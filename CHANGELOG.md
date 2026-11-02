@@ -1,5 +1,12 @@
 # Changelog
 
+## Map travel: pull out, then dive back in (November 2, 2026)
+
+- **Travelling by the treasure map now pulls right out and dives back in.** Pick a place and the camera rises
+  until the reef is a little world far below and Shelly (or Lumi) is too small to see, drifting over toward where
+  she's going. Then it dives back down onto her new spot and she lands with a wave.
+- The sea floor around the board reaches further, so its edge never shows when you're pulled that far out.
+
 ## Softer lamps, and a real trip when you travel by map (November 2, 2026)
 
 - **The lanterns glow instead of flaring.** Each light's share of the glow is capped, and the lanterns' own halos
