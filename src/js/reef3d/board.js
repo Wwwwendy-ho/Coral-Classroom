@@ -25,6 +25,7 @@
     }
     (view.rayList || view.rays || []).forEach(function(rm){ rm.visible = q < 2; });
     view.every = q >= 3 ? 2 : 1; view.w = 0; view.qs = null;
+    if(view.post) view.post.on = reef3dPostWanted(q);
   }
   function reef3dQSet(view, q, now){
     R3.q = q; try { localStorage.setItem(R3Q_KEY, String(q)); } catch(e){}
@@ -77,6 +78,7 @@
     t0 = performance.now(); for(i = 0; i < n; i++){ v.renderer.render(v.scene, v.cam); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); } out.still = +((performance.now() - t0) / n).toFixed(1);
     if(v.renderer.shadowMap.enabled){ t0 = performance.now(); for(i = 0; i < n; i++){ v.renderer.shadowMap.needsUpdate = true; v.renderer.render(v.scene, v.cam); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); } out.moving = +((performance.now() - t0) / n).toFixed(1); }
     else out.moving = out.still;
+    if(v.post && v.post.on){ t0 = performance.now(); for(i = 0; i < n; i++){ v.post.render(v.scene, v.cam); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); } out.look = +((performance.now() - t0) / n).toFixed(1); }   // with the look (post.js)
     out.calls = v.renderer.info.render.calls; out.tris = v.renderer.info.render.triangles; out.programs = v.renderer.info.programs.length;
     return out;
   };
@@ -85,6 +87,7 @@
   window.__reef3dGo = function(i){ if(R3.view) reef3dGoTo(R3.view, i); };   // test helper
   window.__reef3dDice = function(){ if(R3.view) reef3dDice(R3.view); };   // test helper
   window.__reefBoard = function(){ return reefBoard(); };   // test helper
+  window.__reef3dCelebrate = function(){ if(R3.view) reef3dCelebrate(R3.view); };   // test helper
   window.__reef3dEmote = function(n){ if(R3.view) reef3dEmote(R3.view, n); return R3.view && R3.view.emote && R3.view.emote.name; };   // test helper   // test helper
   window.__reef3dInfo = function(){ var v = R3.view; return v ? { calls: v.renderer.info.render.calls, triangles: v.renderer.info.render.triangles, tier: R3.q, fps: v.fps } : { tier: R3.q }; };
   function reef3dLoad(){
@@ -724,7 +727,8 @@
       '<button type="button" class="r3-gamesbtn" data-r3-games aria-label="Minigame corner">'+ccIcon('games')+'</button>';
     var canvas = wrap.querySelector('canvas');
     var big = innerWidth * innerHeight > 700000;   // tablets and larger: skip edge smoothing, the costliest per-pixel step
-    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: !big, alpha: true, powerPreference: 'low-power' });
+    // with the look on (see post.js), edges are smoothed in the off-screen picture, so the canvas needn't do it too
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: !big && !reef3dPostWanted(R3.q), alpha: true, powerPreference: 'low-power' });
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; renderer.shadowMap.autoUpdate = false; // redrawn only when things move (see reef3dFrame)
     var scene = new THREE.Scene();
     var fogCol = night ? '#0c2a30' : '#7fd4d8';
@@ -1026,6 +1030,10 @@
       crab: crab, crabFit: crabFit, crabGap: reefCrabExtent(guide) / 2 + crabFit / 2 + .2, leaving: null, spareCrab: null, chestMixer: chestMixer, chestActs: chestActs, nextStar: nextStar, spinners: spinners, lastT: performance.now(),
       plume: plume, lamp: lamp, wreck: wreckFx, reefFx: reefFx, shipDeck: shipDeck, rig: rig, bake: bake, floor: floor
     };
+    view.post = reef3dPost(renderer, night);
+    reef3dLifeBuild(view);
+    var who = S.profile && S.profile.id;
+    if(R3.flownFor !== who && !reefCalm()){ R3.flownFor = who; view.flyIn = { t0: null, dur: 2600 }; }   // the swoop in, once per visit (see life.js)
     reef3dPartyBuild(view);
     reef3dQApply(view);
     return view;
@@ -1113,7 +1121,8 @@
       var fog = view.scene.fog; if(!view.fog0) view.fog0 = { near: fog.near, far: fog.far, cam: view.cam.far };
       var extra = zp.distanceTo(view.camPos);
       fog.near = view.fog0.near + extra; fog.far = view.fog0.far + extra * 1.3; view.cam.far = fog.far + 8; view.cam.updateProjectionMatrix(); }
-    else if(view.fog0){ view.scene.fog.near = view.fog0.near; view.scene.fog.far = view.fog0.far; view.cam.far = view.fog0.cam; view.cam.updateProjectionMatrix(); view.fog0 = null; }
+    else reef3dCamLife(view, now, t, calm);
+    if(!view.zoomNow && view.fog0){ view.scene.fog.near = view.fog0.near; view.scene.fog.far = view.fog0.far; view.cam.far = view.fog0.cam; view.cam.updateProjectionMatrix(); view.fog0 = null; }
     var g = view.guide.position;
     view.sun.position.set(g.x + 6, 18, g.z + 8); view.sun.target.position.set(g.x, 0, g.z - 2);
     if(!calm){
@@ -1164,7 +1173,8 @@
       if(parts.glow) parts.glow.intensity = 1.2 + Math.sin(t * 3) * .25;
       view.caus.offset.set(t * .012, t * .02);
       view.rays.position.set(g.x * .5, 0, g.z);
-      view.rayList.forEach(function(rm){ rm.material.opacity = rm.userData.base * (.65 + .35 * Math.sin(t * .5 + rm.userData.ph)); });
+      var rayK = Math.max(0, 1 - (view.zoomNow || 0) * 3);   // seen from straight above they'd read as stripes, so they fade as she pulls out
+      view.rayList.forEach(function(rm){ rm.material.opacity = rm.userData.base * rayK * (.65 + .35 * Math.sin(t * .5 + rm.userData.ph)); });
       // Each school circles its own home on the reef; it doesn't follow Shelly. A school she has left far
       // behind swims (not jumps) to a new home ahead of her. Fish face the way they are really moving.
       view.fishLvl = (view.fishLvl || 0) + ((g.y - .3) - (view.fishLvl || 0)) * Math.min(1, dt * 1.5);
@@ -1222,6 +1232,7 @@
     }
     if(calm) reef3dDiceTick(view, now, t);
     // short-lived effects (sand puffs, star bursts) run even in Calm motion as a single still frame
+    reef3dLifeFrame(view, now, t, dt, calm);
     view.fx = view.fx.filter(function(fx){ var p = Math.min(1, (now - fx.t0) / fx.dur); fx.step(p); if(p >= 1){ fx.end(); return false; } return true; });
     if(!calm && view.amb && now - (view.ambBlip || 0) > 3500 + Math.random() * 4000){ view.ambBlip = now; try { if(Sound.isEnabled()) Sound.bloop(700 + Math.random() * 500, 0, .012); } catch(e){} }
     if(view.crab){ // the crab trots after the guide, a little to the side
@@ -1244,7 +1255,14 @@
     view.frameN = (view.frameN || 0) + 1;
     var busy = view.moving || view.fx.length || view.camPos.distanceToSquared(tp) > .0004;
     if(busy || view.frameN % (view.every === 2 ? 6 : 12) === 0) view.renderer.shadowMap.needsUpdate = true;
-    view.renderer.render(view.scene, view.cam);
+    if(view.post && view.post.on){
+      // the sharp band of the miniature blur follows her on screen; pulled out over the map, the whole reef goes miniature
+      var fp = view.guide.position.clone().project(view.cam), fy = Math.min(.8, Math.max(.2, (fp.y + 1) / 2)), zk = Math.min(1, view.zoomNow || 0);
+      fy += (.5 - fy) * zk;   // pulled out over the map: the sharp band moves to the middle and widens, so the whole board reads
+      view.post.U.focusY.value += (fy - view.post.U.focusY.value) * (calm ? 1 : .12);
+      view.post.band = .2 + zk * .16; view.post.extraTilt = 0;
+      view.post.render(view.scene, view.cam);
+    } else view.renderer.render(view.scene, view.cam);
     // reef3dLabels(view) is off: the deck names no longer hover over the board (the tiles show which deck is which,
     // and the treasure map lists them). The label buttons stay, hidden, for screen readers and keyboards.
     // nothing important moving: a device that has shown it struggles may draw the gentle idle motion at half speed

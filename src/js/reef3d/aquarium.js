@@ -138,7 +138,7 @@
   function reefAqBuild(host, found, models, onTap){
     var THREE = window.THREE, night = reefNight(), r = reefRand(7);
     var canvas = document.createElement('canvas'); canvas.className = 'aq-canvas'; canvas.setAttribute('aria-hidden', 'true');
-    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: innerWidth * innerHeight <= 700000, alpha: true, powerPreference: 'low-power' });
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: innerWidth * innerHeight <= 700000 && !reef3dPostWanted(R3.q), alpha: true, powerPreference: 'low-power' });
     var scene = new THREE.Scene(), fogCol = night ? '#0b2d3a' : '#3fa6b8'; scene.fog = new THREE.Fog(fogCol, 10, 26);
     var cam = new THREE.PerspectiveCamera(45, 1, .1, 60); cam.position.set(0, 1.6, 12); cam.lookAt(0, 3.3, -1);
     var kit = reef3dKit(THREE, night), B = kit.B;
@@ -281,7 +281,8 @@
       } else if(c.userData.onBack) body.rotation.z = Math.PI;
     });
     if(!calm) view.bubbles.forEach(function(b){ b.position.y += dt * b.userData.sp; if(b.position.y > 7.5){ b.position.y = 0; } b.position.x += Math.sin(t * 2 + b.position.y) * .003; });
-    view.renderer.render(view.scene, view.cam);
+    if(!view.post){ view.post = reef3dPost(view.renderer, reefNight()); if(view.post){ view.post.on = reef3dPostWanted(R3.q); view.post.band = .34; view.post.U.focusY.value = .5; view.post.tilt = .6; } }   // the same look as the board (post.js)
+    if(view.post) view.post.render(view.scene, view.cam); else view.renderer.render(view.scene, view.cam);
   }
   function reefAqLoop(view){
     function tick(now){

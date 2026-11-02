@@ -1,10 +1,29 @@
 # Changelog
 
+## A more beautiful reef: glow, a miniature-world look, a living board and a swoop-in (November 2, 2026)
+
+- **The look.** Every 3D scene (the board, the profile lobby, the aquarium) now has:
+  - soft glow around bright things (lanterns, glowing tiles, Lumi's light)
+  - a gentle blur at the top and bottom of the view that makes the reef look like a little model world (the band
+    around Shelly stays sharp and follows her; zoomed out over the map, it moves to the middle so the whole board
+    reads clearly)
+  - warmer, richer colours by day and moonlit teal at night, plus a soft vignette
+- **Life on the board.**
+  - A beam of light stands over the next deck in story mode, with sparkles drifting up it.
+  - While the die waits for a tap, three little lights orbit Shelly with comet tails.
+  - Finishing a deck (or finding the golden pearl) gets a victory dance and a burst of confetti.
+  - When nobody touches the screen for a while, the camera sways gently.
+- **The swoop.** The first time the board opens in a visit, the camera dives down from high above onto Shelly.
+- **Built not to lag.** All the blurring happens at a quarter of the screen size. The game already lowers its
+  own quality when frames run slow; on its two lowest levels the new look switches off and the plain scene is
+  drawn, as before. Calm Motion keeps the beam still and skips the moving extras.
+- Fixed while doing this: the slanted light rays no longer show as stripes when you zoom out over the board.
+
 ## One look and one voice across the whole game (November 2, 2026)
 
 - **Drawn icons everywhere, no stray emoji.** Titles, buttons, labels, badges and chips on every screen (settings,
   progress, the Library, Coral Classroom, deck screens, the shop, minigames, the grown-up question, the profile
-  picker) now use the same drawn icon set as the board. 38 new icons were drawn for this. Learning content is
+  picker) now use the same drawn icon set as the board. 36 new icons were drawn for this. Learning content is
   left alone: card faces, stories, answers and the emoji you picked for a deck stay as they are.
 - **The grown-up question sits in the sea** like every other screen (sunlit by day, deep blue at night), not on a
   blank page.

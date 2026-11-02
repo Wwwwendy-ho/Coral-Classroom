@@ -42,7 +42,7 @@
     wrap.innerHTML = '<canvas class="rl-canvas" aria-hidden="true"></canvas>' + reefMusicButtonHTML('rl-musicbtn') +
       '<div class="r3-bubble rl-note" role="status" hidden></div>' +
       '<button type="button" class="rl-themebtn" data-rl-theme aria-label="' + (night ? 'Switch to the sunlit reef (light mode)' : 'Switch to the midnight wreck (dark mode)') + '">' + (night ? '☀️' : '🌙') + '</button>';
-    var renderer = new THREE.WebGLRenderer({ canvas: wrap.querySelector('canvas'), antialias: innerWidth * innerHeight <= 700000, alpha: true, powerPreference: 'low-power' });
+    var renderer = new THREE.WebGLRenderer({ canvas: wrap.querySelector('canvas'), antialias: innerWidth * innerHeight <= 700000 && !reef3dPostWanted(R3.q), alpha: true, powerPreference: 'low-power' });
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; renderer.shadowMap.autoUpdate = false;
     var scene = new THREE.Scene(); scene.fog = new THREE.Fog(night ? '#0d2b35' : '#8fcfd2', 12, 40);
     var cam = new THREE.PerspectiveCamera(45, 1, .1, 100); cam.position.set(0, 5.5, 13); cam.lookAt(0, 2.2, 0);
@@ -239,7 +239,8 @@
     // Occasional shadow updates, as on the board, to keep the iPad cool.
     view.frameN = (view.frameN || 0) + 1;
     if(view.frameN % (view.every === 2 ? 6 : 12) === 0 || view.frameN < 4) view.renderer.shadowMap.needsUpdate = true;
-    view.renderer.render(view.scene, view.cam);
+    if(!view.post){ view.post = reef3dPost(view.renderer, view.night); if(view.post){ view.post.on = reef3dPostWanted(R3.q); view.post.band = .26; view.post.U.focusY.value = .38; } }   // the same look as the board (post.js)
+    if(view.post) view.post.render(view.scene, view.cam); else view.renderer.render(view.scene, view.cam);
   }
   function reefLobbyLoop(view){
     if(view.raf) return;

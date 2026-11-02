@@ -101,7 +101,7 @@
     el.querySelector('[data-yes]').addEventListener('click', function(){
       el.remove(); b.pearls++; reef3dShells(view, -REEF_PEARL_COST);
       b.pearlAt = reef3dPearlSpot(view); reefBoardSave(); reef3dPearlShow(view); reef3dHud(view);
-      reef3dEmote(view, 'cheer'); reef3dCrabAct(view, 'Dance', true); try { reefWinSound(false); } catch(e){}
+      reef3dCelebrate(view); reef3dCrabAct(view, 'Dance', true); try { reefWinSound(false); } catch(e){}
       reef3dPrize(view, '🫧', 'A golden pearl!', 'You have ' + b.pearls + (b.pearls === 1 ? ' pearl' : ' pearls') + ' now. A new one appears somewhere else.');
       setTimeout(done, 3000);
     });

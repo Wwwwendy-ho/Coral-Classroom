@@ -1985,12 +1985,14 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
      js/ui-icons.js             drawn icons in place of emoji in every screen's titles, buttons and labels
      js/vendor/three-gltfloader.js   THIRD-PARTY CODE: three.js GLTFLoader and BufferGeometryUtils (don't edit)
      js/reef3d/critters.js      Kiko's crabs · Food for Shelly
+     js/reef3d/post.js          the look: bloom, the miniature blur, colour grade and vignette over every 3D scene
      js/reef3d/board.js         REEF 3D: the board, its builders and baked lighting
      js/reef3d/scenes.js        the ? block · Shelly's acted moments · the night ship · the day reef
      js/reef3d/dice.js          the dice block
      js/reef3d/party.js         party board: shells, pearl, shop, Chance Time, minigames, story mode
      js/reef3d/games-adult.js   grown-up minigames (Korean ones for Wendy) from the profile's decks
      js/reef3d/aquarium.js      My Aquarium in 3D: the sea friends swim in the tank
+     js/reef3d/life.js          the beam over the next deck, orbiting lights, confetti and the victory dance, camera swoop and drift
      js/reef3d/day-night.js     day and night switching on the board
      js/reef3d/lobby.js         REEF LOBBY (the 3D profile picker)
      js/music.js                background music
@@ -18040,6 +18042,93 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       end: function(){ stars.forEach(function(m){ view.scene.remove(m); }); geo.dispose(); mat.dispose(); } });
   }
 /* end of src/js/reef3d/critters.js */
+/* from src/js/reef3d/post.js */
+  /* ---------- The look: soft glow, a miniature-world blur at the edges, warm filmic colour ----------
+     Every 3D scene (the board, the lobby, the aquarium) draws into an off-screen picture first, then one pass
+     paints it to the screen with:
+       · bloom: bright things (lanterns, glowing tiles, sun glints, Lumi's lure) spill a soft halo of light
+       · tilt-shift: the top and bottom of the view melt into a gentle blur, so the reef reads as a little world
+       · a colour grade (gentle contrast, richer colour, sunlight warmth by day, moonlit teal at night) and a vignette
+       · a whisper of noise, so dark gradients never band
+     Kept cheap for the iPhone XS: all the blurring happens at a quarter of the size (1/16 of the pixels), and the
+     whole thing switches off on the two lowest quality levels (see reef3dQApply), so a struggling device simply
+     draws the plain scene as before. */
+  var REEF3D_POST_VS = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }';
+  var REEF3D_POST_DOWN = 'uniform sampler2D tSrc; uniform vec2 px; varying vec2 vUv;' +
+    'void main(){ vec4 c = texture2D(tSrc, vUv + px * vec2(-1.0, -1.0)) + texture2D(tSrc, vUv + px * vec2(1.0, -1.0)) + texture2D(tSrc, vUv + px * vec2(-1.0, 1.0)) + texture2D(tSrc, vUv + px * vec2(1.0, 1.0)); gl_FragColor = c * 0.25; }';
+  var REEF3D_POST_BRIGHT = 'uniform sampler2D tSrc; uniform float thr; uniform float knee; varying vec2 vUv;' +
+    'void main(){ vec4 c = texture2D(tSrc, vUv); float l = dot(c.rgb, vec3(0.299, 0.587, 0.114)); float k = smoothstep(thr - knee, thr + knee, l); gl_FragColor = vec4(c.rgb * k * c.a, 1.0); }';
+  // 9 taps along one direction (linear sampling makes it a 17-wide gaussian)
+  var REEF3D_POST_BLUR = 'uniform sampler2D tSrc; uniform vec2 dir; varying vec2 vUv;' +
+    'void main(){ vec4 c = texture2D(tSrc, vUv) * 0.2270270;' +
+    ' c += (texture2D(tSrc, vUv + dir * 1.3846154) + texture2D(tSrc, vUv - dir * 1.3846154)) * 0.3162162;' +
+    ' c += (texture2D(tSrc, vUv + dir * 3.2307692) + texture2D(tSrc, vUv - dir * 3.2307692)) * 0.0702703; gl_FragColor = c; }';
+  var REEF3D_POST_FINAL = 'uniform sampler2D tScene; uniform sampler2D tSoft; uniform sampler2D tBloom; uniform float bloomK; uniform float tiltK; uniform float focusY; uniform float band;' +
+    'uniform vec3 tint; uniform float sat; uniform float contrast; uniform float vig; uniform float aspect; uniform float seed; varying vec2 vUv;' +
+    'void main(){' +
+    ' vec4 c = texture2D(tScene, vUv);' +
+    ' float d = abs(vUv.y - focusY); float tk = smoothstep(band, band + 0.32, d) * tiltK;' +
+    ' vec4 s = texture2D(tSoft, vUv); c = mix(c, s, tk);' +
+    ' vec3 b = texture2D(tBloom, vUv).rgb; c.rgb += b * bloomK; c.a = max(c.a, min(1.0, dot(b, vec3(0.333)) * bloomK));' +
+    ' float l = dot(c.rgb, vec3(0.299, 0.587, 0.114)); c.rgb = mix(vec3(l), c.rgb, sat);' +
+    ' c.rgb = (c.rgb - 0.5) * contrast + 0.5; c.rgb *= tint;' +
+    ' float hl = dot(c.rgb, vec3(0.299, 0.587, 0.114)); if(hl > 0.85){ c.rgb *= (0.85 + (hl - 0.85) / (1.0 + (hl - 0.85) * 3.0)) / hl; }' +   // highlights roll off softly (keeping their hue) instead of clipping
+    ' vec2 q = (vUv - 0.5) * vec2(aspect, 1.0); c.rgb *= 1.0 - vig * smoothstep(0.35, 1.05, length(q));' +
+    ' c.rgb += (fract(sin(dot(vUv * 717.0 + seed, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) / 255.0;' +
+    ' gl_FragColor = vec4(clamp(c.rgb, 0.0, 1.0), c.a); }';
+
+  function reef3dPost(renderer, night){
+    var THREE = window.THREE; if(!THREE) return null;
+    var gl2 = renderer.capabilities && renderer.capabilities.isWebGL2;
+    var opts = { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat };
+    // stencilBuffer asks three.js for a 24-bit depth buffer (without it a render target gets 16 bits, and far-off
+    // surfaces close together, like the board's sand and the seabed beyond it, flicker through each other)
+    var mopts = Object.assign({ stencilBuffer: true }, opts);
+    var main = gl2 && THREE.WebGLMultisampleRenderTarget ? new THREE.WebGLMultisampleRenderTarget(1, 1, mopts) : new THREE.WebGLRenderTarget(1, 1, mopts);
+    if(main.samples !== undefined) main.samples = innerWidth * innerHeight > 700000 ? 2 : 4;   // tablets: 2 samples is plenty at their size, and cheaper
+    var small = function(){ var t = new THREE.WebGLRenderTarget(1, 1, opts); t.depthBuffer = false; t.texture.generateMipmaps = false; return t; };
+    var soft = small(), softB = small(), glow = small(), glowB = small();
+    var camO = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1), sceneO = new THREE.Scene();
+    var quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), null); quad.frustumCulled = false; sceneO.add(quad);
+    var mat = function(fs, u){ return new THREE.ShaderMaterial({ vertexShader: REEF3D_POST_VS, fragmentShader: fs, uniforms: u, depthTest: false, depthWrite: false, transparent: false }); };
+    var mDown = mat(REEF3D_POST_DOWN, { tSrc: { value: null }, px: { value: new THREE.Vector2() } });
+    var mBright = mat(REEF3D_POST_BRIGHT, { tSrc: { value: null }, thr: { value: .8 }, knee: { value: .12 } });
+    var mBlur = mat(REEF3D_POST_BLUR, { tSrc: { value: null }, dir: { value: new THREE.Vector2() } });
+    var U = { tScene: { value: main.texture }, tSoft: { value: soft.texture }, tBloom: { value: glow.texture }, bloomK: { value: .5 }, tiltK: { value: .85 }, focusY: { value: .44 }, band: { value: .2 },
+      tint: { value: new THREE.Vector3(1, 1, 1) }, sat: { value: 1.1 }, contrast: { value: 1.05 }, vig: { value: .22 }, aspect: { value: 1 }, seed: { value: 0 } };
+    var mFinal = mat(REEF3D_POST_FINAL, U); mFinal.transparent = true; mFinal.blending = THREE.NoBlending;
+    var P = { on: true, w: 0, h: 0, U: U, extraTilt: 0, band: .2, tilt: .82 };
+    function pass(m, target){ quad.material = m; renderer.setRenderTarget(target); renderer.render(sceneO, camO); }
+    function blur(src, tmp, w, h, spread){ mBlur.uniforms.tSrc.value = src.texture; mBlur.uniforms.dir.value.set(spread / w, 0); pass(mBlur, tmp);
+      mBlur.uniforms.tSrc.value = tmp.texture; mBlur.uniforms.dir.value.set(0, spread / h); pass(mBlur, src); }
+    P.look = function(isNight){   // the grade for day or night
+      if(isNight){ mBright.uniforms.thr.value = .74; mBright.uniforms.knee.value = .1; U.bloomK.value = 1; U.tint.value.set(.96, 1.02, 1.05); U.sat.value = 1.12; U.contrast.value = 1.07; U.vig.value = .34; }
+      else { mBright.uniforms.thr.value = .93; mBright.uniforms.knee.value = .05; U.bloomK.value = .3; U.tint.value.set(1.035, 1.0, .955); U.sat.value = 1.1; U.contrast.value = 1.05; U.vig.value = .2; }
+    };
+    P.look(night);
+    P.render = function(scene, cam){
+      if(!P.on){ renderer.setRenderTarget(null); renderer.render(scene, cam); return; }
+      var size = renderer.getDrawingBufferSize(new THREE.Vector2()), w = Math.max(1, size.x | 0), h = Math.max(1, size.y | 0);
+      if(w !== P.w || h !== P.h){
+        P.w = w; P.h = h; main.setSize(w, h);
+        var sw = Math.max(1, w >> 2), sh = Math.max(1, h >> 2);
+        [soft, softB, glow, glowB].forEach(function(t){ t.setSize(sw, sh); });
+        mDown.uniforms.px.value.set(1.5 / w, 1.5 / h); U.aspect.value = w / h;
+      }
+      var sw2 = Math.max(1, w >> 2), sh2 = Math.max(1, h >> 2);
+      renderer.setRenderTarget(main); renderer.clear(); renderer.render(scene, cam);
+      mDown.uniforms.tSrc.value = main.texture; pass(mDown, soft);                    // the scene at 1/4 size
+      mBright.uniforms.tSrc.value = soft.texture; pass(mBright, glow);                 // just its brightest parts
+      blur(soft, softB, sw2, sh2, 1); blur(glow, glowB, sw2, sh2, 1.2); blur(glow, glowB, sw2, sh2, 2.4);   // a wider halo than blur
+      U.tiltK.value = Math.min(1, P.tilt + P.extraTilt); U.band.value = Math.max(.08, P.band - P.extraTilt * .14); U.seed.value = (U.seed.value + 1.7) % 97;
+      quad.material = mFinal; renderer.setRenderTarget(null); renderer.render(sceneO, camO);
+    };
+    P.dispose = function(){ [main, soft, softB, glow, glowB].forEach(function(t){ t.dispose(); }); [mDown, mBright, mBlur, mFinal].forEach(function(m){ m.dispose(); }); quad.geometry.dispose(); };
+    return P;
+  }
+  // Whether a device should draw the look at all (also used to decide the canvas's own edge smoothing)
+  function reef3dPostWanted(q){ return q < 2; }
+/* end of src/js/reef3d/post.js */
 /* from src/js/reef3d/board.js */
   /* ---------- REEF 3D: a game board on the sea floor (a sunken ship at night). Shelly (Lumi at night)
      stands on a space; tapping a deck or a surprise space makes her hop along the path to it while the
@@ -18068,6 +18157,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     }
     (view.rayList || view.rays || []).forEach(function(rm){ rm.visible = q < 2; });
     view.every = q >= 3 ? 2 : 1; view.w = 0; view.qs = null;
+    if(view.post) view.post.on = reef3dPostWanted(q);
   }
   function reef3dQSet(view, q, now){
     R3.q = q; try { localStorage.setItem(R3Q_KEY, String(q)); } catch(e){}
@@ -18120,6 +18210,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     t0 = performance.now(); for(i = 0; i < n; i++){ v.renderer.render(v.scene, v.cam); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); } out.still = +((performance.now() - t0) / n).toFixed(1);
     if(v.renderer.shadowMap.enabled){ t0 = performance.now(); for(i = 0; i < n; i++){ v.renderer.shadowMap.needsUpdate = true; v.renderer.render(v.scene, v.cam); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); } out.moving = +((performance.now() - t0) / n).toFixed(1); }
     else out.moving = out.still;
+    if(v.post && v.post.on){ t0 = performance.now(); for(i = 0; i < n; i++){ v.post.render(v.scene, v.cam); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); } out.look = +((performance.now() - t0) / n).toFixed(1); }   // with the look (post.js)
     out.calls = v.renderer.info.render.calls; out.tris = v.renderer.info.render.triangles; out.programs = v.renderer.info.programs.length;
     return out;
   };
@@ -18128,6 +18219,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   window.__reef3dGo = function(i){ if(R3.view) reef3dGoTo(R3.view, i); };   // test helper
   window.__reef3dDice = function(){ if(R3.view) reef3dDice(R3.view); };   // test helper
   window.__reefBoard = function(){ return reefBoard(); };   // test helper
+  window.__reef3dCelebrate = function(){ if(R3.view) reef3dCelebrate(R3.view); };   // test helper
   window.__reef3dEmote = function(n){ if(R3.view) reef3dEmote(R3.view, n); return R3.view && R3.view.emote && R3.view.emote.name; };   // test helper   // test helper
   window.__reef3dInfo = function(){ var v = R3.view; return v ? { calls: v.renderer.info.render.calls, triangles: v.renderer.info.render.triangles, tier: R3.q, fps: v.fps } : { tier: R3.q }; };
   function reef3dLoad(){
@@ -18767,7 +18859,8 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       '<button type="button" class="r3-gamesbtn" data-r3-games aria-label="Minigame corner">'+ccIcon('games')+'</button>';
     var canvas = wrap.querySelector('canvas');
     var big = innerWidth * innerHeight > 700000;   // tablets and larger: skip edge smoothing, the costliest per-pixel step
-    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: !big, alpha: true, powerPreference: 'low-power' });
+    // with the look on (see post.js), edges are smoothed in the off-screen picture, so the canvas needn't do it too
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: !big && !reef3dPostWanted(R3.q), alpha: true, powerPreference: 'low-power' });
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; renderer.shadowMap.autoUpdate = false; // redrawn only when things move (see reef3dFrame)
     var scene = new THREE.Scene();
     var fogCol = night ? '#0c2a30' : '#7fd4d8';
@@ -19069,6 +19162,10 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       crab: crab, crabFit: crabFit, crabGap: reefCrabExtent(guide) / 2 + crabFit / 2 + .2, leaving: null, spareCrab: null, chestMixer: chestMixer, chestActs: chestActs, nextStar: nextStar, spinners: spinners, lastT: performance.now(),
       plume: plume, lamp: lamp, wreck: wreckFx, reefFx: reefFx, shipDeck: shipDeck, rig: rig, bake: bake, floor: floor
     };
+    view.post = reef3dPost(renderer, night);
+    reef3dLifeBuild(view);
+    var who = S.profile && S.profile.id;
+    if(R3.flownFor !== who && !reefCalm()){ R3.flownFor = who; view.flyIn = { t0: null, dur: 2600 }; }   // the swoop in, once per visit (see life.js)
     reef3dPartyBuild(view);
     reef3dQApply(view);
     return view;
@@ -19156,7 +19253,8 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       var fog = view.scene.fog; if(!view.fog0) view.fog0 = { near: fog.near, far: fog.far, cam: view.cam.far };
       var extra = zp.distanceTo(view.camPos);
       fog.near = view.fog0.near + extra; fog.far = view.fog0.far + extra * 1.3; view.cam.far = fog.far + 8; view.cam.updateProjectionMatrix(); }
-    else if(view.fog0){ view.scene.fog.near = view.fog0.near; view.scene.fog.far = view.fog0.far; view.cam.far = view.fog0.cam; view.cam.updateProjectionMatrix(); view.fog0 = null; }
+    else reef3dCamLife(view, now, t, calm);
+    if(!view.zoomNow && view.fog0){ view.scene.fog.near = view.fog0.near; view.scene.fog.far = view.fog0.far; view.cam.far = view.fog0.cam; view.cam.updateProjectionMatrix(); view.fog0 = null; }
     var g = view.guide.position;
     view.sun.position.set(g.x + 6, 18, g.z + 8); view.sun.target.position.set(g.x, 0, g.z - 2);
     if(!calm){
@@ -19207,7 +19305,8 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       if(parts.glow) parts.glow.intensity = 1.2 + Math.sin(t * 3) * .25;
       view.caus.offset.set(t * .012, t * .02);
       view.rays.position.set(g.x * .5, 0, g.z);
-      view.rayList.forEach(function(rm){ rm.material.opacity = rm.userData.base * (.65 + .35 * Math.sin(t * .5 + rm.userData.ph)); });
+      var rayK = Math.max(0, 1 - (view.zoomNow || 0) * 3);   // seen from straight above they'd read as stripes, so they fade as she pulls out
+      view.rayList.forEach(function(rm){ rm.material.opacity = rm.userData.base * rayK * (.65 + .35 * Math.sin(t * .5 + rm.userData.ph)); });
       // Each school circles its own home on the reef; it doesn't follow Shelly. A school she has left far
       // behind swims (not jumps) to a new home ahead of her. Fish face the way they are really moving.
       view.fishLvl = (view.fishLvl || 0) + ((g.y - .3) - (view.fishLvl || 0)) * Math.min(1, dt * 1.5);
@@ -19265,6 +19364,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     }
     if(calm) reef3dDiceTick(view, now, t);
     // short-lived effects (sand puffs, star bursts) run even in Calm motion as a single still frame
+    reef3dLifeFrame(view, now, t, dt, calm);
     view.fx = view.fx.filter(function(fx){ var p = Math.min(1, (now - fx.t0) / fx.dur); fx.step(p); if(p >= 1){ fx.end(); return false; } return true; });
     if(!calm && view.amb && now - (view.ambBlip || 0) > 3500 + Math.random() * 4000){ view.ambBlip = now; try { if(Sound.isEnabled()) Sound.bloop(700 + Math.random() * 500, 0, .012); } catch(e){} }
     if(view.crab){ // the crab trots after the guide, a little to the side
@@ -19287,7 +19387,14 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     view.frameN = (view.frameN || 0) + 1;
     var busy = view.moving || view.fx.length || view.camPos.distanceToSquared(tp) > .0004;
     if(busy || view.frameN % (view.every === 2 ? 6 : 12) === 0) view.renderer.shadowMap.needsUpdate = true;
-    view.renderer.render(view.scene, view.cam);
+    if(view.post && view.post.on){
+      // the sharp band of the miniature blur follows her on screen; pulled out over the map, the whole reef goes miniature
+      var fp = view.guide.position.clone().project(view.cam), fy = Math.min(.8, Math.max(.2, (fp.y + 1) / 2)), zk = Math.min(1, view.zoomNow || 0);
+      fy += (.5 - fy) * zk;   // pulled out over the map: the sharp band moves to the middle and widens, so the whole board reads
+      view.post.U.focusY.value += (fy - view.post.U.focusY.value) * (calm ? 1 : .12);
+      view.post.band = .2 + zk * .16; view.post.extraTilt = 0;
+      view.post.render(view.scene, view.cam);
+    } else view.renderer.render(view.scene, view.cam);
     // reef3dLabels(view) is off: the deck names no longer hover over the board (the tiles show which deck is which,
     // and the treasure map lists them). The label buttons stay, hidden, for screen readers and keyboards.
     // nothing important moving: a device that has shown it struggles may draw the gentle idle motion at half speed
@@ -20293,7 +20400,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     el.querySelector('[data-yes]').addEventListener('click', function(){
       el.remove(); b.pearls++; reef3dShells(view, -REEF_PEARL_COST);
       b.pearlAt = reef3dPearlSpot(view); reefBoardSave(); reef3dPearlShow(view); reef3dHud(view);
-      reef3dEmote(view, 'cheer'); reef3dCrabAct(view, 'Dance', true); try { reefWinSound(false); } catch(e){}
+      reef3dCelebrate(view); reef3dCrabAct(view, 'Dance', true); try { reefWinSound(false); } catch(e){}
       reef3dPrize(view, '🫧', 'A golden pearl!', 'You have ' + b.pearls + (b.pearls === 1 ? ' pearl' : ' pearls') + ' now. A new one appears somewhere else.');
       setTimeout(done, 3000);
     });
@@ -21490,7 +21597,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   function reefAqBuild(host, found, models, onTap){
     var THREE = window.THREE, night = reefNight(), r = reefRand(7);
     var canvas = document.createElement('canvas'); canvas.className = 'aq-canvas'; canvas.setAttribute('aria-hidden', 'true');
-    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: innerWidth * innerHeight <= 700000, alpha: true, powerPreference: 'low-power' });
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: innerWidth * innerHeight <= 700000 && !reef3dPostWanted(R3.q), alpha: true, powerPreference: 'low-power' });
     var scene = new THREE.Scene(), fogCol = night ? '#0b2d3a' : '#3fa6b8'; scene.fog = new THREE.Fog(fogCol, 10, 26);
     var cam = new THREE.PerspectiveCamera(45, 1, .1, 60); cam.position.set(0, 1.6, 12); cam.lookAt(0, 3.3, -1);
     var kit = reef3dKit(THREE, night), B = kit.B;
@@ -21633,7 +21740,8 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       } else if(c.userData.onBack) body.rotation.z = Math.PI;
     });
     if(!calm) view.bubbles.forEach(function(b){ b.position.y += dt * b.userData.sp; if(b.position.y > 7.5){ b.position.y = 0; } b.position.x += Math.sin(t * 2 + b.position.y) * .003; });
-    view.renderer.render(view.scene, view.cam);
+    if(!view.post){ view.post = reef3dPost(view.renderer, reefNight()); if(view.post){ view.post.on = reef3dPostWanted(R3.q); view.post.band = .34; view.post.U.focusY.value = .5; view.post.tilt = .6; } }   // the same look as the board (post.js)
+    if(view.post) view.post.render(view.scene, view.cam); else view.renderer.render(view.scene, view.cam);
   }
   function reefAqLoop(view){
     function tick(now){
@@ -21644,6 +21752,147 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     requestAnimationFrame(tick);
   }
 /* end of src/js/reef3d/aquarium.js */
+/* from src/js/reef3d/life.js */
+  /* ---------- Life on the board: little touches that make the reef feel alive ----------
+     · a beam of light over the next deck (it stands with the floating star), with motes drifting up it
+     · while she waits for you to roll, three small lights orbit her, each trailing a comet tail
+     · finishing a deck: a victory dance and a burst of confetti
+     · when nobody touches the screen for a while, the camera drifts gently, like a slow breath
+     · the first time the board opens in a visit, the camera swoops down from high above onto her
+     All of it is a handful of glow sprites and one instanced confetti draw, so it costs almost nothing.
+     Calm Motion keeps the beam (still) and skips the rest. */
+
+  // victory dance: hop to one side, hop to the other, then a big spinning jump, a bounce and a wave
+  REEF3D_EMOTES.dance = { dur: 2900, pose: function(p, q){
+    var a = reef3dSeg(p, 0, .22), b = reef3dSeg(p, .22, .44), j = reef3dSeg(p, .48, .8), l = reef3dSeg(p, .8, .9), w = reef3dSeg(p, .84, 1);
+    q.y = .55 * reef3dBounce(a) + .55 * reef3dBounce(b) + 1.6 * reef3dBounce(j);
+    q.rz = .38 * reef3dBounce(a) - .38 * reef3dBounce(b);
+    q.ry = -.55 * reef3dBounce(a) + .55 * reef3dBounce(b) + Math.PI * 2 * reef3dEase(j);
+    q.sy = 1 - .2 * reef3dBounce(reef3dSeg(p, .44, .5)) + .2 * reef3dBounce(j) - .26 * reef3dBounce(l);
+    q.flap = (a > 0 && a < 1) || (b > 0 && b < 1) || (j > 0 && j < 1) ? 1 : 0; q.wave = w > 0 && w < 1 ? 1 : 0;
+    q.face = reef3dEase(reef3dSeg(p, .82, .9)); q.eyes = .4;
+  } };
+
+  function reef3dGlowMat(col, op){ var THREE = window.THREE; return new THREE.SpriteMaterial({ map: reef3dBlobTex(true), color: col, transparent: true, opacity: op, depthWrite: false, fog: false, blending: THREE.AdditiveBlending }); }
+  function reef3dLifeBuild(view){
+    var THREE = window.THREE, night = view.night, L = view.life = { orb: 0 };
+    // the beam: two open cylinders, a soft wide one and a bright core, fading out as they rise
+    var c = document.createElement('canvas'); c.width = 4; c.height = 128; var g = c.getContext('2d'), gr = g.createLinearGradient(0, 128, 0, 0);
+    gr.addColorStop(0, 'rgba(255,255,255,.95)'); gr.addColorStop(.25, 'rgba(255,255,255,.5)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 4, 128);
+    var tex = new THREE.CanvasTexture(c), col = night ? '#ffd98a' : '#fff0b8';
+    var bm = function(op){ return new THREE.MeshBasicMaterial({ map: tex, color: col, transparent: true, opacity: op, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, fog: false }); };
+    var beam = new THREE.Group();
+    var outer = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.45, 11, 24, 1, true), bm(night ? .28 : .2)); outer.position.y = 5.5;
+    var core = new THREE.Mesh(new THREE.CylinderGeometry(.32, .5, 11, 16, 1, true), bm(night ? .55 : .4)); core.position.y = 5.5;
+    var pool = new THREE.Sprite(reef3dGlowMat(col, night ? .7 : .45)); pool.scale.set(4.2, 4.2, 1); pool.position.y = .3;
+    beam.add(outer, core, pool); beam.visible = false;
+    [outer, core, pool].forEach(function(m){ m.raycast = function(){}; });
+    L.motes = [];
+    for(var i = 0; i < 9; i++){ var s = new THREE.Sprite(reef3dGlowMat(col, 0)); s.scale.setScalar(.32); s.userData = { ph: i / 9, a: i * 2.4, r: .3 + (i % 3) * .3 }; beam.add(s); L.motes.push(s); }
+    view.scene.add(beam); L.beam = beam; L.outer = outer; L.core = core;
+    // orbiting lights, each with a comet tail (its last few positions, smaller and fainter)
+    // (adding light shows at night; on bright sand by day they're painted warm gold so they still stand out)
+    var oc = night ? '#8ff5df' : '#ffc53d', om = function(){ var m = reef3dGlowMat(oc, 0); if(!night) m.blending = THREE.NormalBlending; return m; };
+    L.orbs = [0, 1, 2].map(function(k){
+      var head = new THREE.Sprite(om()); head.scale.setScalar(night ? .55 : .85); view.scene.add(head);
+      var tail = []; for(var j = 0; j < 12; j++){ var t = new THREE.Sprite(om()); t.scale.setScalar((night ? .42 : .62) * (1 - j / 13)); view.scene.add(t); tail.push(t); }
+      return { head: head, tail: tail, hist: [], tilt: [.5, -.6, .15][k], spin: [2.1, -1.7, 2.6][k], ph: k * 2.1, r: [1.3, 1.5, 1.15][k] };
+    });
+  }
+  function reef3dLifeFrame(view, now, t, dt, calm){
+    var L = view.life; if(!L) return;
+    // the beam stands wherever the floating star is
+    var st = view.nextStar, on = !!(st && st.visible);
+    L.beam.visible = on;
+    if(on){
+      var x = st.position.x, z = st.position.z; L.beam.position.set(x, view.groundY(x, z), z);
+      var pulse = calm ? 1 : .85 + .15 * Math.sin(t * 2.2);
+      L.outer.material.opacity = (view.night ? .28 : .2) * pulse; L.core.material.opacity = (view.night ? .55 : .4) * pulse;
+      L.outer.rotation.y = t * .3;
+      L.motes.forEach(function(m){
+        var u = calm ? m.userData.ph : (m.userData.ph + t * .12) % 1, a = m.userData.a + t * .8;
+        m.position.set(Math.cos(a) * m.userData.r, .4 + u * 8, Math.sin(a) * m.userData.r);
+        m.material.opacity = calm ? 0 : Math.sin(u * Math.PI) * .8;
+      });
+    }
+    // the orbiting lights come in while the dice waits for a tap, and fade away when she sets off
+    var want = !calm && view.dice && view.dice.rolling && !view.moving && !view.zoomNow ? 1 : 0;   // (the die spins until it's tapped)
+    L.orb += (want - L.orb) * Math.min(1, dt * 3);
+    var g = view.guide.position, cy = g.y + 1.25;
+    L.orbs.forEach(function(o){
+      var vis = L.orb > .01;
+      o.head.visible = vis; o.tail.forEach(function(s){ s.visible = vis; });
+      if(!vis){ o.hist.length = 0; return; }
+      var a = o.ph + t * o.spin, px = Math.cos(a) * o.r, pz = Math.sin(a) * o.r, py = Math.sin(a) * o.tilt * o.r;
+      var p = { x: g.x + px, y: cy + py + Math.sin(t * 1.3 + o.ph) * .15, z: g.z + pz };
+      o.head.position.set(p.x, p.y, p.z); o.head.material.opacity = .95 * L.orb;
+      o.hist.unshift(p); if(o.hist.length > 24) o.hist.length = 24;
+      o.tail.forEach(function(s, j){ var h = o.hist[Math.min(o.hist.length - 1, j * 2 + 1)]; s.position.set(h.x, h.y, h.z); s.material.opacity = .7 * (1 - j / 12) * L.orb; });
+    });
+  }
+
+  // A burst of confetti from where she stands: paper bits flutter as they fall. One instanced draw.
+  function reef3dConfetti(view){
+    if(reefCalm()) return;
+    var THREE = window.THREE, N = 130, g = view.guide.position;
+    var mesh = new THREE.InstancedMesh(new THREE.PlaneGeometry(.26, .15), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, fog: false }), N);
+    mesh.frustumCulled = false; mesh.raycast = function(){};
+    var cols = ['#ff7a6b', '#ffd25a', '#4fd1c5', '#ff9ed2', '#a98bff', '#7be07b', '#ffffff'].map(function(c){ return new THREE.Color(c); });
+    var bits = [];
+    for(var i = 0; i < N; i++){
+      var a = Math.random() * Math.PI * 2, sp = 1.5 + Math.random() * 3.2;
+      bits.push({ v: new THREE.Vector3(Math.cos(a) * sp * .6, 6 + Math.random() * 5, Math.sin(a) * sp * .6), r: new THREE.Euler(Math.random() * 6, Math.random() * 6, Math.random() * 6), w: new THREE.Vector3(4 + Math.random() * 8, 3 + Math.random() * 6, 2 + Math.random() * 5), ph: Math.random() * 6 });
+      mesh.setColorAt(i, cols[i % cols.length]);
+    }
+    if(mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+    view.scene.add(mesh);
+    var m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), pos = new THREE.Vector3(), sc = new THREE.Vector3(1, 1, 1), y0 = g.y + 1.2;
+    view.fx.push({ t0: performance.now(), dur: 3800,
+      step: function(p){
+        var tt = p * 3.8;
+        bits.forEach(function(b, i){
+          // up fast, then air drag takes over and they flutter down, swaying
+          var up = b.v.y * (1 - Math.exp(-tt * 2.2)) / 2.2 - .35 * tt * tt - .55 * Math.max(0, tt - .6);   // paper falls slowly: drag wins over gravity
+          pos.set(g.x + b.v.x * (1 - Math.exp(-tt * 1.5)) / 1.5 + Math.sin(tt * 3 + b.ph) * .35, y0 + up, g.z + b.v.z * (1 - Math.exp(-tt * 1.5)) / 1.5 + Math.cos(tt * 2.5 + b.ph) * .25);
+          q.setFromEuler(new THREE.Euler(b.r.x + tt * b.w.x, b.r.y + tt * b.w.y, b.r.z + tt * b.w.z));
+          sc.setScalar(up < -1 ? 0 : p > .82 ? 1 - (p - .82) / .18 : 1);
+          m4.compose(pos, q, sc); mesh.setMatrixAt(i, m4);
+        });
+        mesh.instanceMatrix.needsUpdate = true;
+      },
+      end: function(){ view.scene.remove(mesh); mesh.geometry.dispose(); mesh.material.dispose(); } });
+  }
+  function reef3dCelebrate(view){ reef3dEmote(view, 'dance'); reef3dConfetti(view); }
+
+  /* The camera's extra moves. Called after the usual follow camera is placed (not while pinching to the map). */
+  function reef3dCamLife(view, now, t, calm){
+    var THREE = window.THREE, cam = view.cam;
+    // the swoop in: from high above and off to one side, easing down onto her
+    var f = view.flyIn;
+    if(f){
+      if(f.t0 == null) f.t0 = now;   // from the first frame actually drawn (not under the opening transition)
+      var p = Math.min(1, (now - f.t0) / f.dur), e = 1 - Math.pow(1 - p, 3);
+      if(p >= 1 || calm){ view.flyIn = null; }
+      else {
+        var look = view.camLook, off = cam.position.clone().sub(look), d = off.length();
+        var ang = (1 - e) * .9, h = (1 - e);
+        off.applyAxisAngle(new THREE.Vector3(0, 1, 0), ang).normalize();
+        off.y += h * 2.2; off.normalize().multiplyScalar(d * (1 + h * 2.4));
+        cam.position.copy(look).add(off); cam.lookAt(look);
+        view.touchAt = now;
+        return;
+      }
+    }
+    // the slow breath when nobody is touching: a gentle sway that fades in, and out again at the first touch
+    var still = !calm && !view.moving && !(view.dice && !view.dice.rolling) && !view.emote && !view.zoomNow && now - (view.touchAt || 0) > 5000;
+    view.drift = (view.drift || 0) + ((still ? 1 : 0) - (view.drift || 0)) * .02;
+    if(view.drift > .001){
+      var k = view.drift;
+      cam.position.x += Math.sin(t * .23) * .9 * k; cam.position.y += Math.sin(t * .17 + 1) * .35 * k; cam.position.z += Math.sin(t * .19 + 2) * .4 * k;
+      cam.lookAt(view.camLook);
+    }
+  }
+/* end of src/js/reef3d/life.js */
 /* from src/js/reef3d/day-night.js */
   /* ---------- Day ⇄ night: a moonrise or sunrise inside the 3D sea (after Coral Calendar's sun/moon moment) ----------
      1. the camera tilts up from the reef toward the surface while the haze takes on the new colour;
@@ -21801,7 +22050,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     if(quiet || (!finished && !first)) return;
     setTimeout(function(){
       if(!document.body.contains(view.wrap) || view.moving) return;
-      if(finished){ reef3dShells(view, 2); reef3dEmote(view, 'cheer'); var sp = view.spaces[view.at]; if(sp && !reefCalm()) reef3dStars(view, sp); if(!reefCalm()) reef3dCrabAct(view, 'Dance', true);
+      if(finished){ reef3dShells(view, 2); reef3dCelebrate(view); var sp = view.spaces[view.at]; if(sp && !reefCalm()) reef3dStars(view, sp); if(!reefCalm()) reef3dCrabAct(view, 'Dance', true);
         setTimeout(function(){ if(!view.moving) reef3dDice(view); }, reefCalm() ? 200 : 2000); }   // then the dice block comes out
       else { reef3dEmote(view, 'hello'); if(reef3dStoryTarget(view) >= 0 && reef3dStoryTarget(view) !== view.at) setTimeout(function(){ if(!view.moving) reef3dDice(view); }, 1800); }
     }, 650);
@@ -21944,7 +22193,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     wrap.innerHTML = '<canvas class="rl-canvas" aria-hidden="true"></canvas>' + reefMusicButtonHTML('rl-musicbtn') +
       '<div class="r3-bubble rl-note" role="status" hidden></div>' +
       '<button type="button" class="rl-themebtn" data-rl-theme aria-label="' + (night ? 'Switch to the sunlit reef (light mode)' : 'Switch to the midnight wreck (dark mode)') + '">' + (night ? '☀️' : '🌙') + '</button>';
-    var renderer = new THREE.WebGLRenderer({ canvas: wrap.querySelector('canvas'), antialias: innerWidth * innerHeight <= 700000, alpha: true, powerPreference: 'low-power' });
+    var renderer = new THREE.WebGLRenderer({ canvas: wrap.querySelector('canvas'), antialias: innerWidth * innerHeight <= 700000 && !reef3dPostWanted(R3.q), alpha: true, powerPreference: 'low-power' });
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; renderer.shadowMap.autoUpdate = false;
     var scene = new THREE.Scene(); scene.fog = new THREE.Fog(night ? '#0d2b35' : '#8fcfd2', 12, 40);
     var cam = new THREE.PerspectiveCamera(45, 1, .1, 100); cam.position.set(0, 5.5, 13); cam.lookAt(0, 2.2, 0);
@@ -22141,7 +22390,8 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     // Occasional shadow updates, as on the board, to keep the iPad cool.
     view.frameN = (view.frameN || 0) + 1;
     if(view.frameN % (view.every === 2 ? 6 : 12) === 0 || view.frameN < 4) view.renderer.shadowMap.needsUpdate = true;
-    view.renderer.render(view.scene, view.cam);
+    if(!view.post){ view.post = reef3dPost(view.renderer, view.night); if(view.post){ view.post.on = reef3dPostWanted(R3.q); view.post.band = .26; view.post.U.focusY.value = .38; } }   // the same look as the board (post.js)
+    if(view.post) view.post.render(view.scene, view.cam); else view.renderer.render(view.scene, view.cam);
   }
   function reefLobbyLoop(view){
     if(view.raf) return;

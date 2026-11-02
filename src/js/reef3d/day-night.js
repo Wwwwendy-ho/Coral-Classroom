@@ -154,7 +154,7 @@
     if(quiet || (!finished && !first)) return;
     setTimeout(function(){
       if(!document.body.contains(view.wrap) || view.moving) return;
-      if(finished){ reef3dShells(view, 2); reef3dEmote(view, 'cheer'); var sp = view.spaces[view.at]; if(sp && !reefCalm()) reef3dStars(view, sp); if(!reefCalm()) reef3dCrabAct(view, 'Dance', true);
+      if(finished){ reef3dShells(view, 2); reef3dCelebrate(view); var sp = view.spaces[view.at]; if(sp && !reefCalm()) reef3dStars(view, sp); if(!reefCalm()) reef3dCrabAct(view, 'Dance', true);
         setTimeout(function(){ if(!view.moving) reef3dDice(view); }, reefCalm() ? 200 : 2000); }   // then the dice block comes out
       else { reef3dEmote(view, 'hello'); if(reef3dStoryTarget(view) >= 0 && reef3dStoryTarget(view) !== view.at) setTimeout(function(){ if(!view.moving) reef3dDice(view); }, 1800); }
     }, 650);
