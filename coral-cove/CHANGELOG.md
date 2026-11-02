@@ -1,5 +1,20 @@
 # Changelog
 
+## Ask Shelly understands Korean typed in English letters (November 2, 2026)
+
+- Ask about a Korean word the way it sounds, even if it's not spelled quite right, and Shelly works it out. "What is
+  meonje?" gets: "meonje" sounds like 먼저 (meonjeo), first; before anyone or anything else. Or did you mean
+  먼지 (meonji, dust) or 언제 (eonje, when)? It also gets "gamsahamnida", "jigum" (지금), "gwenchanayo" (괜찮아요),
+  "annyeong haseyo", "masisseoyo", "saranghae".
+- It compares loosely, the way learners hear: eo/o/u, ae/e, g/k, d/t, b/p, j/ch, r/l and doubled letters count as
+  close, and a letter or two may be off. A word that starts the same as what was typed, and words from the
+  profile's own decks, come first. English words ("what does cake mean") still get their English answer.
+- Shelly knows about 150 more everyday words for this: question words, time words, food, travel, directions,
+  shopping, feelings, and casual forms like 사랑해, 고마워 and 미안해.
+- Korean romanisations are now shown the way they're said (감사합니다: gamsahamnida, 맛있어요: masisseoyo), not
+  letter by letter.
+- With the Claude helper online, Claude is told to expect this and gets the closest matches as hints.
+
 ## Tidy map labels, a fancier aquarium, and a sea friends library (November 2, 2026)
 
 - **Treasure map labels never overlap.** Each place's picture now sits exactly on its spot (before, a long name pushed

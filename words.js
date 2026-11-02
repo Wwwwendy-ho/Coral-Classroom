@@ -141,5 +141,7 @@
     if(e) e.offline = true;
     return e;
   }
-  window.CoralWords = { load: load, answer: answer, ready: function(){ return !!D; } };
+  // Is this a known English word? (Ask Shelly uses it to tell English words from Korean typed in English letters.)
+  function isEnglish(w){ w = String(w || '').toLowerCase(); return !!(D && D.en && (D.en[w] || (D.enwn && D.enwn[w]) || (D.enf && D.enf[w]))); }
+  window.CoralWords = { load: load, answer: answer, isEnglish: isEnglish, ready: function(){ return !!D; } };
 })();

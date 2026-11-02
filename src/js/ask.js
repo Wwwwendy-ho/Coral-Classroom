@@ -75,6 +75,7 @@
   function askOpen(){
     if(document.getElementById('askWrap')) return;
     askWords();
+    try { koLexWarm(); } catch(e){}   // her decks' Korean, for questions typed in English letters
     var w = document.createElement('div');
     w.id = 'askWrap'; w.className = 'ask-wrap';
     w.innerHTML = '<div class="ask-sheet" role="dialog" aria-modal="true" aria-labelledby="askTitle"></div>';
@@ -117,6 +118,9 @@
       'Use short, simple, literal sentences. No idioms, no sarcasm. Be warm and calm. ' +
       'For Korean, write each part in Hangul with its romanization in brackets, like "찜 (jjim)". For Chinese, add pinyin. ' +
       'If the question is not about a word or a sentence, say kindly in one sentence that you help with words and sentences, and leave parts and example empty. ' +
+      'The question may have Korean typed in English letters, spelled the way it sounds and not quite right (like "meonje" for 먼저, meonjeo). ' +
+      'If so, work out the most likely Korean word, write it in Hangul with the correct romanization, explain it, and if another word is close, mention it as "Or did you mean…?". ' +
+      (function(){ var c = []; try { c = koRomanCandidates(q); } catch(e){} return c.length ? 'Close matches from the learner\'s own words: ' + c.map(function(x){ return x.ko + ' (' + x.rom + ', ' + x.en + ')'; }).join('; ') + '. ' : ''; })() +
       (card ? 'The card on screen says: "' + card.front + '"' + (card.back ? ' (other side: "' + card.back + '")' : '') + '. ' : '') +
       'Question: ' + q + '\n' +
       'Reply with JSON only: {"answer":"1-2 short sentences that answer the question","parts":[{"part":"one piece of the word or sentence","meaning":"what that piece means, in a few words"}],"example":"one short example sentence using the word, or an empty string"}. ' +

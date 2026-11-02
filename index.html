@@ -11919,7 +11919,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   function koSyl(ch){ var c = ch.charCodeAt(0) - 0xAC00; if(c < 0 || c > 11171) return null; return { l: Math.floor(c / 588), v: Math.floor(c % 588 / 28), t: c % 28 }; }
   function koRom(s){ return Array.prototype.map.call(s, function(ch){ var j = koSyl(ch); return j ? KO_L[j.l] + KO_V[j.v] + KO_T[j.t] : ch; }).join(''); }
   function koHasFinal(ch){ var j = koSyl(ch); return !!(j && j.t); }
-  function koPart(p){ return p + ' (' + koRom(p) + ')'; }
+  function koPart(p){ return p + ' (' + koRomSaid(p) + ')'; }
   // Endings and particles, longest first. need: 'C' = only after a final consonant, 'V' = only after a vowel.
   var KO_ENDS = [
     ['고 싶어요', 'want to (polite)'], ['지 않아요', 'do not (polite)'], ['었어요', 'did — past, polite'], ['았어요', 'did — past, polite'], ['였어요', 'was / did — past, polite'], ['했어요', 'did — past, polite'],
@@ -11979,7 +11979,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   // Returns an answer in Ask Shelly's shape, or null when the question has no Korean in it.
   function koLocalAnswer(q, card){
     var ko = (String(q).match(/[가-힣]+(?:\s+[가-힣]+)*/g) || []).join(' ').trim();
-    if(!ko) return null;
+    if(!ko) return koRomanAnswer(q, card);   // "what is meonje?": Korean typed in English letters
     var words = ko.split(/\s+/).slice(0, 6), wantLetters = /letter|spell|sound|read|syllable|글자|자모/i.test(q) || (words.length === 1 && ko.length === 1);
     var parts = [];
     if(wantLetters) parts = koLetters(ko);
@@ -11997,6 +11997,118 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     var unknown = parts.some(function(p){ return p.unknown; });
     if(unknown && !whole) answer += ' I know the parts that are listed. For the meaning of the main word, ask again when you are online.';
     return { answer: answer.trim(), parts: parts.map(function(p){ return { part: p.part, meaning: p.meaning }; }).slice(0, 8), example: '', offline: true };
+  }
+
+  /* ---------- Korean typed in English letters ("what is meonje?") ----------
+     Learners often ask about a word they heard, spelled the way it sounds, and not quite right. Every Korean word
+     Shelly knows (her word list, the beginner words below, and every card in this profile's decks) is romanised
+     two ways, as spelled and as said (한국어: hangukeo / hangugeo), and compared loosely: sounds learners mix up count
+     as the same (eo/o/u, ae/e, g/k, d/t, b/p, j/ch, r/l, s/ss, doubled letters), and a letter or two may be off.
+     Shelly explains the closest word and offers the next closest ("Or did you mean…?"). Online, the same guesses go
+     to Claude as hints (askGo in ask.js). */
+  var KO_MORE = {
+    '먼저':'first; before anyone or anything else','먼지':'dust','나중에':'later','지금':'now','오늘':'today','내일':'tomorrow','어제':'yesterday','언제':'when','어디':'where','누구':'who',
+    '무엇':'what','뭐':'what','왜':'why','어떻게':'how','얼마':'how much','몇':'how many','여기':'here','거기':'there (near you)','저기':'over there','이거':'this (thing)','그거':'that (thing near you)',
+    '저거':'that (thing over there)','네':'yes','아니요':'no','감사합니다':'thank you (polite)','고마워요':'thanks','미안해요':'sorry','죄송합니다':'I am sorry (very polite)','괜찮아요':'it is okay; I am fine',
+    '안녕하세요':'hello','안녕히 가세요':'goodbye (to someone who is leaving)','안녕히 계세요':'goodbye (said when you leave)','반가워요':'nice to meet you','잘 먹겠습니다':'thank you for the food (before eating)',
+    '잘 먹었습니다':'thank you for the food (after eating)','맛있어요':'it is delicious','주세요':'please give me','화장실':'restroom; toilet','물':'water','밥':'rice; a meal','커피':'coffee','차':'tea; car',
+    '우유':'milk','빵':'bread','고기':'meat','김치':'kimchi','메뉴':'menu','계산서':'the bill','영수증':'receipt','카드':'card','현금':'cash','돈':'money','원':'won (Korean money)','가게':'shop',
+    '시장':'market','편의점':'convenience store','식당':'restaurant','카페':'café','호텔':'hotel','방':'room','예약':'reservation','열쇠':'key','지하철':'subway','버스':'bus','택시':'taxi',
+    '기차':'train','역':'station','공항':'airport','표':'ticket','길':'road; way','오른쪽':'right side','왼쪽':'left side','앞':'front','뒤':'back; behind','옆':'beside; next to','위':'up; above',
+    '아래':'down; below','안':'inside','밖':'outside','가까워요':'it is close','멀어요':'it is far','많이':'a lot','조금':'a little','너무':'too; very','정말':'really','아주':'very','같이':'together',
+    '혼자':'alone','다시':'again','천천히':'slowly','빨리':'quickly','잠깐만요':'just a moment','도와주세요':'please help me','몰라요':'I do not know','알아요':'I know','이해해요':'I understand',
+    '한국어':'the Korean language','영어':'the English language','한국':'Korea','미국':'the United States','사람':'person','친구':'friend','가족':'family','엄마':'mom','아빠':'dad','이름':'name',
+    '시간':'time; hour','분':'minute','시':"o'clock",'날씨':'weather','비':'rain','눈':'snow; eye','더워요':'it is hot','추워요':'it is cold','좋아요':'good; I like it','싫어요':'I do not like it',
+    '비싸요':'it is expensive','싸요':'it is cheap','있어요':'there is; I have','없어요':'there is not; I do not have','가요':'go','와요':'come','먹어요':'eat','마셔요':'drink','봐요':'see; watch',
+    '사요':'buy','해요':'do','공부해요':'study','일해요':'work','자요':'sleep','생일':'birthday','아침':'morning; breakfast','점심':'lunch','저녁':'evening; dinner','밤':'night','주말':'weekend',
+    '하나':'one (native)','둘':'two (native)','셋':'three (native)','넷':'four (native)','다섯':'five (native)','일':'one (Sino); work; day','이':'two (Sino); this','삼':'three (Sino)','사':'four (Sino)',
+    '오':'five (Sino)','물어봐도 돼요':'may I ask?','얼마예요':'how much is it?','어디예요':'where is it?','뭐예요':'what is it?','배고파요':'I am hungry','목말라요':'I am thirsty','피곤해요':'I am tired',
+    '아파요':'it hurts; I am sick','병원':'hospital','약국':'pharmacy','경찰':'police','사진':'photo','핸드폰':'mobile phone','와이파이':'Wi-Fi','비밀번호':'password','충전':'charging','출구':'exit',
+    '사랑해':'I love you (casual)','사랑해요':'I love you (polite)','고마워':'thanks (casual)','미안해':'sorry (casual)','알겠어요':'I see; got it','진짜':'really; for real','대박':'awesome; wow',
+    '아이고':'oh my! (surprise or sympathy)','화이팅':'you can do it!','어서 오세요':'welcome (said by shop staff)','물론이죠':'of course','잘 자요':'sleep well','잘 지내요':'I am doing well',
+    '입구':'entrance','문':'door','창문':'window','의자':'chair','책':'book','선물':'gift','옷':'clothes','신발':'shoes','가방':'bag','모자':'hat','우산':'umbrella','바다':'sea','산':'mountain','강':'river'
+  };
+  var KO_LINK = { 1:'g', 2:'kk', 4:'n', 7:'d', 8:'r', 16:'m', 17:'b', 19:'s', 20:'ss', 22:'j', 23:'ch', 24:'k', 25:'t', 26:'p', 27:'' };   // a final consonant read onto a following ㅇ
+  function koRomSaid(w){   // as it sounds: linking onto ㅇ, and k/t/p before n/m becoming ng/n/m
+    var cs = Array.from(w), out = '';
+    cs.forEach(function(ch, i){
+      var j = koSyl(ch); if(!j){ out += ch; return; }
+      var nx = koSyl(cs[i + 1] || ''), init = KO_L[j.l], fin = KO_T[j.t];
+      if(i > 0){ var pv = koSyl(cs[i - 1]); if(pv && pv.t && j.l === 11 && KO_LINK[pv.t] != null) init = KO_LINK[pv.t]; }
+      if(nx && j.t && nx.l === 11 && KO_LINK[j.t] != null) fin = '';
+      else if(nx && j.t && (nx.l === 2 || nx.l === 6)) fin = fin === 'k' ? 'ng' : fin === 't' ? 'n' : fin === 'p' ? 'm' : fin;
+      out += init + KO_V[j.v] + fin;
+    });
+    return out;
+  }
+  function koLoose(r){
+    return String(r || '').toLowerCase().replace(/[^a-z]/g, '')
+      .replace(/eo|oo/g, 'o').replace(/eu/g, 'u').replace(/ae|ai|ay/g, 'e').replace(/ui/g, 'i').replace(/ee/g, 'i')
+      .replace(/ch|jj|tch/g, 'j').replace(/z/g, 'j').replace(/sh/g, 's').replace(/kk|gg|g|ck|c|q/g, 'k').replace(/tt|dd|d/g, 't').replace(/pp|bb|b|f|v/g, 'p').replace(/ss/g, 's').replace(/r/g, 'l')
+      .replace(/(.)\1+/g, '$1');
+  }
+  function koEdit(a, b){
+    var m = a.length, n = b.length, d = []; for(var i = 0; i <= m; i++){ d[i] = [i]; } for(var j = 1; j <= n; j++) d[0][j] = j;
+    for(i = 1; i <= m; i++) for(j = 1; j <= n; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    return d[m][n];
+  }
+  var KO_LEX = { pid: null, list: [] };
+  function koLexAdd(map, ko, en, own){ ko = String(ko || '').replace(/[^가-힣 ]/g, '').trim(); if(!ko || ko.length > 12 || map[ko] && !own) return; map[ko] = { ko: ko, en: en, own: !!own }; }
+  function koLexWarm(){   // her decks' Korean, read once per profile when Ask Shelly opens
+    var pid = S.profile && S.profile.id; if(KO_LEX.pid === pid && KO_LEX.list.length) return;
+    var map = {}; Object.keys(KO_WORDS).forEach(function(k){ koLexAdd(map, k, KO_WORDS[k]); }); Object.keys(KO_MORE).forEach(function(k){ koLexAdd(map, k, KO_MORE[k]); });
+    var done = function(){ KO_LEX = { pid: pid, list: Object.keys(map).map(function(k){ var e = map[k], a = koLoose(koRom(k)), b = koLoose(koRomSaid(k)); e.keys = a === b ? [a] : [a, b]; return e; }) }; };
+    done();
+    if(!S.store || !S.decks) return;
+    Promise.all(S.decks.filter(function(d){ return !d.archived; }).map(function(d){ return Promise.resolve(S.store.getCardsOnce(d.id)).catch(function(){ return []; }); })).then(function(lists){
+      lists.forEach(function(cs){ (cs || []).forEach(function(c){
+        var f = askPlainText(c.front), b = askPlainText(c.back), hk = /[가-힣]/;
+        if(hk.test(f) && !hk.test(b)) koLexAdd(map, f, b, true); else if(hk.test(b) && !hk.test(f)) koLexAdd(map, b, f, true);
+      }); });
+      done();
+    });
+  }
+  function askPlainText(h){ var d = document.createElement('div'); d.innerHTML = String(h || ''); return (d.textContent || '').trim(); }
+  var KO_EN_STOP = /^(what|whats|is|are|does|do|mean|means|meaning|the|a|an|how|say|said|in|korean|word|words|of|to|i|it|this|that|can|could|you|please|tell|me|about|explain|translate|hear|heard|someone|someones|sound|sounds|like|thing|again|and|or|for|my|was|by|with|use|using|when|hey|hi|shelly|lumi)$/;
+  // The closest Korean words to Korean typed in English letters, best first: [{ ko, en, rom, typed, d }]
+  function koRomanCandidates(q){
+    if(/[가-힣]/.test(q)) return [];
+    var toks = (String(q).toLowerCase().match(/[a-z']+/g) || []).map(function(t){ return t.replace(/'/g, ''); }).filter(function(t){ return t.length >= 2 && !KO_EN_STOP.test(t); });
+    var mentionsKo = /korean|hangul|한국/i.test(q), eng = window.CoralWords && window.CoralWords.isEnglish;
+    if(!toks.length) return [];
+    if(!KO_LEX.list.length) koLexWarm();
+    var tries = [];
+    for(var i = 0; i < toks.length; i++) for(var n = 1; n <= 4 && i + n <= toks.length; n++){
+      var raw = toks.slice(i, i + n).join('');
+      if(n === 1 && !mentionsKo && eng && eng(raw) && raw.length > 2) continue;   // an English word, not Korean
+      tries.push({ typed: toks.slice(i, i + n).join(' '), loose: koLoose(raw) });
+    }
+    var best = [];
+    tries.forEach(function(t){
+      var L = t.loose.length; if(L < 2) return;
+      var allow = L <= 3 ? 0 : L <= 5 ? 1 : L <= 8 ? 2 : 3;
+      KO_LEX.list.forEach(function(e){
+        var d = Math.min.apply(null, e.keys.map(function(k){ return koEdit(t.loose, k); }));
+        if(d > allow) return;
+        var rawT = t.typed.replace(/[^a-z]/g, ''), raws = [koRom(e.ko), koRomSaid(e.ko)];
+        // "meonje" is the start of meonjeo: a strong hint; and the first sound is the one people hear best
+        var pre = raws.some(function(k){ return rawT.length >= 4 && k.indexOf(rawT) === 0; }) || e.keys.some(function(k){ return k.indexOf(t.loose) === 0 || t.loose.indexOf(k) === 0; }) ? -.5 : 0;
+        var first = e.keys[0].charAt(0) !== t.loose.charAt(0) ? .45 : 0;
+        best.push({ ko: e.ko, en: String(e.en).replace(/[.!\s]+$/, ''), rom: koRomSaid(e.ko), typed: t.typed, d: d, score: d + pre + first - (e.own ? .15 : 0) - Math.min(L, 8) * .01 });
+      });
+    });
+    best.sort(function(a, b){ return a.score - b.score; });
+    var seen = {}; return best.filter(function(b){ if(seen[b.ko]) return false; seen[b.ko] = 1; return true; }).slice(0, 3);
+  }
+  function koRomanAnswer(q, card){
+    var c = koRomanCandidates(q); if(!c.length) return null;
+    var top = c[0], res = koLocalAnswer(top.ko, { front: top.ko, back: top.en }) || { parts: [] };
+    var exact = top.d === 0 ? '' : ', the closest word I know';
+    var answer = '“' + top.typed + '” sounds like ' + top.ko + ' (' + top.rom + exact + '). It means: ' + top.en + '.';
+    var alt = c.slice(1).filter(function(x){ return x.d <= top.d + 1; });
+    if(alt.length) answer += ' Or did you mean ' + alt.map(function(x){ return x.ko + ' (' + x.rom + ', ' + x.en.split(';')[0] + ')'; }).join(' or ') + '?';
+    var parts = (res.parts || []).map(function(p){ return p.meaning === 'the main word' && p.part.indexOf(top.ko) === 0 ? { part: p.part, meaning: top.en } : p; });
+    return { answer: answer, parts: parts, example: '', offline: true };
   }
 
   /* ---------- Never stuck (child profile) ----------
@@ -22132,6 +22244,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   function askOpen(){
     if(document.getElementById('askWrap')) return;
     askWords();
+    try { koLexWarm(); } catch(e){}   // her decks' Korean, for questions typed in English letters
     var w = document.createElement('div');
     w.id = 'askWrap'; w.className = 'ask-wrap';
     w.innerHTML = '<div class="ask-sheet" role="dialog" aria-modal="true" aria-labelledby="askTitle"></div>';
@@ -22174,6 +22287,9 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       'Use short, simple, literal sentences. No idioms, no sarcasm. Be warm and calm. ' +
       'For Korean, write each part in Hangul with its romanization in brackets, like "찜 (jjim)". For Chinese, add pinyin. ' +
       'If the question is not about a word or a sentence, say kindly in one sentence that you help with words and sentences, and leave parts and example empty. ' +
+      'The question may have Korean typed in English letters, spelled the way it sounds and not quite right (like "meonje" for 먼저, meonjeo). ' +
+      'If so, work out the most likely Korean word, write it in Hangul with the correct romanization, explain it, and if another word is close, mention it as "Or did you mean…?". ' +
+      (function(){ var c = []; try { c = koRomanCandidates(q); } catch(e){} return c.length ? 'Close matches from the learner\'s own words: ' + c.map(function(x){ return x.ko + ' (' + x.rom + ', ' + x.en + ')'; }).join('; ') + '. ' : ''; })() +
       (card ? 'The card on screen says: "' + card.front + '"' + (card.back ? ' (other side: "' + card.back + '")' : '') + '. ' : '') +
       'Question: ' + q + '\n' +
       'Reply with JSON only: {"answer":"1-2 short sentences that answer the question","parts":[{"part":"one piece of the word or sentence","meaning":"what that piece means, in a few words"}],"example":"one short example sentence using the word, or an empty string"}. ' +
