@@ -201,7 +201,7 @@
       var ship = view.spaces.ship;
       if(ship && (Math.abs(a.x) < ship.half) !== (Math.abs(b.x) < ship.half)){   // over the side of the wreck: clear the rail
         var u = Math.min(.85, Math.max(.15, (ship.half - Math.abs(a.x)) / ((Math.abs(b.x) - Math.abs(a.x)) || 1)));
-        var baseY = (a.y || 0) + ((b.y || 0) - (a.y || 0)) * u, railTop = 1.7 + ship.roll * ship.half * (a.x < 0 ? -1 : 1);   // the rail's top, on the side she crosses
+        var baseY = (a.y || 0) + ((b.y || 0) - (a.y || 0)) * u, railTop = 1.7 + ship.roll * ship.half * (a.x < 0 ? -1 : 1) + a.z * (ship.pitch || 0);   // the rail's top, on the side she crosses
         hgt = Math.max(hgt, (railTop - baseY) / Math.sin(u * Math.PI)); dur += 220;
       }
       var ry0 = g.rotation.y, ry1 = ry0 + angTo(ry0, Math.atan2(b.x - a.x, b.z - a.z)), spin = last && steps >= 3 ? (Math.random() < .5 ? -1 : 1) * Math.PI * 2 : 0;
@@ -262,7 +262,7 @@
     var UP = d.y, LOW = st ? st.low + d.y : d.y, BOT = LOW - 1.6, TOP = .35;
     // Everything on the ship goes into two groups that list together: still parts (merged and baked with the
     // scenery) and parts that glow or move. Inside them, heights are the ship's own (before the list).
-    var S = new THREE.Group(), D = new THREE.Group(); S.rotation.z = D.rotation.z = Math.atan(d.roll);
+    var S = new THREE.Group(), D = new THREE.Group(); S.rotation.z = D.rotation.z = Math.atan(d.roll); S.rotation.x = D.rotation.x = -Math.atan(d.pitch || 0);
     o.statics.add(S); o.scene.add(D);
     var hullM = M('#3a2c21'), trimM = M('#271d16'), railM = M('#4a3828'), mastM = M('#33261c');
     var tex = reef3dPlankTex(THREE), deckMat = function(w, l){ var t = tex.clone(); t.needsUpdate = true; t.repeat.set(w / 4, l / 8); return new THREE.MeshLambertMaterial({ map: t, color: '#a9c2bb' }); };
@@ -378,7 +378,7 @@
     sp.forEach(function(s){
       if(!s.branch || Math.abs(s.x) < d.half - .6) return;
       var prev = sp[s.links[0]]; if(Math.abs(prev.x) > d.half - .6) return;
-      var side = Math.sign(s.x), py = (prev.y || 0) - prev.x * d.roll, sy = d.sand, run = Math.abs(s.x) - Math.abs(prev.x) - 1.4;
+      var side = Math.sign(s.x), py = (prev.y || 0) - prev.x * d.roll - prev.z * (d.pitch || 0), sy = d.sand - s.z * (d.pitch || 0), run = Math.abs(s.x) - Math.abs(prev.x) - 1.4;
       var gp = mesh(new THREE.BoxGeometry(Math.hypot(run, py - sy), .14, 1.3), M('#6b5238'), side * (d.half + run / 2 - .4), (py + sy) / 2, (prev.z + s.z) / 2);
       gp.rotation.z = side * Math.atan2(py - sy, run) * -1; S.add(gp);
     });

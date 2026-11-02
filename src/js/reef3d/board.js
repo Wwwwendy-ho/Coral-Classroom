@@ -88,6 +88,7 @@
   window.__reef3dDice = function(){ if(R3.view) reef3dDice(R3.view); };   // test helper
   window.__reefBoard = function(){ return reefBoard(); };   // test helper
   window.__reef3dPlace = function(i){ if(R3.view){ reef3dPlace(R3.view, i); R3.view.touchAt = performance.now(); } };   // test helper: put her on a space, no deck
+  window.__reef3dCamPin = function(p, l){ var v = R3.view, T = window.THREE; if(v) v.camPin = p ? [new T.Vector3().fromArray(p), new T.Vector3().fromArray(l)] : null; };   // test helper
   window.__reef3dCelebrate = function(){ if(R3.view) reef3dCelebrate(R3.view); };   // test helper
   window.__reef3dEmote = function(n){ if(R3.view) reef3dEmote(R3.view, n); return R3.view && R3.view.emote && R3.view.emote.name; };   // test helper   // test helper
   window.__reef3dInfo = function(){ var v = R3.view; return v ? { calls: v.renderer.info.render.calls, triangles: v.renderer.info.render.triangles, tier: R3.q, fps: v.fps } : { tier: R3.q }; };
@@ -138,8 +139,12 @@
       for(var after = k0 + 4; after < list.length; after++){ list[after].z += 2.6 + 2.6; list[after].y = -REEF3D_HOLD; }   // the hold carries on from the foot of the stairs
     }
     if(night){
-      var ship = list.ship = { half: Math.max.apply(null, list.map(function(s){ return Math.abs(s.x); })) + 4.5, roll: .06, sand: -3.35 };
-      list.forEach(function(s){ s.y += s.x * ship.roll; });   // the wreck lists a little to one side
+      // How the wreck has settled: it lists to one side (roll, per unit across) and its bow can be nosed down into the
+      // sand (pitch, per unit along; the stern end, near z = 0, stays put). 'side' sinks one side deeper, 'length'
+      // buries the bow; both were drawn up for Wendy to choose between.
+      var sink = reefShipSink();
+      var ship = list.ship = { half: Math.max.apply(null, list.map(function(s){ return Math.abs(s.x); })) + 4.5, roll: sink === 'side' ? .16 : .06, pitch: sink === 'length' ? .036 : 0, sand: -3.35 };
+      list.forEach(function(s){ s.y += s.x * ship.roll + s.z * ship.pitch; });
     }
     // Party spaces: a hermit crab's shop, a pair of whirlpools, Chance Time on every third surprise, and a clam
     // gate between two spaces that opens and closes every turn (see reef3dParty*).
@@ -167,11 +172,11 @@
         s.x = j.x + side * step * (k + 1); s.z = j.z - .7 * (k + 1) + Math.sin(k * 1.3) * .5;
         if(list.ship && list.stair && j.i > list.stair.k0){   // from the hold the hull walls are too high to climb: the branch runs along the wall inside
           var lim = list.ship.half - 2;
-          s.x = side * Math.min(lim, Math.abs(j.x) + step); s.z = j.z - .6 - step * .95 * k; s.y = j.y + (s.x - j.x) * list.ship.roll;
+          s.x = side * Math.min(lim, Math.abs(j.x) + step); s.z = j.z - .6 - step * .95 * k; s.y = j.y + (s.x - j.x) * list.ship.roll + (s.z - j.z) * list.ship.pitch;
         } else if(list.ship){   // at night a branch steps off the wreck, down a plank, onto the sand outside
           var sh = list.ship, ax = Math.abs(s.x);
           if(ax > sh.half - .6){ s.x = side * Math.max(ax, sh.half + 1.7 + step * sandN); sandN++; s.y = sh.sand; }   // each space on the sand a full step further out
-          else s.y = j.y + (s.x - j.x) * sh.roll;
+          else s.y = j.y + (s.x - j.x) * sh.roll + (s.z - j.z) * sh.pitch;
         }
         prev.links.push(s.i); list.push(s); prev = s;
       });
@@ -762,7 +767,7 @@
     var floorZ = -len / 2 + 14;
     // Night: the main path runs along the deck of a huge abandoned ship (see reef3dWreckDeck). The deck spans the
     // path with room to spare; the silt under it is pushed down so it never shows through the planks.
-    var shipDeck = night && spaces.ship ? { half: spaces.ship.half, roll: spaces.ship.roll, sand: spaces.ship.sand, stair: spaces.stair,
+    var shipDeck = night && spaces.ship ? { half: spaces.ship.half, roll: spaces.ship.roll, pitch: spaces.ship.pitch, sand: spaces.ship.sand, stair: spaces.stair,
       z0: spaces[0].z + 7, z1: spaces[mainN - 1].z - 9, y: -.02 } : null;
     if(shipDeck) shipDeck.holeZ = shipDeck.stair ? shipDeck.stair.cz + 2 : -1e9;
     function onDeck(x, z){ return shipDeck && Math.abs(x) < shipDeck.half + .6 && z < shipDeck.z0 + .6 && z > shipDeck.z1 - shipDeck.half * 1.4; }
@@ -774,7 +779,7 @@
       return h + shipDeck.sand + (along && out > 0 ? Math.max(0, 1 - out / 6) * 1.1 * duneK(fx, zz) : 0);
     }
     for(var v = 0; v < pos.count; v++){ var fx = pos.getX(v), fy = pos.getY(v);
-      pos.setZ(v, onDeck(fx, floorZ - fy) ? (shipDeck.sand - 3) : sandH(fx, fy)); }
+      pos.setZ(v, onDeck(fx, floorZ - fy) ? (shipDeck.sand - 3 - shipDeck.half * shipDeck.roll + Math.min(0, (floorZ - fy) * shipDeck.pitch) - 1) : sandH(fx, fy)); }   // below the lowest corner of the hold, however the wreck has settled
     floorGeo.computeVertexNormals();
     var floor = new THREE.Mesh(floorGeo, M(night ? '#2f3e3e' : '#d9cba6'));
     floor.rotation.x = -Math.PI / 2; floor.position.set(0, -.15, -len / 2 + 14); floor.receiveShadow = true; scene.add(floor);
@@ -978,7 +983,7 @@
     if(chestModel){ chestMixer = new THREE.AnimationMixer(chestModel.userData.root); chestModel.userData.gltf.animations.forEach(function(c){ chestActs[c.name] = chestMixer.clipAction(c); }); }
     // Soft shadows under everything that stands on the sand, then the still scenery baked and merged.
     function groundY(x, z){
-      if(onDeck(x, z) && Math.abs(x) < shipDeck.half) return (z < shipDeck.holeZ && shipDeck.stair ? shipDeck.stair.low : 0) + shipDeck.y + x * shipDeck.roll;
+      if(onDeck(x, z) && Math.abs(x) < shipDeck.half) return (z < shipDeck.holeZ && shipDeck.stair ? shipDeck.stair.low : 0) + shipDeck.y + x * shipDeck.roll + z * shipDeck.pitch;
       return sandH(x, -(z - (-len / 2 + 14))) - .15;
     }
     var blobList = [], blobMat = reef3dBlobMat(reef3dBlobTex(), night);
@@ -1083,6 +1088,7 @@
     look.set(g.x * (f + .05), gy, g.z - 2.6);
   }
   // A mast standing between the camera and her: slide the camera sideways until it clears (by room, in units).
+  function reefShipSink(){ try { return localStorage.getItem('cc-ship-sink') || ''; } catch(e){ return ''; } }
   function reef3dCamMasts(view, out, room){
     var g = view.guide.position, ms = view.wreck && view.wreck.masts;
     (ms || []).forEach(function(m){
@@ -1198,7 +1204,7 @@
         }
         var a = t * sc.spd + sc.ph, cx = sc.hx + Math.cos(a) * rad, cz = sc.hz + Math.sin(a) * rad * .7;
         if(sdk){   // swim over whichever deck is below the school: the top deck, or down in the open hold
-          var floor = (sdk.stair && cz < sdk.holeZ - 1 ? sdk.stair.low + sdk.y : sdk.y) + cx * sdk.roll;
+          var floor = (sdk.stair && cz < sdk.holeZ - 1 ? sdk.stair.low + sdk.y : sdk.y) + cx * sdk.roll + cz * (sdk.pitch || 0);
           sc.lvl = sc.lvl == null ? floor : sc.lvl + (floor - sc.lvl) * Math.min(1, dt * 1.2);
         }
         var lvl = sdk ? sc.lvl : view.fishLvl;
@@ -1260,6 +1266,7 @@
     view.frameN = (view.frameN || 0) + 1;
     var busy = view.moving || view.fx.length || view.camPos.distanceToSquared(tp) > .0004;
     if(busy || view.frameN % (view.every === 2 ? 6 : 12) === 0) view.renderer.shadowMap.needsUpdate = true;
+    if(view.camPin){ view.cam.position.copy(view.camPin[0]); view.cam.lookAt(view.camPin[1]); }   // test helper: a fixed camera (see __reef3dCamPin)
     reef3dSailFade(view, calm);
     if(view.post && view.post.on){
       // the sharp band of the miniature blur follows her on screen; pulled out over the map, the whole reef goes miniature
