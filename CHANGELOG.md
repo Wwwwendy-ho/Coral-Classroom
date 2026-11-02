@@ -1,5 +1,10 @@
 # Changelog
 
+## The wreck lists over into the sand (November 2, 2026)
+
+- **The shipwreck now leans well over to one side**, that side sunk deeper into the sand, like a ship that settled
+  on the sea floor long ago. The deck, the path, the spiral stairs, the hold and the gangplanks all follow the lean.
+
 ## Map travel: you see the whole pull-out now (November 2, 2026)
 
 - The treasure map is already a view from above, so pulling out from there barely showed. Now, as the map

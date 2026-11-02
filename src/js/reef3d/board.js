@@ -139,11 +139,9 @@
       for(var after = k0 + 4; after < list.length; after++){ list[after].z += 2.6 + 2.6; list[after].y = -REEF3D_HOLD; }   // the hold carries on from the foot of the stairs
     }
     if(night){
-      // How the wreck has settled: it lists to one side (roll, per unit across) and its bow can be nosed down into the
-      // sand (pitch, per unit along; the stern end, near z = 0, stays put). 'side' sinks one side deeper, 'length'
-      // buries the bow; both were drawn up for Wendy to choose between.
-      var sink = reefShipSink();
-      var ship = list.ship = { half: Math.max.apply(null, list.map(function(s){ return Math.abs(s.x); })) + 4.5, roll: sink === 'side' ? .16 : .06, pitch: sink === 'length' ? .036 : 0, sand: -3.35 };
+      // How the wreck has settled: it lists well over to one side (roll, per unit across), that side sunk deeper into
+      // the sand. (pitch, per unit along, could nose the bow down too; Wendy chose the sideways list, so it's 0.)
+      var ship = list.ship = { half: Math.max.apply(null, list.map(function(s){ return Math.abs(s.x); })) + 4.5, roll: .16, pitch: 0, sand: -3.35 };
       list.forEach(function(s){ s.y += s.x * ship.roll + s.z * ship.pitch; });
     }
     // Party spaces: a hermit crab's shop, a pair of whirlpools, Chance Time on every third surprise, and a clam
@@ -1088,7 +1086,6 @@
     look.set(g.x * (f + .05), gy, g.z - 2.6);
   }
   // A mast standing between the camera and her: slide the camera sideways until it clears (by room, in units).
-  function reefShipSink(){ try { return localStorage.getItem('cc-ship-sink') || ''; } catch(e){ return ''; } }
   function reef3dCamMasts(view, out, room){
     var g = view.guide.position, ms = view.wreck && view.wreck.masts;
     (ms || []).forEach(function(m){
