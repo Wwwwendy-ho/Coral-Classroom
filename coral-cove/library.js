@@ -102,7 +102,7 @@
     var body = root.querySelector('.clib-body'), head = root.querySelector('.clib-title');
     body.innerHTML = ''; body.scrollTop = 0;
     head.textContent = v.title || 'Library';
-    root.querySelector('.clib-back').innerHTML = icon(stack.length > 1 ? 'back' : 'close') + '<span>' + (stack.length > 1 ? 'Back' : 'Close') + '</span>';
+    root.querySelector('.clib-back').hidden = stack.length < 2;   // deeper pages get a small back arrow beside the Lagoon button
     root.querySelector('.clib-source').textContent = claudeReady() ? '✨ Claude on' : '📴 Offline mode';
     try { v.render(body, arg); } catch(e){ body.innerHTML = '<p class="clib-note">Something went wrong opening this page. ' + esc(e.message) + '</p>'; console.error('[Library]', e); }
     head.textContent = v.title || 'Library';   // some pages set their title while rendering
@@ -112,8 +112,9 @@
     if(root) return;
     var st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
     root = document.createElement('div'); root.className = 'clib'; root.hidden = true; root.setAttribute('role', 'dialog'); root.setAttribute('aria-label', 'Library');
-    root.innerHTML = '<header class="clib-head"><button type="button" class="clib-back">' + icon('close') + '<span>Close</span></button><h1 class="clib-title">Library</h1><span class="clib-source"></span></header><main class="clib-body"></main>';
+    root.innerHTML = '<header class="clib-head"><button type="button" class="clib-home">⟵ Lagoon</button><button type="button" class="clib-back" aria-label="Back" hidden>' + icon('back') + '</button><h1 class="clib-title">Library</h1><span class="clib-source"></span></header><main class="clib-body"></main>';
     root.querySelector('.clib-back').addEventListener('click', back);
+    root.querySelector('.clib-home').addEventListener('click', close);
     root.addEventListener('keydown', function(e){ if(e.key === 'Escape') back(); });
     document.body.appendChild(root);
   }
@@ -2180,7 +2181,9 @@
     });
   } };
   CSS += '\n' + [
-    '.clib-back{ display:inline-flex; align-items:center; gap:6px; } .clib-back .cc-ic{ width:1.15em; height:1.15em; }',
+    '.clib-back{ display:inline-flex; align-items:center; justify-content:center; width:44px; padding:0; } .clib-back[hidden]{ display:none; } .clib-back .cc-ic{ width:1.2em; height:1.2em; }',
+    '.clib-home{ border:none; background:var(--clib-bg); color:var(--clib-ink); font-weight:800; font-size:.95rem; font-family:inherit; min-height:44px; padding:0 16px; border-radius:999px; cursor:pointer; white-space:nowrap; flex:none; }',
+    '.clib-home:focus-visible{ outline:3px solid var(--clib-warm); outline-offset:2px; }',
     '.clib-more-b .cc-ic{ width:1.2em; height:1.2em; vertical-align:-.25em; color:var(--clib-accent); }',
     '.clib-tile-e .cc-ic{ width:2.1rem; height:2.1rem; color:var(--clib-accent); } .clib-tile-e .cc-ic .f{ opacity:.22; }',
     '[data-mic] .cc-ic{ width:1.3em; height:1.3em; } [data-mic].listening{ background:var(--clib-accent); color:var(--clib-accent-ink); }',

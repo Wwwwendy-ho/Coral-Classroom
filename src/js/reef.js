@@ -358,7 +358,7 @@
     var who = (S.profile && S.profile.name) ? S.profile.name + '\'s' : 'My';
     app.innerHTML = '' +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="reef-back">'+(night ? '⚓ Back to the wreck' : '🪸 Back to the reef')+'</button>' +
+        '<button class="back-btn" data-act="reef-back">⟵ Lagoon</button>' +
       '</div>' +
       '<section class="reef-aquarium' + (night ? ' night' : '') + (reefCalm() ? ' calm' : '') + '">' +
         '<div class="aq-head"><h2><button type="button" class="aq-title" data-aq-lib>' + esc(who) + ' Aquarium</button></h2><p>' + t.found + ' of ' + t.total + ' sea friends live here. Finish a deck to find another one.</p></div>' +
@@ -477,6 +477,57 @@
   afterRender('study buddy', reefStudyBuddy);
   afterRender('praise', reefPraiseCheck);
   afterRender('music', reefMusicUpdate);
+
+  /* ---------- The board's menu ----------
+     On the full-screen board only the everyday buttons stay out (Library, the treasure map, Ask, the dice).
+     Everything else (settings, progress, edit mode, sound, music, day/night, the minigame corner, switching
+     profile, ending the session, Done) folds into one menu button. The original buttons stay in the page,
+     hidden, so each menu row just presses its original and every existing behaviour is kept. */
+  var BOARD_MENU = [
+    ['[data-act="open-settings"]', 'settings', 'Settings'],
+    ['[data-act="open-stats"]', 'progress', 'Progress'],
+    ['[data-act="toggle-edit-mode"]', 'edit', 'Edit decks'],
+    ['[data-r3-games]', 'games', 'Minigame corner'],
+    ['.r3 [data-music-toggle]', null, function(b){ return b.getAttribute('aria-pressed') === 'true' ? 'Music: on' : 'Music: off'; }],
+    ['[data-r3-theme]', null, function(){ return reefNight() ? 'Sunlit reef' : 'Midnight wreck'; }],
+    ['[data-act="toggle-sound"]', null, function(b){ return /off/.test(b.getAttribute('aria-label') || '') ? 'Sounds: on' : 'Sounds: off'; }],
+    ['[data-act="switch-profile"]', 'profiles', 'Switch profile'],
+    ['[data-act="end-session"]', 'flag', 'End session'],
+    ['.done-btn[data-act="exit-manager"]', 'check', 'Done']
+  ];
+  function reefBoardMenuClose(){
+    var m = document.querySelector('.r3-menu'); if(!m) return;
+    var btn = document.querySelector('.r3-menubtn'); if(btn) btn.setAttribute('aria-expanded', 'false');
+    m.classList.remove('open'); setTimeout(function(){ m.remove(); }, 160);
+    document.removeEventListener('pointerdown', reefBoardMenuOutside, true);
+  }
+  function reefBoardMenuOutside(e){ if(!e.target.closest('.r3-menu, .r3-menubtn')) reefBoardMenuClose(); }
+  function reefBoardMenuOpen(btn){
+    if(document.querySelector('.r3-menu')) return reefBoardMenuClose();
+    var m = document.createElement('div'); m.className = 'r3-menu' + (reefNight() ? ' night' : ''); m.setAttribute('role', 'menu'); m.setAttribute('aria-label', 'Menu');
+    BOARD_MENU.forEach(function(it){
+      var orig = document.querySelector(it[0]); if(!orig) return;
+      var label = typeof it[2] === 'function' ? it[2](orig) : it[2], svg = it[1] ? ccIcon(it[1]) : (orig.querySelector('svg') ? orig.querySelector('svg').outerHTML : '');
+      var row = document.createElement('button'); row.type = 'button'; row.className = 'r3-menu-row'; row.setAttribute('role', 'menuitem');
+      row.innerHTML = svg + '<span>' + esc(label) + '</span>';
+      row.addEventListener('click', function(){ reefBoardMenuClose(); orig.click(); });
+      m.appendChild(row);
+    });
+    var r = btn.getBoundingClientRect();
+    m.style.top = Math.round(r.bottom + 8) + 'px'; m.style.right = Math.max(10, Math.round(innerWidth - r.right)) + 'px';
+    document.body.appendChild(m); btn.setAttribute('aria-expanded', 'true');
+    requestAnimationFrame(function(){ m.classList.add('open'); });
+    var first = m.querySelector('.r3-menu-row'); if(first) first.focus({ preventScroll: true });
+    m.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ reefBoardMenuClose(); btn.focus(); } });
+    document.addEventListener('pointerdown', reefBoardMenuOutside, true);
+  }
+  afterRender('board menu', function(){
+    reefBoardMenuClose();
+    var bar = document.querySelector('.cv3-hero .topbar > :last-child'); if(!bar || bar.querySelector('.r3-menubtn')) return;
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'icon-btn r3-menubtn'; b.setAttribute('aria-label', 'Menu'); b.setAttribute('aria-haspopup', 'menu'); b.setAttribute('aria-expanded', 'false'); b.title = 'Menu';
+    b.innerHTML = ccIcon('menu'); b.addEventListener('click', function(){ reefBoardMenuOpen(b); });
+    bar.appendChild(b);
+  });
 
   /* ---------- No grown-up check in the Claude version (Wendy's choice). The GitHub/iPad copy loads its seed data
      file, which defines CORAL_COVE_SEED, and asks the grown-up maths question (reefGrownUpGate) wherever a PIN

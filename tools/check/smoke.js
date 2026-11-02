@@ -15,9 +15,15 @@ const { enter, solveGate } = require('./steps');
 const port = +process.argv[2] || 8820;
 const ARGS = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'];
 let failed = 0;
-// The Library's top-left button is "‹ Back" inside a page and "✕ Close" on its first page
+// The Library always has "⟵ Lagoon" (closes it); pages inside it also have a "‹" back arrow
 async function closeLibrary(p) {
-  for (let i = 0; i < 5 && await p.isVisible('.clib .clib-back'); i++) { await p.click('.clib .clib-back'); await p.waitForTimeout(500); }
+  if (await p.isVisible('.clib .clib-home')) { await p.click('.clib .clib-home'); await p.waitForTimeout(500); }
+}
+// On the board, the less-used buttons sit in one menu (top right)
+async function menuPick(p, label) {
+  const btn = await p.$('.r3-menubtn');
+  if (btn && await btn.isVisible()) { await btn.click(); await p.waitForTimeout(300); await p.click('.r3-menu-row:has-text("' + label + '")'); }
+  else await p.click('[data-act="toggle-edit-mode"]');
 }
 function check(name, ok, detail) { console.log((ok ? 'ok    ' : 'FAIL  ') + name + (detail ? '  ' + detail : '')); if (!ok) failed++; }
 const nearestDeck = () => { const v = window.__reef3dView(), here = v.at; const s = v.spaces.filter(s => s.kind === 'deck').sort((a, b) => Math.abs(a.i - here) - Math.abs(b.i - here))[0]; window.__reef3dGo(s.i); return s.item.d.name; };
@@ -99,7 +105,7 @@ async function newPage(browser) {
     await p.locator('button', { hasText: /^(OK|Check|Done)$/ }).first().click().catch(() => {}); await p.waitForTimeout(4000);
     check('child: the right answer returns to the board', await p.evaluate(() => !!document.querySelector('.r3 canvas')));
   }
-  await p.click('[data-act="toggle-edit-mode"]'); await p.waitForTimeout(800);
+  await menuPick(p, 'Edit decks'); await p.waitForTimeout(800);
   check('child: Edit Mode asks the maths question', !!(await p.$('.reef-gate')));
   await p.click('[data-gate="cancel"]').catch(() => {}); await p.waitForTimeout(800);
   check('child: no page errors', !p.errors.length, p.errors.join(' / '));
@@ -125,7 +131,7 @@ async function newPage(browser) {
   const exit2 = await p.$('[data-act^="exit-"], [data-act="back-home"], [aria-label^="Close"]');
   if (exit2) { await exit2.click(); await p.waitForTimeout(4000); }
   check('grown-up: leaving a deck early asks nothing', !!exit2 && !(await p.$('.reef-gate, .lock-screen')) && await p.evaluate(() => !!document.querySelector('.r3 canvas')));
-  await p.click('[data-act="toggle-edit-mode"]'); await p.waitForTimeout(1200);
+  await menuPick(p, 'Edit decks'); await p.waitForTimeout(1200);
   await p.click('[data-act="open-library"]', { force: true }); await p.waitForTimeout(800);
   check('grown-up: the Library opens on the Korean goal', await p.evaluate(() => [...document.querySelectorAll('.clib-tab')].map(t => t.dataset.tab).join(',') === 'korean'));
   await p.click('[data-view="settings"]'); await p.waitForTimeout(800);

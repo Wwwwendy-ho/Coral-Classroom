@@ -1,5 +1,18 @@
 # Changelog
 
+## Fewer buttons on the board, a Lagoon button everywhere, and a wreck with a real floor (November 2, 2026)
+
+- **One menu instead of a row of buttons.** On the board, only the everyday buttons stay out: the Library, the
+  treasure map, Ask Shelly and the dice. Settings, progress, edit mode, sound, music, day/night, the minigame
+  corner, switching profile, ending the session and Done now sit in one menu button (top right). It fits on
+  iPhone and iPad, upright or sideways.
+- **"⟵ Lagoon" in the Library and the aquarium**, like every other screen. Pages inside the Library also get a
+  small back arrow.
+- **The shipwreck's front half has a floor again.** Zoomed out, the seabed beyond the board was cutting through
+  the hold and hiding it. Now you can see the plank floor, spilled barrels and crates, and the path down there.
+  What's left of the deck runs lengthwise and frays back unevenly from both broken edges, so the ship no longer
+  looks cut cleanly in half.
+
 ## Snappier buttons, smoother zoom, a real ship from above, and Sentence Current with a Check button (November 2, 2026)
 
 - **Buttons answer as soon as you can see them.** After a deck, the celebration bubbles no longer catch every

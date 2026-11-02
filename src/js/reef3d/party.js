@@ -741,7 +741,11 @@
       var minZ = 1e9, maxZ = -1e9; sp.forEach(function(s){ minZ = Math.min(minZ, s.z); maxZ = Math.max(maxZ, s.z); });
       var off = night && view.shipDeck ? view.shipDeck.sand : 0, len = maxZ - minZ, cz = (minZ + maxZ) / 2;
       var W = 260, L = len + 260;
-      var hgt = function(x, z){ return Math.min(6.5, Math.max(0, (Math.abs(x) - 12) * .25)) + Math.sin(x * .21) * .35 + Math.cos(z * .17 + x * .05) * .35 - .45 + off; };
+      var hull = night && view.shipDeck ? view.shipDeck.half + 3 : 0;
+      var hgt = function(x, z){
+        if(hull && Math.abs(x) < hull && z < maxZ + 12 && z > minZ - hull * 2.8) return off - 12;   // dips away under the wreck, so it never cuts through the hold
+        return Math.min(6.5, Math.max(0, (Math.abs(x) - 12) * .25)) + Math.sin(x * .21) * .35 + Math.cos(z * .17 + x * .05) * .35 - .45 + off;
+      };
       var g = new THREE.PlaneGeometry(W, L, 52, Math.round(L / 5)), pos = g.attributes.position;
       for(var v = 0; v < pos.count; v++){ var x = pos.getX(v), z = cz - pos.getY(v); pos.setZ(v, hgt(x, z)); }
       g.computeVertexNormals();

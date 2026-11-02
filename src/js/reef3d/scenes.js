@@ -274,16 +274,64 @@
     // decks: the top deck up to the broken edge, the hold floor below it (under the sand line), and the bow
     slab(zc0, holeZ, UP);
     if(st){
-      slab(holeZ + 2.5, bowZ, LOW, '#4a5c57');   // the hold is darker: less light reaches down there
+      slab(holeZ + 2.5, bowZ, LOW, '#d6b896');   // the hold's floor: weathered planks, warmed so they read as wood in the gloom
       for(var hl = 0; hl < 2; hl++){ var hz = holeZ - 5 - hl * (holeZ - bowZ - 6) / 2, hx = (hl % 2 ? 1 : -1) * (d.half - 1.2);   // lanterns hung in the hold
         var hlan = B.lantern(); hlan.position.set(hx, LOW, hz); hlan.scale.setScalar(.8); if(clear(hx, hz)) { D.add(hlan); o.deckObjs.push(hlan); } }
-      for(var k = 0; k < 10; k++){   // the jagged edge: plank ends of different lengths, a few drooping into the hole
-        var bw = W / 10, bx = -d.half + bw * (k + .5), blen = .3 + r() * 1.8, pl = mesh(new THREE.BoxGeometry(bw * .92, .16, blen), M('#4f3d2b'), bx, UP - .08, holeZ - blen / 2);
-        pl.rotation.x = r() < .3 ? .25 + r() * .3 : 0; S.add(pl);
-      }
+      // both broken edges (the deck's, and the forecastle's facing it) are ragged: plank ends of different lengths
+      // reaching over the hole, longest where nothing below needs to be seen, a few drooping into it
+      var holdSp0 = sp.filter(function(q){ return q.z < holeZ; });
+      function reach0(x, z0, z1){ var lim = 99; holdSp0.forEach(function(q){ if(Math.abs(q.x - x) < 2.4 && q.z < Math.max(z0, z1) + 1.5 && q.z > Math.min(z0, z1) - 1.5) lim = Math.min(lim, Math.abs(q.z - z0) - 1.6); });
+        if(Math.abs(x - st.cx) < 4.6 && Math.abs(st.cz - z0) < 8) lim = Math.min(lim, Math.max(0, Math.abs(st.cz - z0) - 3.8));   // and never over the spiral stairs
+        return lim; }
+      [[holeZ, -1], [bowZ, 1]].forEach(function(edge){
+        for(var k = 0; k < 16; k++){
+          var bw = W / 16, bx = -d.half + bw * (k + .5), want = .3 + Math.pow(r(), 1.6) * 5.5, blen = Math.min(want, reach0(bx, edge[0], edge[0] + edge[1] * want));
+          if(blen < .3) continue;
+          var pl = mesh(new THREE.BoxGeometry(bw * .9, .16, blen), M(k % 2 ? '#4f3d2b' : '#5b4632'), bx, UP - .08, edge[0] + edge[1] * blen / 2);
+          if(r() < .25){ pl.rotation.x = -edge[1] * (.2 + r() * .3); pl.position.y -= blen * .12; } S.add(pl);
+        }
+      });
       S.add(mesh(new THREE.BoxGeometry(W, 1.4, .3), M('#120d0a'), 0, UP - .95, holeZ + .15));   // the deck's broken edge, dark below the planks
       var shade = new THREE.Mesh(new THREE.PlaneGeometry(W, 7), new THREE.MeshBasicMaterial({ map: reef3dBlobTex(), color: '#000000', transparent: true, opacity: .75, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
       shade.rotation.x = -Math.PI / 2; shade.position.set(0, LOW + .02, holeZ - .5); shade.scale.x = 1.4; shade.raycast = function(){}; D.add(shade);   // shadow under the overhang
+      // What's left of the deck over the hold, so it reads as a wreck and not a hollow shell: strips of planking
+      // along both sides with ragged inner edges (kept clear of the path below), stubs of the old deck beams
+      // jutting in from the hull, and the ribs of the hull lining its inside walls.
+      var holdSp = sp.filter(function(q){ return q.z < holeZ; });
+      function pathReach(z){ var m = 0; holdSp.forEach(function(q){ if(Math.abs(q.z - z) < 3) m = Math.max(m, Math.abs(q.x)); }); return m; }
+      // The surviving planks run fore and aft, like a real deck's. Each lane of planking frays back from both
+      // ends of the hole by its own amount (outer lanes, held up by the hull, survive longest; one side more than
+      // the other), so the break is a ragged, uneven V rather than a clean cut. Lanes stop short of the path below.
+      var beamM = M('#3e2e20'), laneMs = [M('#5b4632'), M('#4f3c2b'), M('#634c36')], span = holeZ - bowZ;
+      [-1, 1].forEach(function(side){
+        var bias = side < 0 ? 1 : .72;
+        for(var j = 0, lx = d.half - .45; lx > 1; j++, lx -= .9){
+          var fa = Math.max(0, Math.min(1, (.95 - j * .16 + (r() - .5) * .35) * bias)), fb = Math.max(0, Math.min(1, (.75 - j * .2 + (r() - .5) * .35) * bias));
+          var a = span * fa, b = span * fb, run0 = null, mt = laneMs[j % 3];
+          var flush = function(z0, z1){ if(z0 - z1 < .5) return; var pk = mesh(new THREE.BoxGeometry(.84, .16, z0 - z1), mt, side * lx, UP - .08 - (j % 2) * .02, (z0 + z1) / 2); pk.rotation.z = (r() - .5) * .03; S.add(pk); };
+          for(var lz = holeZ; lz > bowZ - .01; lz -= .5){
+            var keep = (lz > holeZ - a || lz < bowZ + b) && lx > pathReach(lz) + 1.9 && !(run0 !== null && r() < .015);
+            if(keep && run0 === null) run0 = lz; else if(!keep && run0 !== null){ flush(run0, lz); run0 = null; }
+          }
+          if(run0 !== null) flush(run0, bowZ);
+        }
+      });
+      // cargo spilled across the hold floor: barrels on their sides and broken crates, clear of the path
+      var barrelM = M('#6b4f33'), hoopM = M('#2b2a26'), crateM = M('#7a6040');
+      for(var cgo = 0; cgo < 14; cgo++){
+        var cxz = (r() - .5) * (W - 3), czz = bowZ + 2 + r() * (span - 5);
+        if(Math.abs(cxz) < pathReach(czz) + 1.6 || !clear(cxz, czz, 2.4)) continue;
+        if(r() < .55){ var br = mesh(new THREE.CylinderGeometry(.55, .55, 1.3, 10), barrelM, cxz, LOW + .55, czz); br.rotation.set(Math.PI / 2, 0, r() * 3); S.add(br);
+          [-.4, .4].forEach(function(o2){ var hp = mesh(new THREE.TorusGeometry(.56, .05, 4, 12), hoopM, cxz + Math.sin(br.rotation.z) * o2, LOW + .55, czz - Math.cos(br.rotation.z) * o2); hp.rotation.y = br.rotation.z; S.add(hp); }); }
+        else { var cs = .9 + r() * .5, cr = mesh(new THREE.BoxGeometry(cs, cs, cs), crateM, cxz, LOW + cs / 2 - .1, czz); cr.rotation.set(r() * .3, r() * 3, r() * .2); S.add(cr); }
+      }
+      // the keelson: the long spine timber down the middle of the hold floor
+      S.add(mesh(new THREE.BoxGeometry(.7, .3, span - 2.5), beamM, 0, LOW + .05, bowZ + (span - 2.5) / 2 + .2));
+      for(var bz2 = holeZ - 2.5; bz2 > bowZ + 1.5; bz2 -= 3.6) [-1, 1].forEach(function(side){
+        var reach = Math.max(1.4, d.half - Math.max(pathReach(bz2) + 1.6, 3)) * (.55 + r() * .45);
+        S.add(mesh(new THREE.BoxGeometry(reach, .32, .34), beamM, side * (d.half - reach / 2), UP - .3, bz2));
+      });
+      for(var rz = holeZ - 1; rz > bowZ + 1; rz -= 2) [-1, 1].forEach(function(side){ S.add(mesh(new THREE.BoxGeometry(.3, UP - LOW, .3), beamM, side * (d.half - .15), (UP + LOW) / 2, rz)); });
       for(var f = 0; f < 4; f++){ var fp = mesh(new THREE.BoxGeometry(.45, .14, 2 + r() * 1.5), M('#4a3828'), (r() - .5) * (W - 4), LOW + .2, holeZ - 2 - r() * 4); fp.rotation.set(r() * .3, r() * 3, r() * .2); if(clear(fp.position.x, fp.position.z)) S.add(fp); }   // fallen planks
     }
     // Seen from above it has to read as a ship: a long curved bow that comes to a point, and a stern with rounded
@@ -307,7 +355,8 @@
       });
     }
     var H = TOP - BOT, L = zc0 - bowZ;
-    capDeck(bowPts, bowZ, st ? LOW : UP); capDeck(sternPts, zc0, UP);
+    capDeck(bowPts, bowZ, UP); capDeck(sternPts, zc0, UP);   // the bow keeps its raised deck (the forecastle), even over the hold
+    if(st) S.add(mesh(new THREE.BoxGeometry(W, UP - LOW, .5), hullM, 0, (UP + LOW) / 2, bowZ - .25));   // the forecastle's wall, facing back into the hold
     capWalls(bowPts, bowZ); capWalls(sternPts, zc0);
 
     // the hull: tall walls from below the sand to the gunwale, a stern wall, angled bow walls, trim and rails
