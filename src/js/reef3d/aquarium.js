@@ -161,9 +161,45 @@
     var pebG = new THREE.DodecahedronGeometry(.12, 0), pebCols = night ? ['#5d6f6a', '#4a5a66', '#6a5a72', '#3f5a52'] : ['#f2a3a0', '#9fd6e8', '#f6e0a8', '#c9b6f0', '#ffffff', '#a8dcb0'];
     for(var pb = 0; pb < 70; pb++){ var pe = new THREE.Mesh(pebG, kit.M(pebCols[pb % pebCols.length])); pe.position.set((r() - .5) * 16, .05, -1 + r() * 7); pe.scale.set(1 + r(), .6, 1 + r()); pe.rotation.y = r() * 6; scene.add(pe); }
     var chest = reef3dModel(models, 'chest', .9, kit.grad); if(chest){ chest.position.set(3.4, 0, -3.5); chest.rotation.y = -.5; scene.add(chest); }
+    // Decorations, so it looks like a well-kept show tank: a fairy-tale castle, a brass diving helmet, a coral garden
+    // in bright colours, a rocky back wall, a bubbling stone, and gems and coins spilling from the treasure chest.
+    // At night the castle's windows and a few pearls glow.
+    var M = kit.M, mesh = kit.mesh;
+    (function castle(){
+      var c = new THREE.Group(), wall = M(night ? '#8a90a8' : '#f2e6d0'), roof = M(night ? '#5a6fb0' : '#f28aa0'), roof2 = M(night ? '#3f8a8a' : '#5cc2c8'), dark = M('#3a2c40');
+      c.add(mesh(new THREE.BoxGeometry(1.8, 1.3, 1.1), wall, 0, .65, 0));
+      [[-1, 1.9, roof], [1, 1.6, roof2], [0, 2.5, roof]].forEach(function(t, i){
+        var x = i === 2 ? 0 : t[0] * .95, tw = mesh(new THREE.CylinderGeometry(.34, .38, t[1], 14), wall, x, t[1] / 2, i === 2 ? -.25 : 0); c.add(tw);
+        c.add(mesh(new THREE.ConeGeometry(.46, .8, 14), t[2], x, t[1] + .4, i === 2 ? -.25 : 0));
+        var win = mesh(new THREE.BoxGeometry(.16, .26, .05), night ? new THREE.MeshBasicMaterial({ color: '#ffd77a' }) : dark, x, t[1] - .45, (i === 2 ? -.25 : 0) + .35); c.add(win);
+      });
+      var door = mesh(new THREE.CylinderGeometry(.28, .28, .06, 16, 1, false, 0, Math.PI), dark, 0, .55, .56); door.rotation.x = Math.PI / 2; c.add(door);
+      c.add(mesh(new THREE.BoxGeometry(.56, .55, .06), dark, 0, .28, .56));
+      for(var k = 0; k < 5; k++) c.add(mesh(new THREE.BoxGeometry(.22, .2, .22), wall, -.8 + k * .4, 1.4, .45));   // battlements
+      c.position.set(-3.7, 0, -4.4); c.rotation.y = .35; c.scale.setScalar(1.15); scene.add(c);
+    })();
+    (function helmet(){
+      var h = new THREE.Group(), brass = M('#d9a74a'), glass = new THREE.MeshBasicMaterial({ color: night ? '#7fe0d6' : '#cfeff2', transparent: true, opacity: .7 });
+      h.add(mesh(new THREE.SphereGeometry(.7, 22, 16), brass, 0, .75, 0));
+      var w = mesh(new THREE.CircleGeometry(.36, 20), glass, 0, .8, .69); h.add(w);
+      var rim = mesh(new THREE.TorusGeometry(.38, .07, 8, 20), brass, 0, .8, .68); h.add(rim);
+      [-1, 1].forEach(function(sd){ var pw = mesh(new THREE.CircleGeometry(.18, 14), glass, sd * .62, .82, .25); pw.rotation.y = sd * 1.2; h.add(pw); });
+      h.add(mesh(new THREE.CylinderGeometry(.75, .8, .25, 20), M('#b8863a'), 0, .12, 0));
+      h.position.set(4.6, 0, -1.6); h.rotation.set(0, -.6, .12); scene.add(h);
+    })();
+    var garden = night ? [['coralBall', -1.5, -6], ['kelp', 1.5, -6.2], ['rock', 5.6, -5], ['coralBall', -6, -3.5]] :
+      [['brain', -1.4, -6], ['staghorn', .2, -6.4], ['fan', 1.6, -6.2], ['sponge', 5.8, -4.6], ['anemone', -5.8, -2.8], ['staghorn', 6.2, -2.4], ['brain', -6.4, -5], ['fan', 3.2, -6.6], ['anemone', 2.2, -.4]];
+    garden.forEach(function(g){ var d = B[g[0]] ? B[g[0]](r) : null; if(!d) return; d.position.set(g[1], 0, g[2]); d.rotation.y = r() * 6; d.scale.multiplyScalar(.8 + r() * .5); scene.add(d); });
+    for(var w2 = 0; w2 < 9; w2++){ var rk = mesh(new THREE.DodecahedronGeometry(1.4 + r() * 1.2, 0), M(night ? '#3d4c52' : '#9aa7a6'), -9 + w2 * 2.2, .6, -8.5 - r()); rk.scale.y = 1.2 + r() * .8; scene.add(rk); }   // the rocky back wall
+    var stone = mesh(new THREE.DodecahedronGeometry(.45, 0), M(night ? '#566a63' : '#8fa3a0'), -1.8, .2, -.8); stone.scale.set(1.3, .6, 1); scene.add(stone);
+    ['gemPink', 'gemBlue', 'coin', 'coin', 'gemPink', 'coin'].forEach(function(nm, i){ var gm = reef3dModel(models, nm, nm === 'coin' ? .22 : .3, kit.grad); if(!gm) return; gm.position.set(2.6 + (i % 3) * .35 + r() * .2, 0, -2.8 + Math.floor(i / 3) * .35); gm.rotation.set(nm === 'coin' ? 1.2 : 0, r() * 6, 0); scene.add(gm); });
+    if(night){ for(var pl = 0; pl < 5; pl++){ var pearl = new THREE.Mesh(new THREE.SphereGeometry(.09, 10, 8), new THREE.MeshBasicMaterial({ color: '#d8fff8' })); pearl.position.set(-4 + pl * 2, .1, -1 - r() * 3); scene.add(pearl); } }
+    // soft beams of light from the hood above
+    var beamM = new THREE.MeshBasicMaterial({ color: night ? '#7fe0d6' : '#fffbe8', transparent: true, opacity: night ? .05 : .12, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+    for(var bm = 0; bm < 5; bm++){ var beam = new THREE.Mesh(new THREE.PlaneGeometry(.9 + r() * .8, 12), beamM); beam.position.set(-5 + bm * 2.5, 5, -4 - r() * 2); beam.rotation.set(0, (r() - .5) * .6, .18); scene.add(beam); }
     // rising bubbles
     var bubG = new THREE.SphereGeometry(.07, 8, 6), bubM = new THREE.MeshBasicMaterial({ color: '#e8fbff', transparent: true, opacity: .55, depthWrite: false }), bubbles = [];
-    for(var b = 0; b < 26; b++){ var bb = new THREE.Mesh(bubG, bubM); bb.position.set((r() - .5) * 12, r() * 7, -4 + r() * 4); bb.scale.setScalar(.5 + r()); bb.userData.sp = .5 + r() * .7; scene.add(bb); bubbles.push(bb); }
+    for(var b = 0; b < 38; b++){ var bb = new THREE.Mesh(bubG, bubM), fromStone = b >= 26; bb.position.set(fromStone ? -1.8 + (r() - .5) * .3 : (r() - .5) * 12, r() * 7, fromStone ? -.8 : -4 + r() * 4); bb.scale.setScalar(.5 + r()); bb.userData.sp = .5 + r() * .7; scene.add(bb); bubbles.push(bb); }
     // the friends
     var friends = found.map(function(f, i){
       var c = reefAqCreature(f.id, kit, models, night), u = c.userData;

@@ -1,5 +1,19 @@
 # Changelog
 
+## Tidy map labels, a fancier aquarium, and a sea friends library (November 2, 2026)
+
+- **Treasure map labels never overlap.** Each place's picture now sits exactly on its spot (before, a long name pushed
+  its picture sideways, even off the edge). If a label would cover another place, run off the parchment, or crowd
+  a branch path, it moves to the other side or a step up or down, wherever overlaps least. On a phone, long names
+  wrap onto two lines. Checked on Wendy's and Alissa's maps, on iPad and phone, upright and sideways: no overlaps.
+- **A fancier aquarium**: a polished wooden tank with brass trim, a lit hood on top and a cabinet stand. Inside are
+  a fairy-tale castle, a brass diving helmet, a coral garden, a rocky back wall with kelp, a bubbling stone, gems
+  and coins by the treasure chest, and soft beams of light. At night the castle windows and a few pearls glow.
+- **The sea friends library.** Tap the aquarium's name or its brass nameplate to see every sea friend, with a
+  progress bar. Found friends show a 3D picture and their name (and how many times they've been found). Tap one and
+  its fact is read aloud while it waves in the tank. Friends still to find are dark shapes marked "???". It replaces
+  the old "Still to find" shelf.
+
 ## A picture for every vocabulary word (October 31, 2026)
 
 - On Alissa's profile, each of the 107 vocabulary words in the story decks (Soccer Practice, Camping Trip, the

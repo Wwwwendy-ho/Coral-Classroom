@@ -615,6 +615,30 @@
       return '<li class="r3-isle ' + st + (u.review ? ' review' : '') + '"><span class="r3-isle-i" aria-hidden="true">' + (u.done ? ccIcon('flag') : i === n.i ? reefGuideMini(view.night) : u.review ? ccIcon('star') : ccIcon('island')) + '</span>' +
         '<span class="r3-isle-t">' + esc(u.title) + '</span><small>' + nice(u.start) + '</small></li>'; }).join('') + '</ol></div>';
   }
+  // No label may cover another place's picture or label, or run off the parchment: a label that does tries the other
+  // side of its picture, then a step up or down, and keeps the first spot that's clear.
+  function reef3dMapDeclutter(ov){
+    var board = ov.querySelector('.r3-map-board'); if(!board) return;
+    var spots = Array.prototype.slice.call(board.querySelectorAll('.r3-map-spot')), br = board.getBoundingClientRect();
+    function area(a, b){ var w = Math.min(a.right, b.right) - Math.max(a.left, b.left), h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top); return w > 1 && h > 1 ? w * h : 0; }
+    function cost(sp){   // how much this place's label and picture cover others, plus any label off the parchment
+      var nm = sp.querySelector('.r3-map-name').getBoundingClientRect(), me = sp.querySelector('.r3-map-em').getBoundingClientRect();
+      var c = Math.max(0, br.left + 2 - nm.left) * 40 + Math.max(0, nm.right - br.right + 2) * 40;
+      spots.forEach(function(o){ if(o === sp) return; var oe = o.querySelector('.r3-map-em').getBoundingClientRect(), on = o.querySelector('.r3-map-name').getBoundingClientRect();
+        c += area(nm, oe) * 2 + area(nm, on) + area(me, on); });
+      return c;
+    }
+    var tries = [[0, 0], [0, 1], [-24, 0], [-24, 1], [24, 0], [24, 1], [-46, 0], [46, 0], [-46, 1], [46, 1], [-68, 0], [68, 0], [-68, 1], [68, 1], [-90, 0], [90, 0]];
+    for(var pass = 0; pass < 3; pass++) spots.forEach(function(sp){
+      if(!cost(sp)) return;
+      var left0 = sp.classList.contains('left'), best = null, bc = Infinity;
+      for(var t = 0; t < tries.length && bc > 0; t++){
+        sp.classList.toggle('left', tries[t][1] ? !left0 : left0); sp.style.setProperty('--dy', tries[t][0] + 'px');
+        var c = cost(sp) + Math.abs(tries[t][0]) * .5; if(c < bc){ bc = c; best = tries[t]; }   // nearer its picture is better, all else equal
+      }
+      sp.classList.toggle('left', best[1] ? !left0 : left0); sp.style.setProperty('--dy', best[0] + 'px');
+    });
+  }
   // Treasure map: the whole board from above on parchment. Tap a deck to send the guide there.
   function reef3dMap(view, fromZoom){
     var sp = view.spaces, minX = -8, maxX = 8, minZ = 0, maxZ = 2;
@@ -659,6 +683,7 @@
     });
     ov.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });
     document.body.appendChild(ov);
+    reef3dMapDeclutter(ov);
     var meEl = ov.querySelector('.r3-map-me'); if(meEl) meEl.scrollIntoView({ block: 'center' });
     ov.querySelector('[data-r3-close]').focus();
   }

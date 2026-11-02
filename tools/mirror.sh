@@ -9,4 +9,5 @@ for f in index.html library.js words.js words-data.js storage.js sw.js seed-data
 done
 rm -rf coral-cove/voice && cp -R voice coral-cove/voice
 rm -rf coral-cove/vocab-pics && cp -R vocab-pics coral-cove/vocab-pics
+rm -rf coral-cove/friend-pics && cp -R friend-pics coral-cove/friend-pics
 echo "coral-cove/ now matches the site"

@@ -241,8 +241,9 @@ body.reef-calm .r3-prize-card, body.reef-calm .r3-prize-e, body.reef-calm .r3-pr
 .r3-map-hint{ margin:2px 0 10px; font-weight:800; opacity:.8; }
 .r3-map-board{ position:relative; }
 .r3-map-board svg{ position:absolute; inset:0; width:100%; height:100%; }
-.r3-map-spot{ position:absolute; transform:translate(-50%, -50%); display:flex; align-items:center; gap:6px; border:none; background:none; cursor:pointer; padding:0; font:inherit; color:inherit; }
-.r3-map-spot.left{ flex-direction:row-reverse; }
+.r3-map-spot{ position:absolute; transform:translate(-19px, -50%); display:flex; align-items:center; gap:6px; border:none; background:none; cursor:pointer; padding:0; font:inherit; color:inherit; }
+.r3-map-spot.left{ flex-direction:row-reverse; transform:translate(calc(-100% + 19px), -50%); }
+.r3-map-name{ position:relative; top:var(--dy, 0px); }
 .r3-map-em{ width:38px; height:38px; flex:none; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem; background:#fff8e6; box-shadow:0 0 0 2px #a8814f, 0 3px 0 #a8814f; }
 .r3-map-spot.ready .r3-map-em{ box-shadow:0 0 0 3px #b5452f, 0 3px 0 #8a3322; }
 .r3-map-spot.done .r3-map-em{ box-shadow:0 0 0 3px #3f7a57, 0 3px 0 #2c5a40; }
@@ -566,3 +567,4 @@ body.reef-calm .cv3-hero .topbar :is(.icon-btn, .btn){ animation:none !important
 .r3-isle.now{ background:#fff1c2; box-shadow:0 0 0 3px #f2b544, 0 2px 0 #c9a46a; }
 .r3-isle.later{ opacity:.65; } .r3-isle.done{ background:#e3f1e7; }
 .r3-isle-i .cc-ic{ width:28px; height:28px; color:#2a8f8a; } .r3-isle.done .r3-isle-i .cc-ic{ color:#b5452f; } .r3-isle.review .r3-isle-i .cc-ic{ color:#d9a020; }
+@media (max-width:520px){ .r3-map-name{ white-space:normal; max-width:8.6em; font-size:.8rem; line-height:1.15; padding:2px 7px; } }   /* phone: long names wrap so they fit beside their picture */
