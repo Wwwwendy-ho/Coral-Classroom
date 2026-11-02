@@ -40,7 +40,9 @@
         var k = koHas(f) && !koHas(b) ? f : koHas(b) && !koHas(f) ? b : null, e = k === f ? b : f;
         if(!k) return;
         if(/\s/.test(k.trim()) && k.length <= 30 && e.length <= 40){
-          if(!seenS[k]){ seenS[k] = 1; pool.sentences.push({ k: k, e: e }); }
+          // only real sentences: they end like one (…요, …다, …까 or with punctuation), with no "A / B" word pairs
+          var real = !/[\/|]/.test(k + e) && /([.?!]|요|다|까|죠|니)["”']?$/.test(k.trim()) && k.trim().split(/\s+/).length >= 2;
+          if(real && !seenS[k]){ seenS[k] = 1; pool.sentences.push({ k: k, e: e }); }
           return;
         }
         if(k.length <= 12 && e.length <= 24 && !seenK[k]){
@@ -159,24 +161,39 @@
   }
 
   // Sentence Current: four sentences; tap the Korean words in order.
+  // Sentence Current: put the Korean words in order (any order you like), then Check. Wrong words turn red and
+  // can be moved; after two wrong checks, "Show me" gives the answer.
   function reefGameSentence(play, finish, g){
     var list = reefPick(g.pool.sentences, 4), si = 0, slips = 0;
     function next(){
       if(si === list.length) return finish(true, reefScoreNote('ksent', slips, false, function(n){ return n === 0 ? 'No slips' : n + (n === 1 ? ' slip' : ' slips'); }));
-      var s = list[si], words = s.k.split(/\s+/), order = reefShuffle(words.map(function(w, i){ return i; })), at = 0;
+      var s = list[si], words = s.k.split(/\s+/), order = reefShuffle(words.map(function(w, i){ return i; })), placed = [], wrongs = 0;
       if(order.join() === words.map(function(w, i){ return i; }).join() && words.length > 1) order.reverse();
       play.innerHTML = '<p class="r3-mini-ask">' + (si + 1) + ' of ' + list.length + ': <b>' + esc(s.e) + '</b></p>' +
         '<div class="r3-kline" aria-live="polite"></div>' +
-        '<div class="r3-kwords">' + order.map(function(i){ return '<button type="button" class="r3-kword" data-i="' + i + '">' + esc(words[i]) + '</button>'; }).join('') + '</div>';
-      var line = play.querySelector('.r3-kline');
+        '<div class="r3-kwords">' + order.map(function(i){ return '<button type="button" class="r3-kword" data-i="' + i + '">' + esc(words[i]) + '</button>'; }).join('') + '</div>' +
+        '<p class="r3-kmsg" aria-live="polite"></p><div class="r3-panel-row"><button type="button" class="r3-btn main" data-check disabled>Check</button></div>';
+      var line = play.querySelector('.r3-kline'), msg = play.querySelector('.r3-kmsg'), chk = play.querySelector('[data-check]');
+      function draw(){
+        line.innerHTML = placed.map(function(i, k){ return '<button type="button" class="r3-kpiece" data-k="' + k + '">' + esc(words[i]) + '</button>'; }).join('');
+        play.querySelectorAll('.r3-kword').forEach(function(b){ var on = placed.indexOf(+b.dataset.i) >= 0; b.classList.toggle('used', on); b.disabled = on; });
+        chk.disabled = placed.length !== words.length;
+      }
       play.onclick = function(e){
-        var b = e.target.closest('.r3-kword'); if(!b || b.disabled) return;
-        // a repeated word can go in either of its places
-        if(words[+b.dataset.i] !== words[at]){ slips++; return reefShake(b); }
-        b.disabled = true; b.classList.add('used'); line.insertAdjacentHTML('beforeend', '<span>' + esc(words[at]) + '</span> '); at++;
-        try { Sound.bloop(650 + at * 90, 0, .05); } catch(err){}
-        if(at === words.length){ try { Sound.correct(); } catch(err){} line.classList.add('done'); reefSay(s.k); si++; setTimeout(next, 1700); }
+        var w = e.target.closest('.r3-kword'), pc = e.target.closest('.r3-kpiece');
+        if(w && !w.disabled){ placed.push(+w.dataset.i); msg.textContent = ''; try { Sound.bloop(650 + placed.length * 90, 0, .05); } catch(err){} return draw(); }
+        if(pc){ placed.splice(+pc.dataset.k, 1); msg.textContent = ''; try { Sound.bloop(420, 0, .04); } catch(err){} return draw(); }   // send a word back
+        if(e.target.closest('[data-show]')){ placed = words.map(function(w2, i){ return i; }); draw(); line.classList.add('done'); reefSay(s.k); si++; chk.disabled = true; setTimeout(next, 2200); return; }
+        if(e.target.closest('[data-check]') && !chk.disabled){
+          var bad = placed.map(function(i, k){ return words[i] !== words[k]; });   // a repeated word fits either of its places
+          if(!bad.some(Boolean)){ try { Sound.correct(); } catch(err){} line.classList.add('done'); chk.disabled = true; msg.textContent = ''; reefSay(s.k); si++; setTimeout(next, 1700); return; }
+          slips++; wrongs++; try { Sound.bloop(300); } catch(err){}
+          line.querySelectorAll('.r3-kpiece').forEach(function(p, k){ p.classList.toggle('wrong', bad[k]); });
+          msg.textContent = 'Not quite: the red words are in the wrong place. Tap one to move it.';
+          if(wrongs >= 2 && !play.querySelector('[data-show]')) chk.insertAdjacentHTML('afterend', '<button type="button" class="r3-btn" data-show>Show me</button>');
+        }
       };
+      draw();
     }
     next();
   }

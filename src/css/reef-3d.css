@@ -82,7 +82,7 @@
 .icon-btn{ color:var(--deep, #0e5a78); } .icon-btn .cc-ic{ width:1.45rem; height:1.45rem; }
 .pill.streak .cc-ic{ color:#ff7a3d; } .pill.stars .cc-ic{ color:#e8a317; } .pill .icon .cc-ic{ width:1.15em; height:1.15em; }
 .pill.streak .cc-ic .f, .pill.stars .cc-ic .f{ opacity:.55; }
-.r3-mapbtn{ display:inline-flex; align-items:center; gap:7px; } .r3-mapbtn .cc-ic{ color:#b5532f; } .r3-mapbtn .cc-ic .f{ opacity:.3; }
+.r3-mapbtn{ display:inline-flex; align-items:center; justify-content:center; gap:7px; } .r3-mapbtn .cc-ic{ color:#b5532f; } .r3-mapbtn .cc-ic .f{ opacity:.3; }
 .r3-themebtn .cc-ic, .r3-gamesbtn .cc-ic, [data-music-toggle] .cc-ic{ width:1.6rem; height:1.6rem; }
 .r3-themebtn .cc-ic{ color:#e39b14; } .r3.night .r3-themebtn .cc-ic, .r3-themebtn .cc-ic.moon{ color:#f2d27a; }
 .r3-gamesbtn .cc-ic{ color:#7a4fc2; } [data-music-toggle] .cc-ic{ color:#2a8f8a; } [data-music-toggle].off .cc-ic{ color:#8a9a9a; }
@@ -264,7 +264,7 @@ body.reef-calm .r3-bubble, body.reef-calm .r3-map-card{ animation:none !importan
 .reef-gate .pin-cancel{ margin-top:0; }
 /* celebration bubbles: float up after a right answer, pop when tapped */
 .reef-pops{ position:fixed; inset:0; z-index:80; pointer-events:none; overflow:hidden; }
-.reef-pops.active{ pointer-events:auto; touch-action:none; }
+.reef-pops.active{ pointer-events:none; } .reef-pops.active .reef-pop{ pointer-events:auto; touch-action:none; }   /* only the bubbles catch taps */
 .reef-pop{ position:absolute; left:var(--x); top:100vh; width:var(--s); height:var(--s); padding:0; border:none; border-radius:50%; cursor:pointer; pointer-events:auto;
   background:radial-gradient(circle at 32% 28%, rgba(255,255,255,.95) 0 9%, rgba(255,255,255,.25) 10% 38%, rgba(160,230,240,.18) 60%, rgba(120,210,225,.45) 100%);
   box-shadow:inset 0 0 0 2px rgba(255,255,255,.75), inset -6px -8px 14px rgba(90,190,210,.35), 0 4px 14px rgba(20,90,110,.12);
@@ -568,3 +568,10 @@ body.reef-calm .cv3-hero .topbar :is(.icon-btn, .btn){ animation:none !important
 .r3-isle.later{ opacity:.65; } .r3-isle.done{ background:#e3f1e7; }
 .r3-isle-i .cc-ic{ width:28px; height:28px; color:#2a8f8a; } .r3-isle.done .r3-isle-i .cc-ic{ color:#b5452f; } .r3-isle.review .r3-isle-i .cc-ic{ color:#d9a020; }
 @media (max-width:520px){ .r3-map-name{ white-space:normal; max-width:8.6em; font-size:.8rem; line-height:1.15; padding:2px 7px; } }   /* phone: long names wrap so they fit beside their picture */
+.r3-kline{ display:flex; flex-wrap:wrap; gap:6px; justify-content:center; align-items:center; }
+.r3-kpiece{ border:none; cursor:pointer; border-radius:12px; padding:8px 12px; font:700 1.3rem/1.2 'Noto Sans KR','Apple SD Gothic Neo',sans-serif; color:#0b3a44; background:#fff; box-shadow:0 3px 0 #9cc9c9; }
+.r3-kpiece.wrong{ background:#ffe1dc; box-shadow:0 3px 0 #e8694e, 0 0 0 2px #e8694e; animation:r3No .35s; }
+.r3-kline.done .r3-kpiece{ background:#e3f1e7; box-shadow:0 3px 0 #3f7a57; }
+.r3-kmsg{ min-height:1.3em; font-size:.9rem; color:#b5452f; }
+.r3-mini-x{ position:absolute; top:10px; right:10px; z-index:2; width:44px; height:44px; border:none; cursor:pointer; border-radius:50%; display:grid; place-items:center; background:#fff8e6; color:#4a3115; box-shadow:0 3px 0 #b08d5a; }
+.r3-mini-x .cc-ic{ width:22px; height:22px; } .r3.night .r3-mini-x{ background:#2a4650; color:#f6e9c8; box-shadow:0 3px 0 #0f2228; }

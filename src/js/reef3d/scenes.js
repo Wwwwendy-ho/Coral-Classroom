@@ -394,15 +394,67 @@
       mast.add(mesh(new THREE.CylinderGeometry(.26, .4, h, 10), mastM, 0, h / 2, 0));
       S.add(mesh(new THREE.CylinderGeometry(.62, .62, .3, 10), trimM, mx, base + .15, mz));
       if(broken){ var stub2 = mesh(new THREE.CylinderGeometry(.24, .26, 7, 10), mastM, mx - side * 3.4, base + .4, mz + 1.4); stub2.rotation.set(0, .5, side * (Math.PI / 2 - .1)); if(clear(stub2.position.x, stub2.position.z, 3.6)) S.add(stub2); return; }
-      var yard = mesh(new THREE.CylinderGeometry(.11, .11, 7, 8), mastM, 0, Math.max(h * .72 + .8, UP - base + 9.9), 0); yard.rotation.z = Math.PI / 2; yard.rotation.y = .25; mast.add(yard);
+      var yardY = Math.max(h * .72 + .8, UP - base + 9.9), yardL = Math.min(W * .72, 13);   // long yards: from above they make the cross shapes of a ship's masts
+      var yard = mesh(new THREE.CylinderGeometry(.12, .12, yardL, 8), mastM, 0, yardY, 0); yard.rotation.z = Math.PI / 2; yard.rotation.y = .25; mast.add(yard);
+      var yard2 = mesh(new THREE.CylinderGeometry(.1, .1, yardL * .8, 8), mastM, 0, yardY - 3.4, 0); yard2.rotation.z = Math.PI / 2; yard2.rotation.y = .25; mast.add(yard2);
       mast.add(mesh(new THREE.CylinderGeometry(.85, .6, .7, 12, 1, true), M('#3f3024', { side: THREE.DoubleSide }), 0, h - .8, 0));
       var sailY = Math.max(base + h * .72 - 1.6, UP + 7.6);   // every sail's foot sits well above the top deck, where the fish swim
-      var sail = new THREE.Mesh(new THREE.PlaneGeometry(6.2, 4.6, 8, 4), sailMat); sail.position.set(mx, sailY, mz + .2); sail.rotation.set(0, .25, lean);
-      var sa = sail.geometry.attributes.position; for(var v = 0; v < sa.count; v++) sa.setZ(v, Math.sin((sa.getX(v) + 3.1) / 6.2 * Math.PI) * .5);
+      var sailW = yardL * .82;   // a full sail between the yards, billowing out, so from above it shows as a pale crescent
+      var sail = new THREE.Mesh(new THREE.PlaneGeometry(sailW, 4.4, 10, 4), sailMat); sail.position.set(mx, sailY, mz + .2); sail.rotation.set(0, .25, lean);
+      var sa = sail.geometry.attributes.position; for(var v = 0; v < sa.count; v++) sa.setZ(v, Math.sin((sa.getX(v) + sailW / 2) / sailW * Math.PI) * 1.7);
       sail.geometry.computeVertexNormals(); sail.raycast = function(){}; D.add(sail);
       var lan = B.lantern(); lan.position.set(mx + side * .55, base + 3.3, mz + .5); lan.scale.setScalar(.7); D.add(lan); o.deckObjs.push(lan);
       mastTops.push({ x: mx, z: mz, top: base + h, base: base, side: side });
     });
+    // Rigging, so the ship reads as a ship from above too: shrouds fanning from each mast top down to both rails,
+    // and stays running fore and aft. Plus deck furniture: grated hatches, coils of rope, a rowboat by the rail.
+    var ropeM = M('#b8955e');   // pale hemp, so the rigging shows against the dark deck
+    function rope(a, b, r){ var len = a.distanceTo(b); if(len < .1) return; var m = new THREE.Mesh(new THREE.CylinderGeometry(r || .07, r || .07, len, 5), ropeM);
+      m.position.copy(a).add(b).multiplyScalar(.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize()); m.raycast = function(){}; S.add(m); }
+    var V3 = function(x, y, z){ return new THREE.Vector3(x, y, z); };
+    mastTops.forEach(function(mt, k){
+      var hw = d.half + .1, top = V3(mt.x, mt.top - .8, mt.z);
+      [-1, 1].forEach(function(side){ for(var q = -2; q <= 1; q++) rope(top, V3(side * hw, TOP + .8, mt.z + q * 1.1 + .6)); });
+      var nxt = mastTops[k + 1];
+      if(nxt) rope(V3(mt.x, mt.top - .6, mt.z), V3(nxt.x, Math.min(nxt.top, mt.top) - 2, nxt.z), .09);   // a stay to the next mast
+      else rope(V3(mt.x, mt.top - .6, mt.z), V3(0, (st ? LOW : UP) + 3.2, bowZ - bowLen - 4.5), .09);    // the last one runs out to the bowsprit
+      if(k === 0) rope(V3(mt.x, mt.top - .6, mt.z), V3(0, TOP + 1, zc0 + sternLen * .8), .09);           // and the first back to the stern
+    });
+    var hatchM = M('#2a1f16'), grateM = M('#5b4632');
+    for(var hz2 = zc0 - 9, hn = 0; hz2 > (st ? holeZ + 4 : bowZ + 6) && hn < 6; hz2 -= 11){
+      var hx2 = (hn % 2 ? 1 : -1) * (d.half - 3.2); if(!clear(hx2, hz2, 2.8)){ hx2 = -hx2; if(!clear(hx2, hz2, 2.8)) continue; } hn++;
+      S.add(mesh(new THREE.BoxGeometry(2.2, .18, 2.6), hatchM, hx2, UP + .09, hz2));
+      for(var gl = -1; gl <= 1; gl++){ S.add(mesh(new THREE.BoxGeometry(2, .06, .16), grateM, hx2, UP + .2, hz2 + gl * .7)); S.add(mesh(new THREE.BoxGeometry(.16, .06, 2.4), grateM, hx2 + gl * .65, UP + .2, hz2)); }
+    }
+    mastTops.forEach(function(mt){ if(mt.base !== UP) return; var cx = mt.x + (mt.side || 1) * 1.3, cz = mt.z + 1.2; if(!clear(cx, cz, 1.6)) return;
+      for(var ring = 0; ring < 3; ring++){ var coil = mesh(new THREE.TorusGeometry(.42 - ring * .1, .07, 6, 16), M('#9a7b4f'), cx, UP + .08 + ring * .06, cz); coil.rotation.x = Math.PI / 2; S.add(coil); } });
+    (function rowboat(){
+      var bz = zc0 - 14, bx = -(d.half - 1.6); if(!clear(bx, bz, 3)) { bx = -bx; if(!clear(bx, bz, 3)) return; }
+      var boat = new THREE.Group(), hullB = mesh(new THREE.SphereGeometry(1, 16, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), M('#6b4a2c'), 0, .55, 0); hullB.scale.set(.75, .5, 2); boat.add(hullB);
+      boat.add(mesh(new THREE.BoxGeometry(1.3, .08, .3), M('#8a6a44'), 0, .52, .5)); boat.add(mesh(new THREE.BoxGeometry(1.3, .08, .3), M('#8a6a44'), 0, .52, -.6));
+      var oar = mesh(new THREE.CylinderGeometry(.05, .05, 2.6, 6), M('#a8814f'), .2, .6, 0); oar.rotation.x = Math.PI / 2; boat.add(oar);
+      boat.position.set(bx, UP, bz); boat.rotation.z = Math.sign(bx) * .12; S.add(boat);
+    })();
+    (function hullCurve(){
+      var N = 48, topY = -1.1, botY = d.sand - .4, capM = M('#5a4330');
+      [-1, 1].forEach(function(side){
+        var pts = [];
+        for(var i = 0; i <= N; i++){
+          var z = zc0 - (zc0 - bowZ) * i / N, t = i / N, damp = 1;
+          exits.forEach(function(e){ if(Math.sign(e.x) === side) damp = Math.min(damp, Math.max(0, Math.min(1, (Math.abs(e.z - z) - 2) / 4))); });
+          pts.push({ z: z, w: 1.9 * Math.pow(Math.sin(Math.PI * Math.min(1, t * 1.05)), .7) * damp });
+        }
+        var pos = [], idx = [], x0 = side * (d.half + .5);
+        pts.forEach(function(p){ var xo = x0 + side * p.w; pos.push(x0, topY, p.z, xo, topY, p.z, xo, botY, p.z); });
+        for(var j = 0; j < N; j++){ var a = j * 3, b = a + 3;
+          idx.push(a, a + 1, b, a + 1, b + 1, b);              // the top of the wale
+          idx.push(a + 1, a + 2, b + 1, a + 2, b + 2, b + 1);  // the outer side, down into the sand
+        }
+        var g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(side > 0 ? idx : idx.map(function(v, k){ return idx[k - k % 3 + (2 - k % 3)]; }));
+        g.computeVertexNormals();
+        var m = new THREE.Mesh(g, capM); m.material = new THREE.MeshLambertMaterial({ color: '#4a3826', side: THREE.DoubleSide }); m.raycast = function(){}; S.add(m);
+      });
+    })();
     // the pirate flag on the tallest mast: black, with a white seashell and crossed anchors (no skull)
     var tall = mastTops.reduce(function(a, m){ return !a || m.top > a.top ? m : a; }, null);
     if(tall){

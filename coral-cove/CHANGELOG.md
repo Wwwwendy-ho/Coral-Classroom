@@ -1,5 +1,25 @@
 # Changelog
 
+## Snappier buttons, smoother zoom, a real ship from above, and Sentence Current with a Check button (November 2, 2026)
+
+- **Buttons answer as soon as you can see them.** After a deck, the celebration bubbles no longer catch every
+  tap: only the bubbles themselves can be popped, and the buttons under them work at once. The dive into a deck
+  and back out lets go of taps the moment the new screen is in, and is 20% quicker (the board is ready in under
+  half a second). Buttons also skip the iPhone/iPad wait for a double-tap.
+- **The map button's icon is centred** on phones.
+- **Sentence Current**: put the words in any order, tap a placed word to send it back, then press **Check**. Wrong
+  words turn red so you can move them, and after two tries "Show me" gives the answer. It only uses real sentences
+  now, never "A / B" word pairs.
+- **Minigames from the minigame corner** have a close button the whole time you play, so you can leave whenever
+  you like.
+- **The wreck from above**: the hull swells out amidships and tapers to the bow and stern, rigging fans from each
+  mast to the rails, stays run fore and aft, long yards cross the masts, the sails billow, and there are grated
+  hatches, coils of rope and a rowboat on deck.
+- **Smoother zoom to the map**: the camera's distance changes evenly through the pinch (like a map app), carries
+  on smoothly when you let go, and settles gently.
+- **Tap a place on the map** and Shelly (Lumi) is already there: the camera swoops down from the map onto her
+  new spot.
+
 ## Ask Shelly understands Korean typed in English letters (November 2, 2026)
 
 - Ask about a Korean word the way it sounds, even if it's not spelled quite right, and Shelly works it out. "What is

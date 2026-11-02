@@ -1100,9 +1100,14 @@
     var k = calm || up ? 1 : 1 - Math.pow(view.camGlide > now ? .955 : .84, dt * 30);
     view.camPos.lerp(tp, k); view.camLook.lerp(tl, k);
     view.cam.position.copy(view.camPos); view.cam.lookAt(view.camLook);
-    if(reef3dZoomFrame(view, now)){ var zc = view.zoomCenter, z = view.zoomNow, ze = z * z * (3 - 2 * Math.min(1, z));   // pinching out to the map
-      var zl = view.camLook.clone().lerp(zc, Math.min(1, ze)), zp = view.camPos.clone().lerp(zc.clone().add(new THREE.Vector3(0, view.zoomH, view.zoomH * .32)), Math.min(1, ze));
-      if(z > 1) zp.y += (z - 1) * 30;
+    if(reef3dZoomFrame(view, now)){   // pinching out to the map
+      // The camera's distance changes by the same proportion for each bit of the pinch (like a map app), while it
+      // turns from looking along the path to looking straight down on the middle of the board.
+      var zc = view.zoomCenter, z = view.zoomNow, zt = Math.min(1, z), turn = zt * zt * (3 - 2 * zt);
+      var zl = view.camLook.clone().lerp(zc, turn);
+      var dir0 = view.camPos.clone().sub(view.camLook), d0 = Math.max(1, dir0.length()), dir1 = new THREE.Vector3(0, 1, .32).normalize();
+      var zDist = d0 * Math.pow(view.zoomH * 1.05 / d0, zt) * (z > 1 ? 1 + (z - 1) * .8 : 1);
+      var zp = zl.clone().add(dir0.normalize().lerp(dir1, turn).normalize().multiplyScalar(zDist));
       view.cam.position.copy(zp); view.cam.lookAt(zl);
       // the fog (and the far edge of what's drawn) moves back with the camera, so the whole board stays clear
       var fog = view.scene.fog; if(!view.fog0) view.fog0 = { near: fog.near, far: fog.far, cam: view.cam.far };

@@ -11377,8 +11377,8 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     if(kind !== 'swim'){
       reefSplash(ov.querySelector('.tx-splash'), innerWidth / 2, innerHeight * .58, kind); // always in the middle of the screen
     }
-    var mid = kind === 'swim' ? 230 : 560, end = kind === 'swim' ? 560 : 1300;
-    setTimeout(function(){ try { fn(); } catch(e){ console.error('[Coral Cove] transition', e); } }, mid);
+    var mid = kind === 'swim' ? 230 : 450, end = kind === 'swim' ? 560 : 1050;   // the dive is quick: the new screen is in (and takes taps) under half a second
+    setTimeout(function(){ try { fn(); } catch(e){ console.error('[Coral Cove] transition', e); } ov.style.pointerEvents = 'none'; }, mid);   // once the new screen is in, its buttons take taps while the water clears
     setTimeout(function(){ ov.remove(); reefBusy = false; window.__reefTx = false; }, end);
   }
   function reefInDeck(){
@@ -11844,7 +11844,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     var layer = document.getElementById('reefPops');
     if(!layer){ layer = document.createElement('div'); layer.id = 'reefPops'; layer.className = 'reef-pops'; layer.setAttribute('aria-hidden', 'true'); document.body.appendChild(layer); }
     if(layer.children.length) return;
-    // While the bubbles float, the layer catches every other tap so the next card waits.
+    // The bubbles can be popped, but taps anywhere else go straight through: the buttons under them work at once.
     layer.classList.add('active');
     clearTimeout(layer._safety); layer._safety = setTimeout(function(){ layer.textContent = ''; reefPopsDone(layer); }, 6500);
     for(var i = 0; i < 6; i++){
@@ -19022,9 +19022,14 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     var k = calm || up ? 1 : 1 - Math.pow(view.camGlide > now ? .955 : .84, dt * 30);
     view.camPos.lerp(tp, k); view.camLook.lerp(tl, k);
     view.cam.position.copy(view.camPos); view.cam.lookAt(view.camLook);
-    if(reef3dZoomFrame(view, now)){ var zc = view.zoomCenter, z = view.zoomNow, ze = z * z * (3 - 2 * Math.min(1, z));   // pinching out to the map
-      var zl = view.camLook.clone().lerp(zc, Math.min(1, ze)), zp = view.camPos.clone().lerp(zc.clone().add(new THREE.Vector3(0, view.zoomH, view.zoomH * .32)), Math.min(1, ze));
-      if(z > 1) zp.y += (z - 1) * 30;
+    if(reef3dZoomFrame(view, now)){   // pinching out to the map
+      // The camera's distance changes by the same proportion for each bit of the pinch (like a map app), while it
+      // turns from looking along the path to looking straight down on the middle of the board.
+      var zc = view.zoomCenter, z = view.zoomNow, zt = Math.min(1, z), turn = zt * zt * (3 - 2 * zt);
+      var zl = view.camLook.clone().lerp(zc, turn);
+      var dir0 = view.camPos.clone().sub(view.camLook), d0 = Math.max(1, dir0.length()), dir1 = new THREE.Vector3(0, 1, .32).normalize();
+      var zDist = d0 * Math.pow(view.zoomH * 1.05 / d0, zt) * (z > 1 ? 1 + (z - 1) * .8 : 1);
+      var zp = zl.clone().add(dir0.normalize().lerp(dir1, turn).normalize().multiplyScalar(zDist));
       view.cam.position.copy(zp); view.cam.lookAt(zl);
       // the fog (and the far edge of what's drawn) moves back with the camera, so the whole board stays clear
       var fog = view.scene.fog; if(!view.fog0) view.fog0 = { near: fog.near, far: fog.far, cam: view.cam.far };
@@ -19582,15 +19587,67 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       mast.add(mesh(new THREE.CylinderGeometry(.26, .4, h, 10), mastM, 0, h / 2, 0));
       S.add(mesh(new THREE.CylinderGeometry(.62, .62, .3, 10), trimM, mx, base + .15, mz));
       if(broken){ var stub2 = mesh(new THREE.CylinderGeometry(.24, .26, 7, 10), mastM, mx - side * 3.4, base + .4, mz + 1.4); stub2.rotation.set(0, .5, side * (Math.PI / 2 - .1)); if(clear(stub2.position.x, stub2.position.z, 3.6)) S.add(stub2); return; }
-      var yard = mesh(new THREE.CylinderGeometry(.11, .11, 7, 8), mastM, 0, Math.max(h * .72 + .8, UP - base + 9.9), 0); yard.rotation.z = Math.PI / 2; yard.rotation.y = .25; mast.add(yard);
+      var yardY = Math.max(h * .72 + .8, UP - base + 9.9), yardL = Math.min(W * .72, 13);   // long yards: from above they make the cross shapes of a ship's masts
+      var yard = mesh(new THREE.CylinderGeometry(.12, .12, yardL, 8), mastM, 0, yardY, 0); yard.rotation.z = Math.PI / 2; yard.rotation.y = .25; mast.add(yard);
+      var yard2 = mesh(new THREE.CylinderGeometry(.1, .1, yardL * .8, 8), mastM, 0, yardY - 3.4, 0); yard2.rotation.z = Math.PI / 2; yard2.rotation.y = .25; mast.add(yard2);
       mast.add(mesh(new THREE.CylinderGeometry(.85, .6, .7, 12, 1, true), M('#3f3024', { side: THREE.DoubleSide }), 0, h - .8, 0));
       var sailY = Math.max(base + h * .72 - 1.6, UP + 7.6);   // every sail's foot sits well above the top deck, where the fish swim
-      var sail = new THREE.Mesh(new THREE.PlaneGeometry(6.2, 4.6, 8, 4), sailMat); sail.position.set(mx, sailY, mz + .2); sail.rotation.set(0, .25, lean);
-      var sa = sail.geometry.attributes.position; for(var v = 0; v < sa.count; v++) sa.setZ(v, Math.sin((sa.getX(v) + 3.1) / 6.2 * Math.PI) * .5);
+      var sailW = yardL * .82;   // a full sail between the yards, billowing out, so from above it shows as a pale crescent
+      var sail = new THREE.Mesh(new THREE.PlaneGeometry(sailW, 4.4, 10, 4), sailMat); sail.position.set(mx, sailY, mz + .2); sail.rotation.set(0, .25, lean);
+      var sa = sail.geometry.attributes.position; for(var v = 0; v < sa.count; v++) sa.setZ(v, Math.sin((sa.getX(v) + sailW / 2) / sailW * Math.PI) * 1.7);
       sail.geometry.computeVertexNormals(); sail.raycast = function(){}; D.add(sail);
       var lan = B.lantern(); lan.position.set(mx + side * .55, base + 3.3, mz + .5); lan.scale.setScalar(.7); D.add(lan); o.deckObjs.push(lan);
       mastTops.push({ x: mx, z: mz, top: base + h, base: base, side: side });
     });
+    // Rigging, so the ship reads as a ship from above too: shrouds fanning from each mast top down to both rails,
+    // and stays running fore and aft. Plus deck furniture: grated hatches, coils of rope, a rowboat by the rail.
+    var ropeM = M('#b8955e');   // pale hemp, so the rigging shows against the dark deck
+    function rope(a, b, r){ var len = a.distanceTo(b); if(len < .1) return; var m = new THREE.Mesh(new THREE.CylinderGeometry(r || .07, r || .07, len, 5), ropeM);
+      m.position.copy(a).add(b).multiplyScalar(.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize()); m.raycast = function(){}; S.add(m); }
+    var V3 = function(x, y, z){ return new THREE.Vector3(x, y, z); };
+    mastTops.forEach(function(mt, k){
+      var hw = d.half + .1, top = V3(mt.x, mt.top - .8, mt.z);
+      [-1, 1].forEach(function(side){ for(var q = -2; q <= 1; q++) rope(top, V3(side * hw, TOP + .8, mt.z + q * 1.1 + .6)); });
+      var nxt = mastTops[k + 1];
+      if(nxt) rope(V3(mt.x, mt.top - .6, mt.z), V3(nxt.x, Math.min(nxt.top, mt.top) - 2, nxt.z), .09);   // a stay to the next mast
+      else rope(V3(mt.x, mt.top - .6, mt.z), V3(0, (st ? LOW : UP) + 3.2, bowZ - bowLen - 4.5), .09);    // the last one runs out to the bowsprit
+      if(k === 0) rope(V3(mt.x, mt.top - .6, mt.z), V3(0, TOP + 1, zc0 + sternLen * .8), .09);           // and the first back to the stern
+    });
+    var hatchM = M('#2a1f16'), grateM = M('#5b4632');
+    for(var hz2 = zc0 - 9, hn = 0; hz2 > (st ? holeZ + 4 : bowZ + 6) && hn < 6; hz2 -= 11){
+      var hx2 = (hn % 2 ? 1 : -1) * (d.half - 3.2); if(!clear(hx2, hz2, 2.8)){ hx2 = -hx2; if(!clear(hx2, hz2, 2.8)) continue; } hn++;
+      S.add(mesh(new THREE.BoxGeometry(2.2, .18, 2.6), hatchM, hx2, UP + .09, hz2));
+      for(var gl = -1; gl <= 1; gl++){ S.add(mesh(new THREE.BoxGeometry(2, .06, .16), grateM, hx2, UP + .2, hz2 + gl * .7)); S.add(mesh(new THREE.BoxGeometry(.16, .06, 2.4), grateM, hx2 + gl * .65, UP + .2, hz2)); }
+    }
+    mastTops.forEach(function(mt){ if(mt.base !== UP) return; var cx = mt.x + (mt.side || 1) * 1.3, cz = mt.z + 1.2; if(!clear(cx, cz, 1.6)) return;
+      for(var ring = 0; ring < 3; ring++){ var coil = mesh(new THREE.TorusGeometry(.42 - ring * .1, .07, 6, 16), M('#9a7b4f'), cx, UP + .08 + ring * .06, cz); coil.rotation.x = Math.PI / 2; S.add(coil); } });
+    (function rowboat(){
+      var bz = zc0 - 14, bx = -(d.half - 1.6); if(!clear(bx, bz, 3)) { bx = -bx; if(!clear(bx, bz, 3)) return; }
+      var boat = new THREE.Group(), hullB = mesh(new THREE.SphereGeometry(1, 16, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), M('#6b4a2c'), 0, .55, 0); hullB.scale.set(.75, .5, 2); boat.add(hullB);
+      boat.add(mesh(new THREE.BoxGeometry(1.3, .08, .3), M('#8a6a44'), 0, .52, .5)); boat.add(mesh(new THREE.BoxGeometry(1.3, .08, .3), M('#8a6a44'), 0, .52, -.6));
+      var oar = mesh(new THREE.CylinderGeometry(.05, .05, 2.6, 6), M('#a8814f'), .2, .6, 0); oar.rotation.x = Math.PI / 2; boat.add(oar);
+      boat.position.set(bx, UP, bz); boat.rotation.z = Math.sign(bx) * .12; S.add(boat);
+    })();
+    (function hullCurve(){
+      var N = 48, topY = -1.1, botY = d.sand - .4, capM = M('#5a4330');
+      [-1, 1].forEach(function(side){
+        var pts = [];
+        for(var i = 0; i <= N; i++){
+          var z = zc0 - (zc0 - bowZ) * i / N, t = i / N, damp = 1;
+          exits.forEach(function(e){ if(Math.sign(e.x) === side) damp = Math.min(damp, Math.max(0, Math.min(1, (Math.abs(e.z - z) - 2) / 4))); });
+          pts.push({ z: z, w: 1.9 * Math.pow(Math.sin(Math.PI * Math.min(1, t * 1.05)), .7) * damp });
+        }
+        var pos = [], idx = [], x0 = side * (d.half + .5);
+        pts.forEach(function(p){ var xo = x0 + side * p.w; pos.push(x0, topY, p.z, xo, topY, p.z, xo, botY, p.z); });
+        for(var j = 0; j < N; j++){ var a = j * 3, b = a + 3;
+          idx.push(a, a + 1, b, a + 1, b + 1, b);              // the top of the wale
+          idx.push(a + 1, a + 2, b + 1, a + 2, b + 2, b + 1);  // the outer side, down into the sand
+        }
+        var g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(side > 0 ? idx : idx.map(function(v, k){ return idx[k - k % 3 + (2 - k % 3)]; }));
+        g.computeVertexNormals();
+        var m = new THREE.Mesh(g, capM); m.material = new THREE.MeshLambertMaterial({ color: '#4a3826', side: THREE.DoubleSide }); m.raycast = function(){}; S.add(m);
+      });
+    })();
     // the pirate flag on the tallest mast: black, with a white seashell and crossed anchors (no skull)
     var tall = mastTops.reduce(function(a, m){ return !a || m.top > a.top ? m : a; }, null);
     if(tall){
@@ -20289,7 +20346,10 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     }
     el.querySelector('[data-go]').addEventListener('click', function(){
       var card = el.querySelector('.r3-panel-card');
-      card.innerHTML = '<h3>' + reefGameIcon(g, 'r3-gameic sm') + ' ' + esc(g.name) + '</h3><div class="r3-mini-play"></div>';
+      // a game picked from the minigame corner can be left at any time
+      card.innerHTML = (practice ? '<button type="button" class="r3-mini-x" data-quit aria-label="Leave this game">' + ccIcon('close') + '</button>' : '') +
+        '<h3>' + reefGameIcon(g, 'r3-gameic sm') + ' ' + esc(g.name) + '</h3><div class="r3-mini-play"></div>';
+      var qx = card.querySelector('[data-quit]'); if(qx) qx.addEventListener('click', function(ev){ ev.stopPropagation(); shut(); if(done) done(); });
       var play = card.querySelector('.r3-mini-play');
       if(g.play) g.play(play, finish, g);
       else if(g.id === 'match') reefGameMatch(play, finish);
@@ -20580,6 +20640,18 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       return '<li class="r3-isle ' + st + (u.review ? ' review' : '') + '"><span class="r3-isle-i" aria-hidden="true">' + (u.done ? ccIcon('flag') : i === n.i ? reefGuideMini(view.night) : u.review ? ccIcon('star') : ccIcon('island')) + '</span>' +
         '<span class="r3-isle-t">' + esc(u.title) + '</span><small>' + nice(u.start) + '</small></li>'; }).join('') + '</ol></div>';
   }
+  // A place tapped on the map: she is already standing there, and the camera comes down from the map onto her.
+  // (From a map opened with the button, the camera rises first, so it's the same swoop either way.)
+  function reef3dMapJump(view, ov, i){
+    if(view.moving || view.dice && !view.dice.rolling) return;
+    ov.classList.add('closing'); setTimeout(function(){ ov.remove(); }, 380);
+    if(!view.zoomNow){ view.zoomCenter = null; view.zoomNow = 1.25; reef3dZoomFrame(view, performance.now()); }   // start from above, like the pinch
+    reef3dPlace(view, i); S.reef3dAt = i; view.dirty = true;
+    var THREE = window.THREE, tp = new THREE.Vector3(), tl = new THREE.Vector3();
+    reef3dCamTarget(view, tp, tl); view.camPos.copy(tp); view.camLook.copy(tl);   // the board view waits at her new spot
+    try { Sound.bubbles(3); } catch(e){}
+    reef3dZoomTo(view, 0, reefCalm() ? 1 : 1000, function(){ view.zoomCenter = null; reef3dEmote(view, 'hello'); });
+  }
   // No label may cover another place's picture or label, or run off the parchment: a label that does tries the other
   // side of its picture, then a step up or down, and keeps the first spot that's clear.
   function reef3dMapDeclutter(ov){
@@ -20638,12 +20710,12 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       if(!view.zoomNow){ ov.remove(); if(mb) mb.focus(); return; }
       // opened by a pinch: the map fades away as the camera swoops back down to her
       ov.classList.add('closing'); setTimeout(function(){ ov.remove(); }, 380);
-      reef3dZoomTo(view, 0, 700, function(){ view.zoomCenter = null; });
+      reef3dZoomTo(view, 0, 900, function(){ view.zoomCenter = null; });
       if(mb) mb.focus();
     }
     ov.addEventListener('click', function(e){
       var go = e.target.closest('[data-r3-go]');
-      if(go){ ov.remove(); view.zoomAnim = null; view.zoomGoal = null; view.zoomNow = 0; view.zoomCenter = null; return reef3dGoTo(view, +go.dataset.r3Go); }
+      if(go) return reef3dMapJump(view, ov, +go.dataset.r3Go);
       if(e.target.closest('[data-r3-close]') || e.target === ov) close();
     });
     ov.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });
@@ -20659,7 +20731,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
      Closing a map opened like this swoops the camera back down. ---- */
   function reef3dZoomFrame(view, now){
     var a = view.zoomAnim;
-    if(a){ var p = Math.min(1, (now - a.t0) / a.dur), e = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+    if(a){ var p = Math.min(1, (now - a.t0) / a.dur), e = a.out ? 1 - Math.pow(1 - p, 3) : p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
       view.zoomNow = a.from + (a.to - a.from) * e; if(p >= 1){ view.zoomAnim = null; if(a.done) a.done(); } }
     else if(view.zoomGoal != null) view.zoomNow = (view.zoomNow || 0) + (view.zoomGoal - (view.zoomNow || 0)) * .35;
     var out = view.outskirts;
@@ -20733,18 +20805,18 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     } catch(err){ try { console.warn('reef outskirts skipped:', err); } catch(e){} }
     return view.outskirts;
   }
-  function reef3dZoomTo(view, to, dur, done){ view.zoomGoal = null; view.zoomAnim = { from: view.zoomNow || 0, to: to, t0: performance.now(), dur: reefCalm() ? 1 : dur, done: done }; }
+  function reef3dZoomTo(view, to, dur, done, out){ view.zoomGoal = null; view.zoomAnim = { from: view.zoomNow || 0, to: to, t0: performance.now(), dur: reefCalm() ? 1 : dur, done: done, out: !!out }; }
   function reef3dZoomRelease(view){
     if(view.mapOpening) return;
     if((view.zoomNow || 0) >= .75) reef3dZoomToMap(view);
-    else reef3dZoomTo(view, 0, 380);
+    else reef3dZoomTo(view, 0, 420, null, true);
   }
   function reef3dZoomToMap(view){
     if(view.mapOpening || document.querySelector('.r3-map')) return;
     view.mapOpening = true; view.zoomCenter = null;
-    reef3dZoomTo(view, 1.35, 750, function(){ view.mapOpening = false; });
+    reef3dZoomTo(view, 1.25, 700, function(){ view.mapOpening = false; }, true);   // carries on from the pinch's own speed and settles
     try { Sound.bubbles(3); } catch(e){}
-    setTimeout(function(){ if(document.body.contains(view.wrap)) reef3dMap(view, true); }, reefCalm() ? 0 : 330);
+    setTimeout(function(){ if(document.body.contains(view.wrap)) reef3dMap(view, true); }, reefCalm() ? 0 : 380);
   }
   function reef3dPinchWire(view){
     var el = view.wrap, pinch = null;
@@ -20863,7 +20935,9 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
         var k = koHas(f) && !koHas(b) ? f : koHas(b) && !koHas(f) ? b : null, e = k === f ? b : f;
         if(!k) return;
         if(/\s/.test(k.trim()) && k.length <= 30 && e.length <= 40){
-          if(!seenS[k]){ seenS[k] = 1; pool.sentences.push({ k: k, e: e }); }
+          // only real sentences: they end like one (…요, …다, …까 or with punctuation), with no "A / B" word pairs
+          var real = !/[\/|]/.test(k + e) && /([.?!]|요|다|까|죠|니)["”']?$/.test(k.trim()) && k.trim().split(/\s+/).length >= 2;
+          if(real && !seenS[k]){ seenS[k] = 1; pool.sentences.push({ k: k, e: e }); }
           return;
         }
         if(k.length <= 12 && e.length <= 24 && !seenK[k]){
@@ -20982,24 +21056,39 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   }
 
   // Sentence Current: four sentences; tap the Korean words in order.
+  // Sentence Current: put the Korean words in order (any order you like), then Check. Wrong words turn red and
+  // can be moved; after two wrong checks, "Show me" gives the answer.
   function reefGameSentence(play, finish, g){
     var list = reefPick(g.pool.sentences, 4), si = 0, slips = 0;
     function next(){
       if(si === list.length) return finish(true, reefScoreNote('ksent', slips, false, function(n){ return n === 0 ? 'No slips' : n + (n === 1 ? ' slip' : ' slips'); }));
-      var s = list[si], words = s.k.split(/\s+/), order = reefShuffle(words.map(function(w, i){ return i; })), at = 0;
+      var s = list[si], words = s.k.split(/\s+/), order = reefShuffle(words.map(function(w, i){ return i; })), placed = [], wrongs = 0;
       if(order.join() === words.map(function(w, i){ return i; }).join() && words.length > 1) order.reverse();
       play.innerHTML = '<p class="r3-mini-ask">' + (si + 1) + ' of ' + list.length + ': <b>' + esc(s.e) + '</b></p>' +
         '<div class="r3-kline" aria-live="polite"></div>' +
-        '<div class="r3-kwords">' + order.map(function(i){ return '<button type="button" class="r3-kword" data-i="' + i + '">' + esc(words[i]) + '</button>'; }).join('') + '</div>';
-      var line = play.querySelector('.r3-kline');
+        '<div class="r3-kwords">' + order.map(function(i){ return '<button type="button" class="r3-kword" data-i="' + i + '">' + esc(words[i]) + '</button>'; }).join('') + '</div>' +
+        '<p class="r3-kmsg" aria-live="polite"></p><div class="r3-panel-row"><button type="button" class="r3-btn main" data-check disabled>Check</button></div>';
+      var line = play.querySelector('.r3-kline'), msg = play.querySelector('.r3-kmsg'), chk = play.querySelector('[data-check]');
+      function draw(){
+        line.innerHTML = placed.map(function(i, k){ return '<button type="button" class="r3-kpiece" data-k="' + k + '">' + esc(words[i]) + '</button>'; }).join('');
+        play.querySelectorAll('.r3-kword').forEach(function(b){ var on = placed.indexOf(+b.dataset.i) >= 0; b.classList.toggle('used', on); b.disabled = on; });
+        chk.disabled = placed.length !== words.length;
+      }
       play.onclick = function(e){
-        var b = e.target.closest('.r3-kword'); if(!b || b.disabled) return;
-        // a repeated word can go in either of its places
-        if(words[+b.dataset.i] !== words[at]){ slips++; return reefShake(b); }
-        b.disabled = true; b.classList.add('used'); line.insertAdjacentHTML('beforeend', '<span>' + esc(words[at]) + '</span> '); at++;
-        try { Sound.bloop(650 + at * 90, 0, .05); } catch(err){}
-        if(at === words.length){ try { Sound.correct(); } catch(err){} line.classList.add('done'); reefSay(s.k); si++; setTimeout(next, 1700); }
+        var w = e.target.closest('.r3-kword'), pc = e.target.closest('.r3-kpiece');
+        if(w && !w.disabled){ placed.push(+w.dataset.i); msg.textContent = ''; try { Sound.bloop(650 + placed.length * 90, 0, .05); } catch(err){} return draw(); }
+        if(pc){ placed.splice(+pc.dataset.k, 1); msg.textContent = ''; try { Sound.bloop(420, 0, .04); } catch(err){} return draw(); }   // send a word back
+        if(e.target.closest('[data-show]')){ placed = words.map(function(w2, i){ return i; }); draw(); line.classList.add('done'); reefSay(s.k); si++; chk.disabled = true; setTimeout(next, 2200); return; }
+        if(e.target.closest('[data-check]') && !chk.disabled){
+          var bad = placed.map(function(i, k){ return words[i] !== words[k]; });   // a repeated word fits either of its places
+          if(!bad.some(Boolean)){ try { Sound.correct(); } catch(err){} line.classList.add('done'); chk.disabled = true; msg.textContent = ''; reefSay(s.k); si++; setTimeout(next, 1700); return; }
+          slips++; wrongs++; try { Sound.bloop(300); } catch(err){}
+          line.querySelectorAll('.r3-kpiece').forEach(function(p, k){ p.classList.toggle('wrong', bad[k]); });
+          msg.textContent = 'Not quite: the red words are in the wrong place. Tap one to move it.';
+          if(wrongs >= 2 && !play.querySelector('[data-show]')) chk.insertAdjacentHTML('afterend', '<button type="button" class="r3-btn" data-show>Show me</button>');
+        }
       };
+      draw();
     }
     next();
   }
@@ -22477,7 +22566,7 @@ body.reef-kid .tc-timer-row{ display:none; } /* no countdowns in her mode */
 /* ---------- transitions ---------- */
 .reef-tx{ position:fixed; inset:0; z-index:99990; overflow:hidden; pointer-events:auto; }
 .tx-water{ position:absolute; left:0; right:0; top:0; height:130%; transform:translateY(100%);
-  background:linear-gradient(180deg, #4fc7cf 0%, #1c8c93 30%, #0b5d73 70%, #073847 100%); animation:txDive 1.3s cubic-bezier(.7,0,.3,1) forwards; }
+  background:linear-gradient(180deg, #4fc7cf 0%, #1c8c93 30%, #0b5d73 70%, #073847 100%); animation:txDive 1.05s cubic-bezier(.7,0,.3,1) forwards; }
 .tx-crest{ position:absolute; left:0; top:-58px; width:100%; height:60px; }
 .tx-crest path{ fill:#4fc7cf; }
 @keyframes txDive{ 0%{ transform:translateY(100%); } 42%,58%{ transform:translateY(-8%); } 100%{ transform:translateY(-125%); } }
@@ -22488,12 +22577,12 @@ body.reef-kid .tc-timer-row{ display:none; } /* no countdowns in her mode */
 .tx-bubbles{ position:absolute; inset:0; }
 .tx-bub{ position:absolute; left:var(--x); bottom:-60px; width:var(--s); height:var(--s); border-radius:50%;
   background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.95), rgba(255,255,255,.15) 60%, rgba(255,255,255,.35)); box-shadow:inset 0 0 0 2px rgba(255,255,255,.5);
-  animation:txBub 1.1s ease-in var(--d) forwards; }
-.tx-bub:nth-child(3n){ animation-duration:.9s; } .tx-bub:nth-child(3n+1){ animation-duration:1.25s; }
+  animation:txBub .9s ease-in var(--d) forwards; }
+.tx-bub:nth-child(3n){ animation-duration:.75s; } .tx-bub:nth-child(3n+1){ animation-duration:1s; }
 @keyframes txBub{ to{ transform:translateY(-125vh) translateX(20px); } }
 /* Bubbles move with transform so the graphics chip animates them on its own while the deck is built behind the water. */
 .tx-water, .tx-bub, .tx-shelly{ will-change:transform; }
-.tx-shelly{ position:absolute; left:50%; top:50%; width:min(42vw, 230px); transform:translate(-50%, 70vh) rotate(0); animation:txShelly 1.25s cubic-bezier(.3,1.2,.5,1) forwards; }
+.tx-shelly{ position:absolute; left:50%; top:50%; width:min(42vw, 230px); transform:translate(-50%, 70vh) rotate(0); animation:txShelly 1s cubic-bezier(.3,1.2,.5,1) forwards; }
 .tx-shelly-svg{ width:100%; height:auto; display:block; filter:drop-shadow(0 12px 16px rgba(0,0,0,.35)); }
 @keyframes txShelly{ 0%{ transform:translate(-50%, 70vh) rotate(-30deg) scale(.6); } 45%{ transform:translate(-50%, -55%) rotate(360deg) scale(1.1); } 60%{ transform:translate(-50%, -50%) rotate(350deg) scale(1); } 100%{ transform:translate(-50%, -120vh) rotate(420deg) scale(.8); } }
 .reef-tx-surface .tx-shelly{ animation-name:txShellyUp; }
@@ -22796,6 +22885,9 @@ body.reef-calm .cc-nudge, body.reef-calm .feed-stage.cc-nudge::after{ animation-
 .aq-lib-detail img{ width:84px; height:84px; flex:none; } .aq-lib-detail b{ font:800 1.2rem 'Baloo 2',sans-serif; } .aq-lib-detail p{ margin:2px 0 4px; font-weight:700; } .aq-lib-detail small{ font-weight:800; opacity:.65; }
 .aq-lib-tip{ margin:14px 0 0; text-align:center; font-weight:800; opacity:.7; }
 @media (max-width:520px){ .aq-lib-grid{ grid-template-columns:repeat(3, 1fr); } .aq-lib-f img{ width:56px; height:56px; } .aq-lib-f b{ font-size:.8rem; } }
+
+/* buttons answer the first tap at once: no wait for a possible double-tap zoom on iPhone and iPad */
+button, a, [role="button"], .r3 canvas, .rl-canvas{ touch-action:manipulation; }
 /* end of src/css/reef.css */
 /* from src/css/reef-3d.css */
 /* ---------- REEF 3D board ---------- */
@@ -22882,7 +22974,7 @@ body.reef-calm .cc-nudge, body.reef-calm .feed-stage.cc-nudge::after{ animation-
 .icon-btn{ color:var(--deep, #0e5a78); } .icon-btn .cc-ic{ width:1.45rem; height:1.45rem; }
 .pill.streak .cc-ic{ color:#ff7a3d; } .pill.stars .cc-ic{ color:#e8a317; } .pill .icon .cc-ic{ width:1.15em; height:1.15em; }
 .pill.streak .cc-ic .f, .pill.stars .cc-ic .f{ opacity:.55; }
-.r3-mapbtn{ display:inline-flex; align-items:center; gap:7px; } .r3-mapbtn .cc-ic{ color:#b5532f; } .r3-mapbtn .cc-ic .f{ opacity:.3; }
+.r3-mapbtn{ display:inline-flex; align-items:center; justify-content:center; gap:7px; } .r3-mapbtn .cc-ic{ color:#b5532f; } .r3-mapbtn .cc-ic .f{ opacity:.3; }
 .r3-themebtn .cc-ic, .r3-gamesbtn .cc-ic, [data-music-toggle] .cc-ic{ width:1.6rem; height:1.6rem; }
 .r3-themebtn .cc-ic{ color:#e39b14; } .r3.night .r3-themebtn .cc-ic, .r3-themebtn .cc-ic.moon{ color:#f2d27a; }
 .r3-gamesbtn .cc-ic{ color:#7a4fc2; } [data-music-toggle] .cc-ic{ color:#2a8f8a; } [data-music-toggle].off .cc-ic{ color:#8a9a9a; }
@@ -23064,7 +23156,7 @@ body.reef-calm .r3-bubble, body.reef-calm .r3-map-card{ animation:none !importan
 .reef-gate .pin-cancel{ margin-top:0; }
 /* celebration bubbles: float up after a right answer, pop when tapped */
 .reef-pops{ position:fixed; inset:0; z-index:80; pointer-events:none; overflow:hidden; }
-.reef-pops.active{ pointer-events:auto; touch-action:none; }
+.reef-pops.active{ pointer-events:none; } .reef-pops.active .reef-pop{ pointer-events:auto; touch-action:none; }   /* only the bubbles catch taps */
 .reef-pop{ position:absolute; left:var(--x); top:100vh; width:var(--s); height:var(--s); padding:0; border:none; border-radius:50%; cursor:pointer; pointer-events:auto;
   background:radial-gradient(circle at 32% 28%, rgba(255,255,255,.95) 0 9%, rgba(255,255,255,.25) 10% 38%, rgba(160,230,240,.18) 60%, rgba(120,210,225,.45) 100%);
   box-shadow:inset 0 0 0 2px rgba(255,255,255,.75), inset -6px -8px 14px rgba(90,190,210,.35), 0 4px 14px rgba(20,90,110,.12);
@@ -23368,6 +23460,13 @@ body.reef-calm .cv3-hero .topbar :is(.icon-btn, .btn){ animation:none !important
 .r3-isle.later{ opacity:.65; } .r3-isle.done{ background:#e3f1e7; }
 .r3-isle-i .cc-ic{ width:28px; height:28px; color:#2a8f8a; } .r3-isle.done .r3-isle-i .cc-ic{ color:#b5452f; } .r3-isle.review .r3-isle-i .cc-ic{ color:#d9a020; }
 @media (max-width:520px){ .r3-map-name{ white-space:normal; max-width:8.6em; font-size:.8rem; line-height:1.15; padding:2px 7px; } }   /* phone: long names wrap so they fit beside their picture */
+.r3-kline{ display:flex; flex-wrap:wrap; gap:6px; justify-content:center; align-items:center; }
+.r3-kpiece{ border:none; cursor:pointer; border-radius:12px; padding:8px 12px; font:700 1.3rem/1.2 'Noto Sans KR','Apple SD Gothic Neo',sans-serif; color:#0b3a44; background:#fff; box-shadow:0 3px 0 #9cc9c9; }
+.r3-kpiece.wrong{ background:#ffe1dc; box-shadow:0 3px 0 #e8694e, 0 0 0 2px #e8694e; animation:r3No .35s; }
+.r3-kline.done .r3-kpiece{ background:#e3f1e7; box-shadow:0 3px 0 #3f7a57; }
+.r3-kmsg{ min-height:1.3em; font-size:.9rem; color:#b5452f; }
+.r3-mini-x{ position:absolute; top:10px; right:10px; z-index:2; width:44px; height:44px; border:none; cursor:pointer; border-radius:50%; display:grid; place-items:center; background:#fff8e6; color:#4a3115; box-shadow:0 3px 0 #b08d5a; }
+.r3-mini-x .cc-ic{ width:22px; height:22px; } .r3.night .r3-mini-x{ background:#2a4650; color:#f6e9c8; box-shadow:0 3px 0 #0f2228; }
 /* end of src/css/reef-3d.css */
 </style>
 

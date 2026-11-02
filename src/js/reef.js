@@ -218,8 +218,8 @@
     if(kind !== 'swim'){
       reefSplash(ov.querySelector('.tx-splash'), innerWidth / 2, innerHeight * .58, kind); // always in the middle of the screen
     }
-    var mid = kind === 'swim' ? 230 : 560, end = kind === 'swim' ? 560 : 1300;
-    setTimeout(function(){ try { fn(); } catch(e){ console.error('[Coral Cove] transition', e); } }, mid);
+    var mid = kind === 'swim' ? 230 : 450, end = kind === 'swim' ? 560 : 1050;   // the dive is quick: the new screen is in (and takes taps) under half a second
+    setTimeout(function(){ try { fn(); } catch(e){ console.error('[Coral Cove] transition', e); } ov.style.pointerEvents = 'none'; }, mid);   // once the new screen is in, its buttons take taps while the water clears
     setTimeout(function(){ ov.remove(); reefBusy = false; window.__reefTx = false; }, end);
   }
   function reefInDeck(){
@@ -685,7 +685,7 @@
     var layer = document.getElementById('reefPops');
     if(!layer){ layer = document.createElement('div'); layer.id = 'reefPops'; layer.className = 'reef-pops'; layer.setAttribute('aria-hidden', 'true'); document.body.appendChild(layer); }
     if(layer.children.length) return;
-    // While the bubbles float, the layer catches every other tap so the next card waits.
+    // The bubbles can be popped, but taps anywhere else go straight through: the buttons under them work at once.
     layer.classList.add('active');
     clearTimeout(layer._safety); layer._safety = setTimeout(function(){ layer.textContent = ''; reefPopsDone(layer); }, 6500);
     for(var i = 0; i < 6; i++){

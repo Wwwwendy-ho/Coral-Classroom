@@ -324,7 +324,10 @@
     }
     el.querySelector('[data-go]').addEventListener('click', function(){
       var card = el.querySelector('.r3-panel-card');
-      card.innerHTML = '<h3>' + reefGameIcon(g, 'r3-gameic sm') + ' ' + esc(g.name) + '</h3><div class="r3-mini-play"></div>';
+      // a game picked from the minigame corner can be left at any time
+      card.innerHTML = (practice ? '<button type="button" class="r3-mini-x" data-quit aria-label="Leave this game">' + ccIcon('close') + '</button>' : '') +
+        '<h3>' + reefGameIcon(g, 'r3-gameic sm') + ' ' + esc(g.name) + '</h3><div class="r3-mini-play"></div>';
+      var qx = card.querySelector('[data-quit]'); if(qx) qx.addEventListener('click', function(ev){ ev.stopPropagation(); shut(); if(done) done(); });
       var play = card.querySelector('.r3-mini-play');
       if(g.play) g.play(play, finish, g);
       else if(g.id === 'match') reefGameMatch(play, finish);
@@ -615,6 +618,18 @@
       return '<li class="r3-isle ' + st + (u.review ? ' review' : '') + '"><span class="r3-isle-i" aria-hidden="true">' + (u.done ? ccIcon('flag') : i === n.i ? reefGuideMini(view.night) : u.review ? ccIcon('star') : ccIcon('island')) + '</span>' +
         '<span class="r3-isle-t">' + esc(u.title) + '</span><small>' + nice(u.start) + '</small></li>'; }).join('') + '</ol></div>';
   }
+  // A place tapped on the map: she is already standing there, and the camera comes down from the map onto her.
+  // (From a map opened with the button, the camera rises first, so it's the same swoop either way.)
+  function reef3dMapJump(view, ov, i){
+    if(view.moving || view.dice && !view.dice.rolling) return;
+    ov.classList.add('closing'); setTimeout(function(){ ov.remove(); }, 380);
+    if(!view.zoomNow){ view.zoomCenter = null; view.zoomNow = 1.25; reef3dZoomFrame(view, performance.now()); }   // start from above, like the pinch
+    reef3dPlace(view, i); S.reef3dAt = i; view.dirty = true;
+    var THREE = window.THREE, tp = new THREE.Vector3(), tl = new THREE.Vector3();
+    reef3dCamTarget(view, tp, tl); view.camPos.copy(tp); view.camLook.copy(tl);   // the board view waits at her new spot
+    try { Sound.bubbles(3); } catch(e){}
+    reef3dZoomTo(view, 0, reefCalm() ? 1 : 1000, function(){ view.zoomCenter = null; reef3dEmote(view, 'hello'); });
+  }
   // No label may cover another place's picture or label, or run off the parchment: a label that does tries the other
   // side of its picture, then a step up or down, and keeps the first spot that's clear.
   function reef3dMapDeclutter(ov){
@@ -673,12 +688,12 @@
       if(!view.zoomNow){ ov.remove(); if(mb) mb.focus(); return; }
       // opened by a pinch: the map fades away as the camera swoops back down to her
       ov.classList.add('closing'); setTimeout(function(){ ov.remove(); }, 380);
-      reef3dZoomTo(view, 0, 700, function(){ view.zoomCenter = null; });
+      reef3dZoomTo(view, 0, 900, function(){ view.zoomCenter = null; });
       if(mb) mb.focus();
     }
     ov.addEventListener('click', function(e){
       var go = e.target.closest('[data-r3-go]');
-      if(go){ ov.remove(); view.zoomAnim = null; view.zoomGoal = null; view.zoomNow = 0; view.zoomCenter = null; return reef3dGoTo(view, +go.dataset.r3Go); }
+      if(go) return reef3dMapJump(view, ov, +go.dataset.r3Go);
       if(e.target.closest('[data-r3-close]') || e.target === ov) close();
     });
     ov.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });
@@ -694,7 +709,7 @@
      Closing a map opened like this swoops the camera back down. ---- */
   function reef3dZoomFrame(view, now){
     var a = view.zoomAnim;
-    if(a){ var p = Math.min(1, (now - a.t0) / a.dur), e = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+    if(a){ var p = Math.min(1, (now - a.t0) / a.dur), e = a.out ? 1 - Math.pow(1 - p, 3) : p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
       view.zoomNow = a.from + (a.to - a.from) * e; if(p >= 1){ view.zoomAnim = null; if(a.done) a.done(); } }
     else if(view.zoomGoal != null) view.zoomNow = (view.zoomNow || 0) + (view.zoomGoal - (view.zoomNow || 0)) * .35;
     var out = view.outskirts;
@@ -768,18 +783,18 @@
     } catch(err){ try { console.warn('reef outskirts skipped:', err); } catch(e){} }
     return view.outskirts;
   }
-  function reef3dZoomTo(view, to, dur, done){ view.zoomGoal = null; view.zoomAnim = { from: view.zoomNow || 0, to: to, t0: performance.now(), dur: reefCalm() ? 1 : dur, done: done }; }
+  function reef3dZoomTo(view, to, dur, done, out){ view.zoomGoal = null; view.zoomAnim = { from: view.zoomNow || 0, to: to, t0: performance.now(), dur: reefCalm() ? 1 : dur, done: done, out: !!out }; }
   function reef3dZoomRelease(view){
     if(view.mapOpening) return;
     if((view.zoomNow || 0) >= .75) reef3dZoomToMap(view);
-    else reef3dZoomTo(view, 0, 380);
+    else reef3dZoomTo(view, 0, 420, null, true);
   }
   function reef3dZoomToMap(view){
     if(view.mapOpening || document.querySelector('.r3-map')) return;
     view.mapOpening = true; view.zoomCenter = null;
-    reef3dZoomTo(view, 1.35, 750, function(){ view.mapOpening = false; });
+    reef3dZoomTo(view, 1.25, 700, function(){ view.mapOpening = false; }, true);   // carries on from the pinch's own speed and settles
     try { Sound.bubbles(3); } catch(e){}
-    setTimeout(function(){ if(document.body.contains(view.wrap)) reef3dMap(view, true); }, reefCalm() ? 0 : 330);
+    setTimeout(function(){ if(document.body.contains(view.wrap)) reef3dMap(view, true); }, reefCalm() ? 0 : 380);
   }
   function reef3dPinchWire(view){
     var el = view.wrap, pinch = null;
