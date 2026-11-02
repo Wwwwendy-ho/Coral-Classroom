@@ -1,5 +1,19 @@
 # Changelog
 
+## One look and one voice across the whole game (November 2, 2026)
+
+- **Drawn icons everywhere, no stray emoji.** Titles, buttons, labels, badges and chips on every screen (settings,
+  progress, the Library, Coral Classroom, deck screens, the shop, minigames, the grown-up question, the profile
+  picker) now use the same drawn icon set as the board. 36 new icons were drawn for this. Learning content is
+  left alone: card faces, stories, answers and the emoji you picked for a deck stay as they are.
+- **The grown-up question sits in the sea** like every other screen (sunlit by day, deep blue at night), not on a
+  blank page.
+- **The Library's "Next up" card glows softly at night** instead of shining bright pink.
+- **Same words everywhere:** American spelling throughout (practice, math, color, favorite).
+- **The Library talks to whoever is using it.** It no longer calls Wendy "she" or "her", and when Claude helps
+  Wendy it knows she's a grown-up learner, not a young child.
+- On narrow phones the Library's "Offline mode" note shrinks to its icon, so page titles fit on one line.
+
 ## Fewer buttons on the board, a Lagoon button everywhere, and a wreck with a real floor (November 2, 2026)
 
 - **One menu instead of a row of buttons.** On the board, only the everyday buttons stay out: the Library, the

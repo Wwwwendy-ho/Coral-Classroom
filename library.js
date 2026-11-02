@@ -139,6 +139,9 @@
     var s = (CC() && CC().subjects ? CC().subjects() : []).find(function(x){ return x.id === id; });
     return s || { id: id, icon: '🏷️', label: id };
   }
+  // who's learning, for Claude's instructions: Wendy is a grown-up learning Korean, not a child
+  function learnerDesc(){ var p = CC() && CC().profile(); return p && p.child === false ? 'an adult learner' : 'a young child'; }
+  function cap(t){ return t.charAt(0).toUpperCase() + t.slice(1); }
   function myGoals(){ var p = CC() && CC().profile(), g = p && p.goals || []; return g.length ? g : ['explore']; }
   function goalDecks(subject){ return decks().filter(function(d){ return d.subject === subject; }); }
   var ACT_ICON = { deck: 'cards', 'play-cafe': 'cup', 'play-library': 'library', 'play-sci': 'flask', 'ws-cloze': 'puzzle', 'ws-trace': 'edit', ask: 'ask', mastery: 'trophy', tricky: 'search',
@@ -149,13 +152,13 @@
   function wsAct(id, e, name, note, o){ return act(id, e, name, note, 'wsMake', JSON.stringify(o)); }
   function goalPlan(subject){
     var gd = goalDecks(subject), d0 = gd[0];
-    var deck = gd.length ? { id: 'deck', e: '🗂️', name: 'Practise your decks', note: gd.length === 1 ? d0.name : gd.length + ' decks', deck: true } : null;
+    var deck = gd.length ? { id: 'deck', e: '🗂️', name: 'Practice your decks', note: gd.length === 1 ? d0.name : gd.length + ' decks', deck: true } : null;
     var plans = {
       math: [deck, act('facts', '⚡', 'Facts practice', 'The facts you are learning', 'facts'), act('visual', '📏', 'See it', 'Number lines and ten frames', 'visual'),
         act('manip', '🧱', 'Blocks and counters', 'Build the numbers', 'manip'), act('mental', '🧠', 'Brain tricks', 'Count on, make ten', 'mental'),
-        wsAct('ws-math', '📝', 'Maths worksheet', 'Sums at your level', { src: 'math' }), act('measure', '🕒', 'Clocks and money', 'Tell the time, pay the shop', 'measure'),
+        wsAct('ws-math', '📝', 'Math worksheet', 'Sums at your level', { src: 'math' }), act('measure', '🕒', 'Clocks and money', 'Tell the time, pay the shop', 'measure'),
         act('geometry', '🔷', 'Shapes', 'Sides, corners, symmetry', 'geometry'), act('puzzles', '🧩', 'Puzzles', 'Sudoku and patterns', 'puzzles'),
-        act('placement', '🧭', 'Where am I?', 'Maths placement check', 'placement')],
+        act('placement', '🧭', 'Where am I?', 'Math placement check', 'placement')],
       reading: [deck, d0 ? wsAct('ws-cloze', '🧩', 'Fill the gaps', 'Words from ' + d0.name, { src: 'cloze', deck: d0.id }) : null,
         wsAct('ws-trace', '✏️', 'Handwriting', 'Letters a to z', { src: 'trace', script: 'abc' }), wsAct('ws-order', '🔢', 'Put it in order', 'Story steps', { src: 'order' }),
         act('teach', '🎓', 'Teach Shelly', 'Explain a word to her', 'teachback'), act('writing', '✍️', 'My writing', 'Write, then get kind feedback', 'writing'),
@@ -170,7 +173,7 @@
     };
     return (plans[subject] || [deck, d0 ? wsAct('ws-deck', '📝', 'Worksheet', 'From ' + d0.name, { src: 'deck', deck: d0.id }) : null,
       act('ask', '🐢', 'Ask Shelly', 'Any question', 'chat', 'ask'), act('teach', '🎓', 'Teach Shelly', 'Explain it to her', 'teachback'),
-      act('facts', '⚡', 'Facts practice', 'Maths facts', 'facts')]).filter(Boolean);
+      act('facts', '⚡', 'Facts practice', 'Math facts', 'facts')]).filter(Boolean);
   }
   function dayRec(){ var r = rec(); if(!r.day || r.day.date !== today()) r.day = { date: today(), done: {} }; return r; }
   function markDone(goal, id){ var r = dayRec(), l = r.day.done[goal] = r.day.done[goal] || []; if(l.indexOf(id) < 0) l.push(id); saveRec(r); }
@@ -301,7 +304,7 @@
         decks: [deckRef(sent, 'learn'), nextWords()],
         tools: [TOOL.play('subway', 'Ask the way'), TOOL.play('taxi', 'Take a taxi'), TOOL.game('Sentence Current')],
         check: 'Direction phrases and building sentences' });
-      U({ key: 'you', title: 'Talking about you', focus: 'Small talk', why: 'Conversation means questions coming back at you. This unit is about answering about family, weather and what she likes, then asking back.',
+      U({ key: 'you', title: 'Talking about you', focus: 'Small talk', why: 'Conversation means questions coming back at you. This unit is about answering about family, weather and what you like, then asking back.',
         cando: ['I can talk about my family and what I like', 'I can say what the weather is like', 'I can ask someone a simple question back'],
         decks: [deckRef(story(/가족|family/i), 'learn'), deckRef(story(/비|rain/i), 'learn'), nextWords()],
         tools: [TOOL.play('intro', 'Small talk'), TOOL.writing, TOOL.teach],
@@ -324,7 +327,7 @@
         if(st === 'words'){
           for(var k = 0; k < wordUnits && main && chunkAt < main.n; k++){ var w = nextWords(); U({ key: 'words' + k, title: (main.d.name) + ', part ' + (k + 1), focus: 'New words', why: 'A steady handful of new words a day, mixed with the ones before, is how vocabulary sticks.',
             cando: ['I can remember the meanings of words ' + (w.from + 1) + '–' + w.to + ' of ' + main.d.name, 'I can use them in a sentence'], decks: [w], tools: [TOOL.cloze(main.d.id), TOOL.worksheet(main.d.id), TOOL.teach], check: 'Words from this part' }); made++; }
-          extraWords.forEach(function(x){ U({ key: 'w-' + x.d.id, title: x.d.name, focus: 'New words', why: 'More words, linked to the ones she knows.', cando: ['I can remember the words in ' + x.d.name], decks: [deckRef(x, 'learn')], tools: [TOOL.worksheet(x.d.id)], check: 'Words from ' + x.d.name }); made++; });
+          extraWords.forEach(function(x){ U({ key: 'w-' + x.d.id, title: x.d.name, focus: 'New words', why: 'More words, linked to the ones you know.', cando: ['I can remember the words in ' + x.d.name], decks: [deckRef(x, 'learn')], tools: [TOOL.worksheet(x.d.id)], check: 'Words from ' + x.d.name }); made++; });
         } else {
           var label = { script: 'Sounds and letters', listening: 'Listening', speaking: 'Saying it out loud', numbers: 'Numbers', sentences: 'Building sentences', stories: 'Little stories', roots: 'Word families' }[st];
           U({ key: st, title: label, focus: label, why: 'Each skill gets its own focused time before it is mixed with the rest.', cando: xs.map(function(x){ return 'I can do ' + x.d.name + ' with 8 out of 10 right'; }).slice(0, 3),
@@ -640,7 +643,7 @@
     html += '<section class="clib-side"><h3>' + (next ? 'Or pick one' : 'Keep going') + '</h3>' + plan.filter(function(a){ return a !== next; }).map(function(a){
       return '<button type="button" class="clib-pick" data-act="' + a.id + '"><span class="clib-pick-e" aria-hidden="true">' + actIcon(a) + '</span><span class="clib-pick-t"><b>' + esc(a.name) +
         (isDone(a) ? ' <span class="clib-tick">✓ done</span>' : '') + '</b><small data-note="' + a.id + '">' + esc(a.note) + '</small></span></button>'; }).join('') + '</section></div>';
-    html += '<h3 class="clib-more-h">Everything else</h3><div class="clib-more">' + [['🐢', 'Tutor', 'tutorHome', 'tutor'], ['📝', 'Worksheets', 'wsHome', 'worksheet'], ['🔢', 'Maths lab', 'mathHome', 'maths'],
+    html += '<h3 class="clib-more-h">Everything else</h3><div class="clib-more">' + [['🐢', 'Tutor', 'tutorHome', 'tutor'], ['📝', 'Worksheets', 'wsHome', 'worksheet'], ['🔢', 'Math lab', 'mathHome', 'maths'],
       ['✍️', 'Check my work', 'checkHome', 'checkwork'], ['📈', 'My progress', 'progressHome', 'progress'], ['🗂️', 'All decks', 'decks', 'cards'], ['⚙️', 'Settings', 'settings', 'settings']].map(function(x){
       return '<button type="button" class="clib-more-b" data-view="' + x[2] + '"><span aria-hidden="true">' + icon(x[3], x[0]) + '</span> ' + x[1] + '</button>'; }).join('') + '</div>';
     el.innerHTML = html;
@@ -657,7 +660,7 @@
   LIB.views.decks = { title: 'Decks', render: function(el){
     var ds = goalFirst(decks());
     if(!ds.length){ el.innerHTML = '<p class="clib-note">No decks yet. A grown-up can add some in Edit Mode.</p>'; return; }
-    el.innerHTML = '<p class="clib-lede">Open a deck to practise it, or make a worksheet from it.</p><ul class="clib-list">' + ds.map(function(d){
+    el.innerHTML = '<p class="clib-lede">Open a deck to practice it, or make a worksheet from it.</p><ul class="clib-list">' + ds.map(function(d){
       return '<li><span class="clib-li-e" aria-hidden="true">' + esc(d.emoji) + '</span><span class="clib-li-t">' + esc(d.name) + '<small data-count="' + esc(d.id) + '"></small></span>' +
         '<button type="button" class="clib-btn" data-ws="' + esc(d.id) + '">📝 Worksheet</button><button type="button" class="clib-btn main" data-open="' + esc(d.id) + '">Practise</button></li>'; }).join('') + '</ul>';
     $$('[data-open]', el).forEach(function(b){ b.addEventListener('click', function(){ close(); CC().startDeck(b.dataset.open); }); });
@@ -681,7 +684,7 @@
       '<label class="clib-label" for="clibCode">Passphrase</label><input id="clibCode" class="clib-input" type="password" autocomplete="off" value="' + esc(s.proxyCode || '') + '">' +
       '<div class="clib-row"><button type="button" class="clib-btn main" data-save>Save</button><button type="button" class="clib-btn" data-test>Test it</button><button type="button" class="clib-btn" data-off>Turn off</button></div><p class="clib-msg" aria-live="polite"></p></section>' +
       '<section class="clib-card"><h2>🔊 Voice</h2><label class="clib-check"><input type="checkbox" id="clibVoice"' + (s.voice !== false ? ' checked' : '') + '> Read tutor replies aloud</label></section>' +
-      '<section class="clib-card"><h2>💛 Her interests</h2><p>Used in maths word problems.</p><input id="clibInt" class="clib-input" value="' + esc((s.interests || ['sea turtles', 'crabs', 'cookies', 'soccer']).join(', ')) + '"></section>' +
+      '<section class="clib-card"><h2>💛 Interests</h2><p>Used in math word problems.</p><input id="clibInt" class="clib-input" value="' + esc((s.interests || ['sea turtles', 'crabs', 'cookies', 'soccer']).join(', ')) + '"></section>' +
       '<section class="clib-card"><h2>💬 Tutor topics</h2><label class="clib-check"><input type="checkbox" id="clibBig"' + (s.noBig ? '' : ' checked') + '> Allow big-question discussions</label>' +
       '<label class="clib-check"><input type="checkbox" id="clibLog"' + (s.noLog ? '' : ' checked') + '> Keep a log of tutor chats for grown-ups</label>' +
       '<div class="clib-row"><button type="button" class="clib-btn" data-chatlog>Read the chat log</button></div></section>';
@@ -692,7 +695,7 @@
     $('[data-save]', el).addEventListener('click', function(){ save(); msg.textContent = 'Saved.'; });
     $('[data-off]', el).addEventListener('click', function(){ $('#clibUrl', el).value = ''; $('#clibCode', el).value = ''; save(); msg.textContent = 'Claude is off. Everything uses the offline versions.'; });
     $('[data-test]', el).addEventListener('click', function(){ save(); msg.textContent = 'Asking Claude…';
-      ask('chat', [{ role: 'user', content: 'Say hello to a young learner in one short sentence.' }]).then(function(t){ msg.textContent = t ? 'It works! Claude says: ' + t : 'It didn\'t work: ' + (LIB.lastError || 'no reply') + '. Check the address and passphrase.'; }); });
+      ask('chat', [{ role: 'user', content: 'Say hello to ' + learnerDesc() + ' in one short sentence.' }]).then(function(t){ msg.textContent = t ? 'It works! Claude says: ' + t : 'It didn\'t work: ' + (LIB.lastError || 'no reply') + '. Check the address and passphrase.'; }); });
     $('[data-chatlog]', el).addEventListener('click', function(){ go('chatLog'); });
     wireGoals(el);
     ['#clibVoice', '#clibBig', '#clibLog', '#clibInt'].forEach(function(id){ $(id, el).addEventListener('change', save); });
@@ -723,7 +726,7 @@
   }
   LIB.views.chatLog = { title: 'Tutor chat log', render: function(el){
     var l = (rec().log || []).filter(function(x){ return x.k === 'chat'; }).slice(-80).reverse();
-    el.innerHTML = l.length ? '<ul class="clib-log">' + l.map(function(x){ return '<li><small>' + new Date(x.t).toLocaleString() + ' · ' + esc(x.mode || '') + (x.src === 'claude' ? ' · Claude' : ' · offline') + '</small><p><b>She:</b> ' + esc(x.q) + '</p><p><b>Shelly:</b> ' + esc(x.a) + '</p></li>'; }).join('') + '</ul>'
+    el.innerHTML = l.length ? '<ul class="clib-log">' + l.map(function(x){ return '<li><small>' + new Date(x.t).toLocaleString() + ' · ' + esc(x.mode || '') + (x.src === 'claude' ? ' · Claude' : ' · offline') + '</small><p><b>Asked:</b> ' + esc(x.q) + '</p><p><b>Shelly:</b> ' + esc(x.a) + '</p></li>'; }).join('') + '</ul>'
       : '<p class="clib-note">No chats yet.</p>';
   } };
 
@@ -760,6 +763,9 @@
     '.clib-path{ display:grid; grid-template-columns:minmax(0, 1.25fr) minmax(0, 1fr); gap:16px; align-items:start; }',
     '@media (max-width:720px){ .clib-path{ grid-template-columns:1fr; } }',
     '.clib-next{ background:var(--g); color:var(--clib-card); border-radius:26px; padding:24px; display:grid; gap:8px; align-content:start; box-shadow:0 6px 0 color-mix(in srgb, var(--g) 70%, #000); }',
+    // at night the goal color sinks into the deep, so the card glows softly instead of shining like a lamp
+    ':root[data-theme="dark"] .clib-next{ background:color-mix(in srgb, var(--g) 42%, #0b2a35); color:#f3f7f4; box-shadow:0 6px 0 color-mix(in srgb, var(--g) 30%, #04161b), 0 0 0 1px color-mix(in srgb, var(--g) 55%, transparent); }',
+    '@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .clib-next{ background:color-mix(in srgb, var(--g) 42%, #0b2a35); color:#f3f7f4; box-shadow:0 6px 0 color-mix(in srgb, var(--g) 30%, #04161b), 0 0 0 1px color-mix(in srgb, var(--g) 55%, transparent); } }',
     '.clib-next-lbl{ font-weight:800; font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; opacity:.85; }',
     '.clib-next-e{ font-size:3.2rem; line-height:1; } .clib-next b{ font:600 2rem/1.1 var(--clib-display); } .clib-next p{ margin:0; font-weight:600; opacity:.92; }',
     '.clib-go{ justify-self:start; margin-top:8px; font:600 1.2rem var(--clib-display); min-height:52px; padding:0 30px; border:none; border-radius:16px; background:var(--clib-card); color:var(--g); cursor:pointer; box-shadow:0 4px 0 rgba(0,0,0,.18); }',
@@ -860,7 +866,7 @@
   /* ---- a small set of facts the offline tutor knows ---- */
   var FACTS = [
     [/turtle/, 'Sea turtles can hold their breath for a long time, and some travel thousands of kilometres across the ocean. Mother turtles come back to beaches to lay their eggs.'],
-    [/octop/, 'An octopus has eight arms, three hearts and blue blood. It can change colour to hide.'],
+    [/octop/, 'An octopus has eight arms, three hearts and blue blood. It can change color to hide.'],
     [/shark/, 'Sharks have been around since before the dinosaurs. They grow new teeth all their lives.'],
     [/whale/, 'The blue whale is the biggest animal that has ever lived. Whales breathe air through a blowhole on top of their heads.'],
     [/dolphin/, 'Dolphins are mammals, not fish. They talk to each other with clicks and whistles.'],
@@ -875,7 +881,7 @@
     [/star\b|stars/, 'Stars are giant balls of hot gas, very far away. Our Sun is the closest star.'],
     [/planet/, 'There are eight planets that go around our Sun: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus and Neptune.'],
     [/rain|cloud/, 'Water from the sea warms up and rises into the sky, makes clouds, then falls back as rain. That is the water cycle.'],
-    [/rainbow/, 'A rainbow happens when sunlight shines through raindrops and splits into colours: red, orange, yellow, green, blue, indigo and violet.'],
+    [/rainbow/, 'A rainbow happens when sunlight shines through raindrops and splits into colors: red, orange, yellow, green, blue, indigo and violet.'],
     [/dinosaur/, 'Dinosaurs lived millions of years ago. Birds are the dinosaurs\' living relatives.'],
     [/plant|tree|leaf|leaves/, 'Plants make their own food from sunlight, water and air. Their leaves give out the oxygen we breathe.'],
     [/heart/, 'Your heart is a muscle about the size of your fist. It pumps blood around your body all day and night.'],
@@ -898,10 +904,10 @@
     ['Do fish sleep?', 'Yes! Fish rest, but most can\'t close their eyes because they have no eyelids. Some hide in coral or sand to rest.'],
     ['Why do we have to sleep?', 'Sleep helps your body grow and fix itself, and helps your brain store what you learned today.'],
     ['How do birds know where to fly in winter?', 'Many birds use the Sun, the stars and even Earth\'s magnetism like a built-in compass.'],
-    ['Why is the sky blue?', 'Sunlight has all the colours. The air scatters blue light the most, so blue comes at us from every direction.'],
+    ['Why is the sky blue?', 'Sunlight has all the colors. The air scatters blue light the most, so blue comes at us from every direction.'],
     ['Could a person live on the Moon?', 'Not without help. There\'s no air to breathe, so astronauts bring air, water and food with them.'],
     ['What makes a good friend?', 'Lots of people say kindness, listening, sharing and being fair. What do you think matters most?'],
-    ['Why do leaves change colour?', 'In autumn trees stop making green chlorophyll, so the yellow and orange that were hiding underneath show through.'],
+    ['Why do leaves change color?', 'In autumn trees stop making green chlorophyll, so the yellow and orange that were hiding underneath show through.'],
     ['How deep is the ocean?', 'The deepest place, the Mariana Trench, is about 11 kilometres down. That\'s deeper than Mount Everest is tall.'],
     ['Is a tomato a fruit?', 'Yes! Scientists call it a fruit because it grows from a flower and has seeds inside.'],
     ['Why do cats purr?', 'Cats often purr when they\'re happy, and sometimes to calm themselves down.'],
@@ -918,7 +924,7 @@
     ['What would happen if there were no bees?', 'Bees carry pollen between flowers so plants can make fruit and seeds. Without bees we\'d have far fewer fruits and vegetables.'],
     ['Why do we dream?', 'Nobody knows for sure! Many scientists think dreams help our brains sort through memories and feelings.'],
     ['Is it ever OK to break a rule?', 'Some people think it\'s OK if following the rule would hurt someone. What do you think?'],
-    ['How do octopuses change colour?', 'Their skin has tiny colour sacs they can stretch or squeeze in a flash, to hide or to show how they feel.'],
+    ['How do octopuses change color?', 'Their skin has tiny color sacs they can stretch or squeeze in a flash, to hide or to show how they feel.'],
     ['Why is the ocean blue?', 'Water soaks up red light and lets blue light bounce around, and it also reflects the blue sky.'],
     ['What makes thunder?', 'Lightning heats the air so fast that it bursts outward with a giant BOOM. That boom is thunder.'],
     ['How many stars are there?', 'More than anyone can count: there are more stars in the universe than grains of sand on all of Earth\'s beaches.'],
@@ -933,7 +939,7 @@
     ['What is a volcano?', 'A volcano is a place where hot melted rock from deep inside the Earth comes up to the surface.'],
     ['Why do some animals glow?', 'Some sea creatures make their own light to find food, to hide or to talk to each other. It\'s called bioluminescence.'],
     ['What makes something alive?', 'Living things grow, need food and water, and make more of their kind. Is a fire alive? Why or why not?'],
-    ['Why is practice important?', 'Each time you practise, your brain builds stronger paths, so it gets easier and faster next time.']
+    ['Why is practice important?', 'Each time you practice, your brain builds stronger paths, so it gets easier and faster next time.']
   ];
   LIB.questionOfDay = function(){ var d = new Date(), n = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 864e5); var q = QOTD[n % QOTD.length]; return { q: q[0], a: q[1] }; };
 
@@ -1001,7 +1007,7 @@
       { bot: 'Here you go! You can keep it for two weeks. Do you have a library card?', want: [/yes|no|here|card/i], hint: 'Say "Yes, here it is" or "No, can I get one?"' },
       { bot: 'All done. Enjoy your book! Come back soon.', end: true } ] },
     { id: 'scientist', e: '🔬', title: 'Interview a marine biologist', lang: 'en', turns: [
-      { bot: 'Hi! I\'m Dr. Reef, a marine biologist. I study ocean animals. What would you like to ask me?', want: [/\?|what|why|how|where|who|when/i], hint: 'Ask a question starting with what, why, how or where. Like "What is your favourite sea animal?"' },
+      { bot: 'Hi! I\'m Dr. Reef, a marine biologist. I study ocean animals. What would you like to ask me?', want: [/\?|what|why|how|where|who|when/i], hint: 'Ask a question starting with what, why, how or where. Like "What is your favorite sea animal?"' },
       { bot: 'Great question! I love octopuses: they are so clever they can open jars. What else would you like to know?', want: [/\?|what|why|how|where|who|when/i], hint: 'Ask another question! Maybe about where you work or what you discovered.' },
       { bot: 'I work on a boat and dive near coral reefs. Coral is made of tiny animals! Would you like to be a scientist one day? Why?', want: [/yes|no|because|maybe/i], hint: 'Answer yes, no or maybe, and say "because…"' },
       { bot: 'That\'s wonderful. Thanks for the interview! Keep asking questions: that\'s what scientists do.', end: true } ] }
@@ -1037,7 +1043,7 @@
   function memoryLine(){
     var l = (rec().log || []).slice(-40).reverse(), ds = decks();
     var lastMath = l.find(function(x){ return x.k === 'math'; }), lastWs = l.find(function(x){ return x.k === 'ws'; });
-    if(lastMath) return 'Welcome back! Last time you practised ' + (lastMath.skill || 'maths') + '. What would you like to do today?';
+    if(lastMath) return 'Welcome back! Last time you practiced ' + (lastMath.skill || 'math') + '. What would you like to do today?';
     if(lastWs) return 'Welcome back! You finished a worksheet on ' + (lastWs.title || 'a deck') + '. What next?';
     if(ds.length) return 'You have ' + ds.length + ' decks, like ' + ds.slice(0, 2).map(function(d){ return d.name; }).join(' and ') + '. Ask me about any of them!';
     return 'Ask me anything, or pick a way to learn together.';
@@ -1100,7 +1106,7 @@
     var f = factFor(q); if(f) return f;
     if(/^(hi|hello|hey|안녕|你好)/i.test(q)) return 'Hello! What would you like to learn about?';
     if(/thank/i.test(q)) return 'You\'re welcome! I love learning with you.';
-    return 'Great question! I don\'t know that one yet without the internet. You could ask a grown-up, look it up together in a book, or ask me again when we\'re online. Want to try a maths question or a word from your decks?';
+    return 'Great question! I don\'t know that one yet without the internet. You could ask a grown-up, look it up together in a book, or ask me again when we\'re online. Want to try a math question or a word from your decks?';
   }
   // Offline "Help me think": answers with a guiding question instead of the answer.
   function offlineSocratic(q, hist){
@@ -1112,15 +1118,15 @@
     if(/because/i.test(q)) return 'That\'s a good reason. Is there another way to look at it?';
     return pick(['What do you already know about that?', 'Why do you think that is?', 'How could we find out if that\'s true?', 'Can you give me an example?', 'What would happen if it were the other way round?']);
   }
-  var ASK_SYS = function(){ return 'Answer the child\'s question in 2 to 4 short sentences. If it is maths, show the steps simply. Her decks are: ' + deckContext() + '.'; };
-  var SOC_SYS = function(){ return 'Socratic mode: never give the final answer straight away. Ask one short guiding question at a time that helps her get there herself. Praise effort. Her decks are: ' + deckContext() + '.'; };
+  var ASK_SYS = function(){ return 'Answer the question from ' + learnerDesc() + ' in 2 to 4 short sentences. If it is math, show the steps simply. Their decks are: ' + deckContext() + '.'; };
+  var SOC_SYS = function(){ return 'Socratic mode: never give the final answer straight away. Ask one short guiding question at a time that helps them get there themselves. Praise effort. Their decks are: ' + deckContext() + '.'; };
 
   LIB.views.chat = { title: 'Ask Shelly', render: function(el, mode){
     loadIndex();
     var soc = mode === 'socratic';
     this.title = soc ? 'Help me think' : 'Ask Shelly';
     chatScreen(el, { mode: mode, placeholder: soc ? 'What are you stuck on?' : 'Ask anything, like "what is 7 + 8?"',
-      greet: soc ? 'Tell me what you\'re working on, and I\'ll ask questions to help you figure it out.' : 'Hi! Ask me a maths question, a word from your decks, or anything you wonder about.',
+      greet: soc ? 'Tell me what you\'re working on, and I\'ll ask questions to help you figure it out.' : 'Hi! Ask me a math question, a word from your decks, or anything you wonder about.',
       offline: function(q, h){ return soc ? offlineSocratic(q, h) : offlineAsk(q); }, system: soc ? SOC_SYS : ASK_SYS });
   } };
 
@@ -1136,12 +1142,12 @@
         if(step < t.qs.length) return react + ' ' + t.qs[step];
         return react + ' Thank you for thinking with me! Here\'s what you said: ' + answers.map(function(a, i){ return (i + 1) + ') ' + a; }).join(' ') + ' What a thinker!';
       },
-      system: function(){ return 'Big-question discussion about: "' + t.title + '". Ask one open question at a time (these are good ones: ' + t.qs.join(' | ') + '). Respond warmly to her ideas, ask her for reasons, and gently offer another point of view. No lectures.'; } });
+      system: function(){ return 'Big-question discussion about: "' + t.title + '". Ask one open question at a time (these are good ones: ' + t.qs.join(' | ') + '). Respond warmly to their ideas, ask them for reasons, and gently offer another point of view. No lectures.'; } });
   } };
 
   LIB.views.plays = { title: 'Role-play', render: function(el){
     var lang = { korean: 'ko', reading: 'en', science: 'en' }, g = myGoals().map(function(x){ return lang[x]; }), rank = function(p){ var i = g.indexOf(p.lang); return i < 0 ? 99 : i; };
-    el.innerHTML = '<p class="clib-lede">Practise real conversations. Shelly plays the other person.</p>' + tiles(PLAYS.slice().sort(function(a, b){ return rank(a) - rank(b); }).map(function(p){ return { e: p.e, icon: PLAY_ICON[p.id], name: p.title, view: 'play', arg: p.id }; })); wireTiles(el);
+    el.innerHTML = '<p class="clib-lede">Practice real conversations. Shelly plays the other person.</p>' + tiles(PLAYS.slice().sort(function(a, b){ return rank(a) - rank(b); }).map(function(p){ return { e: p.e, icon: PLAY_ICON[p.id], name: p.title, view: 'play', arg: p.id }; })); wireTiles(el);
   } };
   LIB.views.play = { title: 'Role-play', render: function(el, id){
     var p = PLAYS.find(function(x){ return x.id === id; }) || PLAYS[0], i = 0, tries = 0;
@@ -1153,7 +1159,7 @@
         if(t.want.some(function(r){ return r.test(q); })){ i++; tries = 0; return (p.lang === 'en' ? '' : 'Great! ') + p.turns[i].bot; }
         tries++; return tries >= 2 ? 'Here\'s a hint: ' + t.hint : 'Hmm, try again! ' + t.bot;
       },
-      system: function(){ return 'Role-play: you are the other person in "' + p.title + '". Stay in character, use simple ' + (p.lang === 'ko' ? 'Korean with English in brackets' : p.lang === 'zh' ? 'Chinese with pinyin and English in brackets' : 'English') + ', one short line at a time. If she makes a mistake, model the right phrase gently and keep going.'; } });
+      system: function(){ return 'Role-play: you are the other person in "' + p.title + '". Stay in character, use simple ' + (p.lang === 'ko' ? 'Korean with English in brackets' : p.lang === 'zh' ? 'Chinese with pinyin and English in brackets' : 'English') + ', one short line at a time. If they make a mistake, model the right phrase gently and keep going.'; } });
     $('[data-hint]', el).addEventListener('click', function(){ var t = p.turns[i]; var m = document.createElement('div'); m.className = 'clib-m bot'; m.textContent = t.end ? 'All done!' : '💡 ' + t.hint; $('.clib-msgs', el).appendChild(m); speak(koPhrases(t.hint) || t.hint || ''); });
   } };
 
@@ -1171,7 +1177,7 @@
         if(round === 2) return (reason ? 'That\'s a strong point. ' : 'Tell me why! ') + 'Here\'s another thought: ' + mine[1] + '. Can you answer that one?';
         return 'Great debating! You listened and gave reasons. Some people think ' + (side === 'yes' ? d.yes : d.no).join(' and ') + '; others think ' + mine.join(' and ') + '. Did you change your mind at all?';
       },
-      system: function(){ return 'Friendly debate on "' + d.q + '". Let her choose a side, then kindly argue the other side with one simple reason at a time, ask for her reasons, and after 3 rounds praise good reasoning and sum up both sides.'; } });
+      system: function(){ return 'Friendly debate on "' + d.q + '". Let them choose a side, then kindly argue the other side with one simple reason at a time, ask for their reasons, and after 3 rounds praise good reasoning and sum up both sides.'; } });
   } };
 
   // Explain it 3 ways: a picture, a story, and steps.
@@ -1199,7 +1205,7 @@
       }
       var hit = lookUp(q);
       var offline = function(){
-        if(!hit){ out.innerHTML = '<p class="clib-note">I can explain maths like 8 + 5 or a word from your decks without the internet. For other things, try again when Claude is on.</p>'; return; }
+        if(!hit){ out.innerHTML = '<p class="clib-note">I can explain math like 8 + 5 or a word from your decks without the internet. For other things, try again when Claude is on.</p>'; return; }
         var letters = hit.front.split('').join(' · ');
         show([['🖼️ As a picture', '<p class="clib-huge">' + esc(hit.front) + '</p><p>' + esc(hit.back) + '</p>'],
               ['📖 As a story', esc(hit.note || ('One day, Shelly saw "' + hit.front + '". She asked what it meant. "It means ' + hit.back + '," said Kiko.'))],
@@ -1243,7 +1249,7 @@
           log('teach', { item: c.front, cover: Math.round(cover * 100) });
           if(claudeReady()){
             fb.textContent = 'Shelly is listening…';
-            ask('feedback', [{ role: 'user', content: 'A child is teaching you about "' + c.front + '" (the correct meaning is: "' + c.back + (c.note ? '; ' + c.note : '') + '"). Here is her explanation: "' + said + '". In 2-3 short, kind sentences: say what she got right, then ask one question about a gap.' }])
+            ask('feedback', [{ role: 'user', content: '' + cap(learnerDesc()) + ' is teaching you about "' + c.front + '" (the correct meaning is: "' + c.back + (c.note ? '; ' + c.note : '') + '"). Here is their explanation: "' + said + '". In 2-3 short, kind sentences: say what they got right, then ask one question about a gap.' }])
               .then(function(t){ if(t){ fb.innerHTML = '<p>' + esc(t) + '</p>'; speak(t); } else offline(); });
           } else offline();
         });
@@ -1262,10 +1268,10 @@
   var LEVELS = { easy: { n: 6, label: 'Easy' }, medium: { n: 10, label: 'Medium' }, stretch: { n: 14, label: 'Stretch' } };
   var KINDS_HOME = [
     { e: '🗂️', name: 'From a deck', note: 'Match, fill in, answer', src: 'deck' },
-    { e: '➕', name: 'Maths', note: 'Sums at her level', src: 'math' },
+    { e: '➕', name: 'Math', note: 'Sums at the right level', src: 'math' },
     { e: '🔎', name: 'A topic', note: 'Any subject', src: 'topic' },
     { e: '🔁', name: 'Spiral review', note: 'Mix of older things', src: 'spiral' },
-    { e: '🐢', name: 'Word problems', note: 'About things she loves', src: 'word' },
+    { e: '🐢', name: 'Word problems', note: 'About favorite things', src: 'word' },
     { e: '✏️', name: 'Fill the gaps', note: 'Sentences with blanks', src: 'cloze' },
     { e: '✍️', name: 'Handwriting', note: 'Trace and copy', src: 'trace' },
     { e: '🔢', name: 'Put in order', note: 'Life cycles, steps', src: 'order' },
@@ -1368,7 +1374,7 @@
   }
   // Maths sums at three levels; every answer keeps its worked steps for checking.
   function wsMath(topic, level, n){
-    var L = { easy: 0, medium: 1, stretch: 2 }[level], items = [], title = ({ add: 'Adding', sub: 'Taking away', mul: 'Times tables', div: 'Sharing', missing: 'Missing numbers', mixed: 'Maths mix', place: 'Tens and ones', money: 'Money', time: 'Telling the time' })[topic] || 'Maths';
+    var L = { easy: 0, medium: 1, stretch: 2 }[level], items = [], title = ({ add: 'Adding', sub: 'Taking away', mul: 'Times tables', div: 'Sharing', missing: 'Missing numbers', mixed: 'Math mix', place: 'Tens and ones', money: 'Money', time: 'Telling the time' })[topic] || 'Math';
     function sum(op){
       var a, b;
       if(op === '+'){ var max = [10, 20, 100][L]; a = 1 + rnd(max - 1); b = 1 + rnd(Math.max(1, max - a)); }
@@ -1421,11 +1427,11 @@
       var byDeck = {}, picked = [];
       learned.forEach(function(x){ (byDeck[x.deck.id] = byDeck[x.deck.id] || []).push(x); });
       var keys = Object.keys(byDeck); for(var r = 0; picked.length < Math.ceil(n * .7) && r < 20; r++) keys.forEach(function(k){ if(byDeck[k][r] && picked.length < Math.ceil(n * .7)) picked.push(byDeck[k][r]); });
-      if(!picked.length){ LIB.wsError = 'Spiral review needs cards she has already practised. Try again after a few rounds.'; return null; }
+      if(!picked.length){ LIB.wsError = 'Spiral review needs cards that were already practiced. Try again after a few rounds.'; return null; }
       var math = wsMath('mixed', level, Math.max(2, n - picked.length)).sections[0];
       return { title: 'Spiral review', level: level, sections: [
         { kind: 'short', title: 'Remember these?', bank: level === 'easy' ? shuffle(picked.map(function(x){ return x.back; })) : null, items: picked.map(function(x){ return { q: x.front, a: x.back, from: x.deck.name }; }) },
-        { kind: 'math', title: 'And some maths', items: math.items } ] };
+        { kind: 'math', title: 'And some math', items: math.items } ] };
     });
   }
   // A topic: her decks first (deck names, subjects and card text), then built-in facts and maths; Claude when on.
@@ -1442,7 +1448,7 @@
         if(seq) return wsOrder(seq, level);
         var dia = Object.keys(DIAGRAMS).find(function(k){ return words.some(function(w){ return k.indexOf(w) >= 0 || DIAGRAMS[k].title.toLowerCase().indexOf(w) >= 0; }); });
         if(dia) return wsLabel(dia, level);
-        LIB.wsError = 'Nothing about "' + topic + '" in her decks yet. With the internet and the Claude helper, Claude can write one about any topic.'; return null;
+        LIB.wsError = 'Nothing about "' + topic + '" in the decks yet. With the internet and the Claude helper, Claude can write one about any topic.'; return null;
       });
     };
     if(!claudeReady() || mathT) return Promise.resolve(offline());
@@ -1455,7 +1461,7 @@
     }).then(function(txt){ var ws = validWs(jsonFrom(txt), level); if(!ws) LIB.wsError = txt === null ? 'Claude couldn\'t be reached. Check the internet and the Claude helper in Settings.' : 'Claude\'s worksheet didn\'t come back in a shape I can use. Try another photo.'; return ws; });
   }
   function WS_PROMPT(level, n){
-    return 'Write a ' + level + ' level worksheet for a young learner with about ' + n + ' items. Reply with JSON only, in this shape: ' +
+    return 'Write a ' + level + ' level worksheet for ' + learnerDesc() + ' with about ' + n + ' items. Reply with JSON only, in this shape: ' +
       '{"title": "...", "sections": [{"kind": "short" | "mc" | "cloze" | "match", "title": "instruction", "items": [...]}]}. ' +
       'Items: short {"q": "...", "a": "..."}; mc {"q": "...", "options": ["...", "...", "..."], "a": "one of the options"}; cloze {"text": "sentence with _____", "a": "missing word"}; match {"pairs": [["left", "right"], ...]}. Keep answers short.';
   }
@@ -1684,8 +1690,8 @@
   }
   function writingClaude(text, rubric){
     var R = RUBRICS[rubric] || RUBRICS.story;
-    var sys = 'You give kind, specific writing feedback to a young child, as "two stars and a wish". Rubric for "' + R.name + '": ' + R.criteria.map(function(c){ return c[0]; }).join('; ') + '. ' +
-      'Reply with JSON only: {"glows":[two short specific praises quoting her words],"wish":"one next step, short and concrete","criteria":[{"name":"<rubric item>","stars":1-3,"note":"short"}],"mechanics":["up to 4 notes on capitals, full stops or spelling, quoting the word"]}. Never rewrite her piece for her.';
+    var sys = 'You give kind, specific writing feedback to ' + learnerDesc() + ', as "two stars and a wish". Rubric for "' + R.name + '": ' + R.criteria.map(function(c){ return c[0]; }).join('; ') + '. ' +
+      'Reply with JSON only: {"glows":[two short specific praises quoting their words],"wish":"one next step, short and concrete","criteria":[{"name":"<rubric item>","stars":1-3,"note":"short"}],"mechanics":["up to 4 notes on capitals, full stops or spelling, quoting the word"]}. Never rewrite their piece for her.';
     return ask('feedback', [{ role: 'user', content: 'Here is my writing:\n\n' + text }], sys).then(function(t){
       var j = jsonFrom(t); if(!j || !Array.isArray(j.glows) || !j.wish) return null;
       return { glows: j.glows.slice(0, 2).map(String), wish: String(j.wish), criteria: (j.criteria || []).slice(0, 6).map(function(c){ return { name: String(c.name || ''), stars: Math.max(1, Math.min(3, +c.stars || 1)), note: String(c.note || '') }; }), mechanics: (j.mechanics || []).slice(0, 5).map(String), src: 'claude' };
@@ -1723,14 +1729,14 @@
     if(!claudeReady()){ el.innerHTML = '<section class="clib-card"><h2>📴 This one needs Claude</h2><p>Reading handwriting from a photo needs the internet and the Claude helper (a grown-up can set it up in Settings).</p><p>Offline, try <b>Check my answers</b> on a Library worksheet, or type your writing into <b>My writing</b>.</p><div class="clib-row"><button type="button" class="clib-btn main" data-v="writing">✍️ My writing</button><button type="button" class="clib-btn" data-v="wsHome">📝 Worksheets</button></div></section>';
       $$('[data-v]', el).forEach(function(b){ b.addEventListener('click', function(){ go(b.dataset.v); }); }); return; }
     el.innerHTML = '<section class="clib-card"><p>Take a photo of a page of sums, a worksheet or some writing. Claude marks it and explains anything to fix.</p>' +
-      '<input type="file" accept="image/*" capture="environment" id="clibPh" class="clib-input"><label class="clib-label" for="clibPhN">Anything Claude should know? (optional)</label><input id="clibPhN" class="clib-input" placeholder="e.g. Page 4 of her maths book, adding to 20">' +
+      '<input type="file" accept="image/*" capture="environment" id="clibPh" class="clib-input"><label class="clib-label" for="clibPhN">Anything Claude should know? (optional)</label><input id="clibPhN" class="clib-input" placeholder="e.g. Page 4 of her math book, adding to 20">' +
       '<div class="clib-row"><button type="button" class="clib-btn main" data-go>📷 Mark it</button></div><p class="clib-note">Please make sure there are no faces or names in the photo.</p></section><div class="clib-out"></div>';
     var out = $('.clib-out', el);
     $('[data-go]', el).addEventListener('click', function(){
       var f = $('#clibPh', el).files[0]; if(!f){ out.innerHTML = '<p class="clib-msg">Choose a photo first.</p>'; return; }
       out.innerHTML = '<p class="clib-msg">Claude is looking…</p>';
       shrinkImage(f, 1400).then(function(img){
-        var sys = 'A child has photographed her own schoolwork. Mark it kindly. Reply with JSON only: {"items":[{"q":"the question or line, short","given":"what she wrote","ok":true|false,"fix":"if wrong: the right answer and one short why"}],"glows":["two specific praises"],"wish":"one next step"}. If you cannot read it, return {"unreadable":true}.';
+        var sys = 'This is ' + learnerDesc() + ' who has photographed their own work. Mark it kindly. Reply with JSON only: {"items":[{"q":"the question or line, short","given":"what they wrote","ok":true|false,"fix":"if wrong: the right answer and one short why"}],"glows":["two specific praises"],"wish":"one next step"}. If you cannot read it, return {"unreadable":true}.';
         return ask('photo', [{ role: 'user', content: [{ type: 'image', source: { type: 'base64', media_type: img.type, data: img.data } }, { type: 'text', text: 'Please mark my work.' + ($('#clibPhN', el).value.trim() ? ' Note: ' + $('#clibPhN', el).value.trim() : '') }] }], sys);
       }).then(function(t){
         var j = jsonFrom(t);
@@ -1748,10 +1754,10 @@
   /* ---- progress ---- */
   LIB.views.progressHome = { title: 'My progress', render: function(el){
     el.innerHTML = tiles([
-      { e: '🏆', name: 'Mastery', note: 'Decks and maths skills', view: 'mastery' },
+      { e: '🏆', name: 'Mastery', note: 'Decks and math skills', view: 'mastery' },
       { e: '🔎', name: 'Tricky spots', note: 'Mistakes to fix', view: 'misconceptions' },
-      { e: '🎯', name: 'Sure or guessing?', note: 'How well she knows', view: 'confidence' },
-      { e: '🧭', name: 'Where am I?', note: 'Maths placement check', view: 'placement' },
+      { e: '🎯', name: 'Sure or guessing?', note: 'How sure, and how often right', view: 'confidence' },
+      { e: '🧭', name: 'Where am I?', note: 'Math placement check', view: 'placement' },
       { e: '💌', name: 'Weekly letter', note: 'For grown-ups', view: 'weekly' }
     ]);
     wireTiles(el);
@@ -1767,10 +1773,10 @@
     return n >= 10 && p >= .9 ? ['Mastered', 'm'] : n >= 6 && p >= .75 ? ['Strong', 'm'] : n >= 3 && p >= .5 ? ['Growing', 'l'] : ['Starting', 'l']; }
   LIB.views.mastery = { title: 'Mastery', render: function(el){
     var ds = decks(), sk = mathSkills(0), keys = Object.keys(sk);
-    el.innerHTML = '<section class="clib-card"><h2>🔢 Maths skills</h2>' + (keys.length ? '<ul class="clib-list">' + keys.map(function(k){ var s = sk[k], lv = skillLevel(s), p = Math.round(s.recent.filter(Boolean).length / s.recent.length * 100);
+    el.innerHTML = '<section class="clib-card"><h2>🔢 Math skills</h2>' + (keys.length ? '<ul class="clib-list">' + keys.map(function(k){ var s = sk[k], lv = skillLevel(s), p = Math.round(s.recent.filter(Boolean).length / s.recent.length * 100);
       return '<li><span class="clib-li-t">' + esc(k) + '<small>' + p + '% of the last ' + s.recent.length + ' · ' + s.n + ' answered</small></span><span class="clib-pill">' + lv[0] + '</span><div class="clib-bar" style="width:100%"><i class="' + lv[1] + '" style="width:' + p + '%"></i></div></li>'; }).join('') + '</ul>'
-      : '<p class="clib-note">No maths answers yet. Try Facts practice in the Maths lab or a maths worksheet.</p>') + '<p class="clib-note">Mastered = 90% or more of the last 10+ answers.</p></section>' +
-      '<section class="clib-card"><h2>🗂️ Decks</h2>' + (ds.length ? '<ul class="clib-list" data-decks></ul><p class="clib-note">Green: mastered (she remembers it for 3 weeks or more). Yellow: learning. Grey: not started.</p>' : '<p class="clib-note">No decks yet.</p>') + '</section>';
+      : '<p class="clib-note">No math answers yet. Try Facts practice in the Math lab or a math worksheet.</p>') + '<p class="clib-note">Mastered = 90% or more of the last 10+ answers.</p></section>' +
+      '<section class="clib-card"><h2>🗂️ Decks</h2>' + (ds.length ? '<ul class="clib-list" data-decks></ul><p class="clib-note">Green: mastered (remembered for 3 weeks or more). Yellow: learning. Grey: not started.</p>' : '<p class="clib-note">No decks yet.</p>') + '</section>';
     var ul = $('[data-decks]', el); if(!ul) return;
     ds.forEach(function(d){ var li = document.createElement('li'); ul.appendChild(li); li.innerHTML = '<span class="clib-li-e">' + esc(d.emoji) + '</span><span class="clib-li-t">' + esc(d.name) + '<small>…</small></span>';
       cards(d.id).then(function(cs){ var m = 0, l = 0; cs.forEach(function(c){ var s = cardStateOf(c); if(s === 'mastered') m++; else if(s === 'learning') l++; }); var n = cs.length || 1;
@@ -1780,24 +1786,24 @@
     var since = Date.now() - 30 * 864e5, by = {};
     (rec().log || []).forEach(function(e){ if(e.k === 'math' && e.mis && e.t >= since){ var b = by[e.mis] = by[e.mis] || { n: 0, ex: [], skill: e.skill }; b.n++; if(b.ex.length < 3) b.ex.push(e.q + ' → ' + e.given); } });
     var ids = Object.keys(by).sort(function(a, b){ return by[b].n - by[a].n; });
-    if(!ids.length){ el.innerHTML = '<section class="clib-card"><h2>🔎 No tricky spots yet</h2><p>When a maths answer is wrong in a way that shows a common mix-up (like adding instead of taking away), Shelly notes it here with a tip.</p></section>'; return; }
+    if(!ids.length){ el.innerHTML = '<section class="clib-card"><h2>🔎 No tricky spots yet</h2><p>When a math answer is wrong in a way that shows a common mix-up (like adding instead of taking away), Shelly notes it here with a tip.</p></section>'; return; }
     el.innerHTML = '<p class="clib-lede">Mix-ups from the last 30 days, most common first.</p>' + ids.map(function(id){ var b = by[id];
       return '<section class="clib-card"><h2>' + esc(MIS_NAME[id] || id) + ' <span class="clib-pill">' + b.n + '×</span></h2><p>💡 ' + esc(MIS[id] || '') + '</p><p class="clib-note">For example: ' + b.ex.map(esc).join(' · ') + '</p>' +
-        '<div class="clib-row"><button type="button" class="clib-btn main" data-skill="' + esc(b.skill || '') + '">Practise ' + esc(b.skill || 'this') + '</button></div></section>'; }).join('');
+        '<div class="clib-row"><button type="button" class="clib-btn main" data-skill="' + esc(b.skill || '') + '">Practice ' + esc(b.skill || 'this') + '</button></div></section>'; }).join('');
     $$('[data-skill]', el).forEach(function(b){ b.addEventListener('click', function(){ go('facts', b.dataset.skill); }); });
   } };
   LIB.views.confidence = { title: 'Sure or guessing?', render: function(el){
     var g = { sure: [0, 0], think: [0, 0], guess: [0, 0] };
     (rec().log || []).forEach(function(e){ if(e.k === 'math' && g[e.conf]){ g[e.conf][0]++; if(e.ok) g[e.conf][1]++; } });
     var total = g.sure[0] + g.think[0] + g.guess[0];
-    if(!total){ el.innerHTML = '<section class="clib-card"><h2>🎯 Nothing yet</h2><p>In Facts practice she picks "I\'m sure", "I think so" or "Guessing" with each answer. This page shows how often each is right, so you can see what she really knows.</p><div class="clib-row"><button type="button" class="clib-btn main" data-f>Try Facts practice</button></div></section>'; $('[data-f]', el).addEventListener('click', function(){ go('facts'); }); return; }
+    if(!total){ el.innerHTML = '<section class="clib-card"><h2>🎯 Nothing yet</h2><p>In Facts practice you pick "I\'m sure", "I think so" or "Guessing" with each answer. This page shows how often each is right, so you can see what she really knows.</p><div class="clib-row"><button type="button" class="clib-btn main" data-f>Try Facts practice</button></div></section>'; $('[data-f]', el).addEventListener('click', function(){ go('facts'); }); return; }
     var row = function(k, label){ var n = g[k][0], p = n ? Math.round(g[k][1] / n * 100) : 0; return '<li><span class="clib-li-t">' + label + '<small>' + n + ' answers</small></span><b>' + (n ? p + '% right' : '–') + '</b><div class="clib-bar" style="width:100%"><i class="m" style="width:' + p + '%"></i></div></li>'; };
     var sp = g.sure[0] ? g.sure[1] / g.sure[0] : null, gp = g.guess[0] ? g.guess[1] / g.guess[0] : null, note;
-    if(sp !== null && sp < .7) note = 'When she\'s sure she is often still wrong, so these facts need slowing down and checking, not just speed.';
-    else if(gp !== null && gp > .7) note = 'Her guesses are mostly right: she knows more than she thinks! Encourage her to trust herself.';
-    else if(sp !== null && sp >= .9) note = 'When she says she\'s sure, she\'s right. That\'s a good sign she knows those facts by heart.';
+    if(sp !== null && sp < .7) note = 'When you\'re sure you\'re often still wrong, so these facts need slowing down and checking, not just speed.';
+    else if(gp !== null && gp > .7) note = 'Your guesses are mostly right: you know more than you think! Trust yourself.';
+    else if(sp !== null && sp >= .9) note = 'When you say you\'re sure, you\'re right. That\'s a good sign you know those facts by heart.';
     else note = 'Keep going: the more answers, the clearer this picture gets.';
-    el.innerHTML = '<section class="clib-card"><h2>🎯 How sure she was, and how often she was right</h2><ul class="clib-list">' + row('sure', '✅ I\'m sure') + row('think', '🤔 I think so') + row('guess', '🎲 Guessing') + '</ul><p>' + esc(note) + '</p></section>';
+    el.innerHTML = '<section class="clib-card"><h2>🎯 How sure you were, and how often you were right</h2><ul class="clib-list">' + row('sure', '✅ I\'m sure') + row('think', '🤔 I think so') + row('guess', '🎲 Guessing') + '</ul><p>' + esc(note) + '</p></section>';
   } };
 
   /* ---- placement check: an adaptive ladder of maths skills ---- */
@@ -1816,7 +1822,7 @@
     { label: 'dividing by 6, 7, 8 and 9', skill: 'sharing', gen: function(){ var b = pick([6, 7, 8, 9]), q = 2 + rnd(10); return [b * q, '÷', b]; } }
   ];
   LIB.views.placement = { title: 'Where am I?', render: function(el){
-    el.innerHTML = '<section class="clib-card"><h2>🧭 Maths placement check</h2><p>About 12 questions. They get harder when you\'re right and easier when you\'re not, to find just the right level. No rush, and it\'s fine not to know!</p><div class="clib-row"><button type="button" class="clib-btn main" data-go>Start</button></div></section>';
+    el.innerHTML = '<section class="clib-card"><h2>🧭 Math placement check</h2><p>About 12 questions. They get harder when you\'re right and easier when you\'re not, to find just the right level. No rush, and it\'s fine not to know!</p><div class="clib-row"><button type="button" class="clib-btn main" data-go>Start</button></div></section>';
     $('[data-go]', el).addEventListener('click', function(){
       var rung = 2, asked = 0, streak = 0, best = -1, misses = {}, q;
       function next(){
@@ -1837,7 +1843,7 @@
         r.placement = { date: today(), rung: ready, label: LADDER[ready].label, secure: best >= 0 ? LADDER[best].label : null, level: lv }; saveRec(r);
         el.innerHTML = '<section class="clib-card"><h2>🧭 Done! Here\'s where you are</h2>' + (best >= 0 ? '<p>✅ Secure: <b>' + esc(LADDER[best].label) + '</b> and everything before it.</p>' : '<p>We\'re at the very start, and that\'s a great place to begin.</p>') +
           '<p>🌱 Ready to learn next: <b>' + esc(LADDER[ready].label) + '</b>.</p><p class="clib-note">Worksheet level to pick: <b>' + lv + '</b>. This is a quick check from ' + asked + ' questions, not a test score; a teacher\'s view counts more.</p>' +
-          '<div class="clib-row"><button type="button" class="clib-btn main" data-p>Practise ' + esc(LADDER[ready].skill) + '</button><button type="button" class="clib-btn" data-w>📝 Make a worksheet</button></div></section>';
+          '<div class="clib-row"><button type="button" class="clib-btn main" data-p>Practice ' + esc(LADDER[ready].skill) + '</button><button type="button" class="clib-btn" data-w>📝 Make a worksheet</button></div></section>';
         sound('sessionEnd'); speak('All done! You\'re ready to learn ' + LADDER[ready].label + '.');
         $('[data-p]', el).addEventListener('click', function(){ go('facts', LADDER[ready].skill); });
         $('[data-w]', el).addEventListener('click', function(){ go('wsMake', JSON.stringify({ src: 'math' })); });
@@ -1867,18 +1873,18 @@
       var topMis = Object.keys(mis).sort(function(a, b){ return mis[b] - mis[a]; })[0];
       var r = rec(), nDays = Object.keys(days).length;
       var html = '<div class="clib-print-area clib-letter"><p>' + new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + '</p><p>Dear grown-ups,</p>';
-      if(!week.length && !lg.length) html += '<p>' + esc(name) + ' hasn\'t practised in Coral Cove this week. A five-minute round together is a lovely way to start again.</p>';
+      if(!week.length && !lg.length) html += '<p>' + esc(name) + ' hasn\'t practiced in Coral Cove this week. A five-minute round together is a lovely way to start again.</p>';
       else {
-        html += '<p>Here is ' + esc(name) + '\'s week in Coral Cove. ' + esc(name) + ' learned on <b>' + nDays + ' day' + (nDays === 1 ? '' : 's') + '</b>' + (cards ? ', practised <b>' + cards + ' cards</b> in ' + week.length + ' round' + (week.length === 1 ? '' : 's') + (cards ? ' (' + Math.round(right / cards * 100) + '% right first time)' : '') : '') + (mins ? ', for about <b>' + mins + ' minutes</b>' : '') + '.</p>';
+        html += '<p>Here is ' + esc(name) + '\'s week in Coral Cove. ' + esc(name) + ' learned on <b>' + nDays + ' day' + (nDays === 1 ? '' : 's') + '</b>' + (cards ? ', practiced <b>' + cards + ' cards</b> in ' + week.length + ' round' + (week.length === 1 ? '' : 's') + (cards ? ' (' + Math.round(right / cards * 100) + '% right first time)' : '') : '') + (mins ? ', for about <b>' + mins + ' minutes</b>' : '') + '.</p>';
         if(deckRows.length) html += '<h2>Decks</h2><ul>' + deckRows.slice(0, 8).map(function(d){ return '<li>' + esc(d.e + ' ' + d.name) + ': ' + d.rounds + ' round' + (d.rounds === 1 ? '' : 's') + ', ' + d.total + ' cards, ' + (d.total ? Math.round(d.right / d.total * 100) : 0) + '% right</li>'; }).join('') + '</ul>';
         var extra = []; if(ws.length) extra.push(ws.length + ' worksheet' + (ws.length === 1 ? '' : 's') + ' (average ' + Math.round(ws.reduce(function(s, w){ return s + (w.score || 0); }, 0) / ws.length) + '%)');
-        if(skKeys.length) extra.push(skKeys.reduce(function(s, k){ return s + sk[k].n; }, 0) + ' maths answers');
+        if(skKeys.length) extra.push(skKeys.reduce(function(s, k){ return s + sk[k].n; }, 0) + ' math answers');
         if(wr.length) extra.push(wr.length + ' piece' + (wr.length === 1 ? '' : 's') + ' of writing');
         if(ch.length) extra.push(ch.length + ' question' + (ch.length === 1 ? '' : 's') + ' for the tutor');
         if(extra.length) html += '<h2>In the Library</h2><p>' + esc(extra.join(', ')) + '.</p>';
         html += '<h2>Going well</h2><p>' + (strengths.length ? esc(strengths.slice(0, 4).join('; ')) + '.' : 'Showing up and trying is the big win this week.') + '</p>';
         html += '<h2>To work on next</h2><p>' + (next.length ? esc(next.slice(0, 3).join('; ')) + '.' : 'Nothing stands out as tricky. Keep the short daily rounds going.') + (topMis ? ' One mix-up came up ' + mis[topMis] + ' time' + (mis[topMis] === 1 ? '' : 's') + ': <i>' + esc(MIS_NAME[topMis]) + '</i>. ' + esc(MIS[topMis]) : '') + '</p>';
-        if(r.placement) html += '<p>Last maths placement check (' + esc(r.placement.date) + '): ready for <b>' + esc(r.placement.label) + '</b>.</p>';
+        if(r.placement) html += '<p>Last math placement check (' + esc(r.placement.date) + '): ready for <b>' + esc(r.placement.label) + '</b>.</p>';
         html += '<h2>An idea for this week</h2><p>' + esc(next.length ? 'Ask ' + name + ' to teach you one thing from ' + (deckRows[deckRows.length - 1] || { name: 'a deck' }).name + '. Explaining it out loud is one of the best ways to remember.' : 'Try a "Teach it back" in the Library together: ' + name + ' explains a card to Shelly, and you listen.') + '</p>';
       }
       html += '<p>From Shelly 🐢 and the Coral Cove reef</p><p class="clib-note">Worked out on this device from Coral Cove\'s practice history and the Library log. Percentages from a handful of answers can swing a lot, so treat them as a rough guide.</p></div>' +
@@ -1895,12 +1901,12 @@
   var SKILL_TOPIC = { 'adding': 'add', 'taking away': 'sub', 'times tables': 'mul', 'sharing': 'div' };
   function levelGuess(){ var p = rec().placement; return p && p.level || 'easy'; }
 
-  LIB.views.mathHome = { title: 'Maths lab', render: function(el){
+  LIB.views.mathHome = { title: 'Math lab', render: function(el){
     el.innerHTML = tiles([
       { e: '⚡', name: 'Facts practice', note: 'Sure, think so or guess?', view: 'facts' },
       { e: '📏', name: 'See it', note: 'Number lines, ten frames, fractions', view: 'visual' },
       { e: '🧱', name: 'Blocks and counters', note: 'Build and share numbers', view: 'manip' },
-      { e: '🧠', name: 'Brain tricks', note: 'Mental maths strategies', view: 'mental' },
+      { e: '🧠', name: 'Brain tricks', note: 'Mental math strategies', view: 'mental' },
       { e: '🔷', name: 'Shapes', note: 'Sides, corners, symmetry', view: 'geometry' },
       { e: '🕒', name: 'Clocks and money', note: 'Tell the time, pay the shop', view: 'measure' },
       { e: '🧩', name: 'Puzzles', note: 'Sudoku and patterns', view: 'puzzles' }
@@ -1911,7 +1917,7 @@
   /* ---- facts practice ---- */
   LIB.views.facts = { title: 'Facts practice', render: function(el, arg){
     var topic = SKILL_TOPIC[arg] || 'add', level = levelGuess();
-    el.innerHTML = '<section class="clib-card"><label class="clib-label">What to practise</label><div class="clib-row" data-t>' +
+    el.innerHTML = '<section class="clib-card"><label class="clib-label">What to practice</label><div class="clib-row" data-t>' +
       [['add', '➕ Adding'], ['sub', '➖ Taking away'], ['mul', '✖️ Times'], ['div', '➗ Sharing'], ['mixed', '🔀 Mix']].map(function(t){ return '<button type="button" class="clib-btn" data-v="' + t[0] + '" aria-pressed="' + (t[0] === topic) + '">' + t[1] + '</button>'; }).join('') + '</div>' +
       '<label class="clib-label">How hard</label><div class="clib-row" data-l>' + [['easy', 'Easy'], ['medium', 'Medium'], ['stretch', 'Stretch']].map(function(t){ return '<button type="button" class="clib-btn" data-v="' + t[0] + '" aria-pressed="' + (t[0] === level) + '">' + t[1] + '</button>'; }).join('') + '</div>' +
       '<div class="clib-row"><button type="button" class="clib-btn main" data-go>Start 10 questions</button></div></section>';

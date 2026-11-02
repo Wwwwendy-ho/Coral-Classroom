@@ -594,3 +594,21 @@ body.r3-full .r3-musicbtn, body.r3-full .r3-themebtn, body.r3-full .r3-gamesbtn{
 .r3-menu.night .r3-menu-row .cc-ic{ color:#7fe0d0; }
 @media (prefers-reduced-motion: reduce){ .r3-menu{ transition:none; } }
 @media (max-height:500px){ .r3-menu{ display:grid; grid-template-columns:1fr 1fr; column-gap:4px; min-width:400px; } .r3-menu-row{ min-height:44px; } }
+/* drawn icons that stand in for emoji in UI text (see ui-icons.js) */
+.cc-ui-ic{ display:inline-flex; vertical-align:-.22em; line-height:0; }
+.cc-ui-ic .cc-ic{ width:1.2em; height:1.2em; vertical-align:0; }
+.r3-panel-e .cc-ui-ic .cc-ic, .clib-huge .cc-ui-ic .cc-ic, .grade-btn .emoji .cc-ui-ic .cc-ic, .clib-tile-e .cc-ui-ic .cc-ic, .clib-next-e .cc-ui-ic .cc-ic{ width:1em; height:1em; }
+/* The grown-up question gets the same sea as the rest of the game, not a blank page */
+.lock-screen.reef-gate{ position:fixed; inset:0; z-index:40; overflow:auto; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:max(20px, env(safe-area-inset-top, 0px)) 16px max(20px, env(safe-area-inset-bottom, 0px));
+  background:radial-gradient(ellipse 90% 45% at 50% -8%, rgba(255,255,255,.75), transparent 70%), linear-gradient(180deg, #c6f0ef 0%, #9adbdc 48%, #e9dcb8 100%); }
+.lock-screen.reef-gate .pin-wrap{ background:rgba(255,253,246,.82); border-radius:28px; padding:20px 18px 16px; box-shadow:0 14px 36px rgba(14,90,120,.18); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+.lock-screen.reef-gate h2{ margin-top:0; }
+:root[data-theme="dark"] .lock-screen.reef-gate{ background:radial-gradient(ellipse 90% 45% at 50% -8%, rgba(120,230,210,.18), transparent 70%), linear-gradient(180deg, #0c3340 0%, #0b2a35 55%, #132b2c 100%); }
+:root[data-theme="dark"] .lock-screen.reef-gate .pin-wrap{ background:rgba(16,48,58,.85); box-shadow:0 14px 36px rgba(0,0,0,.4); }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .lock-screen.reef-gate{ background:radial-gradient(ellipse 90% 45% at 50% -8%, rgba(120,230,210,.18), transparent 70%), linear-gradient(180deg, #0c3340 0%, #0b2a35 55%, #132b2c 100%); }
+  :root:not([data-theme="light"]) .lock-screen.reef-gate .pin-wrap{ background:rgba(16,48,58,.85); box-shadow:0 14px 36px rgba(0,0,0,.4); }
+}
+/* the Library's Claude/offline note shrinks to its icon on narrow phones, so page titles get the room */
+@media (max-width:420px){ .clib-source{ font-size:0; } .clib-source .cc-ui-ic .cc-ic{ width:1.25rem; height:1.25rem; } }
