@@ -624,11 +624,52 @@
     if(view.moving || view.dice && !view.dice.rolling) return;
     ov.classList.add('closing'); setTimeout(function(){ ov.remove(); }, 380);
     if(!view.zoomNow){ view.zoomCenter = null; view.zoomNow = 1.25; reef3dZoomFrame(view, performance.now()); }   // start from above, like the pinch
-    reef3dPlace(view, i); S.reef3dAt = i; view.dirty = true;
     var THREE = window.THREE, tp = new THREE.Vector3(), tl = new THREE.Vector3();
-    reef3dCamTarget(view, tp, tl); view.camPos.copy(tp); view.camLook.copy(tl);   // the board view waits at her new spot
+    function land(){
+      reef3dPlace(view, i); S.reef3dAt = i; view.dirty = true; view.moving = false;
+      reef3dCamTarget(view, tp, tl); view.camPos.copy(tp); view.camLook.copy(tl);   // the board view waits at her new spot
+    }
     try { Sound.bubbles(3); } catch(e){}
-    reef3dZoomTo(view, 0, reefCalm() ? 1 : 1000, function(){ view.zoomCenter = null; reef3dEmote(view, 'hello'); });
+    if(reefCalm()){ land(); return reef3dZoomTo(view, 0, 1, function(){ view.zoomCenter = null; }); }
+    // The trip, seen from above: as the map fades she swims up off her space and across the reef in an arc, a
+    // trail of bubbles behind her, while the view leans a little toward where she's going. Then the camera dives
+    // down to her new spot and she lands with a bounce and a wave.
+    var g = view.guide, from = g.position.clone(), s = view.spaces[i], to = new THREE.Vector3(s.x, .3 + (s.y || 0), s.z);
+    var slow = window.__reefSlowMo || 1;   // tests can film it in slow motion
+    var dist = from.distanceTo(to), dur = Math.min(1700, 900 + dist * 9) * slow, hop = Math.min(7, 2.5 + dist * .08), last = 0;
+    var c0 = view.zoomCenter ? view.zoomCenter.clone() : null, fl = new THREE.Vector3();
+    view.zoomAnim = null; view.zoomGoal = null;
+    var aura = new THREE.Sprite(reef3dGlowMat(view.night ? '#9ff6e6' : '#fff4c2', 0)); aura.scale.setScalar(3.4); view.scene.add(aura);   // a soft glow round her, so she's easy to follow
+    view.moving = true; view.emote = null;
+    view.fx.push({ t0: performance.now() + 250 * slow, dur: dur,
+      step: function(p){
+        if(p <= 0) return;
+        var e = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+        g.position.lerpVectors(from, to, e); g.position.y += hop * Math.sin(Math.PI * e);
+        g.rotation.y = Math.atan2(to.x - from.x, to.z - from.z);
+        var body = g.userData.body; if(body){ body.rotation.x = -.5 * Math.sin(Math.PI * e); body.position.y = 0; body.scale.set(1, 1, 1); }
+        // the view comes down from the whole map to follow her across, close enough to see her swim
+        var k = Math.min(1, p * 3); k = k * k * (3 - 2 * k);
+        if(c0 && view.zoomCenter){ fl.set(g.position.x, 0, g.position.z); view.zoomCenter.lerpVectors(c0, fl, k); }
+        view.zoomNow = 1.25 - .8 * k;
+        aura.position.set(g.position.x, g.position.y + .9, g.position.z); aura.material.opacity = .75 * Math.sin(Math.PI * Math.min(1, p * 1.15));
+        var now = performance.now(); if(now - last > 45 * slow){ last = now; reef3dTrailBubble(view, g.position); }
+        view.touchAt = now;
+      },
+      end: function(){
+        view.scene.remove(aura); aura.material.dispose();
+        land();
+        reef3dZoomTo(view, 0, 1200 * slow, function(){ view.zoomCenter = null; reef3dEmote(view, 'hello'); try { Sound.bloop(520, 0, .05); } catch(e){} }, true);
+      } });
+  }
+  // One bubble left behind as she swims across the map: it wobbles upward and fades
+  function reef3dTrailBubble(view, at){
+    var THREE = window.THREE, m = new THREE.Sprite(reef3dGlowMat(view.night ? '#bff7ee' : '#ffffff', .9));
+    var sz = .5 + Math.random() * .6, x = at.x + (Math.random() - .5) * .8, y = at.y + .6 + Math.random() * .5, z = at.z + (Math.random() - .5) * .8, ph = Math.random() * 6;
+    m.scale.setScalar(sz); m.position.set(x, y, z); view.scene.add(m);
+    view.fx.push({ t0: performance.now(), dur: 900,
+      step: function(p){ m.position.set(x + Math.sin(p * 9 + ph) * .25, y + p * 2.4, z); m.material.opacity = .9 * (1 - p); m.scale.setScalar(sz * (1 + p * .6)); },
+      end: function(){ view.scene.remove(m); m.material.dispose(); } });
   }
   // No label may cover another place's picture or label, or run off the parchment: a label that does tries the other
   // side of its picture, then a step up or down, and keeps the first spot that's clear.

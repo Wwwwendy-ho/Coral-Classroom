@@ -11,8 +11,9 @@
   var REEF3D_POST_VS = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }';
   var REEF3D_POST_DOWN = 'uniform sampler2D tSrc; uniform vec2 px; varying vec2 vUv;' +
     'void main(){ vec4 c = texture2D(tSrc, vUv + px * vec2(-1.0, -1.0)) + texture2D(tSrc, vUv + px * vec2(1.0, -1.0)) + texture2D(tSrc, vUv + px * vec2(-1.0, 1.0)) + texture2D(tSrc, vUv + px * vec2(1.0, 1.0)); gl_FragColor = c * 0.25; }';
-  var REEF3D_POST_BRIGHT = 'uniform sampler2D tSrc; uniform float thr; uniform float knee; varying vec2 vUv;' +
-    'void main(){ vec4 c = texture2D(tSrc, vUv); float l = dot(c.rgb, vec3(0.299, 0.587, 0.114)); float k = smoothstep(thr - knee, thr + knee, l); gl_FragColor = vec4(c.rgb * k * c.a, 1.0); }';
+  // (each light's share is capped, so a lantern near the camera glows softly instead of flaring)
+  var REEF3D_POST_BRIGHT = 'uniform sampler2D tSrc; uniform float thr; uniform float knee; uniform float cap; varying vec2 vUv;' +
+    'void main(){ vec4 c = texture2D(tSrc, vUv); float l = dot(c.rgb, vec3(0.299, 0.587, 0.114)); float k = smoothstep(thr - knee, thr + knee, l); vec3 e = c.rgb * k * c.a; float m = max(e.r, max(e.g, e.b)); e *= min(1.0, cap / max(m, 0.0001)); gl_FragColor = vec4(e, 1.0); }';
   // 9 taps along one direction (linear sampling makes it a 17-wide gaussian)
   var REEF3D_POST_BLUR = 'uniform sampler2D tSrc; uniform vec2 dir; varying vec2 vUv;' +
     'void main(){ vec4 c = texture2D(tSrc, vUv) * 0.2270270;' +
@@ -47,7 +48,7 @@
     var quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), null); quad.frustumCulled = false; sceneO.add(quad);
     var mat = function(fs, u){ return new THREE.ShaderMaterial({ vertexShader: REEF3D_POST_VS, fragmentShader: fs, uniforms: u, depthTest: false, depthWrite: false, transparent: false }); };
     var mDown = mat(REEF3D_POST_DOWN, { tSrc: { value: null }, px: { value: new THREE.Vector2() } });
-    var mBright = mat(REEF3D_POST_BRIGHT, { tSrc: { value: null }, thr: { value: .8 }, knee: { value: .12 } });
+    var mBright = mat(REEF3D_POST_BRIGHT, { tSrc: { value: null }, thr: { value: .8 }, knee: { value: .12 }, cap: { value: .45 } });
     var mBlur = mat(REEF3D_POST_BLUR, { tSrc: { value: null }, dir: { value: new THREE.Vector2() } });
     var U = { tScene: { value: main.texture }, tSoft: { value: soft.texture }, tBloom: { value: glow.texture }, bloomK: { value: .5 }, tiltK: { value: .85 }, focusY: { value: .44 }, band: { value: .2 },
       tint: { value: new THREE.Vector3(1, 1, 1) }, sat: { value: 1.1 }, contrast: { value: 1.05 }, vig: { value: .22 }, aspect: { value: 1 }, seed: { value: 0 } };

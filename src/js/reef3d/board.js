@@ -269,8 +269,8 @@
         [[-.35, -.35], [.35, -.35], [-.35, .35], [.35, .35]].forEach(function(p){ g.add(mesh(new THREE.CylinderGeometry(.05, .05, 1.3, 6), M('#b8902f'), p[0], .72, p[1])); });
         var glow = new THREE.Mesh(new THREE.SphereGeometry(.32, 16, 12), new THREE.MeshBasicMaterial({ color: '#ffe08a', fog: false })); glow.position.y = .72; g.add(glow);
         // a warm halo round the flame, so the lantern really glows in the dark water (the frame loop makes it flicker)
-        var halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: R3haloTex || (R3haloTex = reef3dBlobTex(true)), color: '#ffb84a', transparent: true, depthWrite: false, fog: false, blending: THREE.AdditiveBlending }));
-        halo.position.y = .72; halo.scale.setScalar(2.6); halo.renderOrder = 4; g.add(halo);
+        var halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: R3haloTex || (R3haloTex = reef3dBlobTex(true)), color: '#ffb84a', transparent: true, opacity: .42, depthWrite: false, fog: false, blending: THREE.AdditiveBlending }));
+        halo.position.y = .72; halo.scale.setScalar(2.1); halo.renderOrder = 4; g.add(halo);
         g.add(mesh(new THREE.TorusGeometry(.18, .05, 6, 14), M('#b8902f'), 0, 1.62, 0)); g.userData.glow = glow; g.userData.halo = halo;
         reefCrabMerge(g, [glow]);   // the brass frame in one draw; the flame stays apart so it can flicker
         return g; },
@@ -1159,7 +1159,7 @@
       if(view.plume) reef3dPlume(view.plume, view.dummy, t);
       if(view.lamp){ var lf = .5 + Math.sin(t * 1.6) * .5, fk = Math.sin(t * 7.3) * .5 + Math.sin(t * 11.1) * .5;   // a slow breath plus a candle flicker
         view.lamp.pool.material.opacity = .85 + lf * .12 + fk * .03; if(view.lamp.glow) view.lamp.glow.material.color.setHSL(.12, 1, .68 + lf * .08);
-        if(view.lamp.halo){ view.lamp.halo.scale.setScalar(3.4 + lf * .5 + fk * .12); view.lamp.halo.material.opacity = .85 + fk * .1; } }
+        if(view.lamp.halo){ view.lamp.halo.scale.setScalar(3.4 + lf * .5 + fk * .12); view.lamp.halo.material.opacity = .62 + fk * .08; } }
       view.ring.scale.setScalar(1 + Math.sin(t * 2.4) * .06);
       var parts = view.guide.userData.parts, mv = view.moving;
       var fl = mv ? 1 : q.flap;

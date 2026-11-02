@@ -642,12 +642,12 @@
       var k = Math.max(0, Math.min(1, ((sp.x - cam.x) * lx + (sp.y - cam.y) * ly + (sp.z - cam.z) * lz) / ll));
       var dx = cam.x + lx * k - sp.x, dy = cam.y + ly * k - sp.y, dz = cam.z + lz * k - sp.z, d = Math.sqrt(dx * dx + dy * dy + dz * dz);
       var near = sp.distanceTo(cam) < 9, block = k > .02 && k < .98 && d < sl.userData.halfW + 1.5;
-      var want = view.zoomNow > .3 ? 1 : block || near ? .22 : 1;   // from high above (the map) they're part of the picture
+      var want = view.zoomNow > .9 ? 1 : block || near ? .22 : 1;   // from high above (the map) they're part of the picture
       var u = sl.userData; u.fade += (want - u.fade) * (calm ? 1 : .12);
       sl.material.opacity = u.fade; sl.material.depthWrite = u.fade > .9;
     });
     (w.rigs || []).forEach(function(rg){
-      var want = view.zoomNow > .3 ? 1 : Math.hypot(g.x - rg.x, g.z - rg.z) < 8 ? .15 : 1;
+      var want = view.zoomNow > .9 ? 1 : Math.hypot(g.x - rg.x, g.z - rg.z) < 8 ? .15 : 1;
       rg.fade += (want - rg.fade) * (calm ? 1 : .12);
       rg.mats.forEach(function(m){ m.opacity = rg.fade; m.depthWrite = rg.fade > .9; });
     });

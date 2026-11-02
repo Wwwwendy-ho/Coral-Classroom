@@ -1,5 +1,15 @@
 # Changelog
 
+## Softer lamps, and a real trip when you travel by map (November 2, 2026)
+
+- **The lanterns glow instead of flaring.** Each light's share of the glow is capped, and the lanterns' own halos
+  are smaller and softer, so a lantern close to the camera shows its brass frame and flame, not a block of light.
+- **Travelling by the treasure map is a journey now.** Pick a place and the map fades. The camera comes down from
+  above to follow Shelly (or Lumi) as she swims across the reef in an arc, glowing softly with a trail of bubbles
+  behind her. Then the camera dives down to her new spot and she lands with a wave. Calm Motion still goes
+  straight there.
+- Sails and rigging stay see-through on the way down if they'd hide her.
+
 ## A clear view around the ship's masts (November 2, 2026)
 
 - **Sails turn see-through when they're in the way.** If a sail comes between the camera and Shelly (or Lumi), or
