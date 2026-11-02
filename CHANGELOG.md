@@ -1,5 +1,11 @@
 # Changelog
 
+## Map travel: you see the whole pull-out now (November 2, 2026)
+
+- The treasure map is already a view from above, so pulling out from there barely showed. Now, as the map
+  closes, the view is back down at Shelly (or Lumi), and the whole climb plays out: up and away until she's too
+  small to see, then the dive down onto her new spot.
+
 ## Map travel: pull out, then dive back in (November 2, 2026)
 
 - **Travelling by the treasure map now pulls right out and dives back in.** Pick a place and the camera rises

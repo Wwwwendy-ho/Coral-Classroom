@@ -20966,7 +20966,6 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   function reef3dMapJump(view, ov, i){
     if(view.moving || view.dice && !view.dice.rolling) return;
     ov.classList.add('closing'); setTimeout(function(){ ov.remove(); }, 380);
-    if(!view.zoomNow){ view.zoomCenter = null; view.zoomNow = 1.25; reef3dZoomFrame(view, performance.now()); }   // start from above, like the pinch
     var THREE = window.THREE, tp = new THREE.Vector3(), tl = new THREE.Vector3();
     function land(){
       reef3dPlace(view, i); S.reef3dAt = i; view.dirty = true; view.moving = false;
@@ -20978,12 +20977,18 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     // too small to see, drifting over toward where she's going. While she's out of sight she moves there, then the
     // camera dives back down onto her new spot and she lands with a wave.
     var slow = window.__reefSlowMo || 1;   // tests can film it in slow motion
-    var s = view.spaces[i], to = new THREE.Vector3(s.x, 0, s.z), c0 = view.zoomCenter ? view.zoomCenter.clone() : to.clone(), z0 = view.zoomNow || 1.25, TOP = 2.2;
+    // Behind the closing map the view goes back down to her (the map was already a view from above, so pulling out
+    // from there barely showed), then the whole climb from her up to the little world plays out in front of you.
+    var s = view.spaces[i], to = new THREE.Vector3(s.x, 0, s.z), z0 = 0, TOP = 2.2;
+    var c0 = new THREE.Vector3(view.guide.position.x, 0, view.guide.position.z);
     view.zoomAnim = null; view.zoomGoal = null; view.moving = true; view.emote = null;
-    view.fx.push({ t0: performance.now() + 200 * slow, dur: 1100 * slow,
+    if(!view.zoomH){ view.zoomCenter = null; view.zoomNow = .01; reef3dZoomFrame(view, performance.now()); }   // (works out how high 'the whole board' is)
+    view.zoomNow = 0; view.zoomCenter = c0.clone();
+    reef3dCamTarget(view, tp, tl); view.camPos.copy(tp); view.camLook.copy(tl);
+    view.fx.push({ t0: performance.now() + 150 * slow, dur: 1500 * slow,
       step: function(p){
         if(p <= 0) return;
-        var e = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+        var e = p * p * (3 - 2 * p);   // eases away from her, speeds up, then settles high above
         view.zoomNow = z0 + (TOP - z0) * e;
         if(view.zoomCenter) view.zoomCenter.lerpVectors(c0, to, e);
         view.touchAt = performance.now();
