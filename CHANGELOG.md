@@ -1,5 +1,16 @@
 # Changelog
 
+## A clear view around the ship's masts (November 2, 2026)
+
+- **Sails turn see-through when they're in the way.** If a sail comes between the camera and Shelly (or Lumi), or
+  hangs right in front of the camera, it fades to a ghost of itself and fills back in once she has moved on.
+- **The rigging and yards fade too** when she's standing near that mast, so ropes no longer criss-cross the view.
+  The ropes are also a touch darker, so they don't glow.
+- **The camera steps around the mast in the hold**, as it already did on the top deck. On phones that mast could
+  fill most of the screen.
+- The light beam over the next deck is softer when it's right next to the camera.
+- Zoomed out over the map, everything shows in full, so the ship still looks like a ship.
+
 ## A more beautiful reef: glow, a miniature-world look, a living board and a swoop-in (November 2, 2026)
 
 - **The look.** Every 3D scene (the board, the profile lobby, the aquarium) now has:

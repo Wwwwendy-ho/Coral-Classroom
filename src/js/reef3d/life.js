@@ -51,7 +51,7 @@
     L.beam.visible = on;
     if(on){
       var x = st.position.x, z = st.position.z; L.beam.position.set(x, view.groundY(x, z), z);
-      var pulse = calm ? 1 : .85 + .15 * Math.sin(t * 2.2);
+      var pulse = (calm ? 1 : .85 + .15 * Math.sin(t * 2.2)) * Math.max(.3, Math.min(1, (Math.hypot(view.cam.position.x - x, view.cam.position.z - z) - 6) / 10));   // softer up close, so it never blinds the view
       L.outer.material.opacity = (view.night ? .28 : .2) * pulse; L.core.material.opacity = (view.night ? .55 : .4) * pulse;
       L.outer.rotation.y = t * .3;
       L.motes.forEach(function(m){

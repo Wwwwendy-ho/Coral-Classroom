@@ -87,6 +87,7 @@
   window.__reef3dGo = function(i){ if(R3.view) reef3dGoTo(R3.view, i); };   // test helper
   window.__reef3dDice = function(){ if(R3.view) reef3dDice(R3.view); };   // test helper
   window.__reefBoard = function(){ return reefBoard(); };   // test helper
+  window.__reef3dPlace = function(i){ if(R3.view){ reef3dPlace(R3.view, i); R3.view.touchAt = performance.now(); } };   // test helper: put her on a space, no deck
   window.__reef3dCelebrate = function(){ if(R3.view) reef3dCelebrate(R3.view); };   // test helper
   window.__reef3dEmote = function(n){ if(R3.view) reef3dEmote(R3.view, n); return R3.view && R3.view.emote && R3.view.emote.name; };   // test helper   // test helper
   window.__reef3dInfo = function(){ var v = R3.view; return v ? { calls: v.renderer.info.render.calls, triangles: v.renderer.info.render.triangles, tier: R3.q, fps: v.fps } : { tier: R3.q }; };
@@ -1065,7 +1066,8 @@
       }
       if(st && gy < st.low + .8){   // down in the hold: high above and looking steeply down, so the broken deck edge
         // and the top deck's things don't block her, and the path ahead along the hold stays in view
-        out.set(g.x * f, gy + 15.5, g.z + 7.5); look.set(g.x * (f + .05), gy + .2, g.z - 5.5); view.camMode = 'hold'; return;
+        out.set(g.x * f, gy + 15.5, g.z + 7.5); look.set(g.x * (f + .05), gy + .2, g.z - 5.5); view.camMode = 'hold';
+        reef3dCamMasts(view, out, 3.4); return;   // the mast that rises out of the hold is tall: step round it here too
       }
       var sd2 = view.shipDeck, side = g.x > 0 ? 1 : -1;
       if(sd2 && Math.abs(g.x) > sd2.half + .5){   // off the ship on the sand: the camera goes out there too, not behind the hull
@@ -1074,18 +1076,21 @@
       // Elsewhere on the ship it sits lower and looks ahead, so the masts, sails and the drop to the hold show.
       out.set(g.x * f, 10.5 + gy * .55, g.z + 12.5 + (gy < -1 ? -gy * .25 : 0));
       look.set(g.x * (f + .05), gy + 1.4, g.z - 4.5); view.camMode = 'deck';
-      // a mast standing between the camera and her: slide the camera sideways until it clears
-      var ms = view.wreck && view.wreck.masts;
-      (ms || []).forEach(function(m){
-        var dx = g.x - out.x, dz = g.z - out.z, L2 = dx * dx + dz * dz, u = ((m.x - out.x) * dx + (m.z - out.z) * dz) / L2;
-        if(u < .08 || u > .92) return;
-        var px = out.x + dx * u - m.x, pz = out.z + dz * u - m.z, dist = Math.sqrt(px * px + pz * pz);
-        if(dist < 2.8){ var push = (2.8 - dist) / (1 - u) + .4, dir = px !== 0 ? Math.sign(px) : (m.x > g.x ? -1 : 1); out.x += dir * push; }
-      });
+      reef3dCamMasts(view, out, 2.8);
       return;
     }
     out.set(g.x * f, 13 + gy, g.z + 10.5);
     look.set(g.x * (f + .05), gy, g.z - 2.6);
+  }
+  // A mast standing between the camera and her: slide the camera sideways until it clears (by room, in units).
+  function reef3dCamMasts(view, out, room){
+    var g = view.guide.position, ms = view.wreck && view.wreck.masts;
+    (ms || []).forEach(function(m){
+      var dx = g.x - out.x, dz = g.z - out.z, L2 = dx * dx + dz * dz, u = ((m.x - out.x) * dx + (m.z - out.z) * dz) / L2;
+      if(u < .08 || u > .92) return;
+      var px = out.x + dx * u - m.x, pz = out.z + dz * u - m.z, dist = Math.sqrt(px * px + pz * pz);
+      if(dist < room){ var push = (room - dist) / (1 - u) + .4, dir = px !== 0 ? Math.sign(px) : (m.x > g.x ? -1 : 1); out.x += dir * push; }
+    });
   }
   function reef3dSize(view){
     var w = view.wrap.clientWidth || 1, h = view.wrap.clientHeight || 1;
@@ -1255,6 +1260,7 @@
     view.frameN = (view.frameN || 0) + 1;
     var busy = view.moving || view.fx.length || view.camPos.distanceToSquared(tp) > .0004;
     if(busy || view.frameN % (view.every === 2 ? 6 : 12) === 0) view.renderer.shadowMap.needsUpdate = true;
+    reef3dSailFade(view, calm);
     if(view.post && view.post.on){
       // the sharp band of the miniature blur follows her on screen; pulled out over the map, the whole reef goes miniature
       var fp = view.guide.position.clone().project(view.cam), fy = Math.min(.8, Math.max(.2, (fp.y + 1) / 2)), zk = Math.min(1, view.zoomNow || 0);

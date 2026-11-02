@@ -444,31 +444,46 @@
       S.add(mesh(new THREE.CylinderGeometry(.62, .62, .3, 10), trimM, mx, base + .15, mz));
       if(broken){ var stub2 = mesh(new THREE.CylinderGeometry(.24, .26, 7, 10), mastM, mx - side * 3.4, base + .4, mz + 1.4); stub2.rotation.set(0, .5, side * (Math.PI / 2 - .1)); if(clear(stub2.position.x, stub2.position.z, 3.6)) S.add(stub2); return; }
       var yardY = Math.max(h * .72 + .8, UP - base + 9.9), yardL = Math.min(W * .72, 13);   // long yards: from above they make the cross shapes of a ship's masts
-      var yard = mesh(new THREE.CylinderGeometry(.12, .12, yardL, 8), mastM, 0, yardY, 0); yard.rotation.z = Math.PI / 2; yard.rotation.y = .25; mast.add(yard);
-      var yard2 = mesh(new THREE.CylinderGeometry(.1, .1, yardL * .8, 8), mastM, 0, yardY - 3.4, 0); yard2.rotation.z = Math.PI / 2; yard2.rotation.y = .25; mast.add(yard2);
+      var yard = mesh(new THREE.CylinderGeometry(.12, .12, yardL, 8), mastM, 0, yardY, 0); yard.rotation.z = Math.PI / 2; yard.rotation.y = .25; mast.add(yard); var myYards = [yard];
+      var yard2 = mesh(new THREE.CylinderGeometry(.1, .1, yardL * .8, 8), mastM, 0, yardY - 3.4, 0); yard2.rotation.z = Math.PI / 2; yard2.rotation.y = .25; mast.add(yard2); myYards.push(yard2);
       mast.add(mesh(new THREE.CylinderGeometry(.85, .6, .7, 12, 1, true), M('#3f3024', { side: THREE.DoubleSide }), 0, h - .8, 0));
       var sailY = Math.max(base + h * .72 - 1.6, UP + 7.6);   // every sail's foot sits well above the top deck, where the fish swim
       var sailW = yardL * .82;   // a full sail between the yards, billowing out, so from above it shows as a pale crescent
-      var sail = new THREE.Mesh(new THREE.PlaneGeometry(sailW, 4.4, 10, 4), sailMat); sail.position.set(mx, sailY, mz + .2); sail.rotation.set(0, .25, lean);
+      // each sail has its own material so it can fade on its own when it comes between the camera and her (see reef3dWreckTick);
+      // a lower alpha cut-off than the shared one lets it go see-through while the torn holes stay holes
+      var sm = sailMat.clone(); sm.alphaTest = .15;
+      var sail = new THREE.Mesh(new THREE.PlaneGeometry(sailW, 4.4, 10, 4), sm); sail.userData.fade = 1; sail.userData.halfW = sailW / 2; (out.sails = out.sails || []).push(sail); sail.position.set(mx, sailY, mz + .2); sail.rotation.set(0, .25, lean);
       var sa = sail.geometry.attributes.position; for(var v = 0; v < sa.count; v++) sa.setZ(v, Math.sin((sa.getX(v) + sailW / 2) / sailW * Math.PI) * 1.7);
       sail.geometry.computeVertexNormals(); sail.raycast = function(){}; D.add(sail);
       var lan = B.lantern(); lan.position.set(mx + side * .55, base + 3.3, mz + .5); lan.scale.setScalar(.7); D.add(lan); o.deckObjs.push(lan);
-      mastTops.push({ x: mx, z: mz, top: base + h, base: base, side: side });
+      mastTops.push({ x: mx, z: mz, top: base + h, base: base, side: side, mast: mast, yards: myYards });
     });
     // Rigging, so the ship reads as a ship from above too: shrouds fanning from each mast top down to both rails,
     // and stays running fore and aft. Plus deck furniture: grated hatches, coils of rope, a rowboat by the rail.
-    var ropeM = M('#b8955e');   // pale hemp, so the rigging shows against the dark deck
-    function rope(a, b, r){ var len = a.distanceTo(b); if(len < .1) return; var m = new THREE.Mesh(new THREE.CylinderGeometry(r || .07, r || .07, len, 5), ropeM);
-      m.position.copy(a).add(b).multiplyScalar(.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize()); m.raycast = function(){}; S.add(m); }
+    var ropeM = M('#a3855a');   // pale hemp, so the rigging shows against the dark deck (not so pale that it glows)
+    function rope(a, b, r, grp){ var len = a.distanceTo(b); if(len < .1) return; var m = new THREE.Mesh(new THREE.CylinderGeometry(r || .07, r || .07, len, 5), grp ? grp.userData.ropeM : ropeM);
+      m.position.copy(a).add(b).multiplyScalar(.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize()); m.raycast = function(){}; (grp || S).add(m); }
     var V3 = function(x, y, z){ return new THREE.Vector3(x, y, z); };
-    mastTops.forEach(function(mt, k){
-      var hw = d.half + .1, top = V3(mt.x, mt.top - .8, mt.z);
-      [-1, 1].forEach(function(side){ for(var q = -2; q <= 1; q++) rope(top, V3(side * hw, TOP + .8, mt.z + q * 1.1 + .6)); });
-      var nxt = mastTops[k + 1];
-      if(nxt) rope(V3(mt.x, mt.top - .6, mt.z), V3(nxt.x, Math.min(nxt.top, mt.top) - 2, nxt.z), .09);   // a stay to the next mast
-      else rope(V3(mt.x, mt.top - .6, mt.z), V3(0, (st ? LOW : UP) + 3.2, bowZ - bowLen - 4.5), .09);    // the last one runs out to the bowsprit
-      if(k === 0) rope(V3(mt.x, mt.top - .6, mt.z), V3(0, TOP + 1, zc0 + sternLen * .8), .09);           // and the first back to the stern
+    // Each mast's rigging and yards are its own little group with its own (fadeable) materials: when she stands near
+    // a mast they'd criss-cross the view, so they fade to a ghost there, like the sails (see reef3dSailFade).
+    out.rigs = [];
+    mastTops.forEach(function(mt){
+      var grp = new THREE.Group(); grp.userData.ropeM = ropeM.clone(); grp.userData.ropeM.transparent = true;
+      var ym = mastM.clone(); ym.transparent = true;
+      mt.mast.updateMatrix();
+      mt.yards.forEach(function(y){ mt.mast.remove(y); y.applyMatrix4(mt.mast.matrix); y.material = ym; grp.add(y); });
+      D.add(grp); mt.rig = grp; out.rigs.push({ x: mt.x, z: mt.z, grp: grp, mats: [grp.userData.ropeM, ym], fade: 1 });
     });
+    mastTops.forEach(function(mt, k){
+      var R = function(a, b, r){ rope(a, b, r, mt.rig); };
+      var hw = d.half + .1, top = V3(mt.x, mt.top - .8, mt.z);
+      [-1, 1].forEach(function(side){ for(var q = -2; q <= 1; q++) R(top, V3(side * hw, TOP + .8, mt.z + q * 1.1 + .6)); });
+      var nxt = mastTops[k + 1];
+      if(nxt) R(V3(mt.x, mt.top - .6, mt.z), V3(nxt.x, Math.min(nxt.top, mt.top) - 2, nxt.z), .09);   // a stay to the next mast
+      else R(V3(mt.x, mt.top - .6, mt.z), V3(0, (st ? LOW : UP) + 3.2, bowZ - bowLen - 4.5), .09);    // the last one runs out to the bowsprit
+      if(k === 0) R(V3(mt.x, mt.top - .6, mt.z), V3(0, TOP + 1, zc0 + sternLen * .8), .09);           // and the first back to the stern
+    });
+    out.rigs.forEach(function(rg){ reefCrabMerge(rg.grp, []); rg.grp.traverse(function(m){ m.raycast = function(){}; }); });
     var hatchM = M('#2a1f16'), grateM = M('#5b4632');
     for(var hz2 = zc0 - 9, hn = 0; hz2 > (st ? holeZ + 4 : bowZ + 6) && hn < 6; hz2 -= 11){
       var hx2 = (hn % 2 ? 1 : -1) * (d.half - 3.2); if(!clear(hx2, hz2, 2.8)){ hx2 = -hx2; if(!clear(hx2, hz2, 2.8)) continue; } hn++;
@@ -614,6 +629,28 @@
     for(var g2 = 0; g2 < 5; g2++){ var wsp = glowSprite('#8dffd0', .9 + r() * .6, .5); var mt = mastTops[g2 % Math.max(1, mastTops.length)] || { x: 0, z: zc0 - 5, top: 6, base: UP };
       wsp.userData = { x: mt.x, z: mt.z, y: mt.base + 2 + r() * (Math.min(mt.top, UP + 4.4) - mt.base - 2), ph: r() * 6, rad: 1.5 + r() * 2.5 }; o.scene.add(wsp); out.wisps.push(wsp); }   // kept under the sails
     return out;
+  }
+  // A sail that hides her (or hangs right in front of the camera) fades to a ghost of itself, and fills back in
+  // once she has moved on. Checked against the line from the camera to her middle. Runs every drawn frame (Calm
+  // Motion too, where it changes at once instead of fading).
+  function reef3dSailFade(view, calm){
+    var THREE = window.THREE, w = view.wreck; if(!w || !(w.sails || w.rigs)) return;
+    var g = view.guide.position, cam = view.cam.position, hx = g.x, hy = g.y + 1, hz = g.z, sp = new THREE.Vector3();
+    var lx = hx - cam.x, ly = hy - cam.y, lz = hz - cam.z, ll = lx * lx + ly * ly + lz * lz || 1;
+    (w.sails || []).forEach(function(sl){
+      sl.getWorldPosition(sp);
+      var k = Math.max(0, Math.min(1, ((sp.x - cam.x) * lx + (sp.y - cam.y) * ly + (sp.z - cam.z) * lz) / ll));
+      var dx = cam.x + lx * k - sp.x, dy = cam.y + ly * k - sp.y, dz = cam.z + lz * k - sp.z, d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      var near = sp.distanceTo(cam) < 9, block = k > .02 && k < .98 && d < sl.userData.halfW + 1.5;
+      var want = view.zoomNow > .3 ? 1 : block || near ? .22 : 1;   // from high above (the map) they're part of the picture
+      var u = sl.userData; u.fade += (want - u.fade) * (calm ? 1 : .12);
+      sl.material.opacity = u.fade; sl.material.depthWrite = u.fade > .9;
+    });
+    (w.rigs || []).forEach(function(rg){
+      var want = view.zoomNow > .3 ? 1 : Math.hypot(g.x - rg.x, g.z - rg.z) < 8 ? .15 : 1;
+      rg.fade += (want - rg.fade) * (calm ? 1 : .12);
+      rg.mats.forEach(function(m){ m.opacity = rg.fade; m.depthWrite = rg.fade > .9; });
+    });
   }
   // Every frame at night: jellyfish pulse and drift (staying near her, like the bubbles), ghost lights wander and
   // flicker, the flag ripples, the octopus's tentacles sway, the eel bobs and the treasure glints.
