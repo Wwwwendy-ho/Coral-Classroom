@@ -14,7 +14,7 @@
     '🧩':'puzzle', '🗣':'talk', '💬':'talk', '💭':'talk', '🎙':'mic', '🎤':'mic', '🔇':'sound-off', '🔊':'sound', '🔈':'sound', '🌓':'moon', '🌙':'moon', '☀':'sun',
     '🎚':'sliders', '🔄':'flip', '🔁':'replay', '🔘':'choice', '🧲':'pairs', '👂':'ear', '🔢':'counting', '🚫':'close', '📚':'library', '🔍':'search', '🔎':'search',
     '🖨':'printer', '📂':'folder', '💛':'heart', '🎯':'target', '🧭':'compass', '🌱':'seedling', '🏫':'school', '🏝':'island', '⚓':'anchor', '🎲':'dice',
-    '🔀':'shuffle', '🤔':'ask', '❓':'ask', '😌':'bed', '📴':'cloud-off', '🗺':'map', '🎮':'games', '🏷':'cards', '🎓':'school', '🔬':'flask', '🧪':'flask'
+    '🔀':'shuffle', '🤔':'ask', '❓':'ask', '😌':'bed', '📴':'cloud-off', '🗺':'map', '🎮':'games', '🏷':'cards', '🎓':'school', '🔬':'flask', '🧪':'flask', '⬆':'arrow-up', '🍾':'bottle'
   };
   // where UI text lives (anything else is left alone), and where learning content lives (always left alone)
   var UI_SEL = 'button, [role="button"], h1, h2, h3, h4, label, .nav-title, .read-label, .deck-badge, .label, .ic, .icon, .emoji, .hof-title, .clib-source, ' +

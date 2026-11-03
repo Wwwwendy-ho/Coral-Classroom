@@ -142,10 +142,11 @@
   80%{ opacity:1; transform:translate(-50%,-60%) scale(1); } 100%{ opacity:0; transform:translate(-50%,-90%) scale(.9); } }
 body.reef-calm .r3-dice-tip, body.reef-calm .r3-dice-num{ animation:none !important; }
 /* a fork in the path: two big buttons to pick a way */
-.r3-fork{ position:absolute; z-index:5; left:50%; bottom:calc(max(16px, env(safe-area-inset-bottom, 0px)) + 74px); transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:8px;
+/* centred with left/right + auto margins, not a transform: its pop-in animation sets transform and would undo the centring */
+.r3-fork{ position:absolute; z-index:5; left:16px; right:16px; margin:0 auto; bottom:calc(max(16px, env(safe-area-inset-bottom, 0px)) + 74px); display:flex; flex-direction:column; align-items:center; gap:8px;
   padding:12px 14px; border-radius:22px; background:rgba(251,246,234,.95); box-shadow:0 6px 18px rgba(30,60,60,.2); animation:r3Pop2 .3s var(--reef-pop) both; width:max-content; max-width:calc(100% - 32px); }
 .r3-fork b{ font:800 1.1rem 'Baloo 2',sans-serif; color:#3f2c1b; }
-.r3-fork button{ border:none; cursor:pointer; padding:10px 18px; border-radius:16px; font:800 1.05rem 'Baloo 2',sans-serif; min-width:190px;
+.r3-fork button{ display:inline-flex; align-items:center; justify-content:center; gap:8px; border:none; cursor:pointer; padding:10px 18px; border-radius:16px; font:800 1.05rem 'Baloo 2',sans-serif; min-width:190px;
   background:linear-gradient(180deg, #f6e7c4, #e8d2a0); color:#5a3d1d; box-shadow:0 4px 0 #b08d5a; -webkit-tap-highlight-color:transparent; }
 .r3-fork button:active{ transform:translateY(3px); box-shadow:0 1px 0 #b08d5a; }
 .r3.night .r3-fork{ background:rgba(20,52,58,.95); } .r3.night .r3-fork b{ color:#f6e9c8; }
@@ -612,3 +613,4 @@ body.r3-full .r3-musicbtn, body.r3-full .r3-themebtn, body.r3-full .r3-gamesbtn{
 }
 /* the Library's Claude/offline note shrinks to its icon on narrow phones, so page titles get the room */
 @media (max-width:420px){ .clib-source{ font-size:0; } .clib-source .cc-ui-ic .cc-ic{ width:1.25rem; height:1.25rem; } }
+.r3-fork .cc-ic{ width:1.3em; height:1.3em; color:#2a8f8a; }   /* the buttons are cream by day and night */

@@ -1,5 +1,11 @@
 # Changelog
 
+## The "Which way?" choice sits in the middle again (November 3, 2026)
+
+- **The fork panel was pushed off the right edge of the screen.** Its pop-in animation was undoing the centring, so
+  half of it hung off the side. It's now centred on every screen size, upright or sideways.
+- Its buttons use drawn icons (an arrow, a bottle, a fish) instead of emoji, like the rest of the game.
+
 ## The wreck lists over into the sand (November 2, 2026)
 
 - **The shipwreck now leans well over to one side**, that side sunk deeper into the sand, like a ship that settled
