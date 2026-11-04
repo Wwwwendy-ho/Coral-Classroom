@@ -1,5 +1,12 @@
 # Changelog
 
+## Tidy-up after the move (November 4, 2026)
+
+- The app now lives at **https://wwwwendy-ho.github.io/Coral-Classroom/** (capital letters matter). Add it to the Home
+  Screen from there; the old icons can be deleted.
+- Removed the extra copy of the site kept for an older address. Nothing serves that address any more, and it made
+  every update twice as large.
+
 ## Coral Cove is now Coral Classroom (November 4, 2026)
 
 - **The app is now called Coral Classroom**: on the title screen, the Home Screen icon's name, the page title, and

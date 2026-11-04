@@ -42,7 +42,7 @@ The practice word on the deck screen is picked at random and can differ between 
   CSS feature (`dvh`, `color-mix`, `clamp`, `min`, `max`, `env`), which older iPads need.
 - `python3 tools/check/cssedit.py unused CLASS …` removes the selectors that use those classes.
 
-After either, run `sh tools/mirror.sh` and compare screenshots as above.
+After either, compare screenshots as above.
 
 ## First-time setup
 

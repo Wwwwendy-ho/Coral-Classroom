@@ -24,10 +24,8 @@ See `CHANGELOG.md` for what changed in each update, and `ARCHITECTURE.md` for ho
 | `manifest.webmanifest`, `icon-*.png` | Home Screen app name and icon |
 | `sw.js` | Lets the app open without Wi-Fi |
 | `.nojekyll` | Tells GitHub Pages to serve the files as they are |
-| `coral-cove/` | A copy of the site, kept for devices that saved the older address ending in `/coral-cove/` |
 | `tools/build_claude.py` | Builds the Claude version (one self-contained page) from this repository |
 | `tools/export_seed.py` | Replaces the starting data with an export of the Claude version's database |
-| `tools/mirror.sh` | Copies the site into `coral-cove/` after a change |
 | `tools/check/` | Checks to run before pushing: lint, style audit, browser smoke test, screen comparison (see its README) |
 | `tools/words/` | Builds Ask Shelly's offline dictionary |
 | `tools/compose_music.py` | Makes the background songs |

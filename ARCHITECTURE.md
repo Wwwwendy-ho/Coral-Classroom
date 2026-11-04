@@ -19,7 +19,6 @@ how they fit together. Function names below can be searched for in the files.
 | `three.min.js` | three.js r128 |
 | `*.mp3`, `voice/` | Background songs and the natural voice packs |
 | `sw.js`, `manifest.webmanifest`, `icon-*.png` | Offline support and the Home Screen app |
-| `coral-cove/` | An exact copy of the site for iPads saved on the old address (`tools/mirror.sh` keeps it in sync) |
 | `tools/` | Build and check scripts (see Tools) |
 
 ## Editing the code
@@ -40,7 +39,7 @@ another, as when it was all one file. Keep new code in the file it belongs to, a
 include line in `page.html`.
 
 After an edit: `python3 tools/build.py` writes `index.html` (each file in it sits between `/* from src/... */` and
-`/* end of src/... */` comment lines, which help when reading errors in the browser), then `sh tools/mirror.sh`,
+`/* end of src/... */` comment lines, which help when reading errors in the browser),
 then `sh tools/check/run.sh`. The check fails if `index.html` wasn't rebuilt, and lint gives `src/` file names and
 line numbers.
 
@@ -147,13 +146,12 @@ for an existing rule before adding one; `tools/check/css_audit.py` reports value
 | Tool | Use |
 | --- | --- |
 | `tools/build.py` | Builds `index.html` from `src/` |
-| `tools/check/run.sh` | Run before every push: build check, lint, style audit, mirror check, word tests, browser smoke test |
+| `tools/check/run.sh` | Run before every push: build check, lint, style audit, word tests, browser smoke test |
 | `tools/check/snapshots.js` + `compare.py` | Screenshots and computed styles of 16 screens, to compare before and after a change |
 | `tools/build_claude.py` | Builds the Claude version into `build/` |
 | `tools/export_seed.py` | Replaces the starting data with a database export from the Claude version |
-| `tools/mirror.sh` | Copies the site into `coral-cove/` |
 | `tools/words/` | Builds the offline dictionary |
 | `tools/compose_music.py` | Makes the songs |
 
 After changing site files: run `python3 tools/build.py`, bump the cache name in `sw.js` (so iPads fetch the new
-version), run `sh tools/mirror.sh`, then `sh tools/check/run.sh`.
+version), then run `sh tools/check/run.sh`.
