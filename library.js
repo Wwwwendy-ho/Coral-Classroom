@@ -511,6 +511,7 @@
       '<p class="co-meta">' + co.minutes + ' minutes a day, ' + co.days + ' days a week · about ' + co.perDay + ' new words a study day · ' + niceDate(co.start) + ' to ' + niceDate(co.end) + (co.target ? ' · trip ' + niceDate(co.target) : '') + '</p>' +
       (co.fitNote ? '<p class="co-meta">' + esc(co.fitNote) + '</p>' : '') + '</section>';
     html += headHtml;
+    html += knowCard();
     html += '<h3 class="clib-more-h">The course</h3><ol class="co-line">' + co.units.map(function(u, i){
       var st = u.done ? 'done' : u === now ? 'now' : u.start > t ? 'later' : 'open';
       return '<li class="co-u ' + st + (u.review ? ' review' : '') + '"><details' + (u === now ? ' open' : '') + '><summary><span class="co-dot" aria-hidden="true">' + (u.done ? '✓' : i + 1) + '</span><span class="co-ut"><b>' + esc(u.title) + '</b><small>' + niceDate(u.start) + ' – ' + niceDate(u.end) + ' · ' + u.weeks + ' week' + (u.weeks === 1 ? '' : 's') + (u.testedOut ? ' · quick review' : '') + (u.done ? ' · done' : '') + '</small></span></summary>' +
@@ -531,6 +532,18 @@
     $$('[data-co-skip]', el).forEach(function(b){ b.addEventListener('click', function(){ var u = co.units[+b.dataset.coSkip]; u.done = true; u.doneOn = today(); co.log.push({ date: today(), text: u.title + ' marked done without a check.' }); courseSchedule(co); saveCourse(co).then(function(){ go('classroom', null, true); }); }); });
     $('[data-co-off]', el).addEventListener('click', function(){ var c = CC(); if(c && c.setCourseOn) Promise.resolve(c.setCourseOn(false)).then(function(){ go('home', null, true); }); });
   } };
+  // "What you know": the learner model's count per skill (hear, read, recall, say, use). Hidden until there's
+  // something in it, so a new profile isn't shown a wall of zeros.
+  var KNOW_SKILLS = [['hear', 'ear', 'Hear it'], ['read', 'story', 'Read it'], ['recall', 'bulb', 'Recall it'], ['say', 'mic', 'Say it'], ['use', 'sentence', 'Use it']];
+  function knowCard(){
+    var c = CC(), sum = null;
+    try { sum = c && c.learner ? c.learner.summary() : null; } catch(e){}
+    if(!sum || !sum.items) return '';
+    return '<section class="clib-card co-know"><h2>' + icon('target', '') + ' What you know</h2>' +
+      '<p class="co-meta">Known means you should still remember it three weeks from now. Learning means it is still settling in.</p><ul>' +
+      KNOW_SKILLS.map(function(k){ var n = sum[k[0]] || { known: 0, learning: 0 };
+        return '<li>' + icon(k[1], '') + '<b>' + k[2] + '</b><span>' + n.known + ' known · ' + n.learning + ' learning</span></li>'; }).join('') + '</ul></section>';
+  }
   // The week's rhythm for a unit, as days with activities
   function rhythm(co, u){
     var learn = u.decks.filter(function(d){ return d.role === 'learn'; }), prac = u.decks.filter(function(d){ return d.role !== 'learn'; });
@@ -611,6 +624,7 @@
       '.co-q .co-qt{ font-size:2rem; margin:10px 0 4px; }', '.co-opts{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0; } .co-opt{ min-height:56px; font-size:1.05rem; }',
       '.co-opt.ok{ background:var(--clib-good); color:#fff; border-color:var(--clib-good); } .co-opt.no{ background:var(--clib-bad); color:#fff; border-color:var(--clib-bad); }',
       '.co-hear{ font-size:1.2rem; padding:14px 22px; margin:10px 0; }',
+      '.co-know h2 .cc-ic{ color:var(--clib-accent); vertical-align:-.2em; } .co-know ul{ list-style:none; padding:0; margin:8px 0 0; display:grid; gap:6px; } .co-know li{ display:flex; align-items:center; gap:10px; font-weight:700; } .co-know li .cc-ic{ width:1.4em; height:1.4em; color:var(--clib-accent); flex:none; } .co-know li b{ flex:1; } .co-know li span{ color:var(--clib-soft); }',
       '.clib-classroom{ display:flex; gap:14px; align-items:center; width:100%; text-align:left; border:2px solid var(--clib-accent); background:var(--clib-card); border-radius:20px; padding:14px 16px; margin:0 0 14px; cursor:pointer; font:inherit; color:var(--clib-ink); }',
       '.clib-classroom .co-cr-e .cc-ic{ width:2.4rem; height:2.4rem; color:var(--clib-accent); } .co-go .cc-ic, .co-hear .cc-ic{ width:1.2em; height:1.2em; vertical-align:-.25em; color:var(--clib-accent); } .co-head h2 .cc-ic{ color:var(--clib-accent); vertical-align:-.2em; } .clib-classroom b{ display:block; font-size:1.1rem; } .clib-classroom small{ color:var(--clib-soft); font-weight:700; }',
       '@media (max-width:520px){ .co-two, .co-opts{ grid-template-columns:1fr; } .co-ud{ padding-left:0; } }'

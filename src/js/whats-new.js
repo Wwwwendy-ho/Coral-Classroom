@@ -20,6 +20,9 @@
     ] },
     { id:'sea-chart', date:'2026-11-04', need:'course', steps:[
       { at:'.r3-mapbtn', say:'Open the treasure map and tap The sea, to see every part of Coral Classroom. More islands open soon.' }
+    ] },
+    { id:'what-you-know', date:'2026-11-04', need:'course', steps:[
+      { at:'[aria-label="Open the Library"]', say:'Every Korean card you answer now teaches me what you know. See it in the Library, under My course.' }
     ] }
   ];
   var WN_RECENT_DAYS = 14;   // a brand-new profile is shown only what's new in the last two weeks, not the whole history

@@ -1311,6 +1311,7 @@
     // Snapshot this card as the one swipe-back target — captured before choiceState/cardFlipped
     // reset below, and overwritten on every answer, so there's always exactly one card of "undo peek."
     var gradedMode = (CARD_MODES.indexOf(card.mode) !== -1) ? card.mode : 'flip';
+    learnerNoteAnswer(card, gradedMode, rating);   // the learner model (learner.js) records alongside the scheduler
     var isDragGraded = gradedMode === 'match' || gradedMode === 'blank';
     var tcGraded = gradedMode === 'timedchoice' ? S.timedChoiceState : null;
     var lsGraded = gradedMode === 'listen' ? S.listenState : (gradedMode === 'hanja' ? S.hanjaState : (gradedMode === 'numsys' ? S.numsysState : null));
