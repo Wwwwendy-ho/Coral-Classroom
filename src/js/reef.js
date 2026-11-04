@@ -493,6 +493,7 @@
     ['[data-act="toggle-sound"]', null, function(b){ return /off/.test(b.getAttribute('aria-label') || '') ? 'Sounds: on' : 'Sounds: off'; }],
     ['[data-act="switch-profile"]', 'profiles', 'Switch profile'],
     ['[data-act="end-session"]', 'flag', 'End session'],
+    ['[data-whats-new]', 'sparkle', 'What\'s new'],
     ['.done-btn[data-act="exit-manager"]', 'check', 'Done']
   ];
   function reefBoardMenuClose(){
@@ -527,6 +528,8 @@
     var b = document.createElement('button'); b.type = 'button'; b.className = 'icon-btn r3-menubtn'; b.setAttribute('aria-label', 'Menu'); b.setAttribute('aria-haspopup', 'menu'); b.setAttribute('aria-expanded', 'false'); b.title = 'Menu';
     b.innerHTML = ccIcon('menu'); b.addEventListener('click', function(){ reefBoardMenuOpen(b); });
     bar.appendChild(b);
+    var wn = document.createElement('button'); wn.type = 'button'; wn.hidden = true; wn.setAttribute('data-whats-new', ''); wn.setAttribute('aria-label', 'What\'s new');
+    wn.addEventListener('click', function(){ reefWhatsNew(true); }); bar.appendChild(wn);   // played from the menu (see whats-new.js)
   });
 
   /* ---------- No grown-up check in the Claude version (Wendy's choice). The GitHub/iPad copy loads its seed data

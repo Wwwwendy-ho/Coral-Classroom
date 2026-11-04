@@ -614,3 +614,26 @@ body.r3-full .r3-musicbtn, body.r3-full .r3-themebtn, body.r3-full .r3-gamesbtn{
 /* the Library's Claude/offline note shrinks to its icon on narrow phones, so page titles get the room */
 @media (max-width:420px){ .clib-source{ font-size:0; } .clib-source .cc-ui-ic .cc-ic{ width:1.25rem; height:1.25rem; } }
 .r3-fork .cc-ic{ width:1.3em; height:1.3em; color:#2a8f8a; }   /* the buttons are cream by day and night */
+/* What's new (whats-new.js): the screen dims, a ring lights up the new thing, Shelly's card says what it is */
+.cc-tour{ position:fixed; inset:0; z-index:80; animation:ccTourIn .22s ease-out both; }
+.cc-tour.out{ animation:ccTourOut .2s ease-in both; }
+.cc-tour.nohole{ background:rgba(4,30,36,.55); }
+.cc-tour-hole{ position:fixed; box-shadow:0 0 0 200vmax rgba(4,30,36,.55), 0 0 0 3px #ffd36b, 0 0 22px 6px rgba(255,211,107,.55); cursor:pointer;
+  transition:left .35s cubic-bezier(.3,.8,.3,1), top .35s cubic-bezier(.3,.8,.3,1), width .35s cubic-bezier(.3,.8,.3,1), height .35s cubic-bezier(.3,.8,.3,1); animation:ccTourRing 1.6s ease-in-out infinite; }
+.cc-tour.nohole .cc-tour-hole{ display:none; }
+.cc-tour-card{ position:fixed; box-sizing:border-box; padding:14px 16px 12px; border-radius:22px; background:#fbf6ea; color:#3f2c1b; box-shadow:0 6px 0 #d9b25a, 0 0 0 3px #f6d77c, 0 18px 40px rgba(0,0,0,.3);
+  transition:left .35s cubic-bezier(.3,.8,.3,1), top .35s cubic-bezier(.3,.8,.3,1); }
+.cc-tour.night .cc-tour-card{ background:#163a42; color:#f3ead2; box-shadow:0 6px 0 #0b2228, 0 0 0 3px #2f6b6b, 0 18px 40px rgba(0,0,0,.45); }
+.cc-tour-who{ display:flex; align-items:center; gap:10px; font:800 1.05rem 'Baloo 2',sans-serif; }
+.cc-tour-who .cc-guide-mini{ width:44px; height:44px; flex:none; }
+.cc-tour-n{ margin-left:auto; font:700 .85rem 'Nunito Sans',sans-serif; opacity:.7; }
+.cc-tour-say{ margin:8px 0 12px; font:700 1.05rem/1.4 'Nunito Sans',sans-serif; }
+.cc-tour-row{ display:flex; justify-content:flex-end; gap:10px; }
+.cc-tour-row button{ min-height:44px; padding:0 18px; border:none; border-radius:999px; font:800 1rem 'Baloo 2',sans-serif; cursor:pointer; }
+.cc-tour-skip{ background:none; color:inherit; opacity:.75; }
+.cc-tour-next{ background:#1c8c93; color:#fff; box-shadow:0 3px 0 #0e5a60; }
+.cc-tour-next:active{ transform:translateY(2px); box-shadow:0 1px 0 #0e5a60; }
+@keyframes ccTourIn{ from{ opacity:0; } to{ opacity:1; } }
+@keyframes ccTourOut{ to{ opacity:0; } }
+@keyframes ccTourRing{ 50%{ box-shadow:0 0 0 200vmax rgba(4,30,36,.55), 0 0 0 4px #ffe08a, 0 0 30px 10px rgba(255,211,107,.7); } }
+.cc-tour.calm, .cc-tour.calm *{ animation:none !important; transition:none !important; }

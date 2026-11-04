@@ -1,5 +1,15 @@
 # Changelog
 
+## Shelly shows you what's new (November 4, 2026)
+
+- **After an update, Shelly (Lumi at night) points out what changed.** The screen dims, a ring lights up the new
+  button, and she says what it does in her natural voice. It plays once per profile, Skip ends it at any step, and
+  **What's new** in the menu plays it again. The first one welcomes you to Coral Classroom.
+- Every future release adds its own short walkthrough, and the automatic checks make sure each one points at
+  something that's really on screen.
+- Some lines had lost their natural voice after the switch to American spelling ("color", "math"), so they fell
+  back to the device's voice. They have natural recordings again.
+
 ## Tidy-up after the move (November 4, 2026)
 
 - The app now lives at **https://wwwwendy-ho.github.io/Coral-Classroom/** (capital letters matter). Add it to the Home

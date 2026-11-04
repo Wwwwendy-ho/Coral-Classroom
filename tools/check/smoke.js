@@ -30,6 +30,7 @@ const nearestDeck = () => { const v = window.__reef3dView(), here = v.at; const 
 
 async function newPage(browser) {
   const ctx = await browser.newContext({ viewport: { width: 1024, height: 768 } });
+  await ctx.addInitScript(() => { try { localStorage.setItem('cc-tour-off', '1'); } catch (e) {} });   // the What's new walkthrough is opened on purpose below
   const p = await ctx.newPage(); p.errors = [];
   p.on('pageerror', e => p.errors.push(e.message));
   return p;
@@ -71,6 +72,11 @@ async function newPage(browser) {
     return { board: true, crabGap: c ? Math.hypot(c.x - g.x, c.z - g.z) : null, fled: !!sc.flee, warmed: v.warmed };
   });
   check('child: the 3D board opens', b.board);
+  check('What\'s new: every step points at something on the board', !(await p.evaluate(() => window.__whatsNewMissing())).length, (await p.evaluate(() => window.__whatsNewMissing())).join(', '));
+  await p.evaluate(() => window.__whatsNewShow()); await p.waitForTimeout(500);
+  const tourOn = await p.isVisible('.cc-tour .cc-tour-card');
+  await p.click('[data-tour-skip]').catch(() => {}); await p.waitForTimeout(500);
+  check('What\'s new: the walkthrough opens and Skip closes it', tourOn && !(await p.$('.cc-tour')));
   check('the designed fonts are on (Fredoka, Nunito Sans)', await p.evaluate(async () => { await document.fonts.ready; return document.fonts.check('600 20px Fredoka') && [...document.fonts].some(f => f.family.replace(/"/g, '') === 'Fredoka' && f.status === 'loaded'); }));
   check('child: the crab starts beside the guide', b.crabGap > 1 && b.crabGap < 5, 'gap ' + (b.crabGap || 0).toFixed(2));
   check('child: tapped fish escape', b.fled);

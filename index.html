@@ -1983,6 +1983,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
      js/reef-world.js           REEF WORLD (the 2D map, used when 3D can't start)
      js/library-api.js          window.CoralCove, all the Library (library.js) can reach
      js/ui-icons.js             drawn icons in place of emoji in every screen's titles, buttons and labels
+     js/whats-new.js            What's new: Shelly points out new things after an update (one entry per release)
      js/vendor/three-gltfloader.js   THIRD-PARTY CODE: three.js GLTFLoader and BufferGeometryUtils (don't edit)
      js/reef3d/critters.js      Kiko's crabs · Food for Shelly
      js/reef3d/post.js          the look: bloom, the miniature blur, colour grade and vignette over every 3D scene
@@ -11705,6 +11706,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     ['[data-act="toggle-sound"]', null, function(b){ return /off/.test(b.getAttribute('aria-label') || '') ? 'Sounds: on' : 'Sounds: off'; }],
     ['[data-act="switch-profile"]', 'profiles', 'Switch profile'],
     ['[data-act="end-session"]', 'flag', 'End session'],
+    ['[data-whats-new]', 'sparkle', 'What\'s new'],
     ['.done-btn[data-act="exit-manager"]', 'check', 'Done']
   ];
   function reefBoardMenuClose(){
@@ -11739,6 +11741,8 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     var b = document.createElement('button'); b.type = 'button'; b.className = 'icon-btn r3-menubtn'; b.setAttribute('aria-label', 'Menu'); b.setAttribute('aria-haspopup', 'menu'); b.setAttribute('aria-expanded', 'false'); b.title = 'Menu';
     b.innerHTML = ccIcon('menu'); b.addEventListener('click', function(){ reefBoardMenuOpen(b); });
     bar.appendChild(b);
+    var wn = document.createElement('button'); wn.type = 'button'; wn.hidden = true; wn.setAttribute('data-whats-new', ''); wn.setAttribute('aria-label', 'What\'s new');
+    wn.addEventListener('click', function(){ reefWhatsNew(true); }); bar.appendChild(wn);   // played from the menu (see whats-new.js)
   });
 
   /* ---------- No grown-up check in the Claude version (Wendy's choice). The GitHub/iPad copy loads its seed data
@@ -12870,6 +12874,130 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     if(document.body) uiIconsIn(document.body);
   })();
 /* end of src/js/ui-icons.js */
+/* from src/js/whats-new.js */
+  /* ---------- What's new: Shelly shows you what changed ----------
+     After an update, the first time a profile opens the board, Shelly (Lumi at night) points out each new thing:
+     the screen dims, a soft ring lights up the new button or place, and she says one or two lines in the natural
+     voice. It plays once per profile, can be skipped at any step, and "What's new" in the menu plays the latest one
+     again.
+
+     Each release adds an entry to REEF_WHATS_NEW (newest last): an id, the date it went live, and its steps. A step
+     points at something on the board with a CSS selector (`at`), or at nothing (a step in the middle of the screen).
+     `who` limits an entry to 'adult' or 'child' profiles. The smoke test opens the board and checks that every
+     step's selector finds something (window.__whatsNewMissing), so a walkthrough can never point at a button that
+     has moved or gone. Lines are short: they're spoken, and tools/voice/harvest.py records them. */
+  var REEF_WHATS_NEW = [
+    { id:'menu-and-travel', date:'2026-11-03', steps:[
+      { at:'.r3-menubtn', say:'Settings, music, sounds and the minigame corner now live in this menu.' },
+      { at:'.r3-mapbtn', say:'Pick a place on the treasure map, and you will zoom right out and dive back in there.' }
+    ] },
+    { id:'coral-classroom', date:'2026-11-04', steps:[
+      { say:'Welcome to Coral Classroom! Coral Cove is now the flashcard reef at its heart, with more of the sea to explore soon.' },
+      { at:'[aria-label="Open the Library"]', who:'adult', say:'Your course lives in the Library, under My course.' }
+    ] }
+  ];
+  var WN_RECENT_DAYS = 14;   // a brand-new profile is shown only what's new in the last two weeks, not the whole history
+
+  function whatsNewKey(){ return 'cc-new-seen-' + (S.profile && S.profile.id || 'guest'); }
+  function whatsNewSeen(){
+    var raw = null; try { raw = localStorage.getItem(whatsNewKey()); } catch(e){}
+    if(raw){ try { return JSON.parse(raw) || []; } catch(e){ return []; } }
+    // first time for this profile: older entries count as seen
+    var cut = Date.now() - WN_RECENT_DAYS * 864e5, seen = REEF_WHATS_NEW.filter(function(e){ return Date.parse(e.date) < cut; }).map(function(e){ return e.id; });
+    whatsNewSave(seen); return seen;
+  }
+  function whatsNewSave(seen){ try { localStorage.setItem(whatsNewKey(), JSON.stringify(seen)); } catch(e){} }
+  function whatsNewWho(){ return S.profile && S.profile.mode === 'child' ? 'child' : 'adult'; }
+  function whatsNewSteps(entries){
+    var who = whatsNewWho(), out = [];
+    entries.forEach(function(e){ if(e.who && e.who !== who) return; e.steps.forEach(function(st){ if(!st.who || st.who === who) out.push(st); }); });
+    return out;
+  }
+  // Something else is on screen (a panel, the map, a transition, the Library, a minigame): wait for it to clear.
+  function whatsNewBusy(){
+    var v = window.__reef3dView && window.__reef3dView();
+    return !v || window.__reefTx || v.moving || v.flyIn || v.zoomNow || v.emote && v.emote.name === 'dance' ||
+      document.querySelector('.cc-tour, .r3-map, .r3-panel, .r3-menu, .reef-gate, .clib:not([hidden]), .ask-panel.open');
+  }
+
+  function reefWhatsNew(replay){
+    if(document.querySelector('.cc-tour')) return;
+    var entries;
+    if(replay){ entries = REEF_WHATS_NEW.slice(-1); }
+    else { var seen = whatsNewSeen(); entries = REEF_WHATS_NEW.filter(function(e){ return seen.indexOf(e.id) < 0; }).reverse(); }   // newest first
+    var steps = whatsNewSteps(entries).filter(function(st){ return !st.at || document.querySelector(st.at); });
+    var done = function(){ if(!replay){ var s = whatsNewSeen(); entries.forEach(function(e){ if(s.indexOf(e.id) < 0) s.push(e.id); }); whatsNewSave(s); } };
+    if(!steps.length){ done(); return; }
+    var night = reefNight(), calm = reefCalm(), i = 0;
+    var tour = document.createElement('div'); tour.className = 'cc-tour' + (night ? ' night' : '') + (calm ? ' calm' : '');
+    tour.setAttribute('role', 'dialog'); tour.setAttribute('aria-modal', 'true'); tour.setAttribute('aria-label', 'What\'s new');
+    tour.innerHTML = '<div class="cc-tour-hole" aria-hidden="true"></div>' +
+      '<div class="cc-tour-card"><div class="cc-tour-who">' + reefGuideMini(night) + '<b>What\'s new</b><span class="cc-tour-n"></span></div>' +
+      '<p class="cc-tour-say" aria-live="polite"></p>' +
+      '<div class="cc-tour-row"><button type="button" class="cc-tour-skip" data-tour-skip>Skip</button><button type="button" class="cc-tour-next" data-tour-next>Next</button></div></div>';
+    document.body.appendChild(tour);
+    var hole = tour.querySelector('.cc-tour-hole'), card = tour.querySelector('.cc-tour-card'), say = tour.querySelector('.cc-tour-say'), next = tour.querySelector('[data-tour-next]');
+    function place(){
+      var st = steps.at(i), el = st.at ? document.querySelector(st.at) : null, vw = innerWidth, vh = innerHeight, pad = 10;
+      if(el){
+        var r = el.getBoundingClientRect(), x = r.left - pad, y = r.top - pad, w = r.width + pad * 2, h = r.height + pad * 2;
+        hole.style.cssText = 'left:' + x + 'px;top:' + y + 'px;width:' + w + 'px;height:' + h + 'px;border-radius:' + Math.min(28, h / 2) + 'px';
+        tour.classList.remove('nohole');
+        // the card goes on whichever side of the ring has more room, kept on screen
+        var cw = Math.min(360, vw - 32), ch = card.offsetHeight || 150, below = vh - (y + h), above = y;
+        var cy = below >= ch + 16 || below >= above ? Math.min(vh - ch - 16, y + h + 14) : Math.max(16, y - ch - 14);
+        var cx = Math.max(16, Math.min(vw - cw - 16, x + w / 2 - cw / 2));
+        card.style.cssText = 'left:' + cx + 'px;top:' + cy + 'px;width:' + cw + 'px';
+      } else {
+        tour.classList.add('nohole');
+        var cw2 = Math.min(380, vw - 32);
+        card.style.cssText = 'left:' + (vw - cw2) / 2 + 'px;top:' + Math.max(16, vh * .38 - 80) + 'px;width:' + cw2 + 'px';
+      }
+    }
+    function show(){
+      var st = steps.at(i);
+      say.textContent = st.say;
+      tour.querySelector('.cc-tour-n').textContent = steps.length > 1 ? (i + 1) + ' of ' + steps.length : '';
+      next.textContent = i === steps.length - 1 ? 'Got it' : 'Next';
+      place(); requestAnimationFrame(place);   // once the text is in, the card's height is known
+      try { Speech.speak(st.say); } catch(e){}
+      try { next.focus({ preventScroll:true }); } catch(e){}
+    }
+    function close(){
+      done(); window.removeEventListener('resize', place); document.removeEventListener('keydown', onKey, true);
+      try { Speech.stop && Speech.stop(); } catch(e){}
+      tour.classList.add('out'); setTimeout(function(){ tour.remove(); }, calm ? 0 : 220);
+    }
+    function onKey(e){ if(e.key === 'Escape'){ e.preventDefault(); close(); } }
+    next.addEventListener('click', function(){ if(i < steps.length - 1){ i++; show(); } else close(); });
+    tour.querySelector('[data-tour-skip]').addEventListener('click', close);
+    hole.addEventListener('click', function(){ next.click(); });   // tapping the lit-up thing moves on, it doesn't press it
+    window.addEventListener('resize', place); document.addEventListener('keydown', onKey, true);
+    show();
+  }
+
+  // Shown on the board, once nothing else is on screen
+  afterRender('whats new', function(){
+    if(!S.profile || S.view !== 'home' || reefWhatsNew.waiting) return;
+    try { if(localStorage.getItem('cc-tour-off')) return; } catch(e){}   // tests turn it off, then open it themselves
+    var seen = whatsNewSeen();
+    if(!REEF_WHATS_NEW.some(function(e){ return seen.indexOf(e.id) < 0 && whatsNewSteps([e]).length; })) return;
+    reefWhatsNew.waiting = true;
+    var tries = 0;
+    (function wait(){
+      if(!document.querySelector('.r3 canvas') || S.view !== 'home'){ if(++tries < 40) return setTimeout(wait, 500); reefWhatsNew.waiting = false; return; }
+      if(whatsNewBusy()){ if(++tries < 120) return setTimeout(wait, 500); reefWhatsNew.waiting = false; return; }
+      setTimeout(function(){ reefWhatsNew.waiting = false; if(!whatsNewBusy() && S.view === 'home') reefWhatsNew(false); }, 900);
+    })();
+  });
+  window.__whatsNewShow = function(){ reefWhatsNew(true); };   // test helper: the latest walkthrough, as the menu plays it
+  // Test helper: steps whose selector finds nothing on the board as it is now (should be none)
+  window.__whatsNewMissing = function(){
+    var miss = [];
+    REEF_WHATS_NEW.forEach(function(e){ e.steps.forEach(function(st){ if(st.at && (!st.who || st.who === whatsNewWho()) && !document.querySelector(st.at)) miss.push(e.id + ': ' + st.at); }); });
+    return miss;
+  };
+/* end of src/js/whats-new.js */
 /* from src/js/vendor/three-gltfloader.js */
   /* ================= THIRD-PARTY CODE: three.js GLTFLoader and BufferGeometryUtils r128 =================
      MIT licence, (c) the three.js authors (https://github.com/mrdoob/three.js). Copied unchanged except for
@@ -24054,6 +24182,29 @@ body.r3-full .r3-musicbtn, body.r3-full .r3-themebtn, body.r3-full .r3-gamesbtn{
 /* the Library's Claude/offline note shrinks to its icon on narrow phones, so page titles get the room */
 @media (max-width:420px){ .clib-source{ font-size:0; } .clib-source .cc-ui-ic .cc-ic{ width:1.25rem; height:1.25rem; } }
 .r3-fork .cc-ic{ width:1.3em; height:1.3em; color:#2a8f8a; }   /* the buttons are cream by day and night */
+/* What's new (whats-new.js): the screen dims, a ring lights up the new thing, Shelly's card says what it is */
+.cc-tour{ position:fixed; inset:0; z-index:80; animation:ccTourIn .22s ease-out both; }
+.cc-tour.out{ animation:ccTourOut .2s ease-in both; }
+.cc-tour.nohole{ background:rgba(4,30,36,.55); }
+.cc-tour-hole{ position:fixed; box-shadow:0 0 0 200vmax rgba(4,30,36,.55), 0 0 0 3px #ffd36b, 0 0 22px 6px rgba(255,211,107,.55); cursor:pointer;
+  transition:left .35s cubic-bezier(.3,.8,.3,1), top .35s cubic-bezier(.3,.8,.3,1), width .35s cubic-bezier(.3,.8,.3,1), height .35s cubic-bezier(.3,.8,.3,1); animation:ccTourRing 1.6s ease-in-out infinite; }
+.cc-tour.nohole .cc-tour-hole{ display:none; }
+.cc-tour-card{ position:fixed; box-sizing:border-box; padding:14px 16px 12px; border-radius:22px; background:#fbf6ea; color:#3f2c1b; box-shadow:0 6px 0 #d9b25a, 0 0 0 3px #f6d77c, 0 18px 40px rgba(0,0,0,.3);
+  transition:left .35s cubic-bezier(.3,.8,.3,1), top .35s cubic-bezier(.3,.8,.3,1); }
+.cc-tour.night .cc-tour-card{ background:#163a42; color:#f3ead2; box-shadow:0 6px 0 #0b2228, 0 0 0 3px #2f6b6b, 0 18px 40px rgba(0,0,0,.45); }
+.cc-tour-who{ display:flex; align-items:center; gap:10px; font:800 1.05rem 'Baloo 2',sans-serif; }
+.cc-tour-who .cc-guide-mini{ width:44px; height:44px; flex:none; }
+.cc-tour-n{ margin-left:auto; font:700 .85rem 'Nunito Sans',sans-serif; opacity:.7; }
+.cc-tour-say{ margin:8px 0 12px; font:700 1.05rem/1.4 'Nunito Sans',sans-serif; }
+.cc-tour-row{ display:flex; justify-content:flex-end; gap:10px; }
+.cc-tour-row button{ min-height:44px; padding:0 18px; border:none; border-radius:999px; font:800 1rem 'Baloo 2',sans-serif; cursor:pointer; }
+.cc-tour-skip{ background:none; color:inherit; opacity:.75; }
+.cc-tour-next{ background:#1c8c93; color:#fff; box-shadow:0 3px 0 #0e5a60; }
+.cc-tour-next:active{ transform:translateY(2px); box-shadow:0 1px 0 #0e5a60; }
+@keyframes ccTourIn{ from{ opacity:0; } to{ opacity:1; } }
+@keyframes ccTourOut{ to{ opacity:0; } }
+@keyframes ccTourRing{ 50%{ box-shadow:0 0 0 200vmax rgba(4,30,36,.55), 0 0 0 4px #ffe08a, 0 0 30px 10px rgba(255,211,107,.7); } }
+.cc-tour.calm, .cc-tour.calm *{ animation:none !important; transition:none !important; }
 /* end of src/css/reef-3d.css */
 </style>
 
