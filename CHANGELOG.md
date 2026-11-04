@@ -1,5 +1,16 @@
 # Changelog
 
+## Coral Cove is now Coral Classroom (November 4, 2026)
+
+- **The app is now called Coral Classroom**: on the title screen, the Home Screen icon's name, the page title, and
+  everywhere the app talks about itself. **Coral Cove** stays as the name of the flashcard board, the reef at the
+  heart of it. Your saved progress is untouched.
+- The course page in the Library is now called **My course**, so it no longer shares the app's name.
+- **Back up everything / Restore a backup** in Privacy and data: one file with every profile, deck, card,
+  setting and the Library. Use it to keep a copy, or to carry progress to a new address or device. On an iPhone
+  or iPad it opens the share sheet, so you can Save to Files or AirDrop it.
+- The README explains how to move to the new address after renaming the repository.
+
 ## The "Which way?" choice sits in the middle again (November 3, 2026)
 
 - **The fork panel was pushed off the right edge of the screen.** Its pop-in animation was undoing the centring, so

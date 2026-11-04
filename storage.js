@@ -28,8 +28,8 @@
     // seed-data.js didn't load. Don't save anything, so a later visit (once the file is there)
     // still starts from the real data, and tell whoever is looking.
     canSave = false;
-    showProblem('Coral Cove couldn’t load its decks (the file seed-data.js is missing or still uploading). ' +
-      'Check that every file is in your GitHub repository, wait a minute, then close and reopen Coral Cove.');
+    showProblem('Coral Classroom couldn’t load its decks (the file seed-data.js is missing or still uploading). ' +
+      'Check that every file is in your GitHub repository, wait a minute, then close and reopen Coral Classroom.');
   } else {
     try {
       var saved = localStorage.getItem(KEY);
@@ -83,9 +83,9 @@
     if (!canSave) return;
     try { localStorage.setItem(KEY, JSON.stringify(docs)); }
     catch (e) {
-      console.error('[Coral Cove] could not save on this device', e);
-      showProblem('This iPad couldn’t save Coral Cove’s progress (storage is full or blocked). ' +
-        'Private Browsing can cause this — open Coral Cove from its Home Screen icon instead.');
+      console.error('[Coral Classroom] could not save on this device', e);
+      showProblem('This iPad couldn’t save Coral Classroom’s progress (storage is full or blocked). ' +
+        'Private Browsing can cause this — open Coral Classroom from its Home Screen icon instead.');
     }
   }
   var saveTimer = null;
@@ -221,6 +221,7 @@
   };
 
   window.claude = {
+    onDevice: true,   // this stand-in, not Claude: everything saves in this device's storage (see the backup in Privacy and data)
     use: function (name) {
       if (name === 'db') return Promise.resolve(db);
       // Photo uploads need Claude's online storage, so they stay off here.

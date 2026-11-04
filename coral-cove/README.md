@@ -1,6 +1,6 @@
-# Coral Cove
+# Coral Classroom
 
-Coral Cove flashcards as a 3D underwater board game, set up to run on GitHub Pages and as an iPad Home Screen app.
+Coral Classroom: a language school laid out as a 3D underwater board game (Coral Cove, the flashcard reef, is its heart), set up to run on GitHub Pages and as an iPad Home Screen app.
 Shelly the turtle (Lumi the anglerfish at night) hops along a path of deck spaces across the reef.
 See `CHANGELOG.md` for what changed in each update, and `ARCHITECTURE.md` for how the code is organised.
 
@@ -9,7 +9,7 @@ See `CHANGELOG.md` for what changed in each update, and `ARCHITECTURE.md` for ho
 | File | What it is |
 |---|---|
 | `src/` | The app's code. Edit these files, then run `python3 tools/build.py` (see `ARCHITECTURE.md`) |
-| `index.html` | The Coral Cove app, built from `src/`. Don't edit it directly |
+| `index.html` | The Coral Classroom app, built from `src/`. Don't edit it directly |
 | `tools/build.py` | Builds `index.html` from `src/` |
 | `seed-data.js` | Starting decks, cards and progress, exported from Claude on Oct 26, 2026 |
 | `three.min.js` | three.js r128, the 3D engine for the reef board and the profile lobby |
@@ -37,13 +37,13 @@ See `CHANGELOG.md` for what changed in each update, and `ARCHITECTURE.md` for ho
 
 ## Upload to GitHub
 
-1. Sign in at github.com and click **New repository**. Name it `coral-cove`.
+1. Sign in at github.com and click **New repository**. Name it `coral-classroom`.
 2. Click **uploading an existing file**, drag in every file from this folder, and click **Commit changes**.
    - `.nojekyll` starts with a dot, so your computer may hide it. If it's missing, click
      **Add file → Create new file**, name it `.nojekyll`, leave it empty and commit.
 3. Go to **Settings → Pages**. Under "Build and deployment", choose **Deploy from a branch**,
    pick `main` and `/ (root)`, and click **Save**.
-4. After a minute or two the site is live at `https://YOUR-USERNAME.github.io/coral-cove/`.
+4. After a minute or two the site is live at `https://YOUR-USERNAME.github.io/coral-classroom/` (the address follows the repository's name).
 
 ## Set up the iPad
 
@@ -51,7 +51,18 @@ See `CHANGELOG.md` for what changed in each update, and `ARCHITECTURE.md` for ho
 2. Settings → Screen Time → Content & Privacy Restrictions → App Store, Media, Web & Games →
    Web Content → **Only Approved Websites**. Remove the defaults and add
    `https://YOUR-USERNAME.github.io`.
-3. Open Coral Cove from its Home Screen icon and triple-click the top button to start Guided Access.
+3. Open Coral Classroom from its Home Screen icon and triple-click the top button to start Guided Access.
+
+## Moving to a new address
+
+Renaming the repository changes the site's address, and an iPad or iPhone may keep each Home Screen app's
+saved progress separately. To carry progress over:
+
+1. Before renaming, open the app from its old Home Screen icon: profile screen → **Privacy and data** →
+   **Back up everything**, and save the file (Save to Files, or AirDrop).
+2. Rename the repository. Pages moves to the new address within a minute or two.
+3. Open the new address in Safari, **Add to Home Screen**, open it from the new icon, then
+   **Privacy and data** → **Restore a backup** and pick the file.
 
 ## Good to know
 
@@ -72,9 +83,9 @@ See `CHANGELOG.md` for what changed in each update, and `ARCHITECTURE.md` for ho
 - **3D and offline:** the 3D engine, the models and the celebration music are saved for offline use the first
   time the app opens with Wi-Fi. Each background song is saved the first time it plays. The **Calm motion**
   switch in Settings (or the iPad's Reduce Motion) turns off the movement.
-- **Fonts:** if Screen Time blocks `fonts.googleapis.com`, Coral Cove uses the iPad's built-in font
+- **Fonts:** if Screen Time blocks `fonts.googleapis.com`, Coral Classroom uses the iPad's built-in font
   instead. Approve `https://fonts.googleapis.com` and `https://fonts.gstatic.com` to keep the
-  rounded Coral Cove fonts.
+  rounded Coral Classroom fonts.
 - **This copy is the main one.** Make changes here; `tools/build_claude.py` builds the Claude version from it.
   Changes made directly in the Claude version don't come back here.
 - **Updating later:** upload changed files over the old ones. Decks already saved on the iPad are
@@ -93,11 +104,11 @@ Set it up once, with a grown-up:
    `tools/claude-proxy-worker.js` and click Deploy.
 2. Open the Worker's Settings, then Variables and Secrets, and add:
    - `ANTHROPIC_API_KEY` (Secret): your key from console.anthropic.com
-   - `CORAL_CODE` (Secret): any long passphrase. You'll type the same one into Coral Cove.
+   - `CORAL_CODE` (Secret): any long passphrase. You'll type the same one into Coral Classroom.
    - `MODEL` (Text, optional): the Claude model to use. Defaults to `claude-opus-5-5`.
-   - `ALLOW_ORIGIN` (Text, optional): where Coral Cove runs, e.g. `https://wwwwendy-ho.github.io`.
+   - `ALLOW_ORIGIN` (Text, optional): where Coral Classroom runs, e.g. `https://wwwwendy-ho.github.io`.
      Defaults to `*`.
-3. In Coral Cove, open 📚 Library, then Settings (answer the grown-up maths question). Paste in the Worker's URL and the
+3. In Coral Classroom, open 📚 Library, then Settings (answer the grown-up maths question). Paste in the Worker's URL and the
    passphrase, then tap "Test it".
 
 Each request is billed to your Anthropic account. Replies are kept short to keep the cost low.
@@ -108,9 +119,9 @@ To turn it off, open Library Settings and tap "Turn off". The Library goes back 
 
 - 3D models: Quaternius (Ultimate Platformer Pack, Fish Pack) and the Kenney Pirate Kit (kenney.nl), all CC0.
 - 3D engine: [three.js](https://threejs.org) r128, MIT licence.
-- Vocabulary and sea friend pictures (`vocab-pics/`, `friend-pics/`): [Fluent Emoji 3D](https://github.com/microsoft/fluentui-emoji) by Microsoft, MIT licence, via the `@lobehub/fluent-emoji-3d` package; combined into one picture per word for Coral Cove.
+- Vocabulary and sea friend pictures (`vocab-pics/`, `friend-pics/`): [Fluent Emoji 3D](https://github.com/microsoft/fluentui-emoji) by Microsoft, MIT licence, via the `@lobehub/fluent-emoji-3d` package; combined into one picture per word for Coral Classroom.
 - Korean voice: [SNAP Piper Korean](https://huggingface.co/softguy777/snap_piper_korean_22k), Apache License 2.0, with [g2pkk](https://pypi.org/project/g2pkk/) for pronunciation.
-- English backup definitions: [WordNet 3.0](https://wordnet.princeton.edu), Princeton University (WordNet licence). The child-friendly definitions were written for Coral Cove.
+- English backup definitions: [WordNet 3.0](https://wordnet.princeton.edu), Princeton University (WordNet licence). The child-friendly definitions were written for Coral Classroom.
 - Chinese words and meanings: [CC-CEDICT](https://cc-cedict.org), CC BY-SA 4.0. The Chinese part of `words-data.js` is shared under the same licence.
 - Chinese character parts: [cjk-decomp](https://github.com/amake/cjk-decomp) by Aaron Madlon-Kay, Apache License 2.0.
 - Word frequencies for choosing which words to include: [wordfreq](https://github.com/rspeer/wordfreq) (data CC BY-SA 4.0).

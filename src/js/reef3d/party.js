@@ -15,7 +15,7 @@
     var snap = JSON.parse(JSON.stringify(reefBoard()));
     reefBoardQ = reefBoardQ.then(function(){
       return S.store.getStats().then(function(st){ return S.store.setStats(Object.assign({}, st || {}, { board: snap })); });
-    }).catch(function(e){ console.warn('[Coral Cove] board save failed', e); });
+    }).catch(function(e){ console.warn('[Coral Classroom] board save failed', e); });
   }
   function reef3dHud(view){
     var b = reefBoard(), h = view.wrap.querySelector('.r3-hud'); if(!h) return;

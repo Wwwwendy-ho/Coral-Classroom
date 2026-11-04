@@ -509,7 +509,7 @@
         '<h3>🔠 Reading support</h3>' +
         '<button type="button" class="algo-opt'+(readingSupportOn?' active':'')+'" data-act="toggle-reading-support">' +
           '<span class="algo-name">'+(readingSupportOn ? '✅ On' : '⬜ Off')+'</span>' +
-          '<span class="algo-blurb">Wider letter and word spacing and a larger base font throughout Coral Cove. (Every option is already read aloud on tap in Child Mode — that\'s not tied to this toggle.) Research doesn\'t back special "dyslexia fonts", so this sticks to what the evidence actually supports.</span>' +
+          '<span class="algo-blurb">Wider letter and word spacing and a larger base font throughout Coral Classroom. (Every option is already read aloud on tap in Child Mode — that\'s not tied to this toggle.) Research doesn\'t back special "dyslexia fonts", so this sticks to what the evidence actually supports.</span>' +
         '</button>' +
       '</div>';
 
@@ -540,7 +540,7 @@
         oceanToggleHTML() +
         '<div class="stats-section">' +
           '<h3>🔒 Privacy and data</h3>' +
-          '<p class="algo-note">What Coral Cove keeps, where it lives and who can see it. No ads, no tracking cookies, and practice data is never sent to an AI.</p>' +
+          '<p class="algo-note">What Coral Classroom keeps, where it lives and who can see it. No ads, no tracking cookies, and practice data is never sent to an AI.</p>' +
           '<div class="cove-data-row">' +
             '<button type="button" class="btn btn-ghost" data-act="cove-privacy">Read privacy and data</button>' +
             (profile ? '<button type="button" class="btn btn-ghost" data-cove-export="'+profile.id+'">⬇️ Download '+esc(profile.name)+'\'s data</button>' : '') +
@@ -1009,7 +1009,7 @@
         // An earlier unsaved upload from this same form session, now superseded, is a clean orphan.
         if(priorDraftPhotoId && priorDraftPhotoId !== S.cardFormOriginalPhotoId) Assets.remove(priorDraftPhotoId);
       }).catch(function(err){
-        console.error('[Coral Cove] photo upload failed', err);
+        console.error('[Coral Classroom] photo upload failed', err);
         S.photoUploading = false;
         S.storeError = 'That photo didn\'t upload. Check your connection and try again.';
         render();

@@ -1,4 +1,6 @@
-# How Coral Cove is built
+# How Coral Classroom is built
+
+Coral Classroom is the whole app; Coral Cove is its flashcard board (the reef at the heart of the sea map).
 
 A guide for whoever works on the code next. `README.md` covers using the app; this covers where things are and
 how they fit together. Function names below can be searched for in the files.

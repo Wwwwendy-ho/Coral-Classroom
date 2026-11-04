@@ -138,7 +138,7 @@
       S.planLoading = false;
       if(date === todayISO()) S.planDay = day;
       return day;
-    }).catch(function(e){ S.planLoading = false; console.error('[Coral Cove] plan load failed', e); return null; });
+    }).catch(function(e){ S.planLoading = false; console.error('[Coral Classroom] plan load failed', e); return null; });
   }
   function planSave(){ if(S.planDay && !S.planDay.off) return S.store.setPlanDay(S.planDay.date, S.planDay); return Promise.resolve(); }
   function planNextIndex(day){ day = day || S.planDay; if(!day || !day.blocks) return -1; for(var i = 0; i < day.blocks.length; i++){ if(!day.blocks[i].done) return i; } return -1; }

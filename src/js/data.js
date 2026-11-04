@@ -5,7 +5,7 @@
   // surfaces as a small dismissible banner instead of doing nothing.
   function reportStoreError(action){
     return function(err){
-      console.error('[Coral Cove] '+action+' failed', err);
+      console.error('[Coral Classroom] '+action+' failed', err);
       S.storeError = (action.charAt(0).toUpperCase()+action.slice(1)) + ' didn\'t save. Check your connection and try again.';
       render();
       throw err;
@@ -47,7 +47,7 @@
             return db.collection('profiles').orderBy('order','asc').onSnapshot(function(snap){
               cb(snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); }));
             }, function(err){
-              console.error('[Coral Cove] profile sync lost', err);
+              console.error('[Coral Classroom] profile sync lost', err);
               S.storeError = 'Lost connection while syncing profiles — please reload the page.';
               render();
             });
@@ -142,7 +142,7 @@
               // onSnapshot errors are terminal -- this listener is now dead and will never fire again.
               // Falling back to the (always-empty, in live mode) in-memory store used to silently wipe
               // every deck from the screen. Keep whatever was last shown instead, and tell the grown-up.
-              console.error('[Coral Cove] deck sync lost', err);
+              console.error('[Coral Classroom] deck sync lost', err);
               S.storeError = 'Lost connection while syncing your decks — please reload the page.';
               render();
             });
@@ -199,7 +199,7 @@
             }, function(err){
               // Same terminal-error issue as listenDecks above: don't blank the real card list with
               // an always-empty in-memory fallback -- keep showing the last-known cards and surface it.
-              console.error('[Coral Cove] card sync lost', err);
+              console.error('[Coral Classroom] card sync lost', err);
               S.storeError = 'Lost connection while syncing this deck\'s cards — please reload the page.';
               render();
             });
@@ -367,7 +367,7 @@
         if(!handle || !id) return Promise.resolve();
         // Best-effort: an old/abandoned photo failing to delete just leaves a harmless orphan in
         // the artifact's asset storage -- never worth surfacing an error banner for.
-        return handle.delete(id).catch(function(err){ console.warn('[Coral Cove] could not delete photo asset', err); });
+        return handle.delete(id).catch(function(err){ console.warn('[Coral Classroom] could not delete photo asset', err); });
       }
     };
   })();

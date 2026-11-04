@@ -219,7 +219,7 @@
       reefSplash(ov.querySelector('.tx-splash'), innerWidth / 2, innerHeight * .58, kind); // always in the middle of the screen
     }
     var mid = kind === 'swim' ? 230 : 450, end = kind === 'swim' ? 560 : 1050;   // the dive is quick: the new screen is in (and takes taps) under half a second
-    setTimeout(function(){ try { fn(); } catch(e){ console.error('[Coral Cove] transition', e); } ov.style.pointerEvents = 'none'; }, mid);   // once the new screen is in, its buttons take taps while the water clears
+    setTimeout(function(){ try { fn(); } catch(e){ console.error('[Coral Classroom] transition', e); } ov.style.pointerEvents = 'none'; }, mid);   // once the new screen is in, its buttons take taps while the water clears
     setTimeout(function(){ ov.remove(); reefBusy = false; window.__reefTx = false; }, end);
   }
   function reefInDeck(){

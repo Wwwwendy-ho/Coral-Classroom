@@ -1,6 +1,6 @@
 {
-  "name": "Coral Cove",
-  "short_name": "Coral Cove",
+  "name": "Coral Classroom",
+  "short_name": "Coral Classroom",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

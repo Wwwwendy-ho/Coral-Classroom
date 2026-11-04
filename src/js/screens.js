@@ -83,10 +83,10 @@
     if(!p){ coveToast('Could not find that profile.'); return; }
     coveToast('Gathering '+p.name+'\'s data…');
     S.store.exportProfile(id).then(function(data){
-      var payload = Object.assign({ app:'Coral Cove', exportedAt:new Date().toISOString(),
-        note:'Everything Coral Cove stores for this profile. The grown-up PIN is never included.' }, data);
+      var payload = Object.assign({ app:'Coral Classroom', exportedAt:new Date().toISOString(),
+        note:'Everything Coral Classroom stores for this profile. The grown-up PIN is never included.' }, data);
       var text = JSON.stringify(payload, null, 2);
-      var filename = 'coral-cove-'+coveSafeName(p.name)+'-data-'+coveDate()+'.json';
+      var filename = 'coral-classroom-'+coveSafeName(p.name)+'-data-'+coveDate()+'.json';
       var fallback = function(){
         try {
           var blob = new Blob([text], { type:'application/json' });
@@ -106,7 +106,7 @@
         });
       });
     }).catch(function(err){
-      console.error('[Coral Cove] export failed', err);
+      console.error('[Coral Classroom] export failed', err);
       coveToast('Couldn\'t gather the data. Check your connection and try again.');
     });
   }
@@ -120,7 +120,7 @@
       '<div class="cc-dialog cove-privacy" role="dialog" aria-modal="true" aria-labelledby="covePvTitle">' +
         '<header><h3 id="covePvTitle">🔒 Privacy and data</h3><button type="button" class="icon-btn" data-pv-close aria-label="Close privacy and data">'+ccIcon('close')+'</button></header>' +
         '<div class="cove-pv-body" tabindex="0" aria-label="Privacy and data details">' +
-          '<h4>What Coral Cove keeps</h4><ul>' +
+          '<h4>What Coral Classroom keeps</h4><ul>' +
             '<li>Profile names (a first name is all it needs) and a profile photo if you add one.</li>' +
             '<li>Decks and cards you make, including any pictures added to cards.</li>' +
             '<li>Practice results: answers marked right or not yet, how long an answer took, when each card is due next, stars, streaks, badges and round history.</li>' +
@@ -130,15 +130,21 @@
           '<h4>Where it lives</h4>' +
           '<p>In this page\'s own storage on claude.ai (run by Anthropic). Photos go to the page\'s file storage. The natural voices are recordings that come with the page, made ahead of time; when a word has none, your device\'s own voice reads it. Sound effects are made on the device. 🎙️ Echo recordings stay on this device, are never saved or sent anywhere, and are gone when the card changes.</p>' +
           '<h4>Who can see it</h4>' +
-          '<p>Only people the page\'s owner has shared Coral Cove with, such as the tutor and parents. They can see every profile\'s decks and progress. The PIN keeps grown-up screens away from a child; it is a household lock, not a password.</p>' +
+          '<p>Only people the page\'s owner has shared Coral Classroom with, such as the tutor and parents. They can see every profile\'s decks and progress. The PIN keeps grown-up screens away from a child; it is a household lock, not a password.</p>' +
           '<h4>Claude, AI and other companies</h4>' +
-          '<p>Coral Cove does not send anyone\'s practice data to Claude or any AI model. There are no ads, no analytics, no tracking cookies, and nothing is sold or shared. Fonts come from Google Fonts, which sees an ordinary web request. The page runs on claude.ai under Anthropic\'s privacy policy.</p>' +
+          '<p>Coral Classroom does not send anyone\'s practice data to Claude or any AI model. There are no ads, no analytics, no tracking cookies, and nothing is sold or shared. Fonts come from Google Fonts, which sees an ordinary web request. The page runs on claude.ai under Anthropic\'s privacy policy.</p>' +
           '<h4>Children</h4>' +
           '<p>A parent or guardian (or a tutor with their OK) sets up a child profile. Only add a child with a parent or guardian\'s consent, and use a first name only.</p>' +
           '<h4>Your choices</h4>' +
           '<p><b>Download</b> a profile\'s data as a file, or <b>delete</b> a profile and everything in it, from <b>Manage Profiles</b> (needs the grown-up PIN). Deleting is permanent.</p>' +
+          (window.claude && window.claude.use && !window.claude.onDevice ? '' :   // inside Claude the data lives online, not on the device
+          '<h4>Back up or move to a new address</h4>' +
+          '<p>Everything on this device (every profile, deck, card, setting and the Library) in one file. Keep it as a backup, or restore it on another device or at a new web address.</p>' +
+          '<div class="cove-pv-actions" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" class="btn btn-ghost" data-pv-backup>'+ccIcon('download')+' Back up everything</button>' +
+          '<button type="button" class="btn btn-ghost" data-pv-restore>'+ccIcon('replay')+' Restore a backup</button></div>' +
+          '<input type="file" accept=".json,application/json" data-pv-file hidden>') +
           '<h4>Credits and licenses</h4>' +
-          '<p>Fonts: Fredoka, Nunito Sans, Nunito and Baloo 2, all under the SIL Open Font License 1.1, served by Google Fonts. Emoji are drawn by your device. The turtle (and Lumi the lanternfish in dark mode), sea life and shells are drawn for Coral Cove. No other code libraries are used. Natural voices: made with Supertonic 3 by Supertone Inc. (model under the OpenRAIL-M license) and, for Mandarin, Kokoro v1.1 by hexgrad (Apache 2.0), run through the open-source sherpa-onnx toolkit (Apache 2.0). Chinese pinyin and meanings were checked against CC-CEDICT (CC BY-SA 4.0).</p>' +
+          '<p>Fonts: Fredoka, Nunito Sans, Nunito and Baloo 2, all under the SIL Open Font License 1.1, served by Google Fonts. Emoji are drawn by your device. The turtle (and Lumi the lanternfish in dark mode), sea life and shells are drawn for Coral Classroom. No other code libraries are used. Natural voices: made with Supertonic 3 by Supertone Inc. (model under the OpenRAIL-M license) and, for Mandarin, Kokoro v1.1 by hexgrad (Apache 2.0), run through the open-source sherpa-onnx toolkit (Apache 2.0). Chinese pinyin and meanings were checked against CC-CEDICT (CC BY-SA 4.0).</p>' +
           '<h4>Questions</h4>' +
           '<p>Ask Wendy.</p>' +
         '</div>' +
@@ -162,8 +168,52 @@
     }
     document.addEventListener('keydown', onKey, true);
     wrap.querySelectorAll('[data-pv-close]').forEach(function(b){ b.addEventListener('click', close); });
+    var bk = wrap.querySelector('[data-pv-backup]'), rs = wrap.querySelector('[data-pv-restore]'), fi = wrap.querySelector('[data-pv-file]');
+    if(bk) bk.addEventListener('click', coveBackupAll);
+    if(rs && fi){ rs.addEventListener('click', function(){ fi.value = ''; fi.click(); }); fi.addEventListener('change', function(){ if(fi.files && fi.files[0]) coveRestoreAll(fi.files[0]); }); }
     wrap.addEventListener('click', function(e){ if(e.target === wrap) close(); });
     setTimeout(function(){ var b = wrap.querySelector('[data-pv-close]'); if(b) b.focus(); }, 0);
+  }
+  /* ---------- A whole-device backup: one file holding everything this device saves (on GitHub Pages that's
+     localStorage: profiles, decks, cards, settings, the Library). Used to keep a copy, or to carry progress to a
+     new web address (a renamed site, a new device), where the Home Screen app may start with empty storage. ---------- */
+  var COVE_BACKUP_KIND = 'coral-classroom-backup';
+  function coveBackupAll(){
+    var items = {};
+    try { for(var i = 0; i < localStorage.length; i++){ var k = localStorage.key(i); items[k] = localStorage.getItem(k); } }
+    catch(e){ coveToast('This device won\'t let Coral Classroom read its storage.'); return; }
+    var text = JSON.stringify({ app:'Coral Classroom', kind:COVE_BACKUP_KIND, version:1, savedAt:new Date().toISOString(), items:items });
+    var name = 'coral-classroom-backup-'+coveDate()+'.json';
+    var file = null; try { file = new File([text], name, { type:'application/json' }); } catch(e){}
+    // On an iPhone or iPad the share sheet is the easy way to keep it (Save to Files, AirDrop, Mail)
+    if(file && navigator.canShare && navigator.canShare({ files:[file] })){
+      navigator.share({ files:[file], title:'Coral Classroom backup' }).catch(function(err){ if(!err || err.name !== 'AbortError') coveSaveText(name, text); });
+      return;
+    }
+    coveSaveText(name, text);
+  }
+  function coveSaveText(name, text){
+    try {
+      var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type:'application/json' })); a.download = name;
+      document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+      coveToast('Backup saved.');
+    } catch(e){ coveToast('Downloads aren\'t available here.'); }
+  }
+  function coveRestoreAll(file){
+    var rd = new FileReader();
+    rd.onload = function(){
+      var b = null; try { b = JSON.parse(rd.result); } catch(e){}
+      if(!b || b.kind !== COVE_BACKUP_KIND || !b.items || typeof b.items !== 'object'){ coveToast('That file isn\'t a Coral Classroom backup.'); return; }
+      var when = b.savedAt ? new Date(b.savedAt).toLocaleString() : 'an unknown date';
+      if(!window.confirm('Replace everything on this device with the backup from '+when+'? What is here now will be lost.')) return;
+      try {
+        localStorage.clear();
+        Object.keys(b.items).forEach(function(k){ if(typeof b.items[k] === 'string') localStorage.setItem(k, b.items[k]); });
+      } catch(e){ coveToast('Couldn\'t restore: this device\'s storage is full or blocked.'); return; }
+      coveToast('Restored. Reopening…'); setTimeout(function(){ location.reload(); }, 600);
+    };
+    rd.onerror = function(){ coveToast('Couldn\'t read that file.'); };
+    rd.readAsText(file);
   }
   document.addEventListener('click', function(e){
     var t = e.target && e.target.closest ? e.target.closest('[data-act="cove-privacy"],[data-cove-export],[data-cove-flip]') : null;
@@ -174,7 +224,7 @@
     else coveOpenPrivacy();
   });
   var COVE_SHELL = '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4C9 4 4 10 4 17c0 3 1 5 2.4 6.2L10 26h12l3.6-2.8C27 22 28 20 28 17c0-7-5-13-12-13z" fill="currentColor"/><path d="M16 6.5V25M11.5 8 13.2 25M20.5 8 18.8 25M7.5 12.5 11 25M24.5 12.5 21 25" stroke="rgba(255,255,255,.6)" stroke-width="1.3" fill="none" stroke-linecap="round"/><rect x="11.5" y="25" width="9" height="3.2" rx="1.6" fill="currentColor"/></svg>';
-  app.innerHTML = '<div class="lock-screen"><h2>🌊 Loading Coral Cove…</h2></div>';
+  app.innerHTML = '<div class="lock-screen"><h2>🌊 Loading Coral Classroom…</h2></div>';
 
   // Small dismissible banner for S.storeError, dropped into any Adult Mode screen where a save/sync
   // failure would otherwise look like a button silently doing nothing (deck editor, deck grid, ...).
@@ -196,7 +246,7 @@
   function afterRender(name, fn){ afterRenderHooks.push({ name: name, fn: fn }); }
   function render(){
     var out = renderScreen.apply(this, arguments);
-    afterRenderHooks.forEach(function(h){ try { h.fn(); } catch(e){ console.warn('[Coral Cove] ' + h.name, e); } });
+    afterRenderHooks.forEach(function(h){ try { h.fn(); } catch(e){ console.warn('[Coral Classroom] ' + h.name, e); } });
     return out;
   }
   function renderScreen(){
@@ -426,14 +476,14 @@
     for(i = 0; i < 9; i++) h += '<i style="left:' + (8 + Math.random() * 84).toFixed(1) + '%;top:' + (4 + Math.random() * 22).toFixed(1) + '%;animation-delay:' + (Math.random() * 2.4).toFixed(2) + 's"></i>';
     var el = document.createElement('div');
     el.className = 'cc-splash' + (night ? ' night' : '');
-    el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', 'Coral Cove. Tap to dive in.');
+    el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', 'Coral Classroom. Tap to dive in.');
     el.innerHTML = '<div class="ccs-sky" aria-hidden="true">' + sky + '<span class="ccs-sun"><span class="ccs-rays"></span></span>' +
         '<span class="ccs-cloud c1">' + cloud + '</span><span class="ccs-cloud c2">' + cloud + '</span><span class="ccs-cloud c3">' + cloud + '</span>' +
         (night ? '' : '<span class="ccs-gull g1">︶︶</span><span class="ccs-gull g2">︶︶</span>') +
         '<svg class="ccs-island" viewBox="0 0 220 120"><path class="ccs-sand" d="M0 120 C30 92 80 84 120 88 C160 92 196 104 220 120 Z"/><path class="ccs-trunk" d="M118 92 C116 70 120 50 132 30" fill="none" stroke-width="7" stroke-linecap="round"/>' +
           '<path class="ccs-leaf" d="M132 30 C110 18 92 24 84 36 C102 30 118 30 132 30 Z M132 30 C126 10 140 2 156 4 C144 12 138 20 132 30 Z M132 30 C150 18 170 22 178 36 C162 30 146 30 132 30 Z M132 30 C116 32 106 46 108 58 C116 44 124 36 132 30 Z M132 30 C150 34 160 48 156 60 C150 46 142 38 132 30 Z"/></svg>' +
       '</div>' +
-      '<div class="ccs-title" aria-hidden="true"><span class="ccs-name">Coral Cove</span><span class="ccs-sub">' + (night ? 'A night on the shipwreck' : 'A sea of things to learn') + '</span></div>' +
+      '<div class="ccs-title" aria-hidden="true"><span class="ccs-name">Coral Classroom</span><span class="ccs-sub">' + (night ? 'A night on the shipwreck' : 'A sea of things to learn') + '</span></div>' +
       '<div class="ccs-sea" aria-hidden="true">' + wave('w3') + wave('w2') + wave('w1') +
         '<span class="ccs-glints">' + h + '</span><span class="ccs-shafts"></span>' +
         '<span class="ccs-shelly"><span class="ccs-ripple"></span>' + mascotTurtleSVG('ccs-shelly-svg') + '</span>' +
@@ -613,7 +663,7 @@
             modeBtn('child', '🧒 Child Mode', 'PIN-protected study sessions; deck editing needs the PIN too.') +
             modeBtn('adult', '🔧 Adult Mode', 'Study and manage decks anytime — no PIN needed.') +
           '</div>' +
-          (d.mode === 'child' ? '<label class="cove-consent"><input type="checkbox" data-cove-consent '+(d.consent?'checked':'')+'><span>I\'m this child\'s parent or guardian, or I have their permission. Coral Cove will keep their first name, any photo, their decks and practice results. <button type="button" class="cove-linkbtn" data-act="cove-privacy">What\'s kept?</button></span></label>' : '') +
+          (d.mode === 'child' ? '<label class="cove-consent"><input type="checkbox" data-cove-consent '+(d.consent?'checked':'')+'><span>I\'m this child\'s parent or guardian, or I have their permission. Coral Classroom will keep their first name, any photo, their decks and practice results. <button type="button" class="cove-linkbtn" data-act="cove-privacy">What\'s kept?</button></span></label>' : '') +
           '<button type="button" class="btn btn-primary" data-act="save-new-profile" style="margin-top:18px;" '+((!d.name.trim() || (d.mode==='child' && !d.consent))?'disabled':'')+'>Create Profile</button>' +
         '</div>' +
       '</div>';
@@ -658,7 +708,7 @@
   function pinPadTitles(kind){
     if(kind === 'enterAdult') return ['🔐 Grown-up Profile', 'Enter the PIN to open this profile.'];
     if(kind === 'start') return ['🔐 Start Child Mode', 'Ask a grown-up to enter the PIN to begin today\'s session.'];
-    if(kind === 'end') return ['🔐 End Session', 'Enter the PIN to finish and lock Coral Cove.'];
+    if(kind === 'end') return ['🔐 End Session', 'Enter the PIN to finish and lock Coral Classroom.'];
     if(kind === 'exit') return ['🔐 Leave This Deck?', 'Ask a grown-up to enter the PIN to head back before finishing.'];
     if(kind === 'switch') return ['🔐 Switch Profile', 'Enter the PIN to end this session and switch profiles.'];
     if(kind === 'manageProfiles') return ['🔐 Manage Profiles', 'Enter the PIN to add or remove profiles.'];
@@ -812,12 +862,12 @@
   // Same drawing as Coral Calendar's Lumi (angler); a wrong answer gives her worried brows and a small frown.
   var LUMI_ART = {n: "<circle cx=\"98\" cy=\"3.4\" r=\"11.5\" fill=\"#43D3D4\" opacity=\".09\"/><g><path fill=\"#43D3D4\" fill-opacity=\".17\" stroke=\"#96E0E8\" stroke-opacity=\".62\" stroke-width=\".75\" stroke-linejoin=\"round\" d=\"M66.6 41.4C60.6 40.8 53.6 43.2 49.8 48.2q2.4.3 3.2 2.7q2.6-.7 4.1 1.3q2.4-1.3 4.6.3C63.8 50.6 66.8 46.2 67.6 43Z\" transform=\"translate(-6 -3) rotate(-14 66 42)\"/></g><g class=\"lu-tail\"><path fill=\"#43D3D4\" fill-opacity=\".17\" stroke=\"#96E0E8\" stroke-opacity=\".62\" stroke-width=\".75\" stroke-linejoin=\"round\" d=\"M32.5 33.2C27.5 28.6 21.5 23.4 15 20.2q-2.8 3.2-1.1 6.6q-3.5 3-1.3 6.7q-3.5 3.4-1 6.8q-2.4 3.8 1.1 6.6q-1 3.4 2.7 5.3C21.6 49 27.6 44 32.5 39.6Z\"/><path fill=\"none\" stroke=\"#A0E6EC\" stroke-opacity=\".42\" stroke-width=\".55\" stroke-linecap=\"round\" d=\"M31.4 34.6L16.4 23.6M31.4 35.6L13.8 30.4M31.4 36.6L13.6 37.6M31.4 37.6L14.8 44.6M31.4 38.6L17.4 50.6\"/></g><g><path fill=\"#43D3D4\" fill-opacity=\".17\" stroke=\"#96E0E8\" stroke-opacity=\".62\" stroke-width=\".75\" stroke-linejoin=\"round\" d=\"M40.5 22.6C39.4 17 41.6 11.6 46.4 9q.2 2.6 2.4 3.1q-.6 2.5 1.6 3.5q-1 2.1.6 3.4C47 19.4 43.6 20.8 40.5 22.6Z\"/><path fill=\"none\" stroke=\"#A0E6EC\" stroke-opacity=\".42\" stroke-width=\".55\" stroke-linecap=\"round\" d=\"M41.6 21.4L45.6 11.2M43.2 20.6L48.4 14M45 19.8L50.2 17.6\"/></g><path fill=\"#43D3D4\" fill-opacity=\".17\" stroke=\"#96E0E8\" stroke-opacity=\".62\" stroke-width=\".75\" stroke-linejoin=\"round\" d=\"M39.6 49.2C37.6 53.4 38.4 57.6 41.8 59.8q.7-2.2 2.7-2.3q.1-2 2-2.9C45.2 53 42.6 51.2 39.6 49.2Z\"/><path fill=\"#1E557A\" stroke=\"#7EDEE2\" stroke-opacity=\".6\" stroke-width=\".9\" d=\"M31 36C33 22 46 11.5 63 11.5C80 11.5 93 22 94.5 34.5C95.6 46 86.5 56.5 69 57.5C51 58.5 34 51 31 36Z\"/><path fill=\"#15345C\" opacity=\".85\" d=\"M32.4 32C37 21 49 13.4 63 13.4C77.5 13.4 88.6 20.2 92.4 29.6C84 23.4 73 20.8 62 21.2C50 21.8 40 25.8 32.4 32Z\"/><path fill=\"#62AEBC\" opacity=\".55\" d=\"M36 44.5C46 53 61 56.4 74 55.6C84 55 90.6 50 93.4 43C87.6 50.6 78 53.6 66 53.6C54 53.6 44 50.6 36 44.5Z\"/><ellipse fill=\"#43D3D4\" opacity=\".16\" cx=\"84\" cy=\"22.5\" rx=\"8.5\" ry=\"5.5\"/><path fill=\"none\" stroke=\"#CFF6F8\" stroke-opacity=\".34\" stroke-width=\"1.7\" stroke-linecap=\"round\" d=\"M43 20.4C50 15 59 12.9 68 13.7\"/><path fill=\"none\" stroke=\"#BFF0F5\" stroke-opacity=\".26\" stroke-width=\"1\" stroke-linecap=\"round\" d=\"M70.4 24.6C67 32 67.2 41 71.4 48\"/><circle fill=\"#0A2645\" opacity=\".55\" cx=\"50\" cy=\"18.6\" r=\"1.1\"/><circle fill=\"#0A2645\" opacity=\".55\" cx=\"58.6\" cy=\"15.9\" r=\"0.8\"/><circle fill=\"#0A2645\" opacity=\".55\" cx=\"44.2\" cy=\"25.2\" r=\"0.9\"/><circle fill=\"#0A2645\" opacity=\".55\" cx=\"55.2\" cy=\"23.6\" r=\"0.7\"/><circle fill=\"#0A2645\" opacity=\".55\" cx=\"66.2\" cy=\"18.6\" r=\"0.8\"/><circle fill=\"#0A2645\" opacity=\".55\" cx=\"39.6\" cy=\"31.2\" r=\"0.7\"/><circle fill=\"#0A2645\" opacity=\".55\" cx=\"48.2\" cy=\"30.2\" r=\"0.6\"/><g class=\"ph\"><circle cx=\"43.4\" cy=\"45.8\" r=\"2.34\" fill=\"#43D3D4\" opacity=\".22\"/><circle cx=\"43.4\" cy=\"45.8\" r=\"0.85\" fill=\"#D8FFFB\"/><circle cx=\"50.8\" cy=\"49.6\" r=\"2.6\" fill=\"#43D3D4\" opacity=\".22\"/><circle cx=\"50.8\" cy=\"49.6\" r=\"0.95\" fill=\"#D8FFFB\"/><circle cx=\"59.2\" cy=\"51.8\" r=\"2.6\" fill=\"#43D3D4\" opacity=\".22\"/><circle cx=\"59.2\" cy=\"51.8\" r=\"0.95\" fill=\"#D8FFFB\"/><circle cx=\"67.6\" cy=\"52\" r=\"2.6\" fill=\"#43D3D4\" opacity=\".22\"/><circle cx=\"67.6\" cy=\"52\" r=\"0.95\" fill=\"#D8FFFB\"/><circle cx=\"75.6\" cy=\"50.2\" r=\"2.34\" fill=\"#43D3D4\" opacity=\".22\"/><circle cx=\"75.6\" cy=\"50.2\" r=\"0.85\" fill=\"#D8FFFB\"/><circle cx=\"82.2\" cy=\"46.8\" r=\"2.08\" fill=\"#43D3D4\" opacity=\".22\"/><circle cx=\"82.2\" cy=\"46.8\" r=\"0.76\" fill=\"#D8FFFB\"/><circle cx=\"49.4\" cy=\"39.8\" r=\"1.56\" fill=\"#43D3D4\" opacity=\".22\"/><circle cx=\"49.4\" cy=\"39.8\" r=\"0.57\" fill=\"#D8FFFB\"/><circle cx=\"60.2\" cy=\"43\" r=\"1.56\" fill=\"#43D3D4\" opacity=\".22\"/><circle cx=\"60.2\" cy=\"43\" r=\"0.57\" fill=\"#D8FFFB\"/></g><path display=\"none\" d=\"M31 36C33 22 46 11.5 63 11.5C80 11.5 93 22 94.5 34.5C95.6 46 86.5 56.5 69 57.5C51 58.5 34 51 31 36Z\"/><g class=\"lu-lure\"><path fill=\"none\" stroke=\"#4C97AC\" stroke-width=\"1.5\" stroke-linecap=\"round\" d=\"M77 13.2C76.6 3.6 92 -5 98 3.4\"/><g transform=\"translate(98 3.4)\"><circle class=\"lu-bulb\" r=\"7.5\" fill=\"#43D3D4\" opacity=\".3\"/><circle fill=\"#F0C76A\" r=\"3.5\"/><circle fill=\"#43D3D4\" r=\"2.6\"/><circle fill=\"#F2FFFE\" cx=\"-.9\" cy=\"-.9\" r=\"1\"/></g></g><ellipse fill=\"#F2A08A\" opacity=\".55\" cx=\"77.6\" cy=\"37.4\" rx=\"3.9\" ry=\"2.5\"/><g class=\"lu-eye\"><circle fill=\"#CDEEF3\" cx=\"80\" cy=\"27\" r=\"6.8\"/><g><circle fill=\"#06131D\" cx=\"80.5\" cy=\"27.4\" r=\"5.44\"/><path fill=\"none\" stroke=\"#2A8CA3\" stroke-width=\".9\" stroke-linecap=\"round\" d=\"M76.74 29.45Q80.5 33.53 84.08 29.04\"/><circle fill=\"#fff\" cx=\"82.04\" cy=\"25.1\" r=\"2.04\"/><circle fill=\"#fff\" cx=\"77.96\" cy=\"29.18\" r=\"0.88\"/></g></g><g><path fill=\"none\" stroke=\"#06131D\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M94.6 38.6Q90.5 46.6 79.6 43.4\"/><path fill=\"#EAFBFB\" d=\"M90.67 41.8Q91.77 44.9 92.87 41.8Z\"/><path fill=\"#EAFBFB\" d=\"M87.7 43.4Q88.8 46.5 89.9 43.4Z\"/></g><g class=\"lu-fin\"><path fill=\"#43D3D4\" fill-opacity=\".17\" stroke=\"#96E0E8\" stroke-opacity=\".62\" stroke-width=\".75\" stroke-linejoin=\"round\" d=\"M66.6 41.4C60.6 40.8 53.6 43.2 49.8 48.2q2.4.3 3.2 2.7q2.6-.7 4.1 1.3q2.4-1.3 4.6.3C63.8 50.6 66.8 46.2 67.6 43Z\"/><path fill=\"none\" stroke=\"#A0E6EC\" stroke-opacity=\".42\" stroke-width=\".55\" stroke-linecap=\"round\" d=\"M66 42.2L51.6 48.4M66.2 43L56.2 51.4M66.6 43.8L61.6 52.4\"/></g>", sad: "<circle cx=\"98\" cy=\"3.4\" r=\"11.5\" fill=\"#43D3D4\" opacity=\".09\"/><g><path fill=\"#43D3D4\" fill-opacity=\".17\" stroke=\"#96E0E8\" stroke-opacity=\".62\" stroke-width=\".75\" stroke-linejoin=\"round\" d=\"M66.6 41.4C60.6 40.8 53.6 43.2 49.8 48.2q2.4.3 3.2 2.7q2.6-.7 4.1 1.3q2.4-1.3 4.6.3C63.8 50.6 66.8 46.2 67.6 43Z\" transform=\"translate(-6 -3) rotate(-14 66 42)\"/></g><g class=\"lu-tail\"><path fill=\"#43D3D4\" fill-opacity=\".17\" stroke=\"#96E0E8\" stroke-opacity=\".62\" stroke-width=\".75\" stroke-linejoin=\"round\" d=\"M32.5 33.2C27.5 28.6 21.5 23.4 15 20.2q-2.8 3.2-1.1 6.6q-3.5 3-1.3 6.7q-3.5 3.4-1 6.8q-2.4 3.8 1.1 6.6q-1 3.4 2.7 5.3C21.6 49 27.6 44 32.5 39.6Z\"/><path fill=\"none\" stroke=\"#A0E6EC\" stroke-opacity=\".42\" stroke-width=\".55\" stroke-linecap=\"round\" d=\"M31.4 34.6L16.4 23.6M31.4 35.6L13.8 30.4M31.4 36.6L13.6 37.6M31.4 37.6L14.8 44.6M31.4 38.6L17.4 50.6\"/></g><g><path fill=\"#43D3D4\" fill-opacity=\".17\" stroke=\"#96E0E8\" stroke-opacity=\".62\" stroke-width=\".75\" stroke-linejoin=\"round\" d=\"M40.5 22.6C39.4 17 41.6 11.6 46.4 9q.2 2.6 2.4 3.1q-.6 2.5 1.6 3.5q-1 2.1.6 3.4C47 19.4 43.6 20.8 40.5 22.6Z\"/><path fill=\"none\" stroke=\"#A0E6EC\" stroke-opacity=\".42\" stroke-width=\".55\" stroke-linecap=\"round\" d=\"M41.6 21.4L45.6 11.2M43.2 20.6L48.4 14M45 19.8L50.2 17.6\"/></g><path fill=\"#43D3D4\" fill-opacity=\".17\" stroke=\"#96E0E8\" stroke-opacity=\".62\" stroke-width=\".75\" stroke-linejoin=\"round\" d=\"M39.6 49.2C37.6 53.4 38.4 57.6 41.8 59.8q.7-2.2 2.7-2.3q.1-2 2-2.9C45.2 53 42.6 51.2 39.6 49.2Z\"/><path fill=\"#1E557A\" stroke=\"#7EDEE2\" stroke-opacity=\".6\" stroke-width=\".9\" d=\"M31 36C33 22 46 11.5 63 11.5C80 11.5 93 22 94.5 34.5C95.6 46 86.5 56.5 69 57.5C51 58.5 34 51 31 36Z\"/><path fill=\"#15345C\" opacity=\".85\" d=\"M32.4 32C37 21 49 13.4 63 13.4C77.5 13.4 88.6 20.2 92.4 29.6C84 23.4 73 20.8 62 21.2C50 21.8 40 25.8 32.4 32Z\"/><path fill=\"#62AEBC\" opacity=\".55\" d=\"M36 44.5C46 53 61 56.4 74 55.6C84 55 90.6 50 93.4 43C87.6 50.6 78 53.6 66 53.6C54 53.6 44 50.6 36 44.5Z\"/><ellipse fill=\"#43D3D4\" opacity=\".16\" cx=\"84\" cy=\"22.5\" rx=\"8.5\" ry=\"5.5\"/><path fill=\"none\" stroke=\"#CFF6F8\" stroke-opacity=\".34\" stroke-width=\"1.7\" stroke-linecap=\"round\" d=\"M43 20.4C50 15 59 12.9 68 13.7\"/><path fill=\"none\" stroke=\"#BFF0F5\" stroke-opacity=\".26\" stroke-width=\"1\" stroke-linecap=\"round\" d=\"M70.4 24.6C67 32 67.2 41 71.4 48\"/><circle fill=\"#0A2645\" opacity=\".55\" cx=\"50\" cy=\"18.6\" r=\"1.1\"/><circle fill=\"#0A2645\" opacity=\".55\" cx=\"58.6\" cy=\"15.9\" r=\"0.8\"/><circle fill=\"#0A2645\" opacity=\".55\" cx=\"44.2\" cy=\"25.2\" r=\"0.9\"/><circle fill=\"#0A2645\" opacity=\".55\" cx=\"55.2\" cy=\"23.6\" r=\"0.7\"/><circle fill=\"#0A2645\" opacity=\".55\" cx=\"66.2\" cy=\"18.6\" r=\"0.8\"/><circle fill=\"#0A2645\" opacity=\".55\" cx=\"39.6\" cy=\"31.2\" r=\"0.7\"/><circle fill=\"#0A2645\" opacity=\".55\" cx=\"48.2\" cy=\"30.2\" r=\"0.6\"/><g class=\"ph\"><circle cx=\"43.4\" cy=\"45.8\" r=\"2.34\" fill=\"#43D3D4\" opacity=\".22\"/><circle cx=\"43.4\" cy=\"45.8\" r=\"0.85\" fill=\"#D8FFFB\"/><circle cx=\"50.8\" cy=\"49.6\" r=\"2.6\" fill=\"#43D3D4\" opacity=\".22\"/><circle cx=\"50.8\" cy=\"49.6\" r=\"0.95\" fill=\"#D8FFFB\"/><circle cx=\"59.2\" cy=\"51.8\" r=\"2.6\" fill=\"#43D3D4\" opacity=\".22\"/><circle cx=\"59.2\" cy=\"51.8\" r=\"0.95\" fill=\"#D8FFFB\"/><circle cx=\"67.6\" cy=\"52\" r=\"2.6\" fill=\"#43D3D4\" opacity=\".22\"/><circle cx=\"67.6\" cy=\"52\" r=\"0.95\" fill=\"#D8FFFB\"/><circle cx=\"75.6\" cy=\"50.2\" r=\"2.34\" fill=\"#43D3D4\" opacity=\".22\"/><circle cx=\"75.6\" cy=\"50.2\" r=\"0.85\" fill=\"#D8FFFB\"/><circle cx=\"82.2\" cy=\"46.8\" r=\"2.08\" fill=\"#43D3D4\" opacity=\".22\"/><circle cx=\"82.2\" cy=\"46.8\" r=\"0.76\" fill=\"#D8FFFB\"/><circle cx=\"49.4\" cy=\"39.8\" r=\"1.56\" fill=\"#43D3D4\" opacity=\".22\"/><circle cx=\"49.4\" cy=\"39.8\" r=\"0.57\" fill=\"#D8FFFB\"/><circle cx=\"60.2\" cy=\"43\" r=\"1.56\" fill=\"#43D3D4\" opacity=\".22\"/><circle cx=\"60.2\" cy=\"43\" r=\"0.57\" fill=\"#D8FFFB\"/></g><path display=\"none\" d=\"M31 36C33 22 46 11.5 63 11.5C80 11.5 93 22 94.5 34.5C95.6 46 86.5 56.5 69 57.5C51 58.5 34 51 31 36Z\"/><g class=\"lu-lure\"><path fill=\"none\" stroke=\"#4C97AC\" stroke-width=\"1.5\" stroke-linecap=\"round\" d=\"M77 13.2C76.6 3.6 92 -5 98 3.4\"/><g transform=\"translate(98 3.4)\"><circle class=\"lu-bulb\" r=\"7.5\" fill=\"#43D3D4\" opacity=\".3\"/><circle fill=\"#F0C76A\" r=\"3.5\"/><circle fill=\"#43D3D4\" r=\"2.6\"/><circle fill=\"#F2FFFE\" cx=\"-.9\" cy=\"-.9\" r=\"1\"/></g></g><ellipse fill=\"#F2A08A\" opacity=\".55\" cx=\"77.6\" cy=\"37.4\" rx=\"3.9\" ry=\"2.5\"/><g class=\"lu-eye\"><circle fill=\"#CDEEF3\" cx=\"80\" cy=\"27\" r=\"6.8\"/><g><circle fill=\"#06131D\" cx=\"80.5\" cy=\"27.4\" r=\"5.44\"/><path fill=\"none\" stroke=\"#2A8CA3\" stroke-width=\".9\" stroke-linecap=\"round\" d=\"M76.74 29.45Q80.5 33.53 84.08 29.04\"/><circle fill=\"#fff\" cx=\"82.04\" cy=\"25.1\" r=\"2.04\"/><circle fill=\"#fff\" cx=\"77.96\" cy=\"29.18\" r=\"0.88\"/></g><path fill=\"#1D4C70\" d=\"M75.5 21.74A6.92 6.92 0 0 1 84.5 21.74Q80 23.84 75.5 21.74Z\"/><path fill=\"none\" stroke=\"#0A1F33\" stroke-width=\".85\" stroke-linecap=\"round\" d=\"M75.5 21.74Q80 23.84 84.5 21.74\"/></g><path fill=\"none\" stroke=\"#C4F0F3\" stroke-width=\"1.35\" stroke-linecap=\"round\" d=\"M74.22 18.8Q79.32 15.6 85.44 17.4\"/><g><path fill=\"none\" stroke=\"#06131D\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M94.2 43.4Q89.4 38.6 83.2 43.8\"/></g><g class=\"lu-fin\"><path fill=\"#43D3D4\" fill-opacity=\".17\" stroke=\"#96E0E8\" stroke-opacity=\".62\" stroke-width=\".75\" stroke-linejoin=\"round\" d=\"M66.6 41.4C60.6 40.8 53.6 43.2 49.8 48.2q2.4.3 3.2 2.7q2.6-.7 4.1 1.3q2.4-1.3 4.6.3C63.8 50.6 66.8 46.2 67.6 43Z\"/><path fill=\"none\" stroke=\"#A0E6EC\" stroke-opacity=\".42\" stroke-width=\".55\" stroke-linecap=\"round\" d=\"M66 42.2L51.6 48.4M66.2 43L56.2 51.4M66.6 43.8L61.6 52.4\"/></g>"};
   function lumiSVG(cls, sad){
-    return '<svg class="'+cls+'" viewBox="0 -26 112 112" '+(cls.indexOf('mascot')>=0?'role="img" aria-label="Lumi, the Coral Cove anglerfish mascot"':'aria-hidden="true"')+'>'+(sad?LUMI_ART.sad:LUMI_ART.n)+'</svg>';
+    return '<svg class="'+cls+'" viewBox="0 -26 112 112" '+(cls.indexOf('mascot')>=0?'role="img" aria-label="Lumi, the Coral Classroom anglerfish mascot"':'aria-hidden="true"')+'>'+(sad?LUMI_ART.sad:LUMI_ART.n)+'</svg>';
   }
 
   function mascotTurtleSVG(cls){
     return '' +
-    '<svg class="'+cls+'" viewBox="0 0 140 140" role="img" aria-label="Coral Cove turtle mascot">' +
+    '<svg class="'+cls+'" viewBox="0 0 140 140" role="img" aria-label="Shelly, the Coral Classroom turtle mascot">' +
       '<ellipse cx="70" cy="86" rx="16" ry="10" fill="var(--seaweed)" opacity="0.55"/>' +
       '<ellipse cx="24" cy="70" rx="15" ry="10" fill="var(--lagoon)" transform="rotate(-24 24 70)"/>' +
       '<ellipse cx="116" cy="70" rx="15" ry="10" fill="var(--lagoon)" transform="rotate(24 116 70)"/>' +
@@ -1048,7 +1098,7 @@
       '<div class="topbar">' +
         '<div class="brand">' +
           '<div class="brand-block">' +
-            '<h1 class="brand-title">Coral Cove</h1>' +
+            '<h1 class="brand-title">Coral Classroom</h1>' +
             '<p class="brand-tag">'+(editMode ? '✏️ Edit Mode — arrange and archive decks' : (managing ? '🔧 Adult Mode — kids can\'t see this screen' : 'Dive in and practice!'))+'</p>' +
           '</div>' +
         '</div>' +
@@ -1209,7 +1259,7 @@
     reader.onload = function(){
       var parsed = parseAnkiPlainText(String(reader.result || ''));
       if(!parsed.length){
-        S.storeError = 'Couldn’t find any cards in that file. Coral Cove reads Anki’s plain-text export (File → Export → "Notes in Plain Text") with a Front and Back column — not the .apkg format.';
+        S.storeError = 'Couldn’t find any cards in that file. Coral Classroom reads Anki’s plain-text export (File → Export → "Notes in Plain Text") with a Front and Back column — not the .apkg format.';
         render();
         return;
       }
@@ -1224,7 +1274,7 @@
       }).then(function(){
         render();
       }).catch(function(err){
-        console.error('[Coral Cove] Anki import failed', err);
+        console.error('[Coral Classroom] Anki import failed', err);
         S.storeError = 'That import didn’t finish saving. Check your connection and try again.';
         render();
       });

@@ -454,7 +454,7 @@
     var g = myGoals().filter(function(x){ return x !== 'explore'; });
     return { goal: (p && p.learnGoal) || (g.indexOf('korean') >= 0 ? 'Be conversational when I visit Korea' : ''), subjects: g, level: 'new', minutes: 20, days: 5, start: nextMonday(), target: '' };
   }
-  LIB.views.courseSetup = { title: 'Coral Classroom', render: function(el){
+  LIB.views.courseSetup = { title: 'My course', render: function(el){
     var a = defaultAnswers(), p = CC() && CC().profile();
     var opt = function(v, cur, l){ return '<option value="' + v + '"' + (String(cur) === String(v) ? ' selected' : '') + '>' + l + '</option>'; };
     el.innerHTML = '<section class="clib-card"><h2>' + icon('school', '🏫') + ' What do you want to learn?</h2><p>A few questions, and Coral Classroom plans a course for ' + esc(p ? p.name : 'you') + ': units with clear goals, dates, and checks that adjust it as you go. You can change any answer later.</p>' +
@@ -482,7 +482,7 @@
     });
   } };
 
-  LIB.views.classroom = { title: 'Coral Classroom', render: function(el){
+  LIB.views.classroom = { title: 'My course', render: function(el){
     var co = course();
     if(!co){
       var a = defaultAnswers();   // first visit: plan straight away from what we know, then she can adjust the answers
@@ -504,7 +504,7 @@
         ((co.fixups || []).length ? '<p class="co-meta">' + icon('check', '') + ' ' + co.fixups.length + ' fix-up item' + (co.fixups.length === 1 ? '' : 's') + ' from earlier checks are mixed into your practice.</p>' : '') +
         '<div class="clib-row"><button type="button" class="clib-btn main" data-co-check="' + (now.review ? 'review' : 'unit') + ':' + ni + '">Take the ' + (now.review ? 'review' : 'unit') + ' check (optional)</button><button type="button" class="clib-btn" data-co-skip="' + ni + '">Mark this unit done</button></div></section>';
     } else html += '<section class="clib-card co-now"><h2>🎉 Course complete!</h2><p>Every unit is done. Change your answers to plan the next course.</p></section>';
-    var headHtml = '<section class="clib-card co-head"><h2>' + icon('school', '🏫') + ' Coral Classroom</h2>' +
+    var headHtml = '<section class="clib-card co-head"><h2>' + icon('school', '🏫') + ' My course</h2>' +
       '<label class="clib-label" for="coGoalEdit">My goal</label><div class="co-goalrow"><textarea id="coGoalEdit" class="clib-input co-goal" rows="2">' + esc(co.goal) + '</textarea></div>' +
       '<div class="clib-row"><button type="button" class="clib-btn" data-co-goalsave>Save goal</button><button type="button" class="clib-btn" data-view="courseSetup">Change my answers</button>' +
       (!co.evals.length ? '<button type="button" class="clib-btn" data-co-check="placement">Placement check (optional)</button>' : '') + '</div><p class="clib-msg" data-co-goalmsg aria-live="polite"></p>' +
@@ -518,7 +518,7 @@
         (u.decks.length ? '<p class="co-meta"><b>Decks:</b> ' + u.decks.map(function(dk){ return esc(dk.name) + (dk.part ? ' (cards ' + (dk.from + 1) + '–' + dk.to + ')' : '') + (dk.role !== 'learn' ? ' (practice)' : ''); }).join(', ') + '</p>' : '') +
         '<p class="co-meta"><b>Also:</b> ' + u.tools.map(function(x){ return esc(x.name); }).join(', ') + '</p><p class="co-meta"><b>Check:</b> ' + esc(u.check) + '</p></div></details></li>'; }).join('') + '</ol>';
     html += '<h3 class="clib-more-h">What changed and why</h3><ul class="co-log">' + co.log.slice().reverse().map(function(l){ return '<li><small>' + niceDate(l.date) + '</small> ' + esc(l.text) + '</li>'; }).join('') + '</ul>';
-    html += '<div class="clib-row"><button type="button" class="clib-btn" data-co-off>Turn Coral Classroom off</button></div>';
+    html += '<div class="clib-row"><button type="button" class="clib-btn" data-co-off>Turn the course off</button></div>';
     el.innerHTML = html;
     wireTiles(el);
     if(now) unitProgress(now).then(function(p){ var b = $('[data-co-prog]', el), tx = $('[data-co-progt]', el); if(p == null || !b) return; b.style.width = Math.round(p * 100) + '%';
@@ -621,7 +621,7 @@
   function classroomBanner(){
     if(!courseOn()) return '';
     var co = course(), now = co && courseNow(co);
-    return '<button type="button" class="clib-classroom" data-view="classroom"><span class="co-cr-e" aria-hidden="true">' + icon('school', '🏫') + '</span><span><b>Coral Classroom</b><small>' +
+    return '<button type="button" class="clib-classroom" data-view="classroom"><span class="co-cr-e" aria-hidden="true">' + icon('school', '🏫') + '</span><span><b>My course</b><small>' +
       (!co ? 'Plan your course: a few questions, then units with goals, dates and checks.' : now ? 'Unit ' + (co.units.indexOf(now) + 1) + ' of ' + co.units.length + ': ' + esc(now.title) + ' · until ' + niceDate(now.end) : 'Course complete! 🎉') + '</small></span></button>';
   }
   LIB.views.home = { title: 'Library', render: function(el){
@@ -1873,9 +1873,9 @@
       var topMis = Object.keys(mis).sort(function(a, b){ return mis[b] - mis[a]; })[0];
       var r = rec(), nDays = Object.keys(days).length;
       var html = '<div class="clib-print-area clib-letter"><p>' + new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + '</p><p>Dear grown-ups,</p>';
-      if(!week.length && !lg.length) html += '<p>' + esc(name) + ' hasn\'t practiced in Coral Cove this week. A five-minute round together is a lovely way to start again.</p>';
+      if(!week.length && !lg.length) html += '<p>' + esc(name) + ' hasn\'t practiced in Coral Classroom this week. A five-minute round together is a lovely way to start again.</p>';
       else {
-        html += '<p>Here is ' + esc(name) + '\'s week in Coral Cove. ' + esc(name) + ' learned on <b>' + nDays + ' day' + (nDays === 1 ? '' : 's') + '</b>' + (cards ? ', practiced <b>' + cards + ' cards</b> in ' + week.length + ' round' + (week.length === 1 ? '' : 's') + (cards ? ' (' + Math.round(right / cards * 100) + '% right first time)' : '') : '') + (mins ? ', for about <b>' + mins + ' minutes</b>' : '') + '.</p>';
+        html += '<p>Here is ' + esc(name) + '\'s week in Coral Classroom. ' + esc(name) + ' learned on <b>' + nDays + ' day' + (nDays === 1 ? '' : 's') + '</b>' + (cards ? ', practiced <b>' + cards + ' cards</b> in ' + week.length + ' round' + (week.length === 1 ? '' : 's') + (cards ? ' (' + Math.round(right / cards * 100) + '% right first time)' : '') : '') + (mins ? ', for about <b>' + mins + ' minutes</b>' : '') + '.</p>';
         if(deckRows.length) html += '<h2>Decks</h2><ul>' + deckRows.slice(0, 8).map(function(d){ return '<li>' + esc(d.e + ' ' + d.name) + ': ' + d.rounds + ' round' + (d.rounds === 1 ? '' : 's') + ', ' + d.total + ' cards, ' + (d.total ? Math.round(d.right / d.total * 100) : 0) + '% right</li>'; }).join('') + '</ul>';
         var extra = []; if(ws.length) extra.push(ws.length + ' worksheet' + (ws.length === 1 ? '' : 's') + ' (average ' + Math.round(ws.reduce(function(s, w){ return s + (w.score || 0); }, 0) / ws.length) + '%)');
         if(skKeys.length) extra.push(skKeys.reduce(function(s, k){ return s + sk[k].n; }, 0) + ' math answers');
@@ -1887,7 +1887,7 @@
         if(r.placement) html += '<p>Last math placement check (' + esc(r.placement.date) + '): ready for <b>' + esc(r.placement.label) + '</b>.</p>';
         html += '<h2>An idea for this week</h2><p>' + esc(next.length ? 'Ask ' + name + ' to teach you one thing from ' + (deckRows[deckRows.length - 1] || { name: 'a deck' }).name + '. Explaining it out loud is one of the best ways to remember.' : 'Try a "Teach it back" in the Library together: ' + name + ' explains a card to Shelly, and you listen.') + '</p>';
       }
-      html += '<p>From Shelly 🐢 and the Coral Cove reef</p><p class="clib-note">Worked out on this device from Coral Cove\'s practice history and the Library log. Percentages from a handful of answers can swing a lot, so treat them as a rough guide.</p></div>' +
+      html += '<p>From Shelly 🐢 and Coral Classroom</p><p class="clib-note">Worked out on this device from Coral Classroom\'s practice history and the Library log. Percentages from a handful of answers can swing a lot, so treat them as a rough guide.</p></div>' +
         '<div class="clib-row clib-noprint"><button type="button" class="clib-btn main" data-print>🖨️ Print or save as PDF</button></div>';
       el.innerHTML = html;
       $('[data-print]', el).addEventListener('click', function(){ document.body.classList.add('clib-printing'); setTimeout(function(){ try { window.print(); } catch(e){} setTimeout(function(){ document.body.classList.remove('clib-printing'); }, 500); }, 50); });

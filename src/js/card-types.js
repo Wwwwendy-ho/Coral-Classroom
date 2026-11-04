@@ -297,7 +297,7 @@
       return 'denied';
     }
     var MSG = {
-      blocked: 'The microphone isn\'t allowed in this window, so recording can\'t work here. Echo still works: say it out loud along with the voice. Recording works in the iPad copy of Coral Cove (opened from the Home Screen).',
+      blocked: 'The microphone isn\'t allowed in this window, so recording can\'t work here. Echo still works: say it out loud along with the voice. Recording works in the iPad copy of Coral Classroom (opened from the Home Screen).',
       denied: 'The microphone is switched off for this page. To use it, allow the microphone in the browser\'s settings for this site, then tap Try again.',
       nomic: 'No microphone was found on this device.',
       busy: 'Another app is using the microphone. Close it, then tap Try again.',
@@ -451,7 +451,7 @@
     else if(ph === 'starting') mic = '<button type="button" class="echo-rec" disabled><span class="echo-dot"></span>Getting the microphone…</button>';
     else if(ph === 'ask') mic = '<div class="mic-ask" role="group" aria-labelledby="micAskTitle">' +
         '<div class="mic-ask-title" id="micAskTitle">🎙️ Use the microphone?</div>' +
-        '<p>Coral Cove can record you saying it, so you can hear yourself next to the voice. The recording stays on this device and is deleted when you move to the next card.</p>' +
+        '<p>Coral Classroom can record you saying it, so you can hear yourself next to the voice. The recording stays on this device and is deleted when you move to the next card.</p>' +
         '<div class="mic-ask-btns"><button type="button" class="btn btn-primary" data-act="mic-yes">Yes, use the microphone</button><button type="button" class="btn btn-ghost" data-act="mic-no">Not now</button></div>' +
         '<small>Your browser will ask too. You can change this any time in ⚙️ Settings.</small></div>';
     else if(ph === 'askadult') mic = '<div class="mic-ask"><p>🎙️ A grown-up can turn on the microphone in ⚙️ Settings.</p></div>';
@@ -1438,7 +1438,7 @@
       });
     }).catch(function(err){
       // A failed save used to leave the round stuck on an empty study screen forever.
-      console.error('[Coral Cove] saving the round failed', err);
+      console.error('[Coral Classroom] saving the round failed', err);
       S.finishingRound = false;
       S.storeError = 'This round\'s results didn\'t save. Check your connection and try again.';
       if(!coveShown) S.view = 'summary';
