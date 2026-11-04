@@ -703,12 +703,15 @@
     var me = sp[view.at];
     var ov = document.createElement('div');
     ov.className = 'r3-map' + (fromZoom ? ' from-zoom' : ''); ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-label', 'Treasure map');
+    var sea = reefCourseOn();   // the sea chart (seamap.js) is for profiles with a language course, for now
     ov.innerHTML = '<div class="r3-map-card"><div class="r3-map-head"><b>Treasure map</b><button type="button" class="r3-map-close" data-r3-close aria-label="Close the map">'+ccIcon('close')+'</button></div>' +
+      (sea ? '<div class="r3-map-tabs" role="tablist"><button type="button" role="tab" class="r3-map-tab on" aria-selected="true" data-sea-tab="cove">Coral Cove</button><button type="button" role="tab" class="r3-map-tab" aria-selected="false" data-sea-tab="sea">The sea</button></div>' : '') +
+      '<div class="r3-map-cove" role="tabpanel">' +
       '<p class="r3-map-hint">Tap a place to swim there.</p>' + reef3dVoyageHTML(view) +
       '<div class="r3-map-board" style="height:'+H+'px"><svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true">' +
         '<path d="'+d+'" fill="none" stroke="#b5452f" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round"/>' + dots + '</svg>' + spots +
         '<span class="r3-map-me" style="left:'+(px(me) / W * 100).toFixed(1)+'%;top:'+py(me).toFixed(0)+'px" aria-hidden="true">'+reefGuideMini(view.night)+'</span>' +
-      '</div></div>';
+      '</div></div>' + (sea ? reefSeaHTML(view) : '') + '</div>';
     function close(){
       var mb = view.wrap.querySelector('[data-r3-map]');
       if(!view.zoomNow){ ov.remove(); if(mb) mb.focus(); return; }
@@ -717,9 +720,17 @@
       reef3dZoomTo(view, 0, 900, function(){ view.zoomCenter = null; });
       if(mb) mb.focus();
     }
+    function tab(which){
+      ov.querySelectorAll('[data-sea-tab][role="tab"]').forEach(function(t){ var on = t.dataset.seaTab === which; t.classList.toggle('on', on); t.setAttribute('aria-selected', String(on)); });
+      ov.classList.toggle('sea-on', which === 'sea');
+      if(which === 'sea' && !ov.querySelector('.r3-sea-isle.picked')) reefSeaInfo(ov, 'cove');
+      var card = ov.querySelector('.r3-map-card'); if(card) card.scrollTop = 0;
+    }
     ov.addEventListener('click', function(e){
       var go = e.target.closest('[data-r3-go]');
       if(go) return reef3dMapJump(view, ov, +go.dataset.r3Go);
+      var tb = e.target.closest('[data-sea-tab]'); if(tb) return tab(tb.dataset.seaTab);
+      var isle = e.target.closest('[data-sea]'); if(isle) return reefSeaInfo(ov, isle.dataset.sea);
       if(e.target.closest('[data-r3-close]') || e.target === ov) close();
     });
     ov.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });

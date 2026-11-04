@@ -1991,6 +1991,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
      js/reef3d/scenes.js        the ? block · Shelly's acted moments · the night ship · the day reef
      js/reef3d/dice.js          the dice block
      js/reef3d/party.js         party board: shells, pearl, shop, Chance Time, minigames, story mode
+     js/reef3d/seamap.js        the sea chart: every region of Coral Classroom on one map (in the treasure map)
      js/reef3d/games-adult.js   grown-up minigames (Korean ones for Wendy) from the profile's decks
      js/reef3d/aquarium.js      My Aquarium in 3D: the sea friends swim in the tank
      js/reef3d/life.js          the beam over the next deck, orbiting lights, confetti and the victory dance, camera swoop and drift
@@ -12883,7 +12884,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
 
      Each release adds an entry to REEF_WHATS_NEW (newest last): an id, the date it went live, and its steps. A step
      points at something on the board with a CSS selector (`at`), or at nothing (a step in the middle of the screen).
-     `who` limits an entry to 'adult' or 'child' profiles. The smoke test opens the board and checks that every
+     `who` limits an entry to 'adult' or 'child' profiles; `need:'course'` to profiles with a language course. The smoke test opens the board and checks that every
      step's selector finds something (window.__whatsNewMissing), so a walkthrough can never point at a button that
      has moved or gone. Lines are short: they're spoken, and tools/voice/harvest.py records them. */
   var REEF_WHATS_NEW = [
@@ -12894,6 +12895,9 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     { id:'coral-classroom', date:'2026-11-04', steps:[
       { say:'Welcome to Coral Classroom! Coral Cove is now the flashcard reef at its heart, with more of the sea to explore soon.' },
       { at:'[aria-label="Open the Library"]', who:'adult', say:'Your course lives in the Library, under My course.' }
+    ] },
+    { id:'sea-chart', date:'2026-11-04', need:'course', steps:[
+      { at:'.r3-mapbtn', say:'Open the treasure map and tap The sea, to see every part of Coral Classroom. More islands open soon.' }
     ] }
   ];
   var WN_RECENT_DAYS = 14;   // a brand-new profile is shown only what's new in the last two weeks, not the whole history
@@ -12910,7 +12914,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   function whatsNewWho(){ return S.profile && S.profile.mode === 'child' ? 'child' : 'adult'; }
   function whatsNewSteps(entries){
     var who = whatsNewWho(), out = [];
-    entries.forEach(function(e){ if(e.who && e.who !== who) return; e.steps.forEach(function(st){ if(!st.who || st.who === who) out.push(st); }); });
+    entries.forEach(function(e){ if(e.who && e.who !== who || e.need === 'course' && !reefCourseOn()) return; e.steps.forEach(function(st){ if(!st.who || st.who === who) out.push(st); }); });
     return out;
   }
   // Something else is on screen (a panel, the map, a transition, the Library, a minigame): wait for it to clear.
@@ -12923,7 +12927,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   function reefWhatsNew(replay){
     if(document.querySelector('.cc-tour')) return;
     var entries;
-    if(replay){ entries = REEF_WHATS_NEW.slice(-1); }
+    if(replay){ var mine = REEF_WHATS_NEW.filter(function(e){ return whatsNewSteps([e]).length; }); entries = mine.slice(-1); }   // the newest one meant for this profile
     else { var seen = whatsNewSeen(); entries = REEF_WHATS_NEW.filter(function(e){ return seen.indexOf(e.id) < 0; }).reverse(); }   // newest first
     var steps = whatsNewSteps(entries).filter(function(st){ return !st.at || document.querySelector(st.at); });
     var done = function(){ if(!replay){ var s = whatsNewSeen(); entries.forEach(function(e){ if(s.indexOf(e.id) < 0) s.push(e.id); }); whatsNewSave(s); } };
@@ -12994,7 +12998,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   // Test helper: steps whose selector finds nothing on the board as it is now (should be none)
   window.__whatsNewMissing = function(){
     var miss = [];
-    REEF_WHATS_NEW.forEach(function(e){ e.steps.forEach(function(st){ if(st.at && (!st.who || st.who === whatsNewWho()) && !document.querySelector(st.at)) miss.push(e.id + ': ' + st.at); }); });
+    REEF_WHATS_NEW.forEach(function(e){ if(e.need === 'course' && !reefCourseOn()) return; e.steps.forEach(function(st){ if(st.at && (!st.who || st.who === whatsNewWho()) && !document.querySelector(st.at)) miss.push(e.id + ': ' + st.at); }); });
     return miss;
   };
 /* end of src/js/whats-new.js */
@@ -21228,12 +21232,15 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     var me = sp[view.at];
     var ov = document.createElement('div');
     ov.className = 'r3-map' + (fromZoom ? ' from-zoom' : ''); ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-label', 'Treasure map');
+    var sea = reefCourseOn();   // the sea chart (seamap.js) is for profiles with a language course, for now
     ov.innerHTML = '<div class="r3-map-card"><div class="r3-map-head"><b>Treasure map</b><button type="button" class="r3-map-close" data-r3-close aria-label="Close the map">'+ccIcon('close')+'</button></div>' +
+      (sea ? '<div class="r3-map-tabs" role="tablist"><button type="button" role="tab" class="r3-map-tab on" aria-selected="true" data-sea-tab="cove">Coral Cove</button><button type="button" role="tab" class="r3-map-tab" aria-selected="false" data-sea-tab="sea">The sea</button></div>' : '') +
+      '<div class="r3-map-cove" role="tabpanel">' +
       '<p class="r3-map-hint">Tap a place to swim there.</p>' + reef3dVoyageHTML(view) +
       '<div class="r3-map-board" style="height:'+H+'px"><svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true">' +
         '<path d="'+d+'" fill="none" stroke="#b5452f" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round"/>' + dots + '</svg>' + spots +
         '<span class="r3-map-me" style="left:'+(px(me) / W * 100).toFixed(1)+'%;top:'+py(me).toFixed(0)+'px" aria-hidden="true">'+reefGuideMini(view.night)+'</span>' +
-      '</div></div>';
+      '</div></div>' + (sea ? reefSeaHTML(view) : '') + '</div>';
     function close(){
       var mb = view.wrap.querySelector('[data-r3-map]');
       if(!view.zoomNow){ ov.remove(); if(mb) mb.focus(); return; }
@@ -21242,9 +21249,17 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       reef3dZoomTo(view, 0, 900, function(){ view.zoomCenter = null; });
       if(mb) mb.focus();
     }
+    function tab(which){
+      ov.querySelectorAll('[data-sea-tab][role="tab"]').forEach(function(t){ var on = t.dataset.seaTab === which; t.classList.toggle('on', on); t.setAttribute('aria-selected', String(on)); });
+      ov.classList.toggle('sea-on', which === 'sea');
+      if(which === 'sea' && !ov.querySelector('.r3-sea-isle.picked')) reefSeaInfo(ov, 'cove');
+      var card = ov.querySelector('.r3-map-card'); if(card) card.scrollTop = 0;
+    }
     ov.addEventListener('click', function(e){
       var go = e.target.closest('[data-r3-go]');
       if(go) return reef3dMapJump(view, ov, +go.dataset.r3Go);
+      var tb = e.target.closest('[data-sea-tab]'); if(tb) return tab(tb.dataset.seaTab);
+      var isle = e.target.closest('[data-sea]'); if(isle) return reefSeaInfo(ov, isle.dataset.sea);
       if(e.target.closest('[data-r3-close]') || e.target === ov) close();
     });
     ov.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });
@@ -21425,6 +21440,72 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   }
 
 /* end of src/js/reef3d/party.js */
+/* from src/js/reef3d/seamap.js */
+  /* ---------- The sea chart: every region of Coral Classroom on one map ----------
+     The treasure map gains a second page, The sea: a drawn chart with an island for each region of the language
+     school (see the architecture doc). Coral Cove, the flashcard reef, is in the middle and is where you are;
+     the others show what they will teach and open one by one as they're built. Only profiles with a language
+     course see it for now (reefCourseOn). Tapping an island shows its card; Coral Cove's card leads back to the
+     board's own map. */
+  var REEF_REGIONS = [
+    { id:'cove', say:'Coral Cove, for vocabulary and memory.', name:'Coral Cove', teaches:'Vocabulary and memory', x:150, y:198, open:true,
+      about:'The flashcard reef. Every word you meet anywhere ends up here, reviewed just when you are about to forget it.' },
+    { id:'deck', say:'Captain\'s Deck, for your plan and progress.', name:'Captain\'s Deck', teaches:'Plan and progress', x:150, y:58,
+      about:'Today\'s voyage, your course with its dates, checkpoints, and what you can now do.' },
+    { id:'lagoon', say:'Story Lagoon, for listening and reading.', name:'Story Lagoon', teaches:'Listening and reading', x:62, y:124,
+      about:'Short stories and conversations made from words you know, to listen to first and then read.' },
+    { id:'caves', say:'Echo Caves, for pronunciation.', name:'Echo Caves', teaches:'Pronunciation', x:238, y:124,
+      about:'The sounds you mix up, and shadowing a native voice with your pitch shown beside it.' },
+    { id:'town', say:'Harbor Town, for conversation.', name:'Harbor Town', teaches:'Conversation', x:52, y:252,
+      about:'Townsfolk for each part of your trip: cafes, taxis, shops and a hotel, all in Korean.' },
+    { id:'reef', say:'Pattern Reef, for grammar.', name:'Pattern Reef', teaches:'Grammar', x:248, y:252,
+      about:'One sentence pattern at a time: build it, break it and rebuild it.' },
+    { id:'beach', say:'Bottle Beach, for writing.', name:'Bottle Beach', teaches:'Writing', x:92, y:340,
+      about:'Messages in bottles, a travel journal, and a pen-pal who writes back.' },
+    { id:'light', say:'The Lighthouse, for culture and real life.', name:'The Lighthouse', teaches:'Culture and real life', x:210, y:340,
+      about:'Real menus, signs and tickets, and the manners that go with them.' }
+  ];
+  // Each island's picture, drawn around (0, 0) in map ink and soft colour
+  var SEA_ART = {
+    cove: '<path d="M-14 6c-2-8 1-14 4-18M-14 6c-6-5-9-9-9-15M-14 6c5-4 9-10 9-17M4 6c0-9 3-13 7-17M4 6c-5-6-6-11-5-17M14 6c3-6 7-8 10-11" stroke="#e8604e" stroke-width="3.2" stroke-linecap="round" fill="none"/><circle cx="-23" cy="-9" r="2.4" fill="#e8604e"/><circle cx="11" cy="-11" r="2.4" fill="#e8604e"/><circle cx="24" cy="-5" r="2.4" fill="#e8604e"/>',
+    deck: '<circle r="13" fill="none" stroke="#7a4f22" stroke-width="3"/><circle r="4" fill="#7a4f22"/><path d="M0-21V21M-21 0H21M-15-15 15 15M15-15-15 15" stroke="#7a4f22" stroke-width="2.4" stroke-linecap="round"/>',
+    lagoon: '<path d="M-16-2h14v14h-14zM2-2h14v14H2z" fill="#fff8e6" stroke="#7a4f22" stroke-width="2" stroke-linejoin="round"/><path d="M-13 3h8M-13 7h8M5 3h8M5 7h8" stroke="#2f8f95" stroke-width="1.6" stroke-linecap="round"/><path d="M-2-2c0-4 4-6 4-6" stroke="#7a4f22" stroke-width="1.6" fill="none"/>',
+    caves: '<path d="M-20 10c0-16 8-26 20-26S20-6 20 10z" fill="#6f6a5c" stroke="#4a3115" stroke-width="2"/><path d="M-9 10c0-9 4-14 9-14s9 5 9 14z" fill="#2b2a26"/><path d="M24-12c3 3 3 7 0 10M28-16c5 5 5 13 0 18" stroke="#2f8f95" stroke-width="2" fill="none" stroke-linecap="round"/>',
+    town: '<path d="M-20 10V-4l8-7 8 7v14zM-2 10V-8l9-8 9 8v18z" fill="#fff8e6" stroke="#7a4f22" stroke-width="2" stroke-linejoin="round"/><path d="M-21-3l9-9 9 9M-3-7l10-10 10 10" fill="none" stroke="#c2553e" stroke-width="3" stroke-linejoin="round"/><path d="M-14 10V3h4v7M5 10V2h4v8" fill="#2f8f95"/><path d="M18 10h12M22 10v5M28 10v5" stroke="#7a4f22" stroke-width="2"/>',
+    reef: '<rect x="-17" y="-2" width="11" height="11" rx="2" fill="#2f8f95"/><rect x="-5" y="-2" width="11" height="11" rx="2" fill="#e8a33d"/><rect x="7" y="-2" width="11" height="11" rx="2" fill="#2f8f95"/><rect x="-11" y="-14" width="11" height="11" rx="2" fill="#e8604e"/><rect x="1" y="-14" width="11" height="11" rx="2" fill="#7a4fc2"/>',
+    beach: '<g transform="rotate(-28)"><rect x="-6" y="-12" width="12" height="20" rx="5" fill="#8fd3a8" stroke="#2f6b4f" stroke-width="2"/><rect x="-3" y="-18" width="6" height="7" rx="1.5" fill="#8fd3a8" stroke="#2f6b4f" stroke-width="2"/><rect x="-3" y="-21" width="6" height="4" rx="1" fill="#a8814f"/><path d="M-3-4h6M-3 0h6" stroke="#fff8e6" stroke-width="1.6"/></g>',
+    light: '<path d="M-7 12l3-26h8l3 26z" fill="#fff8e6" stroke="#7a4f22" stroke-width="2" stroke-linejoin="round"/><path d="M-6 4h12M-5-4h10" stroke="#c2553e" stroke-width="4"/><rect x="-6" y="-21" width="12" height="7" rx="1.5" fill="#ffd36b" stroke="#7a4f22" stroke-width="2"/><path d="M-4-23l4-5 4 5" fill="#c2553e"/><path d="M8-18l18-7M8-17l18 4" stroke="#ffd36b" stroke-width="2.4" stroke-linecap="round" opacity=".9"/>'
+  };
+  function reefSeaHTML(view){
+    var W = 300, H = 390, c = REEF_REGIONS[0];
+    var routes = REEF_REGIONS.slice(1).map(function(r){
+      var mx = (c.x + r.x) / 2 + (r.y - c.y) * .18, my = (c.y + r.y) / 2 - (r.x - c.x) * .18;   // a gentle curve, not a ruler line
+      return '<path d="M' + c.x + ' ' + c.y + 'Q' + mx.toFixed(1) + ' ' + my.toFixed(1) + ' ' + r.x + ' ' + r.y + '" fill="none" stroke="#b5452f" stroke-width="2.4" stroke-dasharray="2 8" stroke-linecap="round" opacity=".75"/>';
+    }).join('');
+    var isles = REEF_REGIONS.map(function(r){
+      return '<g transform="translate(' + r.x + ' ' + (r.y - 4) + ')"><ellipse cx="0" cy="14" rx="34" ry="13" fill="#e9d29c" stroke="#a8814f" stroke-width="1.6"/>' +
+        '<ellipse cx="0" cy="16" rx="42" ry="17" fill="none" stroke="#7fbdb8" stroke-width="1.4" opacity=".7"/>' + SEA_ART[r.id] + '</g>';
+    }).join('');
+    // waves and a compass, so the chart reads as sea
+    var waves = [[24, 44], [262, 46], [118, 290], [196, 268], [30, 196], [270, 186], [150, 372], [252, 372]].map(function(p){
+      return '<path d="M' + p[0] + ' ' + p[1] + 'q5-5 10 0t10 0" fill="none" stroke="#7fbdb8" stroke-width="1.6" stroke-linecap="round"/>'; }).join('');
+    var compass = '<g transform="translate(274 300)" opacity=".8"><circle r="13" fill="none" stroke="#a8814f" stroke-width="1.2"/><path d="M0-17L4 0 0 17-4 0z" fill="#b5452f"/><path d="M-17 0L0 3 17 0 0-3z" fill="#a8814f"/><text y="-20" text-anchor="middle" font-size="9" font-weight="800" fill="#7a4f22">N</text></g>';
+    var labels = REEF_REGIONS.map(function(r){
+      return '<button type="button" class="r3-sea-isle' + (r.open ? ' open' : '') + '" data-sea="' + r.id + '" style="left:' + (r.x / W * 100).toFixed(1) + '%;top:' + (r.y / H * 100).toFixed(1) + '%" aria-label="' + esc(r.name) + ': ' + esc(r.teaches) + (r.open ? '' : ', opening soon') + '">' +
+        '<span class="r3-sea-name">' + esc(r.name) + '</span><span class="r3-sea-tag">' + (r.open ? 'You are here' : 'Opening soon') + '</span></button>';
+    }).join('');
+    return '<div class="r3-sea" role="tabpanel" aria-label="The sea"><div class="r3-sea-chart"><svg viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true">' + waves + routes + compass + isles +
+      '</svg>' + labels + '<span class="r3-sea-me" style="left:' + (c.x / W * 100).toFixed(1) + '%;top:' + ((c.y - 30) / H * 100).toFixed(1) + '%" aria-hidden="true">' + reefGuideMini(view.night) + '</span></div>' +
+      '<div class="r3-sea-info" aria-live="polite"></div></div>';
+  }
+  function reefSeaInfo(ov, id){
+    var r = REEF_REGIONS.find(function(x){ return x.id === id; }), box = ov.querySelector('.r3-sea-info'); if(!r || !box) return;
+    ov.querySelectorAll('.r3-sea-isle').forEach(function(b){ b.classList.toggle('picked', b.dataset.sea === id); });
+    box.innerHTML = '<b>' + esc(r.name) + '</b><small>' + esc(r.teaches) + '</small><p>' + esc(r.about) + '</p>' +
+      (r.open ? '<button type="button" class="r3-btn main" data-sea-tab="cove">' + ccIcon('map') + ' Open Coral Cove</button>' : '<span class="r3-sea-soon">' + ccIcon('sparkle') + ' Opening soon</span>');
+    try { Speech.speak(r.say); } catch(e){}
+  }
+/* end of src/js/reef3d/seamap.js */
 /* from src/js/reef3d/games-adult.js */
   /* ---------- Grown-up minigames: built from the profile's own decks, with scores and a personal best ----------
      A grown-up profile with Korean decks (Wendy) gets six Korean games; any other grown-up profile gets Tide Pairs
@@ -24205,6 +24286,32 @@ body.r3-full .r3-musicbtn, body.r3-full .r3-themebtn, body.r3-full .r3-gamesbtn{
 @keyframes ccTourOut{ to{ opacity:0; } }
 @keyframes ccTourRing{ 50%{ box-shadow:0 0 0 200vmax rgba(4,30,36,.55), 0 0 0 4px #ffe08a, 0 0 30px 10px rgba(255,211,107,.7); } }
 .cc-tour.calm, .cc-tour.calm *{ animation:none !important; transition:none !important; }
+/* The sea chart (seamap.js): a second page of the treasure map */
+.r3-map-tabs{ display:flex; gap:6px; margin:6px 0 10px; padding:4px; border-radius:999px; background:rgba(122,79,34,.12); }
+.r3-map-tab{ flex:1; min-height:40px; border:none; border-radius:999px; background:none; color:#7a4f22; font:800 1rem 'Baloo 2',sans-serif; cursor:pointer; transition:background .2s, color .2s, box-shadow .2s; }
+.r3-map-tab.on{ background:#fff8e6; color:#4a3115; box-shadow:0 2px 0 #b08d5a; }
+.r3-sea{ display:none; }
+.r3-map.sea-on .r3-sea{ display:block; animation:r3SeaIn .35s ease-out both; }
+.r3-map.sea-on .r3-map-cove{ display:none; }
+@keyframes r3SeaIn{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+.r3-sea-chart{ position:relative; aspect-ratio:300 / 390; border-radius:16px; overflow:hidden;
+  background:radial-gradient(90% 70% at 50% 50%, rgba(127,189,184,.28), rgba(127,189,184,.1) 70%, transparent), repeating-linear-gradient(0deg, rgba(122,79,34,.05) 0 1px, transparent 1px 26px), repeating-linear-gradient(90deg, rgba(122,79,34,.05) 0 1px, transparent 1px 26px); box-shadow:inset 0 0 0 2px rgba(122,79,34,.25); }
+.r3-sea-chart svg{ position:absolute; inset:0; width:100%; height:100%; }
+.r3-sea-isle{ position:absolute; transform:translate(-50%, 16px); display:flex; flex-direction:column; align-items:center; gap:1px; border:none; background:none; padding:24px 6px 2px; margin-top:-34px; cursor:pointer; color:#4a3115; -webkit-tap-highlight-color:transparent; }
+.r3-sea-name{ font:800 .82rem/1.1 'Baloo 2',sans-serif; white-space:nowrap; padding:1px 7px; border-radius:999px; background:rgba(251,240,210,.88); }
+.r3-sea-tag{ white-space:nowrap; font:800 .62rem/1 'Nunito Sans',sans-serif; letter-spacing:.04em; text-transform:uppercase; color:#8a6a44; }
+.r3-sea-isle.open .r3-sea-tag{ color:#1c8c93; }
+.r3-sea-isle.picked .r3-sea-name{ background:#fff8e6; box-shadow:0 0 0 2px #e8a33d; }
+.r3-sea-isle:active .r3-sea-name{ transform:translateY(1px); }
+.r3-sea-me{ position:absolute; transform:translate(-50%, -50%); width:30px; animation:r3SeaBob 2.4s ease-in-out infinite; pointer-events:none; }
+@keyframes r3SeaBob{ 50%{ transform:translate(-50%, calc(-50% - 4px)); } }
+.r3-sea-info{ margin-top:10px; padding:12px 14px; border-radius:16px; background:rgba(255,248,230,.75); box-shadow:inset 0 0 0 1px rgba(122,79,34,.18); min-height:96px; }
+.r3-sea-info b{ display:block; font:800 1.15rem 'Baloo 2',sans-serif; }
+.r3-sea-info small{ display:block; font-weight:800; color:#8a6a44; margin-top:-2px; }
+.r3-sea-info p{ margin:6px 0 10px; font-weight:600; line-height:1.4; }
+.r3-sea-soon{ display:inline-flex; align-items:center; gap:6px; font-weight:800; color:#8a6a44; }
+.r3-sea-info .r3-btn{ display:inline-flex; align-items:center; gap:6px; }
+body.reef-calm .r3-map.sea-on .r3-sea, body.reef-calm .r3-sea-me{ animation:none; }
 /* end of src/css/reef-3d.css */
 </style>
 

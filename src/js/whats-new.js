@@ -6,7 +6,7 @@
 
      Each release adds an entry to REEF_WHATS_NEW (newest last): an id, the date it went live, and its steps. A step
      points at something on the board with a CSS selector (`at`), or at nothing (a step in the middle of the screen).
-     `who` limits an entry to 'adult' or 'child' profiles. The smoke test opens the board and checks that every
+     `who` limits an entry to 'adult' or 'child' profiles; `need:'course'` to profiles with a language course. The smoke test opens the board and checks that every
      step's selector finds something (window.__whatsNewMissing), so a walkthrough can never point at a button that
      has moved or gone. Lines are short: they're spoken, and tools/voice/harvest.py records them. */
   var REEF_WHATS_NEW = [
@@ -17,6 +17,9 @@
     { id:'coral-classroom', date:'2026-11-04', steps:[
       { say:'Welcome to Coral Classroom! Coral Cove is now the flashcard reef at its heart, with more of the sea to explore soon.' },
       { at:'[aria-label="Open the Library"]', who:'adult', say:'Your course lives in the Library, under My course.' }
+    ] },
+    { id:'sea-chart', date:'2026-11-04', need:'course', steps:[
+      { at:'.r3-mapbtn', say:'Open the treasure map and tap The sea, to see every part of Coral Classroom. More islands open soon.' }
     ] }
   ];
   var WN_RECENT_DAYS = 14;   // a brand-new profile is shown only what's new in the last two weeks, not the whole history
@@ -33,7 +36,7 @@
   function whatsNewWho(){ return S.profile && S.profile.mode === 'child' ? 'child' : 'adult'; }
   function whatsNewSteps(entries){
     var who = whatsNewWho(), out = [];
-    entries.forEach(function(e){ if(e.who && e.who !== who) return; e.steps.forEach(function(st){ if(!st.who || st.who === who) out.push(st); }); });
+    entries.forEach(function(e){ if(e.who && e.who !== who || e.need === 'course' && !reefCourseOn()) return; e.steps.forEach(function(st){ if(!st.who || st.who === who) out.push(st); }); });
     return out;
   }
   // Something else is on screen (a panel, the map, a transition, the Library, a minigame): wait for it to clear.
@@ -46,7 +49,7 @@
   function reefWhatsNew(replay){
     if(document.querySelector('.cc-tour')) return;
     var entries;
-    if(replay){ entries = REEF_WHATS_NEW.slice(-1); }
+    if(replay){ var mine = REEF_WHATS_NEW.filter(function(e){ return whatsNewSteps([e]).length; }); entries = mine.slice(-1); }   // the newest one meant for this profile
     else { var seen = whatsNewSeen(); entries = REEF_WHATS_NEW.filter(function(e){ return seen.indexOf(e.id) < 0; }).reverse(); }   // newest first
     var steps = whatsNewSteps(entries).filter(function(st){ return !st.at || document.querySelector(st.at); });
     var done = function(){ if(!replay){ var s = whatsNewSeen(); entries.forEach(function(e){ if(s.indexOf(e.id) < 0) s.push(e.id); }); whatsNewSave(s); } };
@@ -117,6 +120,6 @@
   // Test helper: steps whose selector finds nothing on the board as it is now (should be none)
   window.__whatsNewMissing = function(){
     var miss = [];
-    REEF_WHATS_NEW.forEach(function(e){ e.steps.forEach(function(st){ if(st.at && (!st.who || st.who === whatsNewWho()) && !document.querySelector(st.at)) miss.push(e.id + ': ' + st.at); }); });
+    REEF_WHATS_NEW.forEach(function(e){ if(e.need === 'course' && !reefCourseOn()) return; e.steps.forEach(function(st){ if(st.at && (!st.who || st.who === whatsNewWho()) && !document.querySelector(st.at)) miss.push(e.id + ': ' + st.at); }); });
     return miss;
   };

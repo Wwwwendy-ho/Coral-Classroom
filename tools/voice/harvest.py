@@ -44,7 +44,7 @@ for s in literals(lib):
 app = open(APP).read()
 def block(start, end_pat=r'\n  \];|\];\n'):
     i = app.index(start); j = re.search(end_pat, app[i:]).end() + i; return app[i:j]
-for b in ['var REEF_PRAISE', 'var REEF_FRIENDS', 'var REEF_GAMES', 'var REEF_WHATS_NEW']:
+for b in ['var REEF_PRAISE', 'var REEF_FRIENDS', 'var REEF_GAMES', 'var REEF_WHATS_NEW', 'var REEF_REGIONS']:
     for s in literals(block(b)):
         if natural(s): add(s)
 for s in ['Ready to practice.', 'All done. Tap to play again.', 'Everything is done! Pick any spot to play again.', 'Shelly says:', 'Lumi says:',

@@ -1,5 +1,13 @@
 # Changelog
 
+## The sea chart (November 4, 2026)
+
+- **The treasure map has a second page: The sea.** It's a drawn chart of all of Coral Classroom: Coral Cove (the
+  flashcard reef, where you are) in the middle, with Captain's Deck, Story Lagoon, Echo Caves, Harbor Town, Pattern
+  Reef, Bottle Beach and the Lighthouse around it. Tap an island to hear its name and read what it will teach. The
+  other islands open one by one as they're built.
+- For profiles with a language course (Wendy's), for now. Shelly points it out the first time.
+
 ## Shelly shows you what's new (November 4, 2026)
 
 - **After an update, Shelly (Lumi at night) points out what changed.** The screen dims, a ring lights up the new

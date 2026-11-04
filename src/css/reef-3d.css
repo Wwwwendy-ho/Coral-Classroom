@@ -637,3 +637,29 @@ body.r3-full .r3-musicbtn, body.r3-full .r3-themebtn, body.r3-full .r3-gamesbtn{
 @keyframes ccTourOut{ to{ opacity:0; } }
 @keyframes ccTourRing{ 50%{ box-shadow:0 0 0 200vmax rgba(4,30,36,.55), 0 0 0 4px #ffe08a, 0 0 30px 10px rgba(255,211,107,.7); } }
 .cc-tour.calm, .cc-tour.calm *{ animation:none !important; transition:none !important; }
+/* The sea chart (seamap.js): a second page of the treasure map */
+.r3-map-tabs{ display:flex; gap:6px; margin:6px 0 10px; padding:4px; border-radius:999px; background:rgba(122,79,34,.12); }
+.r3-map-tab{ flex:1; min-height:40px; border:none; border-radius:999px; background:none; color:#7a4f22; font:800 1rem 'Baloo 2',sans-serif; cursor:pointer; transition:background .2s, color .2s, box-shadow .2s; }
+.r3-map-tab.on{ background:#fff8e6; color:#4a3115; box-shadow:0 2px 0 #b08d5a; }
+.r3-sea{ display:none; }
+.r3-map.sea-on .r3-sea{ display:block; animation:r3SeaIn .35s ease-out both; }
+.r3-map.sea-on .r3-map-cove{ display:none; }
+@keyframes r3SeaIn{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+.r3-sea-chart{ position:relative; aspect-ratio:300 / 390; border-radius:16px; overflow:hidden;
+  background:radial-gradient(90% 70% at 50% 50%, rgba(127,189,184,.28), rgba(127,189,184,.1) 70%, transparent), repeating-linear-gradient(0deg, rgba(122,79,34,.05) 0 1px, transparent 1px 26px), repeating-linear-gradient(90deg, rgba(122,79,34,.05) 0 1px, transparent 1px 26px); box-shadow:inset 0 0 0 2px rgba(122,79,34,.25); }
+.r3-sea-chart svg{ position:absolute; inset:0; width:100%; height:100%; }
+.r3-sea-isle{ position:absolute; transform:translate(-50%, 16px); display:flex; flex-direction:column; align-items:center; gap:1px; border:none; background:none; padding:24px 6px 2px; margin-top:-34px; cursor:pointer; color:#4a3115; -webkit-tap-highlight-color:transparent; }
+.r3-sea-name{ font:800 .82rem/1.1 'Baloo 2',sans-serif; white-space:nowrap; padding:1px 7px; border-radius:999px; background:rgba(251,240,210,.88); }
+.r3-sea-tag{ white-space:nowrap; font:800 .62rem/1 'Nunito Sans',sans-serif; letter-spacing:.04em; text-transform:uppercase; color:#8a6a44; }
+.r3-sea-isle.open .r3-sea-tag{ color:#1c8c93; }
+.r3-sea-isle.picked .r3-sea-name{ background:#fff8e6; box-shadow:0 0 0 2px #e8a33d; }
+.r3-sea-isle:active .r3-sea-name{ transform:translateY(1px); }
+.r3-sea-me{ position:absolute; transform:translate(-50%, -50%); width:30px; animation:r3SeaBob 2.4s ease-in-out infinite; pointer-events:none; }
+@keyframes r3SeaBob{ 50%{ transform:translate(-50%, calc(-50% - 4px)); } }
+.r3-sea-info{ margin-top:10px; padding:12px 14px; border-radius:16px; background:rgba(255,248,230,.75); box-shadow:inset 0 0 0 1px rgba(122,79,34,.18); min-height:96px; }
+.r3-sea-info b{ display:block; font:800 1.15rem 'Baloo 2',sans-serif; }
+.r3-sea-info small{ display:block; font-weight:800; color:#8a6a44; margin-top:-2px; }
+.r3-sea-info p{ margin:6px 0 10px; font-weight:600; line-height:1.4; }
+.r3-sea-soon{ display:inline-flex; align-items:center; gap:6px; font-weight:800; color:#8a6a44; }
+.r3-sea-info .r3-btn{ display:inline-flex; align-items:center; gap:6px; }
+body.reef-calm .r3-map.sea-on .r3-sea, body.reef-calm .r3-sea-me{ animation:none; }
