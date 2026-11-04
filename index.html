@@ -13260,14 +13260,21 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   //   read → the Korean shown, pick the English    recall → the English shown, think of the Korean, flip
   // A word the model has never seen practiced starts with read. With too few other meanings to choose from,
   // hear and read become a flip card with the Korean on the front.
+  // The way to ask: a skill just missed (due again within the hour) comes back first, the way you missed it;
+  // otherwise the one that has faded most (Learner.weakest), or read for a word never practiced.
+  function myWordsWay(ko){
+    var it = Learner.item(ko), soon = Date.now() + 36e5, pick = null, best = Infinity;
+    if(it && it.ch) Object.keys(it.ch).forEach(function(c){ var d = it.ch[c] && it.ch[c].due; if(d && d < soon && d < best){ best = d; pick = c; } });
+    return pick || Learner.weakest(ko) || 'read';
+  }
   function myWordsCard(e, i, meanings){
-    var ch = Learner.weakest(e.ko) || 'read', ko = e.ko, en = myWordsCap(e.en);
+    var ch = myWordsWay(e.ko), ko = e.ko, en = myWordsCap(e.en);
     // all capitalized alike, so a dictionary meaning ("water") doesn't stand out among card ones ("Phone")
     // and a word's wrong answers are words, a sentence's are sentences, so the odd one out isn't the answer
     var sentence = function(m){ return /[.?!]$/.test(m) || m.split(/\s+/).length > 3; };
     var others = meanings.filter(function(m){ return m.toLowerCase() !== en.toLowerCase(); });
     var alike = others.filter(function(m){ return sentence(m) === sentence(en); });
-    var wrong = shuffle(alike.length >= 3 ? alike : others).slice(0, 3).map(myWordsCap);
+    var wrong = shuffle(alike.length >= 2 ? alike : others).slice(0, 3).map(myWordsCap);   // two of the same kind beat three mixed
     var base = { id: 'mw-' + i + '-' + reefHash(e.key), _practice: true, _myWords: e.key, note: '', photoUrl: '', choices: [] };
     if(ch === 'use' && !myWordsSentence(ko)) ch = 'recall';
     if((ch === 'hear' || ch === 'read') && wrong.length < 2) return Object.assign(base, { mode: 'flip', front: ko, back: en });
@@ -13289,7 +13296,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     studyBegin(queue, queue);
   }
   // Test helper: the words due now, each with the way a round would ask it
-  window.__myWordsDue = function(){ return myWordsDue().map(function(e){ return { ko: e.ko, en: e.en, from: e.from, way: Learner.weakest(e.ko) }; }); };
+  window.__myWordsDue = function(){ return myWordsDue().map(function(e){ return { ko: e.ko, en: e.en, from: e.from, way: myWordsWay(e.ko) }; }); };
   // Test helper: the right answer to the card on screen, so the smoke test can miss it on purpose
   window.__studyAnswer = function(){
     var c = S.view === 'study' && S.studyQueue[0]; if(!c) return null;
