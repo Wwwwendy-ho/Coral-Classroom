@@ -288,7 +288,7 @@
     S.reefFind = { id: pick.id, again: !fresh.length };
   }
   function reefSummary(){
-    var deck = S.decks.find(function(d){ return d.id === S.currentDeckId; }) || { name:'Deck', emoji:'🌊' };
+    var deck = deckOrMyWords(S.currentDeckId) || { name:'Deck', emoji:'🌊' };
     var find = S.reefFind ? reefFriend(S.reefFind.id) : null;
     var earnedHTML = '';
     if(S.justEarnedBadges && S.justEarnedBadges.length){

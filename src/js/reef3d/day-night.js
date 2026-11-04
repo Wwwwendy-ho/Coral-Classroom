@@ -192,6 +192,22 @@
     view.warmMats = mats;
     view.warmed = R.info.programs.length - before;   // for checking: how many shaders this compiled ahead of time
   }
+  // Where space i of an old board is on a new one: the same deck, the same step along a branch, or as many steps
+  // past the deck (or the start) before it on the main path. dflt when there's no match.
+  function reef3dSameSpot(a, b, i, dflt){
+    var s = a[i]; if(!s) return dflt;
+    function deckIn(list, id){ for(var k = 0; k < list.length; k++) if(list[k].kind === 'deck' && list[k].item.d.id === id) return k; return -1; }
+    if(s.kind === 'deck'){ var d = deckIn(b, s.item.d.id); if(d >= 0) return d; }
+    if(s.branch){
+      var a0 = a.findIndex(function(x){ return x.branch === s.branch; }), b0 = b.findIndex(function(x){ return x.branch === s.branch; }), t = b0 + (i - a0);
+      return b0 >= 0 && b[t] && b[t].branch === s.branch ? t : dflt;
+    }
+    for(var j = s.kind === 'deck' ? i - 1 : i; j >= 0; j--){
+      var m = a[j].kind === 'start' ? 0 : a[j].kind === 'deck' ? deckIn(b, a[j].item.d.id) : -1;
+      if(m >= 0) return Math.min(m + (i - j), (b.mainN || b.length) - 1);
+    }
+    return dflt;
+  }
   function reef3dMount(rw, zones){
     var scene2d = rw.querySelector('.rw-scene');
     if(!scene2d || R3.failed) return;
@@ -201,11 +217,14 @@
       try {
         var view = R3.view;
         if(!view || view.key !== key){
+          var was = view;
           if(view){ view.renderer.dispose(); view.renderer.forceContextLoss && view.renderer.forceContextLoss(); }
           view = R3.view = reef3dBuild(rw, zones, models); view.key = key;
           reef3dWarm(view);
           reef3dWire(view);
           var start = S.reef3dAt != null && S.reef3dAt < view.spaces.length ? S.reef3dAt : 0;
+          // A deck came or went (My words appears while it has words due): keep her by the same place, not the same number
+          if(was && S.reef3dAt != null && was.key.charAt(0) === key.charAt(0)) start = reef3dSameSpot(was.spaces, view.spaces, S.reef3dAt, start);
           reef3dPlace(view, start);
           reef3dCamTarget(view, view.camPos, view.camLook);
         }

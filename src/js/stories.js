@@ -715,7 +715,7 @@
     var decks = S.decks.filter(function(d){ return !d.archived; });
     return Promise.all([
       Promise.all(decks.map(function(d){ return S.store.getCardsOnce(d.id).catch(function(){ return []; }); })),
-      S.store.getWordBank ? S.store.getWordBank().catch(function(){ return null; }) : Promise.resolve(null)
+      myWordsLoad()
     ]).then(function(r){
       var lists = r[0], cards = [].concat.apply([], lists), marks = (r[1] && r[1].marks) || {};
       var lang = storyLangFor(cards) === 'ko' ? 'ko' : 'en';
@@ -742,12 +742,19 @@
       return !q || e.word.toLowerCase().indexOf(q) !== -1 || String(e.meaning).toLowerCase().indexOf(q) !== -1;
     });
     var LABEL = { known: '✅ Known', learning: '🌱 Learning', 'new': '✨ New' };
+    // "Mine": the My words list (my-words.js), the words she missed, looked up or is losing hold of
+    var mine = myWordsList(), FROM = { missed: 'Missed', asked: 'Looked up', shaky: 'Fading' };
+    if(filter === 'mine'){
+      if(!mine.length) filter = wb.filter = 'all';
+      else shown = mine.filter(function(e){ return !q || e.ko.toLowerCase().indexOf(q) !== -1 || String(e.en).toLowerCase().indexOf(q) !== -1; })
+        .map(function(e){ return { key: e.key, word: e.ko, meaning: e.en, status: 'learning', chip: FROM[e.from] || 'Mine', marked: true }; });
+    }
     var rows = shown.slice(0, 500).map(function(e){
       return '<li class="wb-row wb-'+e.status+'">' +
         '<button type="button" class="wb-say" data-wb-say="'+esc(e.word)+'" aria-label="Hear '+esc(e.word)+'">'+ccIcon('sound')+'</button>' +
         '<div class="wb-text"><b lang="'+(wb.lang === 'ko' ? 'ko' : 'en')+'">'+esc(e.word)+'</b>'+(e.meaning ? '<span>'+esc(e.meaning)+'</span>' : '')+'</div>' +
-        '<span class="wb-chip">'+LABEL[e.status]+'</span>' +
-        (adult ? (e.marked ? '<button type="button" class="wb-mark" data-wb-unmark="'+esc(e.key)+'">Undo</button>'
+        '<span class="wb-chip">'+(e.chip || LABEL[e.status])+'</span>' +
+        (adult && !e.chip ? (e.marked ? '<button type="button" class="wb-mark" data-wb-unmark="'+esc(e.key)+'">Undo</button>'
                            : (e.status !== 'known' ? '<button type="button" class="wb-mark" data-wb-mark="'+esc(e.key)+'">I know it</button>' : '')) : '') +
       '</li>';
     }).join('');
@@ -762,7 +769,7 @@
           '<i class="known" style="width:'+(n.known/total*100)+'%"></i><i class="learning" style="width:'+(n.learning/total*100)+'%"></i></div>' +
         '<p class="wb-note">'+list.length+' words across your decks. A word is <b>Known</b> once you remember it after three weeks, or get it right most times over a week.</p>' +
         '<div class="wb-actions"><button type="button" class="btn btn-primary" data-act="wb-story">✨ Make a story with my words</button></div>' +
-        '<div class="filter-tabs">' + [['all','All',list.length],['new','New',n['new']],['learning','Learning',n.learning],['known','Known',n.known]].map(function(t){
+        '<div class="filter-tabs">' + [['all','All',list.length],['new','New',n['new']],['learning','Learning',n.learning],['known','Known',n.known]].concat(mine.length ? [['mine','Mine',mine.length]] : []).map(function(t){
           return '<button type="button" class="filter-tab'+(filter===t[0]?' active':'')+'" data-wb-filter="'+t[0]+'">'+t[1]+'<span class="filter-count"> '+t[2]+'</span></button>'; }).join('') + '</div>' +
         '<input type="search" class="wb-search" data-wb-search placeholder="Search words or meanings" value="'+esc(wb.q||'')+'" aria-label="Search words">' +
         (shown.length ? '<ul class="wb-list">'+rows+'</ul>' : '<div class="empty-filter-note">'+(list.length ? 'No words match.' : 'No words yet. Add a vocabulary deck to start your Word Bank.')+'</div>') +
@@ -785,7 +792,7 @@
       if(on) marks[k] = 'known'; else delete marks[k];
       S.wb.marks = marks;
       S.wb.list.forEach(function(e){ if(e.key === k){ e.marked = on; e.status = on ? 'known' : e.auto; } });
-      if(S.store.setWordBank) S.store.setWordBank({ marks: marks, updatedAt: Date.now() });
+      wbDocSave({ marks: marks });   // the same record holds My words, so only the marks change
       render();
     }
     app.querySelectorAll('[data-wb-mark]').forEach(function(b){ b.addEventListener('click', function(){ saveMark(b.dataset.wbMark, true); }); });

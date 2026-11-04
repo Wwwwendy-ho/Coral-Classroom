@@ -827,7 +827,7 @@
     var right = Math.max(0, total - (t.again || 0));
     var accuracy = total > 0 ? Math.round((right / total) * 100) : 0;
     var deckNames = (t.decksStudied || []).map(function(id){
-      var d = S.decks.find(function(x){ return x.id === id; });
+      var d = deckOrMyWords(id);
       return d ? (d.emoji + ' ' + esc(d.name)) : null;
     }).filter(Boolean);
     app.innerHTML = '' +
@@ -929,9 +929,10 @@
   }
 
   function refreshDueCounts(){
-    var now = Date.now();
-    return Promise.all(S.decks.map(function(d){
+    var now = Date.now(), lists = [];
+    return Promise.all(S.decks.map(function(d, i){
       return S.store.getCardsOnce(d.id).then(function(cards){
+        if(!d.archived) lists[i] = cards;
         // Counts what a round can actually offer right now -- cards due for review plus the new
         // cards the deck's new-card window lets in (see buildStudyPool). Counting every unseen
         // card made big decks say "300 to review" when only a handful were really available.
@@ -944,7 +945,7 @@
         var due = reviewDue + Math.min(newCount, Math.max(0, NEW_CARD_WINDOW - inFlight));
         S.dueCounts[d.id] = { due: due, total: cards.length };
       });
-    }));
+    })).then(function(){ return myWordsRefresh(lists); });   // My words reads the same cards for its meanings
   }
 
   function coveDueSig(){ return JSON.stringify(S.decks.map(function(d){ var c = S.dueCounts[d.id]; return c ? c.due + '/' + c.total : '-'; })); }

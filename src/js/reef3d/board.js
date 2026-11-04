@@ -425,7 +425,10 @@
     g.beginPath(); g.arc(128, 128, 104, 0, Math.PI * 2); g.stroke(); g.setLineDash([]);
     if(/^deck/.test(kind)){   // decks: a white badge behind a big emoji, and a gold star once it's all done
       g.fillStyle = night ? 'rgba(255,246,222,.92)' : 'rgba(255,255,255,.92)'; g.beginPath(); g.arc(128, 128, 82, 0, Math.PI * 2); g.fill();
-      g.font = '128px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(icon, 128, 136);
+      g.font = '128px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      // a letter instead of an emoji (My words is 말) takes the fill colour, so it needs ink, not the badge's white
+      if(/[가-힣]/.test(icon)){ g.fillStyle = night ? '#6b4514' : '#0d5262'; g.font = '700 116px system-ui, sans-serif'; }
+      g.fillText(icon, 128, 136);
       if(kind === 'deck-done'){ g.font = '900 64px "Baloo 2", system-ui, sans-serif'; g.fillStyle = '#ffcf3f'; g.strokeStyle = '#8a5a12'; g.lineWidth = 6; g.strokeText('★', 200, 58); g.fillText('★', 200, 58); }
       var dt = new window.THREE.CanvasTexture(c); dt.anisotropy = 4; return (R3tex[key] = dt);
     }
@@ -1010,6 +1013,7 @@
       if(s.kind === 'deck'){
         var it = s.item, label = it.state === 'ready' ? 'Ready' : it.state === 'done' ? 'All done' : it.kind;
         b.classList.add(it.state);
+        if(it.d.myWords) b.classList.add('mywords');   // What's new and the smoke test find the My words tile by this
         b.innerHTML = '<span class="r3-emoji" aria-hidden="true">'+it.d.emoji+'</span><span><b>'+esc(it.d.name)+'</b><small>'+esc(label)+'</small></span>' + (it.state === 'done' ? '<i class="r3-star" aria-hidden="true">★</i>' : '');
         b.setAttribute('aria-label', it.d.name + '. ' + (it.state === 'ready' ? 'Ready to practice.' : it.state === 'done' ? 'All done. Tap to play again.' : 'Tap to ' + it.kind.toLowerCase() + '.'));
       } else {

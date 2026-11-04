@@ -11,7 +11,7 @@
   function reefZones(){
     var live = S.decks.filter(function(d){ return !d.archived; });
     var tabs = buildSubjectTabs(live) || [{ id:'all', label:'Decks' }];
-    return tabs.map(function(t){
+    var zones = tabs.map(function(t){
       var decks = t.id === 'all' ? live : live.filter(function(d){ return (d.subject ? subjectMeta(d.subject).id : 'other') === t.id; });
       decks = decks.slice().sort(function(a, b){ return (a.order || 0) - (b.order || 0); });
       var items = decks.map(function(d){
@@ -23,6 +23,14 @@
       var place = reefPlaceFor(t.id === 'all' ? 'other' : t.id, t.label);
       return { id: t.id, label: t.label, place: place, items: items };
     }).filter(function(z){ return z.items.length; });
+    // My words (my-words.js) leads the Korean part of the path while it has words due, so it's the first stop
+    var mw = myWordsTile();
+    if(mw){
+      var kz = zones.find(function(z){ return z.id === 'korean'; }) || zones[0];
+      if(kz) kz.items.unshift(mw);
+      else zones.push({ id: 'korean', label: 'Korean', place: reefPlaceFor('korean', 'Korean'), items: [mw] });
+    }
+    return zones;
   }
 
   /* Shared shading for every object: one hidden <svg> of gradients the objects point at. */

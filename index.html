@@ -1984,6 +1984,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
      js/library-api.js          window.CoralCove, all the Library (library.js) can reach
      js/fsrs.js                 FSRS-4.5 memory math (stability, difficulty, next review)
      js/learner.js              LEARNER MODEL: what each word is known as (hear, read, recall, say, use), per profile
+     js/my-words.js             MY WORDS: missed, looked-up and shaky Korean words, practiced in their weakest way
      js/ui-icons.js             drawn icons in place of emoji in every screen's titles, buttons and labels
      js/whats-new.js            What's new: Shelly points out new things after an update (one entry per release)
      js/vendor/three-gltfloader.js   THIRD-PARTY CODE: three.js GLTFLoader and BufferGeometryUtils (don't edit)
@@ -4635,7 +4636,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     var right = Math.max(0, total - (t.again || 0));
     var accuracy = total > 0 ? Math.round((right / total) * 100) : 0;
     var deckNames = (t.decksStudied || []).map(function(id){
-      var d = S.decks.find(function(x){ return x.id === id; });
+      var d = deckOrMyWords(id);
       return d ? (d.emoji + ' ' + esc(d.name)) : null;
     }).filter(Boolean);
     app.innerHTML = '' +
@@ -4737,9 +4738,10 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
   }
 
   function refreshDueCounts(){
-    var now = Date.now();
-    return Promise.all(S.decks.map(function(d){
+    var now = Date.now(), lists = [];
+    return Promise.all(S.decks.map(function(d, i){
       return S.store.getCardsOnce(d.id).then(function(cards){
+        if(!d.archived) lists[i] = cards;
         // Counts what a round can actually offer right now -- cards due for review plus the new
         // cards the deck's new-card window lets in (see buildStudyPool). Counting every unseen
         // card made big decks say "300 to review" when only a handful were really available.
@@ -4752,7 +4754,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
         var due = reviewDue + Math.min(newCount, Math.max(0, NEW_CARD_WINDOW - inFlight));
         S.dueCounts[d.id] = { due: due, total: cards.length };
       });
-    }));
+    })).then(function(){ return myWordsRefresh(lists); });   // My words reads the same cards for its meanings
   }
 
   function coveDueSig(){ return JSON.stringify(S.decks.map(function(d){ var c = S.dueCounts[d.id]; return c ? c.due + '/' + c.total : '-'; })); }
@@ -5103,37 +5105,42 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
 
   function startStudy(deckId){
     if(!deckId) return;
-    S.finishingRound = false;
-    S.storeError = null;
+    if(deckId === MW_ID) return startMyWords();   // My words (my-words.js) builds its round from the word list, not a stored deck
     S.currentDeckId = deckId;
     S.editMode = false; // Edit Mode is a deck-management concept -- Dive In always leaves it behind
     S.store.updateDeck(deckId, { lastOpenedAt: Date.now() }); // drives the Manage Decks "most recently opened" order
     S.store.getCardsOnce(deckId).then(function(cards){
       var pool = buildStudyPool(cards);
-      S.studyQueue = interspersedRound(cards, pool, currentDifficulty().roundSize);
-      S.studyTotal = S.studyQueue.length;
-      S.sessionReviewed = 0;
-      S.sessionStars = 0;
-      S.roundTally = { again: 0, hard: 0, good: 0, easy: 0 };
-      S.roundStartedAt = Date.now();
-      S.view = 'study';
-      S.cardFlipped = false;
-      S.choiceState = null;
-      S.dragState = null;
-      S.timedChoiceState = null;
-      S.timedChoiceAllCards = cards; // full deck pool (not just this round's queue) -- gives 'timedchoice' mode enough sibling cards to draw distractors from even on a short round
-      S.timedChoiceDirection = null;
-      S.timedChoiceGroupLeft = 0;
-      clearTimedChoiceTimer();
-      S.currentCardId = null;
-      S.cardShownAt = null;
-      S.cardFlippedAt = null;
-      S.transitioning = false;
-      S.peeking = false;
-      S.lastAnsweredCard = null;
-      S.critterPrevPct = 0;
-      render();
+      studyBegin(interspersedRound(cards, pool, currentDifficulty().roundSize), cards);
     });
+  }
+  // Starts a graded round of these cards (allCards: where Listen & Pick and timed choice draw their wrong answers)
+  function studyBegin(queue, allCards){
+    S.finishingRound = false;
+    S.storeError = null;
+    S.studyQueue = queue;
+    S.studyTotal = S.studyQueue.length;
+    S.sessionReviewed = 0;
+    S.sessionStars = 0;
+    S.roundTally = { again: 0, hard: 0, good: 0, easy: 0 };
+    S.roundStartedAt = Date.now();
+    S.view = 'study';
+    S.cardFlipped = false;
+    S.choiceState = null;
+    S.dragState = null;
+    S.timedChoiceState = null;
+    S.timedChoiceAllCards = allCards; // full deck pool (not just this round's queue) -- gives 'timedchoice' mode enough sibling cards to draw distractors from even on a short round
+    S.timedChoiceDirection = null;
+    S.timedChoiceGroupLeft = 0;
+    clearTimedChoiceTimer();
+    S.currentCardId = null;
+    S.cardShownAt = null;
+    S.cardFlippedAt = null;
+    S.transitioning = false;
+    S.peeking = false;
+    S.lastAnsweredCard = null;
+    S.critterPrevPct = 0;
+    render();
   }
 
   // Builds a round. For a child profile, cards she already knows well are mixed in between new or shaky
@@ -6927,7 +6934,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     var decks = S.decks.filter(function(d){ return !d.archived; });
     return Promise.all([
       Promise.all(decks.map(function(d){ return S.store.getCardsOnce(d.id).catch(function(){ return []; }); })),
-      S.store.getWordBank ? S.store.getWordBank().catch(function(){ return null; }) : Promise.resolve(null)
+      myWordsLoad()
     ]).then(function(r){
       var lists = r[0], cards = [].concat.apply([], lists), marks = (r[1] && r[1].marks) || {};
       var lang = storyLangFor(cards) === 'ko' ? 'ko' : 'en';
@@ -6954,12 +6961,19 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
       return !q || e.word.toLowerCase().indexOf(q) !== -1 || String(e.meaning).toLowerCase().indexOf(q) !== -1;
     });
     var LABEL = { known: '✅ Known', learning: '🌱 Learning', 'new': '✨ New' };
+    // "Mine": the My words list (my-words.js), the words she missed, looked up or is losing hold of
+    var mine = myWordsList(), FROM = { missed: 'Missed', asked: 'Looked up', shaky: 'Fading' };
+    if(filter === 'mine'){
+      if(!mine.length) filter = wb.filter = 'all';
+      else shown = mine.filter(function(e){ return !q || e.ko.toLowerCase().indexOf(q) !== -1 || String(e.en).toLowerCase().indexOf(q) !== -1; })
+        .map(function(e){ return { key: e.key, word: e.ko, meaning: e.en, status: 'learning', chip: FROM[e.from] || 'Mine', marked: true }; });
+    }
     var rows = shown.slice(0, 500).map(function(e){
       return '<li class="wb-row wb-'+e.status+'">' +
         '<button type="button" class="wb-say" data-wb-say="'+esc(e.word)+'" aria-label="Hear '+esc(e.word)+'">'+ccIcon('sound')+'</button>' +
         '<div class="wb-text"><b lang="'+(wb.lang === 'ko' ? 'ko' : 'en')+'">'+esc(e.word)+'</b>'+(e.meaning ? '<span>'+esc(e.meaning)+'</span>' : '')+'</div>' +
-        '<span class="wb-chip">'+LABEL[e.status]+'</span>' +
-        (adult ? (e.marked ? '<button type="button" class="wb-mark" data-wb-unmark="'+esc(e.key)+'">Undo</button>'
+        '<span class="wb-chip">'+(e.chip || LABEL[e.status])+'</span>' +
+        (adult && !e.chip ? (e.marked ? '<button type="button" class="wb-mark" data-wb-unmark="'+esc(e.key)+'">Undo</button>'
                            : (e.status !== 'known' ? '<button type="button" class="wb-mark" data-wb-mark="'+esc(e.key)+'">I know it</button>' : '')) : '') +
       '</li>';
     }).join('');
@@ -6974,7 +6988,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
           '<i class="known" style="width:'+(n.known/total*100)+'%"></i><i class="learning" style="width:'+(n.learning/total*100)+'%"></i></div>' +
         '<p class="wb-note">'+list.length+' words across your decks. A word is <b>Known</b> once you remember it after three weeks, or get it right most times over a week.</p>' +
         '<div class="wb-actions"><button type="button" class="btn btn-primary" data-act="wb-story">✨ Make a story with my words</button></div>' +
-        '<div class="filter-tabs">' + [['all','All',list.length],['new','New',n['new']],['learning','Learning',n.learning],['known','Known',n.known]].map(function(t){
+        '<div class="filter-tabs">' + [['all','All',list.length],['new','New',n['new']],['learning','Learning',n.learning],['known','Known',n.known]].concat(mine.length ? [['mine','Mine',mine.length]] : []).map(function(t){
           return '<button type="button" class="filter-tab'+(filter===t[0]?' active':'')+'" data-wb-filter="'+t[0]+'">'+t[1]+'<span class="filter-count"> '+t[2]+'</span></button>'; }).join('') + '</div>' +
         '<input type="search" class="wb-search" data-wb-search placeholder="Search words or meanings" value="'+esc(wb.q||'')+'" aria-label="Search words">' +
         (shown.length ? '<ul class="wb-list">'+rows+'</ul>' : '<div class="empty-filter-note">'+(list.length ? 'No words match.' : 'No words yet. Add a vocabulary deck to start your Word Bank.')+'</div>') +
@@ -6997,7 +7011,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
       if(on) marks[k] = 'known'; else delete marks[k];
       S.wb.marks = marks;
       S.wb.list.forEach(function(e){ if(e.key === k){ e.marked = on; e.status = on ? 'known' : e.auto; } });
-      if(S.store.setWordBank) S.store.setWordBank({ marks: marks, updatedAt: Date.now() });
+      wbDocSave({ marks: marks });   // the same record holds My words, so only the marks change
       render();
     }
     app.querySelectorAll('[data-wb-mark]').forEach(function(b){ b.addEventListener('click', function(){ saveMark(b.dataset.wbMark, true); }); });
@@ -8902,7 +8916,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
   }
 
   function renderStudy(){
-    var deck = S.decks.find(function(d){ return d.id === S.currentDeckId; }) || {name:'Deck', emoji:'🌊'};
+    var deck = deckOrMyWords(S.currentDeckId) || {name:'Deck', emoji:'🌊'};
     if(!S.studyQueue.length){
       finishStudy();
       return;
@@ -9384,7 +9398,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     // what the Progress page's per-deck "topics" breakdown groups by category and sums.
     updates.timesSeen = (card.timesSeen || 0) + 1;
     updates.timesCorrect = (card.timesCorrect || 0) + (rating !== 'again' ? 1 : 0);
-    S.store.updateCard(S.currentDeckId, card.id, updates);
+    if(!card._myWords) S.store.updateCard(S.currentDeckId, card.id, updates);   // My words cards are made for the round and never saved
     planNoteAnswer(card, rating);
     S.sessionReviewed += 1;
     S.sessionStars += STARS[rating];
@@ -9392,6 +9406,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     // reset below, and overwritten on every answer, so there's always exactly one card of "undo peek."
     var gradedMode = (CARD_MODES.indexOf(card.mode) !== -1) ? card.mode : 'flip';
     learnerNoteAnswer(card, gradedMode, rating);   // the learner model (learner.js) records alongside the scheduler
+    myWordsNoteAnswer(card, gradedMode, rating);   // a missed Korean card joins My words (my-words.js)
     var isDragGraded = gradedMode === 'match' || gradedMode === 'blank';
     var tcGraded = gradedMode === 'timedchoice' ? S.timedChoiceState : null;
     var lsGraded = gradedMode === 'listen' ? S.listenState : (gradedMode === 'hanja' ? S.hanjaState : (gradedMode === 'numsys' ? S.numsysState : null));
@@ -9475,7 +9490,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     var t = S.roundTally || { again:0, hard:0, good:0, easy:0 };
     var total = S.sessionReviewed;
     var right = Math.max(0, total - t.again);
-    var deck = S.decks.find(function(d){ return d.id === S.currentDeckId; });
+    var deck = deckOrMyWords(S.currentDeckId);
     var historyEntry = {
       deckId: S.currentDeckId,
       deckName: deck ? deck.name : 'Deck',
@@ -9529,7 +9544,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
 
   function renderSummary(){
     if(reefKid()) return reefSummary();
-    var deck = S.decks.find(function(d){ return d.id === S.currentDeckId; }) || {name:'Deck', emoji:'🌊'};
+    var deck = deckOrMyWords(S.currentDeckId) || {name:'Deck', emoji:'🌊'};
     var t = S.roundTally || { again:0, hard:0, good:0, easy:0 };
     var total = S.sessionReviewed;
     var right = Math.max(0, total - t.again);
@@ -11505,7 +11520,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     S.reefFind = { id: pick.id, again: !fresh.length };
   }
   function reefSummary(){
-    var deck = S.decks.find(function(d){ return d.id === S.currentDeckId; }) || { name:'Deck', emoji:'🌊' };
+    var deck = deckOrMyWords(S.currentDeckId) || { name:'Deck', emoji:'🌊' };
     var find = S.reefFind ? reefFriend(S.reefFind.id) : null;
     var earnedHTML = '';
     if(S.justEarnedBadges && S.justEarnedBadges.length){
@@ -12317,7 +12332,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   function reefZones(){
     var live = S.decks.filter(function(d){ return !d.archived; });
     var tabs = buildSubjectTabs(live) || [{ id:'all', label:'Decks' }];
-    return tabs.map(function(t){
+    var zones = tabs.map(function(t){
       var decks = t.id === 'all' ? live : live.filter(function(d){ return (d.subject ? subjectMeta(d.subject).id : 'other') === t.id; });
       decks = decks.slice().sort(function(a, b){ return (a.order || 0) - (b.order || 0); });
       var items = decks.map(function(d){
@@ -12329,6 +12344,14 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       var place = reefPlaceFor(t.id === 'all' ? 'other' : t.id, t.label);
       return { id: t.id, label: t.label, place: place, items: items };
     }).filter(function(z){ return z.items.length; });
+    // My words (my-words.js) leads the Korean part of the path while it has words due, so it's the first stop
+    var mw = myWordsTile();
+    if(mw){
+      var kz = zones.find(function(z){ return z.id === 'korean'; }) || zones[0];
+      if(kz) kz.items.unshift(mw);
+      else zones.push({ id: 'korean', label: 'Korean', place: reefPlaceFor('korean', 'Korean'), items: [mw] });
+    }
+    return zones;
   }
 
   /* Shared shading for every object: one hidden <svg> of gradients the objects point at. */
@@ -13043,6 +13066,237 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     } catch(e){}
   }
 /* end of src/js/learner.js */
+/* from src/js/my-words.js */
+  /* ---------- MY WORDS: the profile's own Korean word list, practiced in its weakest way ----------
+     A list that fills itself, for profiles with a language course (reefCourseOn):
+       missed  every Korean card answered "again", in any deck (commitGrade → myWordsNoteAnswer)
+       asked   Korean words and phrases looked up in Ask Shelly (askGo → myWordsNoteAsk)
+       shaky   words the learner model (learner.js) holds whose weakest skill has faded below MW_WEAK_R
+     Each entry keeps the Korean and an English meaning: the card's other side, or else the offline Korean
+     dictionary Ask Shelly answers from (the profile's own cards, KO_MORE, KO_WORDS, KO_FORMS in reef.js). A word
+     with no meaning anywhere is left out, since a card needs two sides.
+     The list is saved in the Word Bank's own record (store getWordBank / setWordBank, beside its "I know this"
+     marks) as mine: { <learnerKey>: { ko, en, from, at, seen } }, where at is when it was added (or missed or
+     looked up again) and seen when it was last practiced here. The Word Bank screen shows it under "Mine".
+     On the board it is a "My words" deck tile, shown only while something on the list is due: a word just
+     added is due at once, and after that a word is due when the learner model says one of its skills is.
+     A round asks each word in the skill it's shakiest in (Learner.weakest), using the ordinary card modes, so
+     answers go through commitGrade and the learner model hears them like any other card. Nothing here touches a
+     deck's own SM-2 or Leitner schedule: the cards are made on the spot and never saved. */
+  var MW_ID = 'cc-my-words';
+  var MW_DECK = { id: MW_ID, name: 'My words', emoji: '말', subject: 'korean', myWords: true };
+  var MW_MAX = 300;          // the list keeps its newest 300 words
+  var MW_WEAK_R = 0.7;       // a skill this likely to be forgotten (FSRS recall chance) counts as shaky
+  var MW_ROUND = 10;
+  var MW_SCAN_MS = 5 * 60e3; // the shaky-word scan runs at most every five minutes
+  var MW = { pid: null, doc: null, loading: null, meanings: {}, scanAt: 0 };
+
+  function myWordsPid(){ return S.profile && S.profile.id || null; }
+  // The Word Bank record for whoever is signed in, loaded once per profile. Resolves to the record (or null
+  // when no profile is open or the store can't read it).
+  function myWordsLoad(){
+    var pid = myWordsPid();
+    if(!pid || !S.store) return Promise.resolve(null);
+    if(MW.pid === pid && MW.loading) return MW.loading;
+    MW.pid = pid; MW.doc = null; MW.meanings = {}; MW.scanAt = 0;
+    var get = S.store.getWordBank ? S.store.getWordBank().catch(function(){ return null; }) : Promise.resolve(null);
+    MW.loading = Promise.resolve(get).then(function(doc){
+      if(MW.pid !== pid) return null;
+      MW.doc = Object.assign({}, doc || {});
+      MW.doc.mine = Object.assign({}, MW.doc.mine || {});
+      return MW.doc;
+    });
+    return MW.loading;
+  }
+  // Saves the record with these fields changed. The Word Bank's marks and this list share it, so every save
+  // starts from the whole record and neither erases the other.
+  function wbDocSave(patch){
+    var pid = myWordsPid();
+    return myWordsLoad().then(function(doc){
+      if(!doc || MW.pid !== pid || myWordsPid() !== pid || !S.store.setWordBank) return;
+      Object.assign(doc, patch || {}, { updatedAt: Date.now() });
+      return S.store.setWordBank(doc);
+    });
+  }
+  function myWordsOn(){ try { return reefCourseOn(); } catch(e){ return false; } }
+  function myWordsPlain(t){ return askPlainText(t).replace(/\s+/g, ' ').trim(); }
+
+  // The Korean on each card in her decks, with the other side as its meaning, for words that turn up without
+  // one (an Ask Shelly lookup, a shaky word). Called with every deck's cards whenever the board counts what's due.
+  function myWordsLearnCards(lists){
+    var map = {};
+    (lists || []).forEach(function(cards){ (cards || []).forEach(function(c){
+      if(c.mode === 'hanja' || c.mode === 'numsys' || c.mode === 'blank') return;
+      var f = myWordsPlain(c.front), b = myWordsPlain(c.back), fk = learnerHasHangul(f), bk = learnerHasHangul(b);
+      if(fk === bk) return;
+      var ko = fk ? f : b, en = fk ? b : f;
+      if(/[A-Za-z]/.test(en) && !map[learnerKey(ko)]) map[learnerKey(ko)] = en;
+    }); });
+    MW.meanings = map;
+  }
+  // An English meaning for Korean text, from her cards first, then the offline dictionary; '' if none.
+  function myWordsMeaning(ko){
+    var k = learnerKey(ko), bare = String(ko || '').replace(/[^가-힣 ]/g, '').replace(/\s+/g, ' ').trim();
+    if(MW.meanings[k]) return MW.meanings[k];
+    if(KO_MORE[bare]) return KO_MORE[bare];
+    if(KO_WORDS[bare]) return KO_WORDS[bare];
+    if(KO_FORMS[bare]) return KO_FORMS[bare][1];
+    return '';
+  }
+
+  // Adds a word (or brings it back to the top as due now). from: 'missed', 'asked' or 'shaky'. A shaky word that
+  // is already listed is left as it is, so the weekly drift of memory doesn't keep resetting it.
+  function myWordsAdd(ko, en, from){
+    ko = myWordsPlain(ko).replace(/^[\s"'“”‘’]+|[\s"'“”‘’]+$/g, '');
+    if(!ko || ko.length > 60 || !learnerHasHangul(ko) || !myWordsOn()) return Promise.resolve(false);
+    en = myWordsCap(myWordsPlain(en || '') || myWordsMeaning(ko));
+    if(!en) return Promise.resolve(false);
+    var pid = myWordsPid();
+    return myWordsLoad().then(function(doc){
+      if(!doc || myWordsPid() !== pid) return false;
+      var mine = doc.mine, k = learnerKey(ko), e = mine[k];
+      if(e && from === 'shaky') return false;
+      mine[k] = { ko: e ? e.ko : ko, en: (e && e.en) || en.slice(0, 120), from: from, at: Date.now(), seen: 0 };
+      var keys = Object.keys(mine);
+      if(keys.length > MW_MAX) keys.sort(function(a, b){ return (mine[a].at || 0) - (mine[b].at || 0); }).slice(0, keys.length - MW_MAX).forEach(function(x){ delete mine[x]; });
+      return wbDocSave({ mine: mine }).then(function(){ return true; });
+    });
+  }
+
+  // Called by commitGrade() for every answered card, after the learner model has recorded it. A Korean card
+  // answered "again" joins the list; a My words card notes that it was practiced.
+  function myWordsNoteAnswer(card, mode, rating){
+    try {
+      if(card._myWords){
+        var doc = MW.doc, e = doc && doc.mine[card._myWords];
+        if(e){ e.seen = Date.now(); e.n = (e.n || 0) + 1; wbDocSave({ mine: doc.mine }); }
+        return;
+      }
+      if(rating !== 'again' || mode === 'hanja' || mode === 'numsys' || mode === 'blank') return;
+      var f = myWordsPlain(card.front), b = myWordsPlain(card.back), fk = learnerHasHangul(f), bk = learnerHasHangul(b);
+      if(fk === bk) return;
+      var en = fk ? b : f;
+      myWordsAdd(fk ? f : b, /[A-Za-z]/.test(en) ? en : '', 'missed');
+    } catch(err){}
+  }
+  // Called by askGo() with the question: each run of Korean in it, or (for Korean typed in English letters) the
+  // word Shelly takes it to be when the match is exact. A phrase with no meaning is tried word by word.
+  function myWordsNoteAsk(q, card){
+    try {
+      if(!myWordsOn()) return;
+      var runs = String(q || '').match(/[가-힣]+(?:\s+[가-힣]+)*/g) || [];
+      runs.slice(0, 3).forEach(function(run){
+        var en = card && myWordsPlain(card.front).replace(/[^가-힣\s]/g, '').trim() === run ? myWordsPlain(card.back) : '';
+        if(en && learnerHasHangul(en)) en = '';
+        if(en || myWordsMeaning(run)) return myWordsAdd(run, en, 'asked');
+        run.split(/\s+/).slice(0, 4).forEach(function(w){ if(myWordsMeaning(w)) myWordsAdd(w, '', 'asked'); });
+      });
+      if(!runs.length){
+        var c = koRomanCandidates(q)[0];
+        if(c && c.d === 0) myWordsAdd(c.ko, c.en, 'asked');
+      }
+    } catch(e){}
+  }
+  // Words the learner model holds whose shakiest skill has faded below MW_WEAK_R.
+  function myWordsScanShaky(now){
+    if(!myWordsOn() || !MW.doc) return;
+    now = now || Date.now();
+    if(now - MW.scanAt < MW_SCAN_MS) return;
+    MW.scanAt = now;
+    var items = learnerModel().items, mine = MW.doc.mine, adds = 0;
+    Object.keys(items).forEach(function(k){
+      var it = items[k]; if(it.lang !== 'ko' || mine[k] || adds >= 20) return;
+      var ch = Learner.weakest(it.text, now), r = ch ? Learner.retrievability(it.text, ch, now) : null;
+      if(r != null && r < MW_WEAK_R && myWordsMeaning(it.text)){ adds++; myWordsAdd(it.text, '', 'shaky'); }
+    });
+  }
+  // Everything after the board's due counts: the list for this profile, her cards' meanings, the shaky scan.
+  function myWordsRefresh(lists){
+    if(!myWordsOn()) return Promise.resolve();
+    return myWordsLoad().then(function(){
+      myWordsLearnCards(lists);
+      // only once her decks are in: before that, every word would look like it has no meaning
+      if((lists || []).some(function(l){ return l && l.length; })) myWordsScanShaky();
+    });
+  }
+
+  // The words due now, in the order Learner.due() gives (soonest first), then words new to the list.
+  function myWordsDue(now){
+    if(!myWordsOn() || !MW.doc || MW.pid !== myWordsPid()) return [];
+    now = now || Date.now();
+    var mine = MW.doc.mine, order = {}, n = 0;
+    Learner.due(now).forEach(function(d){ if(order[d.key] == null) order[d.key] = n++; });
+    return Object.keys(mine).filter(function(k){ return !mine[k].seen || order[k] != null; })
+      .sort(function(a, b){
+        var oa = order[a] != null ? order[a] : 1e9, ob = order[b] != null ? order[b] : 1e9;
+        return oa - ob || (mine[a].at || 0) - (mine[b].at || 0);
+      })
+      .map(function(k){ return Object.assign({ key: k }, mine[k]); });
+  }
+  // The whole list, newest first (the Word Bank's Mine tab)
+  function myWordsList(){
+    if(!myWordsOn() || !MW.doc || MW.pid !== myWordsPid()) return [];
+    var mine = MW.doc.mine;
+    return Object.keys(mine).sort(function(a, b){ return (mine[b].at || 0) - (mine[a].at || 0); }).map(function(k){ return Object.assign({ key: k }, mine[k]); });
+  }
+  // The board's tile (an item like reefZones' own), or null when nothing is due.
+  function myWordsTile(){
+    var n = myWordsDue().length;
+    return n ? { d: MW_DECK, dc: { due: n, total: n }, kind: null, state: 'ready' } : null;
+  }
+  // The deck for an id, counting My words, which isn't stored with the others
+  function deckOrMyWords(id){
+    return id === MW_ID ? MW_DECK : S.decks.find(function(d){ return d.id === id; });
+  }
+
+  function myWordsCap(t){ t = String(t || ''); return t.charAt(0).toUpperCase() + t.slice(1); }
+  // A sentence (three or more words, or ending like one) can be built from its words; a shorter phrase can't.
+  function myWordsSentence(ko){
+    var n = ko.trim().split(/\s+/).length;
+    return n >= 2 && n <= 9 && (n >= 3 || /[.?!]$/.test(ko.trim()));
+  }
+  // One word, asked in its weakest way:
+  //   hear → Listen & Pick    say → Echo    use → Sentence Builder for a sentence, else as recall
+  //   read → the Korean shown, pick the English    recall → the English shown, think of the Korean, flip
+  // A word the model has never seen practiced starts with read. With too few other meanings to choose from,
+  // hear and read become a flip card with the Korean on the front.
+  function myWordsCard(e, i, meanings){
+    var ch = Learner.weakest(e.ko) || 'read', ko = e.ko, en = myWordsCap(e.en);
+    // all capitalized alike, so a dictionary meaning ("water") doesn't stand out among card ones ("Phone")
+    // and a word's wrong answers are words, a sentence's are sentences, so the odd one out isn't the answer
+    var sentence = function(m){ return /[.?!]$/.test(m) || m.split(/\s+/).length > 3; };
+    var others = meanings.filter(function(m){ return m.toLowerCase() !== en.toLowerCase(); });
+    var alike = others.filter(function(m){ return sentence(m) === sentence(en); });
+    var wrong = shuffle(alike.length >= 3 ? alike : others).slice(0, 3).map(myWordsCap);
+    var base = { id: 'mw-' + i + '-' + reefHash(e.key), _practice: true, _myWords: e.key, note: '', photoUrl: '', choices: [] };
+    if(ch === 'use' && !myWordsSentence(ko)) ch = 'recall';
+    if((ch === 'hear' || ch === 'read') && wrong.length < 2) return Object.assign(base, { mode: 'flip', front: ko, back: en });
+    if(ch === 'hear') return Object.assign(base, { mode: 'listen', front: ko, back: en, choices: wrong });
+    if(ch === 'say') return Object.assign(base, { mode: 'echo', front: ko, back: en });
+    if(ch === 'use') return Object.assign(base, { mode: 'build', front: ko, back: en });
+    if(ch === 'read') return Object.assign(base, { mode: 'choice', front: ko, back: en, choices: wrong });
+    return Object.assign(base, { mode: 'flip', front: en, back: ko });
+  }
+  function startMyWords(){
+    var due = myWordsDue();
+    if(!due.length){ goHome(); return; }
+    var seen = {}, meanings = [];
+    Object.keys(MW.doc.mine).map(function(k){ return MW.doc.mine[k].en; }).concat(Object.keys(MW.meanings).map(function(k){ return MW.meanings[k]; }))
+      .forEach(function(m){ var l = String(m || '').toLowerCase(); if(m && !seen[l] && m.length <= 60){ seen[l] = 1; meanings.push(m); } });
+    var queue = due.slice(0, MW_ROUND).map(function(e, i){ return myWordsCard(e, i, meanings); });
+    S.currentDeckId = MW_ID;
+    S.editMode = false;
+    studyBegin(queue, queue);
+  }
+  // Test helper: the words due now, each with the way a round would ask it
+  window.__myWordsDue = function(){ return myWordsDue().map(function(e){ return { ko: e.ko, en: e.en, from: e.from, way: Learner.weakest(e.ko) }; }); };
+  // Test helper: the right answer to the card on screen, so the smoke test can miss it on purpose
+  window.__studyAnswer = function(){
+    var c = S.view === 'study' && S.studyQueue[0]; if(!c) return null;
+    var tc = S.timedChoiceState, ls = S.listenState;
+    return tc && tc.cardId === c.id ? tc.answer : ls && ls.cardId === c.id ? ls.answer : c.back;
+  };
+/* end of src/js/my-words.js */
 /* from src/js/ui-icons.js */
   /* ---------- One look for every screen: drawn icons, never emoji, in the app's own chrome ----------
      Titles, buttons, labels, badges and chips across the app (and the Library) were written over years with
@@ -13138,6 +13392,10 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     ] },
     { id:'what-you-know', date:'2026-11-04', need:'course', steps:[
       { at:'[aria-label="Open the Library"]', say:'Every Korean card you answer now teaches me what you know. See it in the Library, under My course.' }
+    ] },
+    // The My words tile is only on the board while words are due, so this points at the map, which lists it then
+    { id:'my-words', date:'2026-11-04', need:'course', steps:[
+      { at:'.r3-mapbtn', say:'Korean words you miss or look up now go in My words, a new stop on the reef. Find it on the treasure map.' }
     ] }
   ];
   var WN_RECENT_DAYS = 14;   // a brand-new profile is shown only what's new in the last two weeks, not the whole history
@@ -18980,7 +19238,10 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     g.beginPath(); g.arc(128, 128, 104, 0, Math.PI * 2); g.stroke(); g.setLineDash([]);
     if(/^deck/.test(kind)){   // decks: a white badge behind a big emoji, and a gold star once it's all done
       g.fillStyle = night ? 'rgba(255,246,222,.92)' : 'rgba(255,255,255,.92)'; g.beginPath(); g.arc(128, 128, 82, 0, Math.PI * 2); g.fill();
-      g.font = '128px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(icon, 128, 136);
+      g.font = '128px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      // a letter instead of an emoji (My words is 말) takes the fill colour, so it needs ink, not the badge's white
+      if(/[가-힣]/.test(icon)){ g.fillStyle = night ? '#6b4514' : '#0d5262'; g.font = '700 116px system-ui, sans-serif'; }
+      g.fillText(icon, 128, 136);
       if(kind === 'deck-done'){ g.font = '900 64px "Baloo 2", system-ui, sans-serif'; g.fillStyle = '#ffcf3f'; g.strokeStyle = '#8a5a12'; g.lineWidth = 6; g.strokeText('★', 200, 58); g.fillText('★', 200, 58); }
       var dt = new window.THREE.CanvasTexture(c); dt.anisotropy = 4; return (R3tex[key] = dt);
     }
@@ -19565,6 +19826,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       if(s.kind === 'deck'){
         var it = s.item, label = it.state === 'ready' ? 'Ready' : it.state === 'done' ? 'All done' : it.kind;
         b.classList.add(it.state);
+        if(it.d.myWords) b.classList.add('mywords');   // What's new and the smoke test find the My words tile by this
         b.innerHTML = '<span class="r3-emoji" aria-hidden="true">'+it.d.emoji+'</span><span><b>'+esc(it.d.name)+'</b><small>'+esc(label)+'</small></span>' + (it.state === 'done' ? '<i class="r3-star" aria-hidden="true">★</i>' : '');
         b.setAttribute('aria-label', it.d.name + '. ' + (it.state === 'ready' ? 'Ready to practice.' : it.state === 'done' ? 'All done. Tap to play again.' : 'Tap to ' + it.kind.toLowerCase() + '.'));
       } else {
@@ -22661,6 +22923,22 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     view.warmMats = mats;
     view.warmed = R.info.programs.length - before;   // for checking: how many shaders this compiled ahead of time
   }
+  // Where space i of an old board is on a new one: the same deck, the same step along a branch, or as many steps
+  // past the deck (or the start) before it on the main path. dflt when there's no match.
+  function reef3dSameSpot(a, b, i, dflt){
+    var s = a[i]; if(!s) return dflt;
+    function deckIn(list, id){ for(var k = 0; k < list.length; k++) if(list[k].kind === 'deck' && list[k].item.d.id === id) return k; return -1; }
+    if(s.kind === 'deck'){ var d = deckIn(b, s.item.d.id); if(d >= 0) return d; }
+    if(s.branch){
+      var a0 = a.findIndex(function(x){ return x.branch === s.branch; }), b0 = b.findIndex(function(x){ return x.branch === s.branch; }), t = b0 + (i - a0);
+      return b0 >= 0 && b[t] && b[t].branch === s.branch ? t : dflt;
+    }
+    for(var j = s.kind === 'deck' ? i - 1 : i; j >= 0; j--){
+      var m = a[j].kind === 'start' ? 0 : a[j].kind === 'deck' ? deckIn(b, a[j].item.d.id) : -1;
+      if(m >= 0) return Math.min(m + (i - j), (b.mainN || b.length) - 1);
+    }
+    return dflt;
+  }
   function reef3dMount(rw, zones){
     var scene2d = rw.querySelector('.rw-scene');
     if(!scene2d || R3.failed) return;
@@ -22670,11 +22948,14 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       try {
         var view = R3.view;
         if(!view || view.key !== key){
+          var was = view;
           if(view){ view.renderer.dispose(); view.renderer.forceContextLoss && view.renderer.forceContextLoss(); }
           view = R3.view = reef3dBuild(rw, zones, models); view.key = key;
           reef3dWarm(view);
           reef3dWire(view);
           var start = S.reef3dAt != null && S.reef3dAt < view.spaces.length ? S.reef3dAt : 0;
+          // A deck came or went (My words appears while it has words due): keep her by the same place, not the same number
+          if(was && S.reef3dAt != null && was.key.charAt(0) === key.charAt(0)) start = reef3dSameSpot(was.spaces, view.spaces, S.reef3dAt, start);
           reef3dPlace(view, start);
           reef3dCamTarget(view, view.camPos, view.camLook);
         }
@@ -23367,6 +23648,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     q = String(q || '').trim().slice(0, 200);
     if(!q || Ask.busy) return;
     var card = askCard();
+    myWordsNoteAsk(q, card);   // Korean looked up here joins My words (my-words.js)
     Ask.q = q; Ask.busy = true; Ask.err = ''; Ask.res = null; askRender();
     var prompt = 'You are ' + askName() + ', a friendly sea helper in a flashcard app. The person asking is a 12-year-old learner (reading at about a first-grade level) or their tutor. ' +
       'You only explain words and sentences in any language (for example Korean, English or Chinese): what they mean, and how they are built from parts (syllables, roots, particles, words). ' +

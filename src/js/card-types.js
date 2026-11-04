@@ -822,7 +822,7 @@
   }
 
   function renderStudy(){
-    var deck = S.decks.find(function(d){ return d.id === S.currentDeckId; }) || {name:'Deck', emoji:'🌊'};
+    var deck = deckOrMyWords(S.currentDeckId) || {name:'Deck', emoji:'🌊'};
     if(!S.studyQueue.length){
       finishStudy();
       return;
@@ -1304,7 +1304,7 @@
     // what the Progress page's per-deck "topics" breakdown groups by category and sums.
     updates.timesSeen = (card.timesSeen || 0) + 1;
     updates.timesCorrect = (card.timesCorrect || 0) + (rating !== 'again' ? 1 : 0);
-    S.store.updateCard(S.currentDeckId, card.id, updates);
+    if(!card._myWords) S.store.updateCard(S.currentDeckId, card.id, updates);   // My words cards are made for the round and never saved
     planNoteAnswer(card, rating);
     S.sessionReviewed += 1;
     S.sessionStars += STARS[rating];
@@ -1312,6 +1312,7 @@
     // reset below, and overwritten on every answer, so there's always exactly one card of "undo peek."
     var gradedMode = (CARD_MODES.indexOf(card.mode) !== -1) ? card.mode : 'flip';
     learnerNoteAnswer(card, gradedMode, rating);   // the learner model (learner.js) records alongside the scheduler
+    myWordsNoteAnswer(card, gradedMode, rating);   // a missed Korean card joins My words (my-words.js)
     var isDragGraded = gradedMode === 'match' || gradedMode === 'blank';
     var tcGraded = gradedMode === 'timedchoice' ? S.timedChoiceState : null;
     var lsGraded = gradedMode === 'listen' ? S.listenState : (gradedMode === 'hanja' ? S.hanjaState : (gradedMode === 'numsys' ? S.numsysState : null));
@@ -1395,7 +1396,7 @@
     var t = S.roundTally || { again:0, hard:0, good:0, easy:0 };
     var total = S.sessionReviewed;
     var right = Math.max(0, total - t.again);
-    var deck = S.decks.find(function(d){ return d.id === S.currentDeckId; });
+    var deck = deckOrMyWords(S.currentDeckId);
     var historyEntry = {
       deckId: S.currentDeckId,
       deckName: deck ? deck.name : 'Deck',
@@ -1449,7 +1450,7 @@
 
   function renderSummary(){
     if(reefKid()) return reefSummary();
-    var deck = S.decks.find(function(d){ return d.id === S.currentDeckId; }) || {name:'Deck', emoji:'🌊'};
+    var deck = deckOrMyWords(S.currentDeckId) || {name:'Deck', emoji:'🌊'};
     var t = S.roundTally || { again:0, hard:0, good:0, easy:0 };
     var total = S.sessionReviewed;
     var right = Math.max(0, total - t.again);

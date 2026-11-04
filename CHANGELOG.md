@@ -1,5 +1,18 @@
 # Changelog
 
+## My words (November 4, 2026)
+
+- **A new stop on the reef: My words.** It's your own list of Korean words, and it fills itself: every Korean card
+  you answer wrong, in any deck, every Korean word or phrase you look up with Ask Shelly, and words you're starting
+  to forget. Each word comes with its English meaning, from the card or from Shelly's dictionary.
+- **The tile shows up at the start of the Korean part of the board when words are ready**, and goes away when
+  you've practiced them. You can also find it on the treasure map.
+- **Each word is asked in the way you know it least**: hear it and pick the meaning, say it back with Echo, build
+  the sentence, read the Korean and pick the English, or see the English and think of the Korean. Your answers
+  teach the app what you know, like any other card. Your normal decks' schedules don't change.
+- The Word Bank has a new **Mine** tab with the whole list and where each word came from.
+- For profiles with a language course (Wendy's), for now. Shelly points it out the first time.
+
 ## Coral Classroom learns what you know (November 4, 2026)
 
 - **Every Korean card you answer now teaches the app what you know, and how you know it.** It keeps track of five

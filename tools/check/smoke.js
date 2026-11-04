@@ -7,6 +7,7 @@
      grown-up profile nothing asks again (leaving a deck, Library settings, Edit Mode), while the child's Edit
      Mode and Library settings still ask; the Library's home has a tab per learning goal, with Next up and today's count;
      a child leaving a deck early gets the subtraction question;
+   - My words: a Korean card the grown-up misses joins her list, and its tile appears on the board;
    - Ask Shelly answers English, Chinese and Korean words with the network switched off;
    - the Library opens.
    Usage: node smoke.js [port]        Exits with 1 if anything fails. */
@@ -137,6 +138,17 @@ async function newPage(browser) {
   const exit2 = await p.$('[data-act^="exit-"], [data-act="back-home"], [aria-label^="Close"]');
   if (exit2) { await exit2.click(); await p.waitForTimeout(4000); }
   check('grown-up: leaving a deck early asks nothing', !!exit2 && !(await p.$('.reef-gate, .lock-screen')) && await p.evaluate(() => !!document.querySelector('.r3 canvas')));
+  // My words: a Korean card answered wrong puts its word on her list, and the list's tile on the board
+  check('grown-up: My words is not on the board before anything is missed', await p.evaluate(() => !document.querySelector('.r3-label.mywords') && !window.__myWordsDue().length));
+  await p.evaluate(() => { const d = window.CoralCove.decks().find(x => /speed quiz/i.test(x.name)); if (d) window.CoralCove.startDeck(d.id); });
+  await p.waitForTimeout(2500);
+  const missed = await p.evaluate(() => { const a = window.__studyAnswer(), b = [...document.querySelectorAll('.choice-btn:not([disabled])')].find(x => x.textContent.trim() !== a); if (b) b.click(); return b ? a : null; });
+  await p.waitForTimeout(3500);
+  const exit3 = await p.$('[data-act="exit-study"]'); if (exit3) { await exit3.click(); await p.waitForTimeout(5000); }
+  const mw = await p.evaluate(() => ({ tile: !!document.querySelector('.r3-label.mywords'), due: window.__myWordsDue() }));
+  check('grown-up: a missed Korean card goes in My words, and its tile appears on the board', !!missed && mw.tile && mw.due.some(e => e.from === 'missed' && e.ko && e.en),
+    (missed || 'no card to miss') + ' → ' + mw.due.map(e => e.ko + ' = ' + e.en).join(', '));
+  check('grown-up: What\'s new: every step points at something on the board', !(await p.evaluate(() => window.__whatsNewMissing())).length, (await p.evaluate(() => window.__whatsNewMissing())).join(', '));
   await menuPick(p, 'Edit decks'); await p.waitForTimeout(1200);
   await p.click('[data-act="open-library"]', { force: true }); await p.waitForTimeout(800);
   check('grown-up: the Library opens on the Korean goal', await p.evaluate(() => [...document.querySelectorAll('.clib-tab')].map(t => t.dataset.tab).join(',') === 'korean'));

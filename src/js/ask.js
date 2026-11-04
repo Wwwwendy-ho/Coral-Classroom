@@ -112,6 +112,7 @@
     q = String(q || '').trim().slice(0, 200);
     if(!q || Ask.busy) return;
     var card = askCard();
+    myWordsNoteAsk(q, card);   // Korean looked up here joins My words (my-words.js)
     Ask.q = q; Ask.busy = true; Ask.err = ''; Ask.res = null; askRender();
     var prompt = 'You are ' + askName() + ', a friendly sea helper in a flashcard app. The person asking is a 12-year-old learner (reading at about a first-grade level) or their tutor. ' +
       'You only explain words and sentences in any language (for example Korean, English or Chinese): what they mean, and how they are built from parts (syllables, roots, particles, words). ' +

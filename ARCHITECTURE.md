@@ -91,6 +91,11 @@ The scheduler is Anki-style SM-2 (constants at the top of the script, `DIFFICULT
 Each card type (timed choice, sound-out blend, Hangul Blend, Listen & Pick, Echo, Mic, Sentence Builder,
 Chinese bridge, Native or Sino?) has its own section with its state on `S` and a render function.
 
+Alongside the scheduler, the learner model (`src/js/learner.js`, `Learner`) tracks each Korean word in five skills
+with FSRS. `src/js/my-words.js` builds a profile's My words list from missed cards, Ask Shelly lookups and fading
+words (saved in the Word Bank's record), shows it as a deck tile on the board while words are due, and makes a
+round of cards in each word's weakest skill on the spot (they're never saved, so deck schedules don't change).
+
 ## Grown-up checks
 
 There is no PIN. On GitHub, `reefGrownUpGate(kind)` shows a times question; a right answer calls

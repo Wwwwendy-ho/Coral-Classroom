@@ -4,37 +4,42 @@
 
   function startStudy(deckId){
     if(!deckId) return;
-    S.finishingRound = false;
-    S.storeError = null;
+    if(deckId === MW_ID) return startMyWords();   // My words (my-words.js) builds its round from the word list, not a stored deck
     S.currentDeckId = deckId;
     S.editMode = false; // Edit Mode is a deck-management concept -- Dive In always leaves it behind
     S.store.updateDeck(deckId, { lastOpenedAt: Date.now() }); // drives the Manage Decks "most recently opened" order
     S.store.getCardsOnce(deckId).then(function(cards){
       var pool = buildStudyPool(cards);
-      S.studyQueue = interspersedRound(cards, pool, currentDifficulty().roundSize);
-      S.studyTotal = S.studyQueue.length;
-      S.sessionReviewed = 0;
-      S.sessionStars = 0;
-      S.roundTally = { again: 0, hard: 0, good: 0, easy: 0 };
-      S.roundStartedAt = Date.now();
-      S.view = 'study';
-      S.cardFlipped = false;
-      S.choiceState = null;
-      S.dragState = null;
-      S.timedChoiceState = null;
-      S.timedChoiceAllCards = cards; // full deck pool (not just this round's queue) -- gives 'timedchoice' mode enough sibling cards to draw distractors from even on a short round
-      S.timedChoiceDirection = null;
-      S.timedChoiceGroupLeft = 0;
-      clearTimedChoiceTimer();
-      S.currentCardId = null;
-      S.cardShownAt = null;
-      S.cardFlippedAt = null;
-      S.transitioning = false;
-      S.peeking = false;
-      S.lastAnsweredCard = null;
-      S.critterPrevPct = 0;
-      render();
+      studyBegin(interspersedRound(cards, pool, currentDifficulty().roundSize), cards);
     });
+  }
+  // Starts a graded round of these cards (allCards: where Listen & Pick and timed choice draw their wrong answers)
+  function studyBegin(queue, allCards){
+    S.finishingRound = false;
+    S.storeError = null;
+    S.studyQueue = queue;
+    S.studyTotal = S.studyQueue.length;
+    S.sessionReviewed = 0;
+    S.sessionStars = 0;
+    S.roundTally = { again: 0, hard: 0, good: 0, easy: 0 };
+    S.roundStartedAt = Date.now();
+    S.view = 'study';
+    S.cardFlipped = false;
+    S.choiceState = null;
+    S.dragState = null;
+    S.timedChoiceState = null;
+    S.timedChoiceAllCards = allCards; // full deck pool (not just this round's queue) -- gives 'timedchoice' mode enough sibling cards to draw distractors from even on a short round
+    S.timedChoiceDirection = null;
+    S.timedChoiceGroupLeft = 0;
+    clearTimedChoiceTimer();
+    S.currentCardId = null;
+    S.cardShownAt = null;
+    S.cardFlippedAt = null;
+    S.transitioning = false;
+    S.peeking = false;
+    S.lastAnsweredCard = null;
+    S.critterPrevPct = 0;
+    render();
   }
 
   // Builds a round. For a child profile, cards she already knows well are mixed in between new or shaky
