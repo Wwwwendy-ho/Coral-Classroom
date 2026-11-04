@@ -13663,7 +13663,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       var words = listen ? '<span class="lg-ko" lang="ko">' + esc(l[1]) + '</span>' :
         '<span class="lg-ko" lang="ko">' + l[1].split(/\s+/).map(function(tok, wi){
           return '<button type="button" class="lg-w' + (L.word && L.word[0] === i && L.word[1] === wi ? ' on' : '') + '" data-lg-w="' + i + ':' + wi + '">' + esc(tok) + '</button>'; }).join(' ') + '</span>';
-      return '<li class="lg-line who' + l[0] + (L.playing === i ? ' playing' : '') + '" data-lg-line="' + i + '">' +
+      return '<li class="lg-line' + (l[0] ? ' lg-me' : '') + (L.playing === i ? ' playing' : '') + '" data-lg-line="' + i + '">' +
         '<span class="lg-who">' + esc(who[0]) + '</span>' +
         '<div class="lg-bubble">' + words +
           (!listen && L.showEn[i] ? '<span class="lg-en">' + esc(l[2]) + '</span>' : '') +
@@ -24697,10 +24697,10 @@ button, a, [role="button"], .r3 canvas, .rl-canvas{ touch-action:manipulation; }
 .lg-hint .cc-ic{ flex:none; width:22px; height:22px; color:var(--lg-teal); }
 .lg-lines{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
 .lg-line{ display:flex; flex-direction:column; align-items:flex-start; gap:3px; max-width:88%; }
-.lg-line.who1{ align-self:flex-end; align-items:flex-end; }
+.lg-line.lg-me{ align-self:flex-end; align-items:flex-end; }
 .lg-who{ font-size:.8rem; font-weight:800; color:var(--lg-soft); padding:0 8px; }
 .lg-bubble{ background:var(--lg-panel); border:2px solid var(--lg-edge); border-radius:20px 20px 20px 6px; padding:10px 14px; transition:background .25s ease, border-color .25s ease, transform .25s ease; }
-.lg-line.who1 .lg-bubble{ background:var(--lg-you); border-radius:20px 20px 6px 20px; }
+.lg-line.lg-me .lg-bubble{ background:var(--lg-you); border-radius:20px 20px 6px 20px; }
 .lg-line.playing .lg-bubble{ background:var(--lg-glow); border-color:#e8a33d; transform:scale(1.02); }
 body.reef-calm .lg-bubble{ transition:none; }
 body.reef-calm .lg-line.playing .lg-bubble{ transform:none; }

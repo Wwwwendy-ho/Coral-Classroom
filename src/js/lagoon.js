@@ -166,7 +166,7 @@
       var words = listen ? '<span class="lg-ko" lang="ko">' + esc(l[1]) + '</span>' :
         '<span class="lg-ko" lang="ko">' + l[1].split(/\s+/).map(function(tok, wi){
           return '<button type="button" class="lg-w' + (L.word && L.word[0] === i && L.word[1] === wi ? ' on' : '') + '" data-lg-w="' + i + ':' + wi + '">' + esc(tok) + '</button>'; }).join(' ') + '</span>';
-      return '<li class="lg-line who' + l[0] + (L.playing === i ? ' playing' : '') + '" data-lg-line="' + i + '">' +
+      return '<li class="lg-line' + (l[0] ? ' lg-me' : '') + (L.playing === i ? ' playing' : '') + '" data-lg-line="' + i + '">' +
         '<span class="lg-who">' + esc(who[0]) + '</span>' +
         '<div class="lg-bubble">' + words +
           (!listen && L.showEn[i] ? '<span class="lg-en">' + esc(l[2]) + '</span>' : '') +

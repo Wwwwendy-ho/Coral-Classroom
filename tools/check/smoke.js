@@ -149,6 +149,23 @@ async function newPage(browser) {
   check('grown-up: a missed Korean card goes in My words, and its tile appears on the board', !!missed && mw.tile && mw.due.some(e => e.from === 'missed' && e.ko && e.en),
     (missed || 'no card to miss') + ' → ' + mw.due.map(e => e.ko + ' = ' + e.en).join(', '));
   check('grown-up: What\'s new: every step points at something on the board', !(await p.evaluate(() => window.__whatsNewMissing())).length, (await p.evaluate(() => window.__whatsNewMissing())).join(', '));
+  // Story Lagoon: open from the sea chart, a story opens, and a tapped word shows its meaning
+  await p.click('[data-r3-map]'); await p.waitForTimeout(1200);
+  await p.click('.r3-map-tab[data-sea-tab="sea"]'); await p.waitForTimeout(400);
+  await p.click('.r3-sea-isle[data-sea="lagoon"]'); await p.waitForTimeout(400);
+  const lgBtn = await p.$('[data-sea-go="lagoon"]');
+  check('grown-up: the sea chart has an Open Story Lagoon button', !!lgBtn && /Open Story Lagoon/.test(await lgBtn.textContent()));
+  if (lgBtn) { await lgBtn.click(); await p.waitForTimeout(2500); }
+  check('grown-up: Story Lagoon lists its twelve stories', await p.evaluate(() => document.querySelectorAll('.lg-story').length === 12));
+  await p.click('.lg-story'); await p.waitForTimeout(800);
+  check('grown-up: a story opens, ready to listen', await p.evaluate(() => document.querySelectorAll('.lg-line').length >= 4 && !!document.querySelector('[data-lg-play]')));
+  await p.click('[data-lg-next]'); await p.waitForTimeout(500);
+  await p.click('.lg-w'); await p.waitForTimeout(600);
+  const lgWord = await p.evaluate(() => { const w = document.querySelector('.lg-word'); return w ? w.innerText.replace(/\s+/g, ' ').trim() : ''; });
+  check('grown-up: a tapped word shows its meaning', /[가-힣]/.test(lgWord) && /[a-z]{3}/i.test(lgWord), lgWord);
+  await p.click('[data-act="lg-back"]'); await p.waitForTimeout(500);
+  await p.click('[data-act="lg-home"]'); await p.waitForTimeout(6000);
+  check('grown-up: leaving Story Lagoon goes back to the board', await p.evaluate(() => !!document.querySelector('.r3 canvas')));
   await menuPick(p, 'Edit decks'); await p.waitForTimeout(1200);
   await p.click('[data-act="open-library"]', { force: true }); await p.waitForTimeout(800);
   check('grown-up: the Library opens on the Korean goal', await p.evaluate(() => [...document.querySelectorAll('.clib-tab')].map(t => t.dataset.tab).join(',') === 'korean'));
