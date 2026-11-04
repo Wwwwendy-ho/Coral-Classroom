@@ -730,6 +730,7 @@
       var go = e.target.closest('[data-r3-go]');
       if(go) return reef3dMapJump(view, ov, +go.dataset.r3Go);
       var tb = e.target.closest('[data-sea-tab]'); if(tb) return tab(tb.dataset.seaTab);
+      var sg = e.target.closest('[data-sea-go]'); if(sg) return reefSeaGo(ov, sg.dataset.seaGo);
       var isle = e.target.closest('[data-sea]'); if(isle) return reefSeaInfo(ov, isle.dataset.sea);
       if(e.target.closest('[data-r3-close]') || e.target === ov) close();
     });

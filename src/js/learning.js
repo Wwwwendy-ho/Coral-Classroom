@@ -937,22 +937,22 @@
     // onEnd() once playback actually finishes.
     function speakThen(text, onEnd, opts){
       if(!Sound.isEnabled() || !text || deckSpeechMuted()){ if(onEnd) onEnd(); return; }
-      var str = String(text), variant = opts && opts.variant;
+      var str = String(text), variant = opts && opts.variant, rate = opts && opts.rate;   // rate: a slower reading, as in speak()
       // Watchdog: some phones (iOS Safari especially) silently drop an utterance or never fire its
       // 'end' event, which used to leave anything waiting on onEnd -- like a Sound Blend card's
       // auto-advance -- stuck forever. onEnd now fires once, either when playback really ends or
       // after a generous length-based timeout, whichever comes first.
       var origEnd = onEnd, endFired = false;
-      var watchdog = setTimeout(function(){ onEnd(); }, Math.min(9000, 2600 + str.length * 110));
+      var watchdog = setTimeout(function(){ onEnd(); }, Math.min(rate ? 14000 : 9000, (2600 + str.length * 110) / Math.min(1, rate || 1)));
       onEnd = function(){ if(endFired) return; endFired = true; clearTimeout(watchdog); if(origEnd) origEnd(); };
       var token = ++speakToken;
       resolveClip(str, variant).then(function(clip){
         if(token !== speakToken){ onEnd(); return; }
         if(clip){
-          playUrl(clip.url, 1, onEnd).catch(function(){ speakSynthCb(str, onEnd); });
+          playUrl(clip.url, clipRate(clip, rate, variant), onEnd).catch(function(){ speakSynthCb(str, onEnd); });
           return;
         }
-        speakParts(str, null, variant, token, onEnd);
+        speakParts(str, rate, variant, token, onEnd);
       }).catch(function(){ speakSynthCb(str, onEnd); });
     }
     return { speak: speak, speakThen: speakThen, stop: stop, playUrl: playUrl, isSupported: function(){ return supported; },

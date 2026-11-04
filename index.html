@@ -12,7 +12,7 @@
 <script src="seed-data.js?v=20261026"></script>
 <script src="audio-clips.js?v=20261026"></script>
 <script src="storage.js?v=20261026"></script>
-<script src="library.js?v=20261028" defer></script>
+<script src="library.js?v=20261104" defer></script>
 <script src="words.js?v=20261028" defer></script>
 <script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js?v=20261026').catch(function(){});});}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" media="print" id="coveperfFonts" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&family=Fredoka:wght@400;500;600;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&display=swap">
@@ -1985,6 +1985,8 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
      js/fsrs.js                 FSRS-4.5 memory math (stability, difficulty, next review)
      js/learner.js              LEARNER MODEL: what each word is known as (hear, read, recall, say, use), per profile
      js/my-words.js             MY WORDS: missed, looked-up and shaky Korean words, practiced in their weakest way
+     js/lagoon-stories.js       STORY LAGOON's built-in stories: twelve trip conversations with word meanings and questions
+     js/lagoon.js               STORY LAGOON: the story list (best fit first) and the reader (listen, read, questions)
      js/ui-icons.js             drawn icons in place of emoji in every screen's titles, buttons and labels
      js/whats-new.js            What's new: Shelly points out new things after an update (one entry per release)
      js/vendor/three-gltfloader.js   THIRD-PARTY CODE: three.js GLTFLoader and BufferGeometryUtils (don't edit)
@@ -2944,22 +2946,22 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     // onEnd() once playback actually finishes.
     function speakThen(text, onEnd, opts){
       if(!Sound.isEnabled() || !text || deckSpeechMuted()){ if(onEnd) onEnd(); return; }
-      var str = String(text), variant = opts && opts.variant;
+      var str = String(text), variant = opts && opts.variant, rate = opts && opts.rate;   // rate: a slower reading, as in speak()
       // Watchdog: some phones (iOS Safari especially) silently drop an utterance or never fire its
       // 'end' event, which used to leave anything waiting on onEnd -- like a Sound Blend card's
       // auto-advance -- stuck forever. onEnd now fires once, either when playback really ends or
       // after a generous length-based timeout, whichever comes first.
       var origEnd = onEnd, endFired = false;
-      var watchdog = setTimeout(function(){ onEnd(); }, Math.min(9000, 2600 + str.length * 110));
+      var watchdog = setTimeout(function(){ onEnd(); }, Math.min(rate ? 14000 : 9000, (2600 + str.length * 110) / Math.min(1, rate || 1)));
       onEnd = function(){ if(endFired) return; endFired = true; clearTimeout(watchdog); if(origEnd) origEnd(); };
       var token = ++speakToken;
       resolveClip(str, variant).then(function(clip){
         if(token !== speakToken){ onEnd(); return; }
         if(clip){
-          playUrl(clip.url, 1, onEnd).catch(function(){ speakSynthCb(str, onEnd); });
+          playUrl(clip.url, clipRate(clip, rate, variant), onEnd).catch(function(){ speakSynthCb(str, onEnd); });
           return;
         }
-        speakParts(str, null, variant, token, onEnd);
+        speakParts(str, rate, variant, token, onEnd);
       }).catch(function(){ speakSynthCb(str, onEnd); });
     }
     return { speak: speak, speakThen: speakThen, stop: stop, playUrl: playUrl, isSupported: function(){ return supported; },
@@ -4096,6 +4098,8 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     if(S.view === 'readAlong') return renderReadAlong();
     if(S.view === 'miniStory') return renderMiniStory();
     if(S.view === 'wordBank') return renderWordBank();
+    if(S.view === 'lagoon') return renderLagoon();
+    if(S.view === 'lagoonRead') return renderLagoonRead();
     if(S.view === 'plan') return renderPlan();
     if(S.view === 'planMonth') return renderPlanMonth();
     if(S.view === 'flashFeed') return renderFlashFeed();         // Flash Feed -- same reasoning again,
@@ -11455,7 +11459,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     setTimeout(function(){ ov.remove(); reefBusy = false; window.__reefTx = false; }, end);
   }
   function reefInDeck(){
-    return ['study','summary','feed','story','equationFeed','langFeed','readAlong','flashFeed','miniStory','wordBank'].indexOf(S.view) !== -1;
+    return ['study','summary','feed','story','equationFeed','langFeed','readAlong','flashFeed','miniStory','wordBank','lagoon','lagoonRead'].indexOf(S.view) !== -1;
   }
   // Every way out of a deck goes through goHome(), so this is the one place that adds the pop-up.
   function goHome(){
@@ -12761,6 +12765,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     stopSpeaking: function(){ try { if(window.speechSynthesis) speechSynthesis.cancel(); } catch(e){} },
     sound: function(name){ try { if(Sound[name]) Sound[name](); } catch(e){} },
     startDeck: function(id){ reefStartDeck(id); },
+    openLagoon: function(){ openLagoon(); },   // Story Lagoon (lagoon.js), from My course
     night: function(){ try { return reefNight(); } catch(e){ return false; } },
     calm: function(){ try { return reefCalm(); } catch(e){ return false; } },
     // false in the Claude version and inside a grown-up profile, where the app asks no grown-up questions
@@ -13304,6 +13309,469 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     return tc && tc.cardId === c.id ? tc.answer : ls && ls.cardId === c.id ? ls.answer : c.back;
   };
 /* end of src/js/my-words.js */
+/* from src/js/lagoon-stories.js */
+  /* ---------- STORY LAGOON: the built-in stories ----------
+     Twelve short conversations for a grown-up getting ready for a trip to Korea, in the order the trip happens.
+     Anna, a traveler from Canada, is in every one, so the stories feel like one journey.
+     Each line is [speaker, Korean, English, words]. speaker is 0 or 1, an index into cast. words glosses every
+     space-separated piece of the Korean line, in order, as "piece=meaning" or "piece=meaning=base", joined by ";".
+     The piece is written without its punctuation; base is the plain word as the Korean decks have it (공항에 →
+     공항), so a word known from a deck counts as known here too. Each question names the lines (at) its answer
+     comes from, so a right or wrong answer is recorded against those lines' words.
+     Korean is polite 해요체 throughout, with the set phrases (감사합니다, 반갑습니다) as Koreans say them. */
+  var LAGOON_STORIES = [
+    { id:'arrive', en:'Arriving', ko:'공항에 도착했어요', cast:[['Officer','직원'], ['Anna','안나']],
+      lines:[
+        [0, '안녕하세요. 여권 좀 보여 주세요.', 'Hello. Please show me your passport.', '안녕하세요=hello;여권=passport;좀=please (softens a request);보여=show=보여 주다;주세요=please (do it for me)=주세요'],
+        [1, '네, 여기 있어요.', 'Sure, here it is.', '네=yes;여기=here;있어요=it is (there is)=있어요'],
+        [0, '여행 왔어요?', 'Are you here to travel?', '여행=travel, a trip;왔어요=came=와요'],
+        [1, '네, 여행 왔어요.', 'Yes, I came to travel.', '네=yes;여행=travel, a trip;왔어요=came=와요'],
+        [0, '며칠 동안 있을 거예요?', 'How many days will you stay?', '며칠=how many days;동안=for (a length of time);있을=stay=있어요;거예요=will (going to)'],
+        [1, '일주일 동안 있을 거예요.', 'I will stay for a week.', '일주일=one week;동안=for (a length of time);있을=stay=있어요;거예요=will (going to)'],
+        [0, '좋은 여행 되세요.', 'Have a good trip.', '좋은=good;여행=trip=여행;되세요=have (may it be)']
+      ],
+      qs:[
+        { q:'안나는 왜 한국에 왔어요?', en:'Why did Anna come to Korea?', o:[['여행 왔어요.', 'To travel.'], ['일하러 왔어요.', 'To work.'], ['공부하러 왔어요.', 'To study.']], a:0, at:[2, 3] },
+        { q:'며칠 동안 있을 거예요?', en:'How many days will she stay?', o:[['사흘 동안요.', 'Three days.'], ['일주일 동안요.', 'A week.'], ['한 달 동안요.', 'A month.']], a:1, at:[4, 5] }
+      ] },
+    { id:'hotel', en:'The hotel', ko:'호텔에서', cast:[['Front desk','직원'], ['Anna','안나']],
+      lines:[
+        [1, '안녕하세요. 체크인하고 싶어요.', 'Hello. I would like to check in.', '안녕하세요=hello;체크인하고=check in;싶어요=I would like to'],
+        [0, '성함이 어떻게 되세요?', 'May I have your name?', '성함이=name (polite)=이름;어떻게=how=어떻게;되세요=is (polite)'],
+        [1, '안나예요.', 'It is Anna.', '안나예요=it is Anna'],
+        [0, '네, 방은 칠 층이에요.', 'All right, your room is on the seventh floor.', '네=all right, yes;방은=the room=방;칠=seven=칠;층이에요=is the floor=층'],
+        [1, '아침 식사는 몇 시예요?', 'What time is breakfast?', '아침=morning=아침;식사는=meal=아침 식사;몇=what (how many)=몇;시예요=o\'clock is it=시'],
+        [0, '일곱 시부터 열 시까지예요.', 'It is from seven to ten.', '일곱=seven=일곱;시부터=o\'clock, from=시;열=ten=열;시까지예요=o\'clock, until=시'],
+        [0, '엘리베이터는 저쪽에 있어요.', 'The elevator is over there.', '엘리베이터는=the elevator;저쪽에=over there;있어요=is (there)=있어요'],
+        [1, '감사합니다.', 'Thank you.', '감사합니다=thank you']
+      ],
+      qs:[
+        { q:'안나의 방은 몇 층이에요?', en:'What floor is Anna\'s room on?', o:[['삼 층이에요.', 'The third floor.'], ['칠 층이에요.', 'The seventh floor.'], ['십 층이에요.', 'The tenth floor.']], a:1, at:[3] },
+        { q:'아침 식사는 몇 시부터예요?', en:'What time does breakfast start?', o:[['여섯 시부터요.', 'From six.'], ['일곱 시부터요.', 'From seven.'], ['열 시부터요.', 'From ten.']], a:1, at:[4, 5] }
+      ] },
+    { id:'cafe', en:'At a cafe', ko:'카페에서', cast:[['Barista','직원'], ['Anna','안나']],
+      lines:[
+        [0, '어서 오세요. 뭐 드릴까요?', 'Welcome. What can I get you?', '어서=welcome (with 오세요)=어서 오세요;오세요=welcome, please come in=어서 오세요;뭐=what=뭐;드릴까요=shall I give you'],
+        [1, '아이스 아메리카노 한 잔 주세요.', 'One iced americano, please.', '아이스=iced;아메리카노=americano;한=one;잔=cup (counter)=잔;주세요=please give me=주세요'],
+        [0, '여기서 드세요?', 'Is it for here?', '여기서=here, in this place=여기;드세요=will you have it (eat or drink)'],
+        [1, '아니요, 가져갈게요.', 'No, I will take it with me.', '아니요=no=아니요;가져갈게요=I will take it with me'],
+        [1, '이 빵도 하나 주세요.', 'One of this bread too, please.', '이=this=이것;빵도=bread too=빵;하나=one=하나;주세요=please give me=주세요'],
+        [0, '네, 모두 칠천 원이에요.', 'Sure, that is seven thousand won in all.', '네=sure, yes;모두=in all, everything;칠천=seven thousand;원이에요=won it is=원'],
+        [1, '카드 돼요?', 'Can I pay by card?', '카드=card;돼요=is it okay, does it work'],
+        [0, '네, 돼요.', 'Yes, that works.', '네=yes;돼요=it works, it is okay']
+      ],
+      qs:[
+        { q:'안나는 커피를 여기서 마셔요?', en:'Does Anna drink her coffee here?', o:[['네, 여기서 마셔요.', 'Yes, she drinks it here.'], ['아니요, 가져가요.', 'No, she takes it with her.'], ['커피를 안 마셔요.', 'She does not drink coffee.']], a:1, at:[2, 3] },
+        { q:'모두 얼마예요?', en:'How much is it in all?', o:[['사천 원이에요.', 'Four thousand won.'], ['칠천 원이에요.', 'Seven thousand won.'], ['만 원이에요.', 'Ten thousand won.']], a:1, at:[5] }
+      ] },
+    { id:'restaurant', en:'At a restaurant', ko:'식당에서', cast:[['Server','직원'], ['Anna','안나']],
+      lines:[
+        [0, '어서 오세요. 몇 분이세요?', 'Welcome. How many are you?', '어서=welcome (with 오세요)=어서 오세요;오세요=welcome, please come in=어서 오세요;몇=how many=몇;분이세요=people (polite) are you'],
+        [1, '두 명이요.', 'Two people.', '두=two=둘;명이요=people (counter)=명'],
+        [0, '이쪽으로 앉으세요.', 'Please sit over here.', '이쪽으로=this way, over here;앉으세요=please sit=앉아요'],
+        [1, '비빔밥 하나하고 김치찌개 하나 주세요.', 'One bibimbap and one kimchi stew, please.', '비빔밥=bibimbap (rice mixed with vegetables);하나하고=one, and=하나;김치찌개=kimchi stew=김치;하나=one=하나;주세요=please give me=주세요'],
+        [0, '김치찌개는 좀 매워요. 괜찮으세요?', 'The kimchi stew is a little spicy. Is that all right?', '김치찌개는=the kimchi stew=김치;좀=a little;매워요=is spicy;괜찮으세요=is it all right for you=괜찮아요'],
+        [1, '네, 괜찮아요. 매운 음식을 좋아해요.', 'Yes, it is fine. I like spicy food.', '네=yes;괜찮아요=it is fine=괜찮아요;매운=spicy;음식을=food=음식;좋아해요=I like=좋아해요'],
+        [0, '맛있게 드세요.', 'Enjoy your meal.', '맛있게=deliciously, with enjoyment=맛있어요;드세요=please eat'],
+        [1, '여기요, 물 좀 주세요.', 'Excuse me, some water, please.', '여기요=excuse me (to call staff)=여기;물=water=물;좀=some, please;주세요=please give me=주세요']
+      ],
+      qs:[
+        { q:'몇 명이 왔어요?', en:'How many people came?', o:[['한 명이요.', 'One.'], ['두 명이요.', 'Two.'], ['세 명이요.', 'Three.']], a:1, at:[1] },
+        { q:'뭐가 매워요?', en:'What is spicy?', o:[['비빔밥이요.', 'The bibimbap.'], ['김치찌개요.', 'The kimchi stew.'], ['물이요.', 'The water.']], a:1, at:[4] }
+      ] },
+    { id:'shopping', en:'Shopping', ko:'옷 가게에서', cast:[['Clerk','직원'], ['Anna','안나']],
+      lines:[
+        [1, '이 티셔츠 얼마예요?', 'How much is this T-shirt?', '이=this=이것;티셔츠=T-shirt=셔츠;얼마예요=how much is it=얼마'],
+        [0, '이만 원이에요.', 'It is twenty thousand won.', '이만=twenty thousand;원이에요=won it is=원'],
+        [1, '좀 비싸요. 더 싼 거 있어요?', 'That is a little expensive. Do you have a cheaper one?', '좀=a little;비싸요=is expensive=비싸요;더=more=더;싼=cheap=싸요;거=one, thing;있어요=do you have=있어요'],
+        [0, '이건 만 오천 원이에요.', 'This one is fifteen thousand won.', '이건=this one=이것;만=ten thousand;오천=five thousand;원이에요=won it is=원'],
+        [1, '다른 색도 있어요?', 'Do you have other colors too?', '다른=other;색도=color too;있어요=do you have=있어요'],
+        [0, '네, 흰색하고 파란색이 있어요.', 'Yes, we have white and blue.', '네=yes;흰색하고=white, and=흰색;파란색이=blue=파란색;있어요=we have=있어요'],
+        [1, '파란색으로 주세요.', 'The blue one, please.', '파란색으로=the blue one=파란색;주세요=please give me=주세요']
+      ],
+      qs:[
+        { q:'처음 티셔츠는 얼마예요?', en:'How much is the first T-shirt?', o:[['만 원이에요.', 'Ten thousand won.'], ['만 오천 원이에요.', 'Fifteen thousand won.'], ['이만 원이에요.', 'Twenty thousand won.']], a:2, at:[0, 1] },
+        { q:'안나는 무슨 색을 사요?', en:'What color does Anna buy?', o:[['흰색이요.', 'White.'], ['파란색이요.', 'Blue.'], ['빨간색이요.', 'Red.']], a:1, at:[5, 6] }
+      ] },
+    { id:'subway', en:'The subway', ko:'지하철 타기', cast:[['A local','시민'], ['Anna','안나']],
+      lines:[
+        [1, '실례합니다. 명동역에 가고 싶어요.', 'Excuse me. I want to go to Myeongdong Station.', '실례합니다=excuse me=실례합니다;명동역에=to Myeongdong Station=역;가고=go=가요;싶어요=I want to'],
+        [0, '사 호선을 타세요.', 'Take Line 4.', '사=four=사;호선을=subway line;타세요=please take (ride)'],
+        [1, '여기서 멀어요?', 'Is it far from here?', '여기서=from here=여기;멀어요=is it far'],
+        [0, '아니요, 세 정거장이에요.', 'No, it is three stops.', '아니요=no=아니요;세=three=셋;정거장이에요=stops it is'],
+        [1, '표는 어디에서 사요?', 'Where do I buy a ticket?', '표는=a ticket;어디에서=where=어디;사요=do I buy=사요'],
+        [0, '저기 기계에서 사요. 교통카드도 돼요.', 'You buy it at that machine. A transit card works too.', '저기=over there;기계에서=at the machine;사요=you buy=사요;교통카드도=a transit card too;돼요=works, is okay'],
+        [1, '정말 감사합니다.', 'Thank you so much.', '정말=really, so;감사합니다=thank you=감사합니다']
+      ],
+      qs:[
+        { q:'몇 호선을 타요?', en:'Which line does Anna take?', o:[['이 호선이요.', 'Line 2.'], ['사 호선이요.', 'Line 4.'], ['칠 호선이요.', 'Line 7.']], a:1, at:[1] },
+        { q:'명동역은 몇 정거장이에요?', en:'How many stops to Myeongdong Station?', o:[['두 정거장이에요.', 'Two stops.'], ['세 정거장이에요.', 'Three stops.'], ['다섯 정거장이에요.', 'Five stops.']], a:1, at:[3] }
+      ] },
+    { id:'taxi', en:'A taxi', ko:'택시 타기', cast:[['Driver','기사님'], ['Anna','안나']],
+      lines:[
+        [0, '안녕하세요. 어디로 가세요?', 'Hello. Where are you going?', '안녕하세요=hello;어디로=where to=어디;가세요=are you going (polite)=가요'],
+        [1, '서울역으로 가 주세요.', 'To Seoul Station, please.', '서울역으로=to Seoul Station=역;가=go=가요;주세요=please (do it for me)'],
+        [0, '네. 안전벨트 매세요.', 'All right. Please fasten your seat belt.', '네=all right, yes;안전벨트=seat belt;매세요=please fasten'],
+        [1, '얼마나 걸려요?', 'How long does it take?', '얼마나=how long, how much=얼마나;걸려요=does it take (time)'],
+        [0, '길이 막혀서 삼십 분쯤 걸려요.', 'The traffic is heavy, so it takes about thirty minutes.', '길이=the road;막혀서=is jammed, so;삼십=thirty=삼십 분;분쯤=minutes, about=분;걸려요=it takes (time)'],
+        [1, '여기서 세워 주세요.', 'Please stop here.', '여기서=here=여기;세워=stop (the car);주세요=please (do it for me)'],
+        [0, '만 이천 원이에요.', 'That is twelve thousand won.', '만=ten thousand;이천=two thousand;원이에요=won it is=원']
+      ],
+      qs:[
+        { q:'안나는 어디로 가요?', en:'Where is Anna going?', o:[['서울역이요.', 'Seoul Station.'], ['공항이요.', 'The airport.'], ['호텔이요.', 'The hotel.']], a:0, at:[1] },
+        { q:'얼마나 걸려요?', en:'How long does it take?', o:[['십 분쯤 걸려요.', 'About ten minutes.'], ['삼십 분쯤 걸려요.', 'About thirty minutes.'], ['한 시간쯤 걸려요.', 'About an hour.']], a:1, at:[3, 4] }
+      ] },
+    { id:'way', en:'Asking the way', ko:'길 묻기', cast:[['A local','시민'], ['Anna','안나']],
+      lines:[
+        [1, '저기요, 이 근처에 은행이 있어요?', 'Excuse me, is there a bank near here?', '저기요=excuse me;이=this=이것;근처에=nearby, around here;은행이=a bank=은행;있어요=is there=있어요'],
+        [0, '네, 이 길로 쭉 가세요.', 'Yes, go straight down this street.', '네=yes;이=this=이것;길로=along the street;쭉=straight on;가세요=please go=가요'],
+        [0, '편의점 앞에서 오른쪽으로 도세요.', 'Turn right at the convenience store.', '편의점=convenience store;앞에서=in front of;오른쪽으로=to the right;도세요=please turn'],
+        [0, '은행은 병원 옆에 있어요.', 'The bank is next to the hospital.', '은행은=the bank=은행;병원=hospital=병원;옆에=next to;있어요=is (there)=있어요'],
+        [1, '걸어서 갈 수 있어요?', 'Can I walk there?', '걸어서=on foot=걸어요;갈=go=가요;수=can (with 있어요);있어요=can (I)=있어요'],
+        [0, '네, 오 분쯤 걸려요.', 'Yes, it takes about five minutes.', '네=yes;오=five=오;분쯤=minutes, about=분;걸려요=it takes (time)'],
+        [1, '감사합니다!', 'Thank you!', '감사합니다=thank you']
+      ],
+      qs:[
+        { q:'은행은 어디에 있어요?', en:'Where is the bank?', o:[['병원 옆에 있어요.', 'Next to the hospital.'], ['학교 뒤에 있어요.', 'Behind the school.'], ['공원 앞에 있어요.', 'In front of the park.']], a:0, at:[3] },
+        { q:'편의점 앞에서 어디로 가요?', en:'Which way does Anna go at the convenience store?', o:[['왼쪽으로 가요.', 'Left.'], ['오른쪽으로 가요.', 'Right.'], ['뒤로 가요.', 'Back.']], a:1, at:[2] }
+      ] },
+    { id:'meet', en:'Meeting someone', ko:'처음 만났어요', cast:[['Minsu','민수'], ['Anna','안나']],
+      lines:[
+        [0, '안녕하세요. 저는 민수예요.', 'Hello. I am Minsu.', '안녕하세요=hello;저는=I=저;민수예요=am Minsu'],
+        [1, '안녕하세요. 저는 안나예요. 만나서 반갑습니다.', 'Hello. I am Anna. Nice to meet you.', '안녕하세요=hello;저는=I=저;안나예요=am Anna;만나서=to meet you=만나서 반갑습니다;반갑습니다=I am glad=만나서 반갑습니다'],
+        [0, '어느 나라 사람이에요?', 'What country are you from?', '어느=which=어느 것;나라=country=나라;사람이에요=person are you'],
+        [1, '캐나다 사람이에요.', 'I am Canadian.', '캐나다=Canada;사람이에요=a person I am'],
+        [0, '한국어를 잘하네요!', 'You speak Korean well!', '한국어를=Korean (the language);잘하네요=you are good at it'],
+        [1, '아니에요, 아직 잘 못해요.', 'Not really, I am not good at it yet.', '아니에요=not really, no=아니요;아직=yet, still;잘=well;못해요=cannot do'],
+        [0, '한국 음식 좋아해요?', 'Do you like Korean food?', '한국=Korea, Korean;음식=food=음식;좋아해요=do you like=좋아해요'],
+        [1, '네, 김치를 정말 좋아해요.', 'Yes, I really like kimchi.', '네=yes;김치를=kimchi=김치;정말=really;좋아해요=I like=좋아해요']
+      ],
+      qs:[
+        { q:'안나는 어느 나라 사람이에요?', en:'What country is Anna from?', o:[['한국 사람이에요.', 'Korea.'], ['캐나다 사람이에요.', 'Canada.'], ['중국 사람이에요.', 'China.']], a:1, at:[2, 3] },
+        { q:'안나는 뭘 정말 좋아해요?', en:'What does Anna really like?', o:[['김치를 좋아해요.', 'Kimchi.'], ['커피를 좋아해요.', 'Coffee.'], ['국수를 좋아해요.', 'Noodles.']], a:0, at:[7] }
+      ] },
+    { id:'weather', en:'The weather', ko:'오늘 날씨', cast:[['Minsu','민수'], ['Anna','안나']],
+      lines:[
+        [1, '오늘 날씨가 어때요?', 'What is the weather like today?', '오늘=today=오늘;날씨가=the weather=날씨;어때요=how is it'],
+        [0, '오늘은 좀 추워요.', 'It is a little cold today.', '오늘은=today=오늘;좀=a little;추워요=it is cold=추워요'],
+        [1, '오후에 비가 와요?', 'Is it going to rain in the afternoon?', '오후에=in the afternoon=오후;비가=rain=비;와요=comes, falls=와요'],
+        [0, '네, 저녁부터 비가 와요.', 'Yes, it rains from this evening.', '네=yes;저녁부터=from the evening=저녁;비가=rain=비;와요=comes, falls=와요'],
+        [0, '우산 있어요?', 'Do you have an umbrella?', '우산=umbrella=우산;있어요=do you have=있어요'],
+        [1, '아니요, 없어요. 편의점에서 살게요.', 'No, I do not. I will buy one at a convenience store.', '아니요=no=아니요;없어요=I do not have;편의점에서=at a convenience store;살게요=I will buy=사요'],
+        [0, '내일은 날씨가 좋아요.', 'Tomorrow the weather is nice.', '내일은=tomorrow=내일;날씨가=the weather=날씨;좋아요=is good, nice']
+      ],
+      qs:[
+        { q:'오늘 날씨가 어때요?', en:'What is the weather like today?', o:[['더워요.', 'It is hot.'], ['추워요.', 'It is cold.'], ['따뜻해요.', 'It is warm.']], a:1, at:[1] },
+        { q:'안나는 우산을 어디에서 사요?', en:'Where will Anna buy an umbrella?', o:[['편의점에서 사요.', 'At a convenience store.'], ['시장에서 사요.', 'At the market.'], ['호텔에서 사요.', 'At the hotel.']], a:0, at:[4, 5] }
+      ] },
+    { id:'market', en:'At the market', ko:'시장에서', cast:[['Seller','사장님'], ['Anna','안나']],
+      lines:[
+        [1, '사과 얼마예요?', 'How much are the apples?', '사과=apple;얼마예요=how much is it=얼마'],
+        [0, '다섯 개에 만 원이에요.', 'Five for ten thousand won.', '다섯=five=다섯;개에=for (things)=개;만=ten thousand;원이에요=won it is=원'],
+        [1, '이 귤도 맛있어요?', 'Are these tangerines good too?', '이=these, this=이것;귤도=tangerines too;맛있어요=are they tasty=맛있어요'],
+        [0, '네, 아주 달아요. 하나 드셔 보세요.', 'Yes, they are very sweet. Try one.', '네=yes;아주=very;달아요=they are sweet;하나=one=하나;드셔=eat (polite);보세요=try (and see)=봐요'],
+        [1, '와, 정말 맛있어요!', 'Wow, it is really good!', '와=wow;정말=really;맛있어요=it is tasty=맛있어요'],
+        [1, '사과 다섯 개하고 귤 한 봉지 주세요.', 'Five apples and a bag of tangerines, please.', '사과=apple;다섯=five=다섯;개하고=(things), and=개;귤=tangerine;한=one;봉지=bag;주세요=please give me=주세요'],
+        [0, '감사합니다. 또 오세요.', 'Thank you. Come again.', '감사합니다=thank you;또=again;오세요=please come=와요']
+      ],
+      qs:[
+        { q:'사과 다섯 개에 얼마예요?', en:'How much are five apples?', o:[['오천 원이에요.', 'Five thousand won.'], ['만 원이에요.', 'Ten thousand won.'], ['이만 원이에요.', 'Twenty thousand won.']], a:1, at:[1] },
+        { q:'귤은 어때요?', en:'What are the tangerines like?', o:[['달아요.', 'Sweet.'], ['매워요.', 'Spicy.'], ['비싸요.', 'Expensive.']], a:0, at:[3] }
+      ] },
+    { id:'goodbye', en:'Saying goodbye', ko:'다음에 또 만나요', cast:[['Minsu','민수'], ['Anna','안나']],
+      lines:[
+        [1, '내일 캐나다로 돌아가요.', 'I go back to Canada tomorrow.', '내일=tomorrow=내일;캐나다로=to Canada;돌아가요=I go back'],
+        [0, '벌써요? 시간이 정말 빨리 가요.', 'Already? Time goes by so fast.', '벌써요=already;시간이=time;정말=really, so;빨리=fast=빨라요;가요=goes=가요'],
+        [0, '한국 여행은 어땠어요?', 'How was your trip to Korea?', '한국=Korea;여행은=the trip=여행;어땠어요=how was it'],
+        [1, '정말 재미있었어요. 음식도 맛있었어요.', 'It was really fun. The food was delicious too.', '정말=really;재미있었어요=it was fun;음식도=the food too=음식;맛있었어요=was delicious=맛있어요'],
+        [0, '다음에 또 오세요.', 'Come again next time.', '다음에=next time=다음에 봐요;또=again;오세요=please come=와요'],
+        [1, '네, 꼭 다시 올게요.', 'Yes, I will be sure to come back.', '네=yes;꼭=for sure;다시=again;올게요=I will come=와요'],
+        [0, '잘 가요. 건강하세요!', 'Goodbye. Take care!', '잘=well, safely;가요=go=가요;건강하세요=stay healthy, take care']
+      ],
+      qs:[
+        { q:'안나는 언제 캐나다로 돌아가요?', en:'When does Anna go back to Canada?', o:[['오늘 돌아가요.', 'Today.'], ['내일 돌아가요.', 'Tomorrow.'], ['다음 주에 돌아가요.', 'Next week.']], a:1, at:[0] },
+        { q:'한국 여행은 어땠어요?', en:'How was the trip to Korea?', o:[['재미있었어요.', 'It was fun.'], ['심심했어요.', 'It was boring.'], ['무서웠어요.', 'It was scary.']], a:0, at:[3] }
+      ] }
+  ];
+/* end of src/js/lagoon-stories.js */
+/* from src/js/lagoon.js */
+  /* ---------- STORY LAGOON: listen first, then read ----------
+     The first new region of the sea chart (seamap.js). A list of the built-in stories (lagoon-stories.js), the
+     ones that fit best first, then a reader in four steps:
+       listen   every line plays in the natural Korean voice and lights up as it plays, with a slower option
+       read     tap any word for its meaning and its sound; a word she didn't know goes in My words
+       quiz     two questions, each answered by picking one of three Korean answers
+       done     the finish moment, as at the end of a deck
+     A story fits best when about 90–95% of its words are already known: enough to follow it, with a few new ones
+     to pick up. A word counts as known when the learner model (learner.js) says she would recognize it, reading
+     or hearing it, with a 70% chance or better, or when it's on a card in one of her Korean decks.
+     Screens: S.view 'lagoon' (the list) and 'lagoonRead' (one story), state in S.lagoon. Which stories she has
+     finished is kept per profile in localStorage (cc-lagoon-done-<profile id>); losing it only loses the ticks. */
+  var LAGOON_KNOWN_R = 0.7;
+  var LAGOON_AIM = [0.90, 0.95];
+  var LAGOON_ICON = { arrive:'globe', hotel:'bed', cafe:'cup', restaurant:'bowl', shopping:'bag', subway:'train', taxi:'car',
+    way:'compass', meet:'wave', weather:'sun', market:'apple', goodbye:'heart' };
+
+  // "여권=passport;좀=please" -> [{ ko, en, base }]
+  function lagoonWords(line){
+    return String(line[3] || '').split(';').map(function(p){ var b = p.split('='); return { ko: b[0], en: b[1] || '', base: b[2] || '' }; });
+  }
+  function lagoonStory(id){ return LAGOON_STORIES.find(function(s){ return s.id === id; }) || null; }
+  function lagoonDoneKey(){ return 'cc-lagoon-done-' + (S.profile && S.profile.id || 'guest'); }
+  function lagoonDone(){ try { return JSON.parse(localStorage.getItem(lagoonDoneKey()) || '{}') || {}; } catch(e){ return {}; } }
+  function lagoonMarkDone(id, right){
+    var d = lagoonDone(); d[id] = { at: Date.now(), right: right };
+    try { localStorage.setItem(lagoonDoneKey(), JSON.stringify(d)); } catch(e){}
+  }
+
+  // Every Korean word and phrase on the profile's cards, as learner keys: whole sides, the parts of "A / B", and each
+  // word of a sentence, so 커피 is known from "커피 한 잔 주세요" as well as from its own card.
+  function lagoonDeckWords(cards){
+    var set = {};
+    function add(t){ var k = learnerKey(t); if(k && learnerHasHangul(k)) set[k] = 1; }
+    cards.forEach(function(c){
+      [c.front, c.back].forEach(function(side){
+        var t = String(side || '').replace(/["“”]/g, '');
+        if(!learnerHasHangul(t)) return;
+        add(t);
+        t.split('/').forEach(add);
+        t.split(/\s+/).forEach(function(w){ add(w.replace(/[.,!?~]/g, '')); });
+      });
+    });
+    return set;
+  }
+  function lagoonKnows(w, deck){
+    var keys = [w.ko, w.base].filter(Boolean);
+    for(var i = 0; i < keys.length; i++){
+      var k = learnerKey(keys[i]);
+      if(deck && deck[k]) return true;
+      var rr = Learner.retrievability(keys[i], 'read'), rh = Learner.retrievability(keys[i], 'hear');
+      if((rr != null && rr >= LAGOON_KNOWN_R) || (rh != null && rh >= LAGOON_KNOWN_R)) return true;
+    }
+    return false;
+  }
+  // -> { known, total, share }: each different word once
+  function lagoonCoverage(s, deck){
+    var seen = {}, known = 0, total = 0;
+    s.lines.forEach(function(l){ lagoonWords(l).forEach(function(w){
+      var k = learnerKey(w.ko); if(seen[k]) return; seen[k] = 1; total++;
+      if(lagoonKnows(w, deck)) known++;
+    }); });
+    return { known: known, total: total, share: total ? known / total : 0 };
+  }
+  // How far a story is from the 90–95% aim: below it counts double, since too many new words is worse than too few.
+  function lagoonMiss(share){ return share < LAGOON_AIM[0] ? (LAGOON_AIM[0] - share) * 2 : share > LAGOON_AIM[1] ? share - LAGOON_AIM[1] : 0; }
+  function lagoonRanked(deck){
+    var done = lagoonDone();
+    return LAGOON_STORIES.map(function(s, i){
+      var c = lagoonCoverage(s, deck);
+      return { s: s, i: i, c: c, done: !!done[s.id], miss: lagoonMiss(c.share) };
+    }).sort(function(a, b){ return (a.done - b.done) || (a.miss - b.miss) || (a.i - b.i); });   // stories already read go last
+  }
+
+  function openLagoon(){
+    try { Speech.stop(); } catch(e){}
+    S.currentDeckId = null;
+    S.lagoon = { deck: S.lagoon && S.lagoon.deck || null };
+    S.view = 'lagoon';
+    render(); window.scrollTo(0, 0);
+    var decks = (S.decks || []).filter(function(d){ return !d.archived; });
+    Promise.all(decks.map(function(d){ return S.store.getCardsOnce(d.id).catch(function(){ return []; }); })).then(function(lists){
+      if(!S.lagoon) return;
+      S.lagoon.deck = lagoonDeckWords([].concat.apply([], lists));
+      if(S.view === 'lagoon') render();
+    }).catch(function(){});
+  }
+  function renderLagoon(){
+    var L = S.lagoon || (S.lagoon = {}), list = lagoonRanked(L.deck);
+    var best = list.find(function(x){ return !x.done; });
+    var rows = list.map(function(x){
+      var pct = Math.round(x.c.share * 100), fit = !x.miss && !x.done;
+      return '<li><button type="button" class="lg-story' + (x.done ? ' done' : '') + (x === best ? ' best' : '') + '" data-lg-open="' + x.s.id + '">' +
+        '<span class="lg-ic" aria-hidden="true">' + ccIcon(LAGOON_ICON[x.s.id] || 'story') + '</span>' +
+        '<span class="lg-st"><b>' + esc(x.s.en) + '</b><span lang="ko">' + esc(x.s.ko) + '</span>' +
+          '<span class="lg-meter" role="img" aria-label="You know ' + x.c.known + ' of its ' + x.c.total + ' words"><i style="width:' + pct + '%"></i></span>' +
+          '<small>' + (L.deck ? 'Words you know: ' + pct + '%' : 'Counting your words…') + '</small></span>' +
+        '<span class="lg-tag">' + (x.done ? ccIcon('check') + ' Read' : x === best ? 'Try this' : fit ? 'Good fit' : '') + '</span>' +
+      '</button></li>';
+    }).join('');
+    app.innerHTML = '<div class="nav-row"><button class="back-btn" data-act="lg-home">⟵ Lagoon</button><span class="nav-title">' + ccIcon('story') + ' Story Lagoon</span></div>' +
+      '<div class="lg-page">' +
+        '<div class="lg-intro"><h2>Listen first, then read</h2><p>Short conversations for your trip. The best fit for you is at the top: most of its words you know already, and a few are new.</p></div>' +
+        '<ul class="lg-list">' + rows + '</ul>' +
+      '</div>';
+    app.querySelector('[data-act="lg-home"]').addEventListener('click', function(){ goHome(); });
+    app.querySelectorAll('[data-lg-open]').forEach(function(b){ b.addEventListener('click', function(){ lagoonOpenStory(b.dataset.lgOpen); }); });
+  }
+
+  function lagoonOpenStory(id){
+    var s = lagoonStory(id); if(!s) return;
+    try { Speech.stop(); } catch(e){}
+    var L = S.lagoon || (S.lagoon = {});
+    L.id = id; L.phase = 'listen'; L.playing = -1; L.slow = !!L.slow; L.showEn = {}; L.word = null; L.q = 0; L.picked = null; L.right = 0; L.graded = {}; L.heard = false;
+    S.view = 'lagoonRead';
+    try { Sound.bloop(560); } catch(e){}
+    render(); window.scrollTo(0, 0);
+  }
+  function lagoonStop(){ var L = S.lagoon; if(L){ L.playing = -1; L.token = (L.token || 0) + 1; } try { Speech.stop(); } catch(e){} }
+  // Plays the lines one after another from `from`, lighting each up as it plays
+  function lagoonPlay(from){
+    var L = S.lagoon, s = lagoonStory(L.id); if(!s) return;
+    var token = L.token = (L.token || 0) + 1;
+    function step(i){
+      if(token !== L.token || S.view !== 'lagoonRead') return;
+      if(i >= s.lines.length){ L.playing = -1; L.heard = true; lagoonPaint(); return; }
+      L.playing = i; lagoonPaint();
+      Speech.speakThen(s.lines[i][1], function(){ if(token === L.token) setTimeout(function(){ step(i + 1); }, L.slow ? 700 : 450); },
+        L.slow ? { rate: 0.7, variant: 'slow' } : null);
+    }
+    step(from || 0);
+  }
+  // Only the parts that change while it plays are touched, so the page doesn't jump about
+  function lagoonPaint(){
+    var L = S.lagoon;
+    app.querySelectorAll('[data-lg-line]').forEach(function(el){
+      var on = +el.dataset.lgLine === L.playing;
+      el.classList.toggle('playing', on);
+      if(on && !reefCalm()) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    });
+    var pb = app.querySelector('[data-lg-play]');
+    if(pb) pb.innerHTML = L.playing >= 0 ? ccIcon('sound-off') + ' Stop' : ccIcon(L.heard ? 'replay' : 'headphones') + (L.heard ? ' Listen again' : ' Listen');
+    var nx = app.querySelector('[data-lg-next]'); if(nx) nx.classList.toggle('btn-primary', L.heard || L.phase !== 'listen');
+  }
+
+  function renderLagoonRead(){
+    var L = S.lagoon || {}, s = lagoonStory(L.id);
+    if(!s){ S.view = 'lagoon'; return renderLagoon(); }
+    var head = '<div class="nav-row"><button class="back-btn" data-act="lg-back">⟵ Lagoon</button><span class="nav-title">' + ccIcon(LAGOON_ICON[s.id] || 'story') + ' ' + esc(s.en) + '</span></div>';
+    var steps = [['listen', 'Listen'], ['read', 'Read'], ['quiz', 'Questions']];
+    var at = L.phase === 'done' ? 3 : steps.map(function(x){ return x[0]; }).indexOf(L.phase);
+    var stepsHTML = '<ol class="lg-steps" aria-label="Steps">' + steps.map(function(x, i){
+      return '<li class="' + (i < at ? 'past' : i === at ? 'now' : '') + '"' + (i === at ? ' aria-current="step"' : '') + '>' + (i < at ? ccIcon('check') : '<span>' + (i + 1) + '</span>') + x[1] + '</li>'; }).join('') + '</ol>';
+    var body = '';
+    if(L.phase === 'listen' || L.phase === 'read') body = lagoonLinesHTML(s, L);
+    else if(L.phase === 'quiz') body = lagoonQuizHTML(s, L);
+    else body = lagoonDoneHTML(s, L);
+    app.innerHTML = head + '<div class="lg-page lg-read' + (L.phase === 'listen' ? ' listening' : '') + '">' +
+      '<div class="lg-title"><h2 lang="ko">' + esc(s.ko) + '</h2><span>' + esc(s.en) + '</span></div>' + (L.phase === 'done' ? '' : stepsHTML) + body + '</div>';
+    lagoonWire(s, L);
+  }
+  function lagoonLinesHTML(s, L){
+    var listen = L.phase === 'listen';
+    var lines = s.lines.map(function(l, i){
+      var who = s.cast[l[0]] || ['', ''];
+      var words = listen ? '<span class="lg-ko" lang="ko">' + esc(l[1]) + '</span>' :
+        '<span class="lg-ko" lang="ko">' + l[1].split(/\s+/).map(function(tok, wi){
+          return '<button type="button" class="lg-w' + (L.word && L.word[0] === i && L.word[1] === wi ? ' on' : '') + '" data-lg-w="' + i + ':' + wi + '">' + esc(tok) + '</button>'; }).join(' ') + '</span>';
+      return '<li class="lg-line who' + l[0] + (L.playing === i ? ' playing' : '') + '" data-lg-line="' + i + '">' +
+        '<span class="lg-who">' + esc(who[0]) + '</span>' +
+        '<div class="lg-bubble">' + words +
+          (!listen && L.showEn[i] ? '<span class="lg-en">' + esc(l[2]) + '</span>' : '') +
+          (listen ? '' : '<span class="lg-tools"><button type="button" class="lg-mini" data-lg-say="' + i + '" aria-label="Hear this line">' + ccIcon('sound') + '</button>' +
+            '<button type="button" class="lg-mini" data-lg-en="' + i + '" aria-pressed="' + !!L.showEn[i] + '">' + (L.showEn[i] ? 'Hide English' : 'English') + '</button></span>') +
+        '</div></li>';
+    }).join('');
+    var wordBox = '';
+    if(!listen && L.word){
+      var w = lagoonWords(s.lines[L.word[0]])[L.word[1]];
+      if(w) wordBox = '<div class="lg-word" role="status"><button type="button" class="lg-mini lg-wsay" data-lg-wsay aria-label="Hear ' + esc(w.ko) + '">' + ccIcon('sound') + '</button>' +
+        '<div><b lang="ko">' + esc(w.ko) + '</b><span>' + esc(w.en) + '</span>' + (w.base && w.base !== w.ko ? '<small>From <span lang="ko">' + esc(w.base) + '</span></small>' : '') +
+        (L.wordAdded ? '<small class="lg-added">' + ccIcon('sparkle') + ' Added to My words</small>' : '') + '</div>' +
+        '<button type="button" class="lg-mini lg-wclose" data-lg-wclose aria-label="Close">' + ccIcon('close') + '</button></div>';
+    }
+    var hint = listen ? '<p class="lg-hint">' + ccIcon('ear') + ' Listen to the whole conversation first. Try to follow it before you read the words.</p>'
+                      : '<p class="lg-hint">' + ccIcon('story') + ' Now read along. Tap any word to see what it means and hear it.</p>';
+    var bar = '<div class="lg-bar">' +
+      '<button type="button" class="btn ' + (listen && !L.heard ? 'btn-primary' : 'btn-ghost') + ' lg-play" data-lg-play>' + (L.playing >= 0 ? ccIcon('sound-off') + ' Stop' : ccIcon(L.heard ? 'replay' : 'headphones') + (L.heard ? ' Listen again' : ' Listen')) + '</button>' +
+      '<button type="button" class="btn btn-ghost lg-slow" data-lg-slow aria-pressed="' + !!L.slow + '">' + ccIcon('turtle') + (L.slow ? ' Slower: on' : ' Slower') + '</button>' +
+      '<button type="button" class="btn ' + (L.heard || !listen ? 'btn-primary' : 'btn-ghost') + ' lg-next" data-lg-next>' + (listen ? 'Now read it' : 'Questions') + '</button></div>';
+    return hint + '<ol class="lg-lines">' + lines + '</ol>' + wordBox + bar;
+  }
+  function lagoonQuizHTML(s, L){
+    var q = s.qs[L.q]; if(!q) return '';
+    var picked = L.picked;
+    var opts = q.o.map(function(o, i){
+      var st = picked == null ? '' : i === q.a ? ' right' : i === picked ? ' wrong' : ' dim';
+      return '<li><button type="button" class="lg-opt' + st + '" data-lg-opt="' + i + '"' + (picked != null ? ' aria-disabled="true"' : '') + '><span lang="ko">' + esc(o[0]) + '</span>' +
+        (picked != null ? '<small>' + esc(o[1]) + '</small>' : '') + '</button></li>'; }).join('');
+    var fb = picked == null ? '' : '<p class="lg-fb ' + (picked === q.a ? 'ok' : 'no') + '" role="status">' +
+      (picked === q.a ? ccIcon('check') + ' ' + esc(reefPraiseLine()) : 'The answer is in this line: <span lang="ko">' + esc(s.lines[q.at[q.at.length - 1]][1]) + '</span>') + '</p>';
+    return '<div class="lg-quiz"><p class="lg-qn">Question ' + (L.q + 1) + ' of ' + s.qs.length + '</p>' +
+      '<div class="lg-q"><button type="button" class="lg-mini" data-lg-qsay aria-label="Hear the question">' + ccIcon('sound') + '</button><div><b lang="ko">' + esc(q.q) + '</b>' +
+        (L.qEn || picked != null ? '<span>' + esc(q.en) + '</span>' : '<button type="button" class="lg-mini lg-qen" data-lg-qen>English</button>') + '</div></div>' +
+      '<ul class="lg-opts">' + opts + '</ul>' + fb +
+      (picked != null ? '<div class="lg-bar"><button type="button" class="btn btn-primary" data-lg-qnext>' + (L.q + 1 < s.qs.length ? 'Next question' : 'Finish') + '</button></div>' : '') + '</div>';
+  }
+  function lagoonDoneHTML(s, L){
+    var n = s.qs.length, all = L.right === n;
+    var nextUp = lagoonRanked(S.lagoon.deck).find(function(x){ return !x.done && x.s.id !== s.id; });
+    return '<div class="summary-card reef-sum-card lg-done">' +
+      '<span class="lg-done-ic" aria-hidden="true">' + ccIcon(all ? 'trophy' : 'star') + '</span>' +
+      '<h2>' + (all ? 'Story finished!' : 'Story read!') + '</h2>' +
+      '<p>' + esc(all ? reefPraiseLine() : 'Good listening. The lines you missed will come back in your practice.') + '</p>' +
+      '<p class="lg-score">' + L.right + ' of ' + n + ' questions right</p>' +
+      '<div class="reef-sum-actions">' +
+        (nextUp ? '<button type="button" class="btn btn-primary" data-lg-open="' + nextUp.s.id + '">Next story: ' + esc(nextUp.s.en) + '</button>' : '') +
+        '<button type="button" class="btn btn-ghost" data-lg-again>' + ccIcon('replay') + ' Read it again</button>' +
+        '<button type="button" class="btn btn-ghost" data-act="lg-back">' + ccIcon('story') + ' All stories</button>' +
+      '</div></div>';
+  }
+
+  // Records one answer per word per reading, so a word that shows up in both questions isn't counted twice
+  function lagoonGrade(L, w, grade){
+    var k = learnerKey(w.ko); if(!k || L.graded[k]) return;
+    L.graded[k] = grade;
+    try { Learner.record(w.ko, 'read', grade); } catch(e){}
+  }
+  function lagoonTapWord(s, L, li, wi){
+    var w = lagoonWords(s.lines[li])[wi]; if(!w) return;
+    lagoonStop();
+    var known = lagoonKnows(w, L.deck);
+    L.word = [li, wi]; L.wordAdded = false;
+    // looking a word up says it wasn't sure: a word she didn't know is missed, one she did is "hard"
+    lagoonGrade(L, w, known ? 'hard' : 'again');
+    if(!known) myWordsAdd(w.ko, w.en, 'asked').then(function(ok){ if(ok && L.word && L.word[0] === li && L.word[1] === wi && S.view === 'lagoonRead'){ L.wordAdded = true; renderLagoonRead(); } }).catch(function(){});
+    try { Speech.speak(w.ko); } catch(e){}
+    renderLagoonRead();
+  }
+  function lagoonAnswer(s, L, i){
+    var q = s.qs[L.q]; if(!q || L.picked != null) return;
+    L.picked = i;
+    var ok = i === q.a;
+    if(ok){ L.right++; try { Sound.correct(); } catch(e){} } else { try { Sound.wrong(); } catch(e){} }
+    q.at.forEach(function(li){ lagoonWords(s.lines[li]).forEach(function(w){ lagoonGrade(L, w, ok ? 'good' : 'again'); }); });
+    renderLagoonRead();
+    try { Speech.speak(q.o[q.a][0]); } catch(e){}
+  }
+  function lagoonFinish(s, L){
+    L.phase = 'done';
+    lagoonMarkDone(s.id, L.right);
+    try { reefWinSound(true); } catch(e){}
+    try { if(!reefCalm()) Ocean.bubbles(10); } catch(e){}
+    renderLagoonRead(); window.scrollTo(0, 0);
+  }
+  function lagoonWire(s, L){
+    function on(sel, fn){ app.querySelectorAll(sel).forEach(function(b){ b.addEventListener('click', function(e){ fn(b, e); }); }); }
+    on('[data-act="lg-back"]', function(){ lagoonStop(); S.view = 'lagoon'; render(); window.scrollTo(0, 0); });
+    on('[data-lg-play]', function(){ if(L.playing >= 0){ lagoonStop(); lagoonPaint(); } else lagoonPlay(0); });
+    on('[data-lg-slow]', function(b){ L.slow = !L.slow; b.setAttribute('aria-pressed', String(L.slow)); b.innerHTML = ccIcon('turtle') + (L.slow ? ' Slower: on' : ' Slower');
+      if(L.playing >= 0){ var at = L.playing; lagoonStop(); lagoonPlay(at); } });
+    on('[data-lg-next]', function(){ lagoonStop(); if(L.phase === 'listen'){ L.phase = 'read'; L.heard = true; } else { L.phase = 'quiz'; L.word = null; } renderLagoonRead(); window.scrollTo(0, 0);
+      if(L.phase === 'quiz') try { Speech.speak(s.qs[0].q); } catch(e){} });
+    on('[data-lg-w]', function(b){ var p = b.dataset.lgW.split(':'); lagoonTapWord(s, L, +p[0], +p[1]); });
+    on('[data-lg-wsay]', function(){ var w = L.word && lagoonWords(s.lines[L.word[0]])[L.word[1]]; if(w) try { Speech.speak(w.ko); } catch(e){} });
+    on('[data-lg-wclose]', function(){ L.word = null; renderLagoonRead(); });
+    on('[data-lg-say]', function(b){ lagoonStop(); var i = +b.dataset.lgSay; L.playing = i; lagoonPaint();
+      var token = L.token; Speech.speakThen(s.lines[i][1], function(){ if(token === L.token){ L.playing = -1; lagoonPaint(); } }, L.slow ? { rate: 0.7, variant: 'slow' } : null); });
+    on('[data-lg-en]', function(b){ var i = +b.dataset.lgEn; L.showEn[i] = !L.showEn[i]; renderLagoonRead(); });
+    on('[data-lg-qsay]', function(){ try { Speech.speak(s.qs[L.q].q); } catch(e){} });
+    on('[data-lg-qen]', function(){ L.qEn = true; renderLagoonRead(); });
+    on('[data-lg-opt]', function(b){ lagoonAnswer(s, L, +b.dataset.lgOpt); });
+    on('[data-lg-qnext]', function(){ if(L.q + 1 < s.qs.length){ L.q++; L.picked = null; L.qEn = false; renderLagoonRead(); try { Speech.speak(s.qs[L.q].q); } catch(e){} } else lagoonFinish(s, L); });
+    on('[data-lg-open]', function(b){ lagoonOpenStory(b.dataset.lgOpen); });
+    on('[data-lg-again]', function(){ lagoonOpenStory(s.id); });
+  }
+/* end of src/js/lagoon.js */
 /* from src/js/ui-icons.js */
   /* ---------- One look for every screen: drawn icons, never emoji, in the app's own chrome ----------
      Titles, buttons, labels, badges and chips across the app (and the Library) were written over years with
@@ -13403,6 +13871,9 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     // The My words tile is only on the board while words are due, so this points at the map, which lists it then
     { id:'my-words', date:'2026-11-04', need:'course', steps:[
       { at:'.r3-mapbtn', say:'Korean words you miss or look up now go in My words, a new stop on the reef. Find it on the treasure map.' }
+    ] },
+    { id:'story-lagoon', date:'2026-11-04', need:'course', steps:[
+      { at:'.r3-mapbtn', say:'Story Lagoon is open on the treasure map, with short Korean stories to hear and then read.' }
     ] }
   ];
   var WN_RECENT_DAYS = 14;   // a brand-new profile is shown only what's new in the last two weeks, not the whole history
@@ -21768,6 +22239,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       var go = e.target.closest('[data-r3-go]');
       if(go) return reef3dMapJump(view, ov, +go.dataset.r3Go);
       var tb = e.target.closest('[data-sea-tab]'); if(tb) return tab(tb.dataset.seaTab);
+      var sg = e.target.closest('[data-sea-go]'); if(sg) return reefSeaGo(ov, sg.dataset.seaGo);
       var isle = e.target.closest('[data-sea]'); if(isle) return reefSeaInfo(ov, isle.dataset.sea);
       if(e.target.closest('[data-r3-close]') || e.target === ov) close();
     });
@@ -21953,7 +22425,8 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   /* ---------- The sea chart: every region of Coral Classroom on one map ----------
      The treasure map gains a second page, The sea: a drawn chart with an island for each region of the language
      school (see the architecture doc). Coral Cove, the flashcard reef, is in the middle and is where you are;
-     the others show what they will teach and open one by one as they're built. Only profiles with a language
+     the others show what they will teach and open one by one as they're built (open, with a `go` function that
+     starts it). Story Lagoon (lagoon.js) is the first. Only profiles with a language
      course see it for now (reefCourseOn). Tapping an island shows its card; Coral Cove's card leads back to the
      board's own map. */
   var REEF_REGIONS = [
@@ -21961,7 +22434,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       about:'The flashcard reef. Every word you meet anywhere ends up here, reviewed just when you are about to forget it.' },
     { id:'deck', say:'Captain\'s Deck, for your plan and progress.', name:'Captain\'s Deck', teaches:'Plan and progress', x:150, y:58,
       about:'Today\'s voyage, your course with its dates, checkpoints, and what you can now do.' },
-    { id:'lagoon', say:'Story Lagoon, for listening and reading.', name:'Story Lagoon', teaches:'Listening and reading', x:62, y:124,
+    { id:'lagoon', say:'Story Lagoon, for listening and reading.', name:'Story Lagoon', teaches:'Listening and reading', x:62, y:124, open:true, go:'openLagoon',
       about:'Short stories and conversations made from words you know, to listen to first and then read.' },
     { id:'caves', say:'Echo Caves, for pronunciation.', name:'Echo Caves', teaches:'Pronunciation', x:238, y:124,
       about:'The sounds you mix up, and shadowing a native voice with your pitch shown beside it.' },
@@ -22001,7 +22474,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     var compass = '<g transform="translate(274 300)" opacity=".8"><circle r="13" fill="none" stroke="#a8814f" stroke-width="1.2"/><path d="M0-17L4 0 0 17-4 0z" fill="#b5452f"/><path d="M-17 0L0 3 17 0 0-3z" fill="#a8814f"/><text y="-20" text-anchor="middle" font-size="9" font-weight="800" fill="#7a4f22">N</text></g>';
     var labels = REEF_REGIONS.map(function(r){
       return '<button type="button" class="r3-sea-isle' + (r.open ? ' open' : '') + '" data-sea="' + r.id + '" style="left:' + (r.x / W * 100).toFixed(1) + '%;top:' + (r.y / H * 100).toFixed(1) + '%" aria-label="' + esc(r.name) + ': ' + esc(r.teaches) + (r.open ? '' : ', opening soon') + '">' +
-        '<span class="r3-sea-name">' + esc(r.name) + '</span><span class="r3-sea-tag">' + (r.open ? 'You are here' : 'Opening soon') + '</span></button>';
+        '<span class="r3-sea-name">' + esc(r.name) + '</span><span class="r3-sea-tag">' + (r.id === 'cove' ? 'You are here' : r.open ? 'Open now' : 'Opening soon') + '</span></button>';
     }).join('');
     return '<div class="r3-sea" role="tabpanel" aria-label="The sea"><div class="r3-sea-chart"><svg viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true">' + waves + routes + compass + isles +
       '</svg>' + labels + '<span class="r3-sea-me" style="left:' + (c.x / W * 100).toFixed(1) + '%;top:' + ((c.y - 30) / H * 100).toFixed(1) + '%" aria-hidden="true">' + reefGuideMini(view.night) + '</span></div>' +
@@ -22011,8 +22484,19 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     var r = REEF_REGIONS.find(function(x){ return x.id === id; }), box = ov.querySelector('.r3-sea-info'); if(!r || !box) return;
     ov.querySelectorAll('.r3-sea-isle').forEach(function(b){ b.classList.toggle('picked', b.dataset.sea === id); });
     box.innerHTML = '<b>' + esc(r.name) + '</b><small>' + esc(r.teaches) + '</small><p>' + esc(r.about) + '</p>' +
-      (r.open ? '<button type="button" class="r3-btn main" data-sea-tab="cove">' + ccIcon('map') + ' Open Coral Cove</button>' : '<span class="r3-sea-soon">' + ccIcon('sparkle') + ' Opening soon</span>');
+      (r.id === 'cove' ? '<button type="button" class="r3-btn main" data-sea-tab="cove">' + ccIcon('map') + ' Open Coral Cove</button>' :
+       r.open ? '<button type="button" class="r3-btn main" data-sea-go="' + r.id + '">' + ccIcon('story') + ' Open ' + esc(r.name) + '</button>' :
+       '<span class="r3-sea-soon">' + ccIcon('sparkle') + ' Opening soon</span>');
     try { Speech.speak(r.say); } catch(e){}
+  }
+  // Leaves the board for an open region: the map closes and the water covers the change, as when diving into a deck
+  function reefSeaGo(ov, id){
+    var r = REEF_REGIONS.find(function(x){ return x.id === id; }), fn = r && r.go === 'openLagoon' ? openLagoon : null;
+    if(!fn) return;
+    try { Speech.stop(); } catch(e){}
+    ov.remove();
+    try { Sound.bloop(520); } catch(e){}
+    reefGo('dive', null, fn);
   }
 /* end of src/js/reef3d/seamap.js */
 /* from src/js/reef3d/games-adult.js */
@@ -24174,6 +24658,94 @@ body.reef-calm .cc-nudge, body.reef-calm .feed-stage.cc-nudge::after{ animation-
 
 /* buttons answer the first tap at once: no wait for a possible double-tap zoom on iPhone and iPad */
 button, a, [role="button"], .r3 canvas, .rl-canvas{ touch-action:manipulation; }
+
+/* ---------- Story Lagoon (lagoon.js): the story list and the reader ----------
+   Cream panels with teal ink by day, the reef's deep teal cards at night (the --lg-* tokens). Every tap target
+   is at least 44px. Lines light up as they play; with Calm motion they change colour without moving. */
+:root{ --lg-panel:#fffaf0; --lg-edge:#ead9b4; --lg-ink:#0b2b33; --lg-soft:#5b6f6f; --lg-teal:#1c8c93; --lg-glow:#fff1c7; --lg-you:#e6f5f4; --lg-ok:#17795e; --lg-no:#b24a2e; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --lg-panel:#0f3942; --lg-edge:#1f5560; --lg-ink:#eaf6f4; --lg-soft:#a9cbc7; --lg-teal:#6ed8dc; --lg-glow:#3a3a1e; --lg-you:#14505c; --lg-ok:#7dd8b8; --lg-no:#f2a88f; } }
+:root[data-theme="dark"]{ --lg-panel:#0f3942; --lg-edge:#1f5560; --lg-ink:#eaf6f4; --lg-soft:#a9cbc7; --lg-teal:#6ed8dc; --lg-glow:#3a3a1e; --lg-you:#14505c; --lg-ok:#7dd8b8; --lg-no:#f2a88f; }
+.lg-page{ display:flex; flex-direction:column; gap:14px; padding-bottom:28px; max-width:720px; margin:0 auto; color:var(--lg-ink); }
+.lg-intro, .lg-title{ background:var(--lg-panel); border:2px solid var(--lg-edge); border-radius:var(--r-md); padding:14px 16px; }
+.lg-intro h2, .lg-title h2{ font-family:'Baloo 2',system-ui,sans-serif; margin:0; font-size:1.45rem; color:var(--lg-ink); }
+.lg-intro p{ margin:4px 0 0; color:var(--lg-soft); font-weight:600; }
+.lg-title{ display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 12px; }
+.lg-title span{ color:var(--lg-soft); font-weight:700; }
+.lg-list{ list-style:none; margin:0; padding:0; display:grid; gap:10px; grid-template-columns:repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+.lg-story{ width:100%; min-height:76px; display:grid; grid-template-columns:48px minmax(0,1fr) auto; align-items:center; gap:12px; text-align:left; cursor:pointer;
+  background:var(--lg-panel); color:var(--lg-ink); border:2px solid var(--lg-edge); border-radius:var(--r-md); padding:10px 12px; font:inherit; box-shadow:0 4px 0 var(--lg-edge); }
+.lg-story:active{ transform:translateY(2px); box-shadow:0 2px 0 var(--lg-edge); }
+.lg-story.best{ border-color:var(--lg-teal); box-shadow:0 4px 0 var(--lg-teal); }
+.lg-story.done{ opacity:.82; }
+.lg-ic{ width:48px; height:48px; border-radius:50%; display:grid; place-items:center; background:var(--lg-you); }
+.lg-ic .cc-ic{ width:26px; height:26px; color:var(--lg-teal); }
+.lg-st{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.lg-st b{ font-family:'Baloo 2',system-ui,sans-serif; font-size:1.1rem; line-height:1.15; }
+.lg-st > span[lang]{ font-weight:700; color:var(--lg-soft); }
+.lg-st small{ color:var(--lg-soft); font-weight:700; }
+.lg-meter{ display:block; height:8px; border-radius:99px; background:var(--lg-edge); overflow:hidden; margin-top:4px; max-width:220px; }
+.lg-meter i{ display:block; height:100%; background:var(--lg-teal); border-radius:99px; }
+.lg-tag{ font-weight:800; font-size:.85rem; color:var(--lg-teal); display:inline-flex; align-items:center; gap:4px; white-space:nowrap; }
+.lg-tag .cc-ic{ width:18px; height:18px; }
+.lg-steps{ list-style:none; display:flex; gap:8px; margin:0; padding:0; }
+.lg-steps li{ flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 6px; border-radius:99px; font-weight:800; font-size:.9rem; color:var(--lg-soft); background:var(--lg-panel); border:2px solid var(--lg-edge); }
+.lg-steps li span{ width:22px; height:22px; border-radius:50%; display:grid; place-items:center; background:var(--lg-edge); color:var(--lg-ink); font-size:.8rem; }
+.lg-steps li.now{ border-color:var(--lg-teal); color:var(--lg-ink); }
+.lg-steps li.now span{ background:var(--lg-teal); color:#fff; }
+.lg-steps li .cc-ic{ width:20px; height:20px; color:var(--lg-ok); }
+.lg-hint{ margin:0; display:flex; gap:8px; align-items:flex-start; font-weight:700; color:var(--lg-soft); }
+.lg-hint .cc-ic{ flex:none; width:22px; height:22px; color:var(--lg-teal); }
+.lg-lines{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+.lg-line{ display:flex; flex-direction:column; align-items:flex-start; gap:3px; max-width:88%; }
+.lg-line.who1{ align-self:flex-end; align-items:flex-end; }
+.lg-who{ font-size:.8rem; font-weight:800; color:var(--lg-soft); padding:0 8px; }
+.lg-bubble{ background:var(--lg-panel); border:2px solid var(--lg-edge); border-radius:20px 20px 20px 6px; padding:10px 14px; transition:background .25s ease, border-color .25s ease, transform .25s ease; }
+.lg-line.who1 .lg-bubble{ background:var(--lg-you); border-radius:20px 20px 6px 20px; }
+.lg-line.playing .lg-bubble{ background:var(--lg-glow); border-color:#e8a33d; transform:scale(1.02); }
+body.reef-calm .lg-bubble{ transition:none; }
+body.reef-calm .lg-line.playing .lg-bubble{ transform:none; }
+.lg-ko{ display:block; font-size:1.35rem; font-weight:700; line-height:1.5; word-break:keep-all; }
+.lg-read.listening .lg-ko{ color:var(--lg-soft); }
+.lg-read.listening .lg-line.playing .lg-ko{ color:var(--lg-ink); }
+.lg-w{ font:inherit; color:inherit; background:none; border:none; padding:2px 1px; margin:0; min-height:44px; cursor:pointer; border-bottom:2px dotted var(--lg-teal); border-radius:4px; line-height:1.2; }
+.lg-w.on{ background:var(--lg-glow); }
+.lg-en{ display:block; margin-top:4px; color:var(--lg-soft); font-weight:600; }
+.lg-tools{ display:flex; gap:6px; margin-top:6px; }
+.lg-mini{ min-width:44px; min-height:44px; border-radius:99px; border:2px solid var(--lg-edge); background:var(--lg-panel); color:var(--lg-ink); font:800 .9rem 'Nunito',sans-serif; padding:0 12px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px; }
+.lg-mini .cc-ic{ width:20px; height:20px; color:var(--lg-teal); }
+.lg-word{ position:sticky; bottom:calc(12px + env(safe-area-inset-bottom, 0px)); z-index:5; display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:12px; align-items:center;
+  background:var(--lg-panel); border:2px solid var(--lg-teal); border-radius:var(--r-md); padding:12px; box-shadow:0 10px 26px rgba(10,61,74,.25); }
+.lg-word b{ display:block; font-family:'Baloo 2',system-ui,sans-serif; font-size:1.5rem; line-height:1.1; }
+.lg-word span{ display:block; font-weight:700; }
+.lg-word small{ display:block; color:var(--lg-soft); font-weight:700; }
+.lg-word .lg-added{ color:var(--lg-teal); display:flex; align-items:center; gap:4px; }
+.lg-word .lg-added .cc-ic{ width:16px; height:16px; }
+.lg-bar{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
+.lg-bar .btn{ min-height:48px; display:inline-flex; align-items:center; gap:8px; padding:10px 18px; font-weight:800; }
+.lg-bar .btn .cc-ic{ width:22px; height:22px; }
+.lg-quiz{ display:flex; flex-direction:column; gap:12px; }
+.lg-qn{ margin:0; font-weight:800; color:var(--lg-soft); }
+.lg-q{ display:flex; gap:12px; align-items:flex-start; background:var(--lg-panel); border:2px solid var(--lg-edge); border-radius:var(--r-md); padding:12px 14px; }
+.lg-q b{ display:block; font-size:1.35rem; }
+.lg-q span{ display:block; color:var(--lg-soft); font-weight:700; }
+.lg-qen{ margin-top:6px; }
+.lg-opts{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+.lg-opt{ width:100%; min-height:58px; text-align:left; cursor:pointer; font:700 1.25rem 'Nunito',sans-serif; color:var(--lg-ink); background:var(--lg-panel); border:2px solid var(--lg-edge); border-radius:var(--r-md); padding:10px 16px; box-shadow:0 4px 0 var(--lg-edge); }
+.lg-opt small{ display:block; font-size:.9rem; color:var(--lg-soft); }
+.lg-opt.right{ border-color:var(--lg-ok); box-shadow:0 4px 0 var(--lg-ok); }
+.lg-opt.wrong{ border-color:var(--lg-no); box-shadow:0 4px 0 var(--lg-no); }
+.lg-opt.dim{ opacity:.6; }
+.lg-fb{ margin:0; font-weight:800; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.lg-fb.ok{ color:var(--lg-ok); }
+.lg-fb.no{ color:var(--lg-ink); }
+.lg-fb .cc-ic{ width:22px; height:22px; }
+.lg-done{ text-align:center; }
+.lg-done-ic .cc-ic{ width:72px; height:72px; color:#e8a33d; }
+.lg-done p{ margin:4px auto; max-width:440px; font-weight:700; color:var(--reef-soft); }
+.lg-done .lg-score{ font-weight:900; color:var(--reef-ink); font-size:1.1rem; }
+.lg-done .btn{ min-height:48px; display:inline-flex; align-items:center; gap:8px; padding:10px 18px; font-weight:800; }
+.lg-done .btn .cc-ic{ width:22px; height:22px; }
+@media (max-width:420px){ .lg-line{ max-width:96%; } .lg-ko{ font-size:1.25rem; } .lg-bar .btn{ flex:1 1 auto; justify-content:center; } }
 /* end of src/css/reef.css */
 /* from src/css/reef-3d.css */
 /* ---------- REEF 3D board ---------- */

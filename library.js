@@ -512,6 +512,9 @@
       (co.fitNote ? '<p class="co-meta">' + esc(co.fitNote) + '</p>' : '') + '</section>';
     html += headHtml;
     html += knowCard();
+    // Story Lagoon (the app's lagoon.js) is the course's listening and reading practice
+    if(CC() && CC().openLagoon) html += '<section class="clib-card co-lagoon"><h2>' + icon('story', '') + ' Story Lagoon</h2><p>Short conversations for your trip. Listen first, then read, then answer two questions.</p>' +
+      '<div class="clib-row"><button type="button" class="clib-btn main" data-co-lagoon>Open Story Lagoon</button></div></section>';
     html += '<h3 class="clib-more-h">The course</h3><ol class="co-line">' + co.units.map(function(u, i){
       var st = u.done ? 'done' : u === now ? 'now' : u.start > t ? 'later' : 'open';
       return '<li class="co-u ' + st + (u.review ? ' review' : '') + '"><details' + (u === now ? ' open' : '') + '><summary><span class="co-dot" aria-hidden="true">' + (u.done ? '✓' : i + 1) + '</span><span class="co-ut"><b>' + esc(u.title) + '</b><small>' + niceDate(u.start) + ' – ' + niceDate(u.end) + ' · ' + u.weeks + ' week' + (u.weeks === 1 ? '' : 's') + (u.testedOut ? ' · quick review' : '') + (u.done ? ' · done' : '') + '</small></span></summary>' +
@@ -529,6 +532,7 @@
     $$('[data-co-go]', el).forEach(function(b){ b.addEventListener('click', function(){ var p = b.dataset.coGo.split(':'), x = wk[+p[0]][1][+p[1]]; courseStart(x); }); });
     $('[data-co-goalsave]', el).addEventListener('click', function(){ co.goal = $('#coGoalEdit', el).value.trim() || co.goal; co.log.push({ date: today(), text: 'Goal changed to "' + co.goal + '".' }); saveCourse(co).then(function(){ $('[data-co-goalmsg]', el).textContent = 'Saved. To re-plan around the new goal, use Change my answers.'; }); });
     $$('[data-co-check]', el).forEach(function(b){ b.addEventListener('click', function(){ go('courseCheck', b.dataset.coCheck); }); });
+    $$('[data-co-lagoon]', el).forEach(function(b){ b.addEventListener('click', function(){ sound('tap'); close(); CC().openLagoon(); }); });
     $$('[data-co-skip]', el).forEach(function(b){ b.addEventListener('click', function(){ var u = co.units[+b.dataset.coSkip]; u.done = true; u.doneOn = today(); co.log.push({ date: today(), text: u.title + ' marked done without a check.' }); courseSchedule(co); saveCourse(co).then(function(){ go('classroom', null, true); }); }); });
     $('[data-co-off]', el).addEventListener('click', function(){ var c = CC(); if(c && c.setCourseOn) Promise.resolve(c.setCourseOn(false)).then(function(){ go('home', null, true); }); });
   } };

@@ -287,6 +287,8 @@
     if(S.view === 'readAlong') return renderReadAlong();
     if(S.view === 'miniStory') return renderMiniStory();
     if(S.view === 'wordBank') return renderWordBank();
+    if(S.view === 'lagoon') return renderLagoon();
+    if(S.view === 'lagoonRead') return renderLagoonRead();
     if(S.view === 'plan') return renderPlan();
     if(S.view === 'planMonth') return renderPlanMonth();
     if(S.view === 'flashFeed') return renderFlashFeed();         // Flash Feed -- same reasoning again,

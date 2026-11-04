@@ -1,7 +1,8 @@
   /* ---------- The sea chart: every region of Coral Classroom on one map ----------
      The treasure map gains a second page, The sea: a drawn chart with an island for each region of the language
      school (see the architecture doc). Coral Cove, the flashcard reef, is in the middle and is where you are;
-     the others show what they will teach and open one by one as they're built. Only profiles with a language
+     the others show what they will teach and open one by one as they're built (open, with a `go` function that
+     starts it). Story Lagoon (lagoon.js) is the first. Only profiles with a language
      course see it for now (reefCourseOn). Tapping an island shows its card; Coral Cove's card leads back to the
      board's own map. */
   var REEF_REGIONS = [
@@ -9,7 +10,7 @@
       about:'The flashcard reef. Every word you meet anywhere ends up here, reviewed just when you are about to forget it.' },
     { id:'deck', say:'Captain\'s Deck, for your plan and progress.', name:'Captain\'s Deck', teaches:'Plan and progress', x:150, y:58,
       about:'Today\'s voyage, your course with its dates, checkpoints, and what you can now do.' },
-    { id:'lagoon', say:'Story Lagoon, for listening and reading.', name:'Story Lagoon', teaches:'Listening and reading', x:62, y:124,
+    { id:'lagoon', say:'Story Lagoon, for listening and reading.', name:'Story Lagoon', teaches:'Listening and reading', x:62, y:124, open:true, go:'openLagoon',
       about:'Short stories and conversations made from words you know, to listen to first and then read.' },
     { id:'caves', say:'Echo Caves, for pronunciation.', name:'Echo Caves', teaches:'Pronunciation', x:238, y:124,
       about:'The sounds you mix up, and shadowing a native voice with your pitch shown beside it.' },
@@ -49,7 +50,7 @@
     var compass = '<g transform="translate(274 300)" opacity=".8"><circle r="13" fill="none" stroke="#a8814f" stroke-width="1.2"/><path d="M0-17L4 0 0 17-4 0z" fill="#b5452f"/><path d="M-17 0L0 3 17 0 0-3z" fill="#a8814f"/><text y="-20" text-anchor="middle" font-size="9" font-weight="800" fill="#7a4f22">N</text></g>';
     var labels = REEF_REGIONS.map(function(r){
       return '<button type="button" class="r3-sea-isle' + (r.open ? ' open' : '') + '" data-sea="' + r.id + '" style="left:' + (r.x / W * 100).toFixed(1) + '%;top:' + (r.y / H * 100).toFixed(1) + '%" aria-label="' + esc(r.name) + ': ' + esc(r.teaches) + (r.open ? '' : ', opening soon') + '">' +
-        '<span class="r3-sea-name">' + esc(r.name) + '</span><span class="r3-sea-tag">' + (r.open ? 'You are here' : 'Opening soon') + '</span></button>';
+        '<span class="r3-sea-name">' + esc(r.name) + '</span><span class="r3-sea-tag">' + (r.id === 'cove' ? 'You are here' : r.open ? 'Open now' : 'Opening soon') + '</span></button>';
     }).join('');
     return '<div class="r3-sea" role="tabpanel" aria-label="The sea"><div class="r3-sea-chart"><svg viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true">' + waves + routes + compass + isles +
       '</svg>' + labels + '<span class="r3-sea-me" style="left:' + (c.x / W * 100).toFixed(1) + '%;top:' + ((c.y - 30) / H * 100).toFixed(1) + '%" aria-hidden="true">' + reefGuideMini(view.night) + '</span></div>' +
@@ -59,6 +60,17 @@
     var r = REEF_REGIONS.find(function(x){ return x.id === id; }), box = ov.querySelector('.r3-sea-info'); if(!r || !box) return;
     ov.querySelectorAll('.r3-sea-isle').forEach(function(b){ b.classList.toggle('picked', b.dataset.sea === id); });
     box.innerHTML = '<b>' + esc(r.name) + '</b><small>' + esc(r.teaches) + '</small><p>' + esc(r.about) + '</p>' +
-      (r.open ? '<button type="button" class="r3-btn main" data-sea-tab="cove">' + ccIcon('map') + ' Open Coral Cove</button>' : '<span class="r3-sea-soon">' + ccIcon('sparkle') + ' Opening soon</span>');
+      (r.id === 'cove' ? '<button type="button" class="r3-btn main" data-sea-tab="cove">' + ccIcon('map') + ' Open Coral Cove</button>' :
+       r.open ? '<button type="button" class="r3-btn main" data-sea-go="' + r.id + '">' + ccIcon('story') + ' Open ' + esc(r.name) + '</button>' :
+       '<span class="r3-sea-soon">' + ccIcon('sparkle') + ' Opening soon</span>');
     try { Speech.speak(r.say); } catch(e){}
+  }
+  // Leaves the board for an open region: the map closes and the water covers the change, as when diving into a deck
+  function reefSeaGo(ov, id){
+    var r = REEF_REGIONS.find(function(x){ return x.id === id; }), fn = r && r.go === 'openLagoon' ? openLagoon : null;
+    if(!fn) return;
+    try { Speech.stop(); } catch(e){}
+    ov.remove();
+    try { Sound.bloop(520); } catch(e){}
+    reefGo('dive', null, fn);
   }

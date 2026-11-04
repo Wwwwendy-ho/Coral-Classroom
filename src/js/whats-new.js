@@ -27,6 +27,9 @@
     // The My words tile is only on the board while words are due, so this points at the map, which lists it then
     { id:'my-words', date:'2026-11-04', need:'course', steps:[
       { at:'.r3-mapbtn', say:'Korean words you miss or look up now go in My words, a new stop on the reef. Find it on the treasure map.' }
+    ] },
+    { id:'story-lagoon', date:'2026-11-04', need:'course', steps:[
+      { at:'.r3-mapbtn', say:'Story Lagoon is open on the treasure map, with short Korean stories to hear and then read.' }
     ] }
   ];
   var WN_RECENT_DAYS = 14;   // a brand-new profile is shown only what's new in the last two weeks, not the whole history
