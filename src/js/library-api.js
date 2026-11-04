@@ -35,7 +35,13 @@
       return Promise.resolve(S.store.updateProfile(S.profile.id, { course: c, courseOn: true })).then(function(){ return true; }, function(){ return false; }); },
     setCourseOn: function(on){ if(!S.profile) return Promise.resolve(false); S.profile.courseOn = !!on;
       return Promise.resolve(S.store.updateProfile(S.profile.id, { courseOn: !!on })).then(function(){ return true; }, function(){ return false; }); },
-    needsGrownUpCheck: function(){ return !reefNoPin() && !reefInsideAdult('library'); }
+    needsGrownUpCheck: function(){ return !reefNoPin() && !reefInsideAdult('library'); },
+    // the learner model (learner.js), read-only: what this profile knows, per word and per skill
+    learner: {
+      summary: function(){ return Learner.summary(); },
+      item: function(t){ return Learner.item(t); },
+      due: function(now, ch){ return Learner.due(now, ch); }
+    }
   };
   // Runs at the end of renderHome(): outside Edit Mode the deck menu becomes the reef (every profile).
   function reefHome(){

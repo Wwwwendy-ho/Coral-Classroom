@@ -1,5 +1,16 @@
 # Changelog
 
+## Coral Classroom learns what you know (November 4, 2026)
+
+- **Every Korean card you answer now teaches the app what you know, and how you know it.** It keeps track of five
+  skills for each word or sentence: hearing it, reading it, recalling it from the English, saying it, and using it
+  in a sentence. Each one has its own memory schedule, so "can read it" and "can say it" are tracked separately.
+- **My course in the Library has a new "What you know" card**: for each of the five skills, how many words are
+  known (you should still remember them three weeks from now) and how many are still being learned. It appears
+  once you've answered a few Korean cards.
+- Rounds work exactly as before: this only listens for now, so later features can practice your weakest skill.
+  Everything is kept on your device, per profile.
+
 ## Shelly shows you what's new (November 4, 2026)
 
 - **After an update, Shelly (Lumi at night) points out what changed.** The screen dims, a ring lights up the new
