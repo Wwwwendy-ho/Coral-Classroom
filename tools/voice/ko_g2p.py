@@ -23,4 +23,19 @@ def pron(s):
             out[i] = {'수': '쑤', '거': '꺼'}[src[i][0]] + out[i][1:]
         if prev == '다섯' and src[i].startswith('명'):
             out[i - 1] = '다선'
+        # nasal change across the space, as it's said in a phrase: a final ㄱ/ㄷ/ㅂ sound before ㄴ or ㅁ becomes
+        # ㅇ/ㄴ/ㅁ (몇 명 [면 명], 한국 남자 [한궁 남자], 밥 먹어요 [밤 머거요])
+        a, b = out[i - 1], out[i]
+        if a and b and '가' <= a[-1] <= '힣' and '가' <= b[0] <= '힣':
+            fin = (ord(a[-1]) - 0xAC00) % 28
+            ini = (ord(b[0]) - 0xAC00) // 588
+            if ini in (2, 6) and fin in (1, 7, 17):   # next starts ㄴ or ㅁ; this ends ㄱ, ㄷ or ㅂ
+                out[i - 1] = a[:-1] + chr(ord(a[-1]) - fin + {1: 21, 7: 4, 17: 16}[fin])
+    # the -(으)ㄹ게요 ending is said tense: 줄게요 [줄께요], 기다릴게요 [기다릴께요]
+    for i, w in enumerate(out):
+        for j in range(1, len(w)):
+            c = w[j - 1]
+            if w[j] == '게' and '가' <= c <= '힣' and (ord(c) - 0xAC00) % 28 == 8 and w[j:].startswith('게요'):
+                out[i] = w[:j] + '께' + w[j + 1:]
+                break
     return ' '.join(out)
