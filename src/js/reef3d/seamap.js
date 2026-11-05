@@ -2,7 +2,7 @@
      The treasure map gains a second page, The sea: a drawn chart with an island for each region of the language
      school (see the architecture doc). Coral Cove, the flashcard reef, is in the middle and is where you are;
      the others show what they will teach and open one by one as they're built (open, with a `go` function that
-     starts it, and the icon on its button). Story Lagoon (lagoon.js) was the first, Harbor Town (town.js) the second, Echo Caves (caves.js) the third, Pattern Reef (patterns.js) the fourth. Only profiles with a language
+     starts it, and the icon on its button). Story Lagoon (lagoon.js) was the first, Harbor Town (town.js) the second, Echo Caves (caves.js) the third, Pattern Reef (patterns.js) the fourth, Bottle Beach (beach.js) the fifth and the Lighthouse (light.js) the sixth. Only profiles with a language
      course see it for now (reefCourseOn). Tapping an island shows its card; Coral Cove's card leads back to the
      board's own map. */
   var REEF_REGIONS = [
@@ -18,9 +18,9 @@
       about:'Townsfolk for each part of your trip: a cafe, a taxi, a shop, the hotel and a new friend. Listen, then answer in Korean.' },
     { id:'reef', say:'Pattern Reef, for grammar.', name:'Pattern Reef', teaches:'Grammar', x:248, y:252, open:true, go:'openPatterns', icon:'sentence',
       about:'One sentence pattern at a time: build it, break it and rebuild it.' },
-    { id:'beach', say:'Bottle Beach, for writing.', name:'Bottle Beach', teaches:'Writing', x:92, y:340,
+    { id:'beach', say:'Bottle Beach, for writing.', name:'Bottle Beach', teaches:'Writing', x:92, y:340, open:true, go:'openBeach', icon:'bottle',
       about:'Messages in bottles, a travel journal, and a pen-pal who writes back.' },
-    { id:'light', say:'The Lighthouse, for culture and real life.', name:'The Lighthouse', teaches:'Culture and real life', x:210, y:340,
+    { id:'light', say:'The Lighthouse, for culture and real life.', name:'The Lighthouse', teaches:'Culture and real life', x:210, y:340, open:true, go:'openLight', icon:'lighthouse', openAs:'the Lighthouse',
       about:'Real menus, signs and tickets, and the manners that go with them.' }
   ];
   // Each island's picture, drawn around (0, 0) in map ink and soft colour
@@ -61,13 +61,13 @@
     ov.querySelectorAll('.r3-sea-isle').forEach(function(b){ b.classList.toggle('picked', b.dataset.sea === id); });
     box.innerHTML = '<b>' + esc(r.name) + '</b><small>' + esc(r.teaches) + '</small><p>' + esc(r.about) + '</p>' +
       (r.id === 'cove' ? '<button type="button" class="r3-btn main" data-sea-tab="cove">' + ccIcon('map') + ' Open Coral Cove</button>' :
-       r.open ? '<button type="button" class="r3-btn main" data-sea-go="' + r.id + '">' + ccIcon(r.icon || 'story') + ' Open ' + esc(r.name) + '</button>' :
+       r.open ? '<button type="button" class="r3-btn main" data-sea-go="' + r.id + '">' + ccIcon(r.icon || 'story') + ' Open ' + esc(r.openAs || r.name) + '</button>' :
        '<span class="r3-sea-soon">' + ccIcon('sparkle') + ' Opening soon</span>');
     try { Speech.speak(r.say); } catch(e){}
   }
   // Leaves the board for an open region: the map closes and the water covers the change, as when diving into a deck
   function reefSeaGo(ov, id){
-    var r = REEF_REGIONS.find(function(x){ return x.id === id; }), fn = r && { openLagoon: openLagoon, openTown: openTown, openCaves: openCaves, openPatterns: openPatterns }[r.go];
+    var r = REEF_REGIONS.find(function(x){ return x.id === id; }), fn = r && { openLagoon: openLagoon, openTown: openTown, openCaves: openCaves, openPatterns: openPatterns, openBeach: openBeach, openLight: openLight }[r.go];
     if(!fn) return;
     try { Speech.stop(); } catch(e){}
     ov.remove();

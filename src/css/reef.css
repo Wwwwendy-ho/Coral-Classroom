@@ -681,3 +681,148 @@ body.reef-calm .tw-dots i{ animation:none; opacity:.7; }
 .tw-pat .btn > span{ text-align:left; }
 @media (max-width:420px){ .pr-rlist li{ flex-direction:column; align-items:stretch; } }
 @media (min-width:700px){ .pr-ex b{ font-size:1.45rem; } .pr-word{ font-size:1.5rem; } }
+
+/* ---------- Bottle Beach (beach.js): 지수's bottles, writing back, and her letters ----------
+   The same panels and --lg-* tokens as the other islands. Added here: the letter (paper with a soft edge, the same
+   by day and night as paper is), the writing box and its tiles, the feedback (what's right in green first, then
+   at most two things to look at, in amber, never red), and the journal. */
+.bb-page, .lh-page{ padding-bottom:96px; }   /* the last buttons scroll clear of the Ask Shelly button */
+.bb-meter{ max-width:none; margin-top:10px; }
+.bb-count{ display:block; margin-top:4px; font-weight:800; color:var(--lg-soft); }
+.bb-links{ display:grid; gap:10px; grid-template-columns:repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+.bb-link{ display:flex; gap:12px; align-items:center; text-align:left; min-height:64px; font:inherit; color:var(--lg-ink); cursor:pointer; box-shadow:0 4px 0 var(--lg-edge); }
+.bb-link > .cc-ic{ flex:none; width:28px; height:28px; color:var(--lg-teal); }
+.bb-link b{ display:block; font-family:'Baloo 2',system-ui,sans-serif; font-size:1.1rem; }
+.bb-link small{ display:block; color:var(--lg-soft); font-weight:700; }
+.bb-link:active{ transform:translateY(2px); box-shadow:0 2px 0 var(--lg-edge); }
+.bb-bottle .lg-st b{ font-size:1.25rem; word-break:keep-all; }
+.bb-letter{ position:relative; display:flex; flex-direction:column; gap:6px; background:#fff8e6; color:#3b2a14; border:2px solid #e2cf9f; border-radius:6px 18px 6px 18px;
+  padding:14px 16px; box-shadow:0 6px 18px rgba(10,61,74,.18); background-image:repeating-linear-gradient(transparent 0 33px, rgba(122,79,34,.12) 33px 34px); }
+.bb-letter .lg-ko{ color:#3b2a14; }
+.bb-letter .lg-w{ border-bottom-color:#a8814f; }
+.bb-letter .lg-w.on{ background:#ffe9a8; }
+.bb-letter .lg-en{ color:#6b5634; }
+.bb-letter .lg-mini{ background:#fffdf6; border-color:#e2cf9f; color:#3b2a14; }
+.bb-letter .lg-mini .cc-ic{ color:#1c8c93; }
+.bb-from{ display:flex; align-items:center; gap:6px; font-weight:800; font-size:.9rem; color:#7a4f22; }
+.bb-from .cc-ic{ width:20px; height:20px; color:#2f8f95; }
+.bb-reply{ padding-right:64px; }
+.bb-art{ position:absolute; right:12px; top:12px; }
+.bb-art .cc-ic{ width:44px; height:44px; color:#2f6b4f; transform:rotate(-24deg); }
+.bb-reply.wash{ animation:bb-wash .9s ease-out both; }
+@keyframes bb-wash{ from{ opacity:0; transform:translateY(24px) rotate(-2deg); } to{ opacity:1; transform:none; } }
+body.reef-calm .bb-reply.wash{ animation:none; }
+.bb-write{ display:flex; flex-direction:column; gap:8px; }
+.bb-write h3{ margin-bottom:0; }
+.bb-label{ font-weight:700; color:var(--lg-soft); font-size:.95rem; }
+.bb-write textarea{ width:100%; box-sizing:border-box; min-height:96px; resize:vertical; font:600 16px/1.5 'Nunito',sans-serif;   /* 16px keeps iPhone from zooming in */
+  font-size:max(16px, 1.15rem); color:var(--lg-ink); background:var(--lg-you); border:2px solid var(--lg-edge); border-radius:12px; padding:10px 12px; }
+.bb-write textarea:focus{ outline:none; border-color:var(--lg-teal); }
+.bb-tilebar{ display:flex; gap:8px; flex-wrap:wrap; }
+.bb-tiles-h{ margin:4px 0 0; font-weight:800; font-size:.9rem; color:var(--lg-soft); }
+.bb-tiles{ display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-start; }
+.bb-page .build-tile{ font-family:inherit; min-height:46px; }
+.bb-tile.mine{ border-style:dashed; }
+.bb-exbtn{ align-self:flex-start; }
+.bb-ex{ margin-top:4px; }
+.bb-good ul, .bb-fix ul{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px; }
+.bb-good li{ position:relative; padding-left:22px; font-weight:700; line-height:1.45; }
+.bb-good li::before{ content:''; position:absolute; left:4px; top:.5em; width:9px; height:9px; border-radius:50%; background:var(--lg-ok); }
+.bb-good h3 .cc-ic{ color:var(--lg-ok); }
+.bb-known{ margin:8px 0 0; display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.bb-chip{ display:inline-block; padding:2px 10px; border-radius:99px; background:var(--lg-you); border:1.5px solid var(--lg-edge); color:var(--lg-ink); font-weight:800; }
+.bb-fix{ border-style:dashed; border-color:#e8a33d; }
+.bb-fix h3 .cc-ic{ color:#e8a33d; }
+.bb-fix li{ display:flex; gap:10px; align-items:center; justify-content:space-between; padding-left:12px; border-left:3px solid #e8a33d; }
+.bb-fix li > span{ display:flex; flex-direction:column; gap:2px; font-weight:700; min-width:0; }
+.bb-fix li b{ font-size:1.2rem; }
+.bb-fix small{ color:var(--lg-soft); font-weight:700; }
+.bb-fix > p{ margin:10px 0 0; }
+.bb-fix .btn{ min-height:48px; display:inline-flex; align-items:center; gap:8px; font-weight:800; flex:none; text-align:left; }
+.bb-fix .btn .cc-ic{ width:20px; height:20px; }
+.bb-fix .btn small{ display:block; font-weight:700; opacity:.8; }
+.bb-page .lg-fb{ flex-wrap:nowrap; align-items:flex-start; line-height:1.45; }
+.bb-page .lg-fb .cc-ic{ flex:none; }
+.bb-mine{ align-self:flex-end; max-width:88%; background:var(--lg-you); border:2px solid var(--lg-edge); border-radius:20px 20px 6px 20px; padding:10px 14px; }
+.bb-mine .bb-from{ color:var(--lg-soft); }
+.bb-mine p{ margin:2px 0 0; font-size:1.2rem; font-weight:700; word-break:keep-all; }
+.bb-journal{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+.bb-journal li{ display:flex; flex-direction:column; gap:6px; }
+.bb-date{ font-weight:800; color:var(--lg-soft); }
+.bb-q, .bb-you, .bb-her{ margin:0; }
+.bb-q span{ font-weight:800; }
+.bb-q small, .bb-her small{ display:block; color:var(--lg-soft); font-weight:700; }
+.bb-you{ font-size:1.15rem; font-weight:700; padding:6px 10px; border-left:3px solid var(--lg-teal); }
+.bb-her{ display:flex; gap:10px; align-items:center; font-weight:700; }
+@media (max-width:420px){ .bb-fix li{ flex-direction:column; align-items:stretch; } .bb-mine{ max-width:96%; } }
+
+/* ---------- The Lighthouse (light.js): signs drawn as cards, and manners notes ----------
+   Each sign keeps its own colors by day and night, as a real one would (a chalk menu board is dark, a receipt is
+   white paper); everything around it uses the --lg-* tokens. Every word on a sign is a 44px button. */
+.lh-h{ margin:4px 0 -4px; display:flex; align-items:center; gap:8px; font-family:'Baloo 2',system-ui,sans-serif; font-size:1.2rem; color:var(--lg-ink); }
+.lh-h .cc-ic{ width:22px; height:22px; color:var(--lg-teal); }
+.lh-sign{ align-self:center; width:100%; max-width:440px; box-sizing:border-box; display:flex; flex-direction:column; gap:2px; padding:16px; border-radius:12px;
+  box-shadow:0 8px 22px rgba(10,61,74,.22); font-weight:700; }
+.lh-row{ display:flex; flex-wrap:wrap; align-items:center; gap:2px 6px; line-height:1.3; }
+.lh-row .lh-r{ margin-left:auto; text-align:right; }
+.lh-row > span{ display:inline-flex; flex-wrap:wrap; align-items:center; gap:2px 6px; }
+.lh-w{ font:inherit; color:inherit; background:none; border:none; margin:0; padding:2px 3px; min-height:44px; min-width:32px; cursor:pointer; border-bottom:2px dotted currentColor; border-radius:4px; }
+.lh-w.on{ background:rgba(255,211,107,.55); }
+.lh-title{ justify-content:center; font-size:1.5rem; font-weight:900; }
+.lh-head{ margin-top:8px; font-size:1.05rem; font-weight:900; opacity:.85; }
+.lh-item, .lh-exit, .lh-route{ font-size:1.15rem; }
+.lh-note{ margin-top:8px; font-size:.95rem; justify-content:center; opacity:.9; }
+.lh-big{ justify-content:center; font-size:2.6rem; font-weight:900; }
+/* a chalk menu board */
+.lh-board{ background:#26332f; color:#f4f1e6; border:8px solid #7a4f22; font-family:'Baloo 2',system-ui,sans-serif; }
+.lh-board .lh-head{ color:#ffd36b; }
+/* a paper menu */
+.lh-paper{ background:#fffaf0; color:#2b2118; border:2px solid #d9c49a; }
+.lh-paper .lh-title{ border-bottom:2px solid #c2553e; }
+.lh-paper .lh-head{ color:#c2553e; }
+/* a subway station sign: the line color, a station name, the exits */
+.lh-subway{ background:#f5f7f7; color:#1d2b2d; border:2px solid #c9d3d3; }
+.lh-line{ justify-content:center; }
+.lh-line .lh-w{ background:#2fa34f; color:#fff; border-radius:99px; padding:2px 14px; border-bottom:none; }
+.lh-station{ justify-content:center; font-size:2rem; font-weight:900; }
+.lh-dir{ font-size:.95rem; background:#1d2b2d; color:#fff; border-radius:8px; padding:0 8px; }
+.lh-subway .lh-head{ color:#9a6a00; }
+.lh-exit > span:first-child{ display:inline-grid; place-items:center; width:30px; height:30px; border-radius:6px; background:#f2c200; color:#1d2b2d; font-weight:900; }
+.lh-exit .lh-r{ margin-left:10px; text-align:left; flex:1; }
+/* a bus stop: blue (trunk) and green (branch) routes */
+.lh-bus{ background:#0f5f8f; color:#fff; border:2px solid #0b4467; }
+.lh-bus .lh-station{ font-size:1.8rem; }
+.lh-route{ background:rgba(255,255,255,.12); border-radius:8px; padding:0 8px; margin-top:4px; }
+.lh-bus .lh-head{ color:#bfe6ff; }
+/* a receipt: narrow white paper, a dashed rule above the total */
+.lh-receipt{ max-width:340px; background:#fff; color:#222; border:1px solid #ddd; border-radius:4px; font-family:'Nunito',ui-monospace,monospace; }
+.lh-receipt .lh-title{ font-size:1.3rem; }
+.lh-receipt .lh-head{ justify-content:center; border-bottom:1px dashed #999; padding-bottom:4px; }
+.lh-total{ border-top:2px dashed #999; margin-top:6px; padding-top:4px; font-size:1.25rem; font-weight:900; }
+/* a pharmacy: the green 약 sign */
+.lh-pharmacy{ background:#f4fbf6; color:#173b26; border:2px solid #2e8b57; }
+.lh-pharmacy .lh-big .lh-w{ background:#2e8b57; color:#fff; border-radius:12px; padding:0 20px; border-bottom:none; }
+.lh-pharmacy .lh-head{ color:#2e8b57; }
+/* a hotel key card sleeve */
+.lh-card{ background:linear-gradient(135deg, #123c4a, #1c5f6e); color:#f2efe6; border:2px solid #c8a96a; }
+.lh-card .lh-title{ color:#e8cf8f; }
+/* a door: the outside and the inside */
+.lh-door{ background:#d9c3a0; color:#2b1d0e; border:10px solid #8a6a43; border-radius:10px 10px 0 0; }
+.lh-side{ justify-content:center; font-size:.8rem; text-transform:uppercase; letter-spacing:.08em; opacity:.7; margin-top:6px; }
+.lh-door .lh-big .lh-w{ background:#fff; border-radius:8px; padding:0 18px; border:2px solid #2b1d0e; font-size:2rem; }
+/* restroom signs: a blue 남 and a red 여 */
+.lh-toilet{ background:#eef2f4; color:#1d2b2d; border:2px solid #b8c4c9; }
+.lh-pair{ justify-content:center; gap:16px; margin:8px 0; }
+.lh-pair > span{ margin:0 !important; }
+.lh-pair .lh-w{ width:72px; height:72px; font-size:2rem; font-weight:900; color:#fff; border-radius:12px; border-bottom:none; }
+.lh-pair > span:first-child .lh-w{ background:#1f5fae; }
+.lh-pair .lh-r .lh-w{ background:#c23a3a; }
+.lh-lock{ justify-content:center; margin-top:8px; }
+.lh-lock .lh-w{ background:#c23a3a; color:#fff; border-radius:6px; border-bottom:none; padding:2px 10px; }
+.lh-opt{ word-break:keep-all; }
+.lh-opt[aria-disabled="true"]{ cursor:default; }
+.lh-page .lg-fb{ flex-wrap:nowrap; align-items:flex-start; line-height:1.45; }
+.lh-page .lg-fb .cc-ic{ flex:none; }
+.lh-tip b{ margin-right:4px; }
+@media (max-width:420px){ .lh-big{ font-size:2.2rem; } .lh-station{ font-size:1.7rem; } }
+@media (min-width:700px){ .lh-sign{ font-size:1.1rem; } .bb-letter .lg-ko{ font-size:1.6rem; } }
