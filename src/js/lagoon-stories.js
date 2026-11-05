@@ -12,9 +12,9 @@
       lines:[
         [0, '안녕하세요. 여권 좀 보여 주세요.', 'Hello. Please show me your passport.', '안녕하세요=hello;여권=passport;좀=please (softens a request);보여=show=보여 주다;주세요=please (do it for me)=주세요'],
         [1, '네, 여기 있어요.', 'Sure, here it is.', '네=yes;여기=here;있어요=it is (there is)=있어요'],
-        [0, '여행 왔어요?', 'Are you here to travel?', '여행=travel, a trip;왔어요=came=와요'],
+        [0, '여행 오셨어요?', 'Are you here to travel?', '여행=travel, a trip;오셨어요=came (polite, said to you)=와요'],
         [1, '네, 여행 왔어요.', 'Yes, I came to travel.', '네=yes;여행=travel, a trip;왔어요=came=와요'],
-        [0, '며칠 동안 있을 거예요?', 'How many days will you stay?', '며칠=how many days;동안=for (a length of time);있을=stay=있어요;거예요=will (going to)'],
+        [0, '며칠 동안 계실 거예요?', 'How many days will you stay?', '며칠=how many days;동안=for (a length of time);계실=stay (polite, said to you)=있어요;거예요=will (going to)'],
         [1, '일주일 동안 있을 거예요.', 'I will stay for a week.', '일주일=one week;동안=for (a length of time);있을=stay=있어요;거예요=will (going to)'],
         [0, '좋은 여행 되세요.', 'Have a good trip.', '좋은=good;여행=trip=여행;되세요=have (may it be)']
       ],
@@ -41,7 +41,7 @@
       lines:[
         [0, '어서 오세요. 뭐 드릴까요?', 'Welcome. What can I get you?', '어서=welcome (with 오세요)=어서 오세요;오세요=welcome, please come in=어서 오세요;뭐=what=뭐;드릴까요=shall I give you'],
         [1, '아이스 아메리카노 한 잔 주세요.', 'One iced americano, please.', '아이스=iced;아메리카노=americano;한=one;잔=cup (counter)=잔;주세요=please give me=주세요'],
-        [0, '여기서 드세요?', 'Is it for here?', '여기서=here, in this place=여기;드세요=will you have it (eat or drink)'],
+        [0, '드시고 가세요?', 'Is it for here?', '드시고=have it (eat or drink, polite), and;가세요=go (are you going)'],
         [1, '아니요, 가져갈게요.', 'No, I will take it with me.', '아니요=no=아니요;가져갈게요=I will take it with me'],
         [1, '이 빵도 하나 주세요.', 'One of this bread too, please.', '이=this=이것;빵도=bread too=빵;하나=one=하나;주세요=please give me=주세요'],
         [0, '네, 모두 칠천 원이에요.', 'Sure, that is seven thousand won in all.', '네=sure, yes;모두=in all, everything;칠천=seven thousand;원이에요=won it is=원'],
@@ -143,7 +143,7 @@
         [1, '오늘 날씨가 어때요?', 'What is the weather like today?', '오늘=today=오늘;날씨가=the weather=날씨;어때요=how is it'],
         [0, '오늘은 좀 추워요.', 'It is a little cold today.', '오늘은=today=오늘;좀=a little;추워요=it is cold=추워요'],
         [1, '오후에 비가 와요?', 'Is it going to rain in the afternoon?', '오후에=in the afternoon=오후;비가=rain=비;와요=comes, falls=와요'],
-        [0, '네, 저녁부터 비가 와요.', 'Yes, it rains from this evening.', '네=yes;저녁부터=from the evening=저녁;비가=rain=비;와요=comes, falls=와요'],
+        [0, '네, 오후부터 비가 와요.', 'Yes, it rains from the afternoon.', '네=yes;오후부터=from the afternoon=오후;비가=rain=비;와요=comes, falls=와요'],
         [0, '우산 있어요?', 'Do you have an umbrella?', '우산=umbrella=우산;있어요=do you have=있어요'],
         [1, '아니요, 없어요. 편의점에서 살게요.', 'No, I do not. I will buy one at a convenience store.', '아니요=no=아니요;없어요=I do not have;편의점에서=at a convenience store;살게요=I will buy=사요'],
         [0, '내일은 날씨가 좋아요.', 'Tomorrow the weather is nice.', '내일은=tomorrow=내일;날씨가=the weather=날씨;좋아요=is good, nice']

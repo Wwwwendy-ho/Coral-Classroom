@@ -236,6 +236,9 @@
     if(!known) myWordsAdd(w.ko, w.en, 'asked').then(function(ok){ if(ok && L.word && L.word[0] === li && L.word[1] === wi && S.view === 'lagoonRead'){ L.wordAdded = true; renderLagoonRead(); } }).catch(function(){});
     try { Speech.speak(w.ko); } catch(e){}
     renderLagoonRead();
+    // the meaning card sits at the bottom of the screen: a word low down scrolls up so the card doesn't cover it
+    var on = app.querySelector('.lg-w.on'), card = app.querySelector('.lg-word');
+    if(on && card){ var gap = on.getBoundingClientRect().bottom - card.getBoundingClientRect().top + 16; if(gap > 0) window.scrollBy({ top: gap, behavior: reefCalm() ? 'auto' : 'smooth' }); }
   }
   function lagoonAnswer(s, L, i){
     var q = s.qs[L.q]; if(!q || L.picked != null) return;

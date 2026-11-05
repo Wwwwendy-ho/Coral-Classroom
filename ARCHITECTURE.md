@@ -95,6 +95,9 @@ Alongside the scheduler, the learner model (`src/js/learner.js`, `Learner`) trac
 with FSRS. `src/js/my-words.js` builds a profile's My words list from missed cards, Ask Shelly lookups and fading
 words (saved in the Word Bank's record), shows it as a deck tile on the board while words are due, and makes a
 round of cards in each word's weakest skill on the spot (they're never saved, so deck schedules don't change).
+Story Lagoon, the first region of the sea after Coral Cove, is `src/js/lagoon-stories.js` (twelve built-in trip
+conversations with word meanings and questions) and `src/js/lagoon.js` (the story list, best fit first, and the reader:
+listen, read with tap-a-word, questions). Taps and answers feed the learner model and My words.
 
 ## Grown-up checks
 

@@ -1,5 +1,18 @@
 # Changelog
 
+## Story Lagoon opens (November 5, 2026)
+
+- **The first new island of the sea is open: Story Lagoon**, for listening and reading. Twelve short conversations
+  for the trip, in the order it happens: arriving, the hotel, a café, a restaurant, shopping, the subway, a taxi,
+  asking the way, meeting someone, the weather, the market and saying goodbye. Anna, a traveler, is in every one.
+- **The best story for you is at the top**: the one where you already know most of the words, with a "words you
+  know" meter on each.
+- **Listen first, then read.** Every line is spoken in the natural Korean voice (with a slower version), and lights
+  up as it plays. Then read along: tap any word to hear it and see what it means. A word you didn't know goes into
+  My words. Two quick questions at the end.
+- Open it from the treasure map (The sea, then Story Lagoon) or from My course in the Library. Shelly points it out
+  the first time.
+
 ## My words (November 4, 2026)
 
 - **A new stop on the reef: My words.** It's your own list of Korean words, and it fills itself: every Korean card
