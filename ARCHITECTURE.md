@@ -98,6 +98,12 @@ round of cards in each word's weakest skill on the spot (they're never saved, so
 Story Lagoon, the first region of the sea after Coral Cove, is `src/js/lagoon-stories.js` (twelve built-in trip
 conversations with word meanings and questions) and `src/js/lagoon.js` (the story list, best fit first, and the reader:
 listen, read with tap-a-word, questions). Taps and answers feed the learner model and My words.
+Harbor Town, the second region, is `src/js/town-talks.js` (eight townsfolk, each a small map of turns: the
+townsperson's line, then two or three answers graded best, ok or a gentle mistake with a hint, where answers can
+lead to different lines) and `src/js/town.js` (the list, best fit first by Story Lagoon's word-knowledge helpers,
+and the chat: tap or type an answer, matched in Hangul or loose romanization with reef.js's `koLoose` and
+`koRomSaid`, then a debrief). It records 'hear', 'use' and 'read' in the learner model and adds the phrases
+she needed to My words (from 'town'). `tools/check/test_town.js` checks every line is glossed and every path ends.
 
 ## Grown-up checks
 

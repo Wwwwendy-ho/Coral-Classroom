@@ -1,5 +1,21 @@
 # Changelog
 
+## Harbor Town opens (November 5, 2026)
+
+- **The second new island of the sea is open: Harbor Town**, for conversation. Eight people you meet on a trip
+  to Korea: a cafe owner, a restaurant server, a shop clerk, a taxi driver, a subway helper, the hotel's front
+  desk, a pharmacist and a new friend.
+- **Each one talks with you in Korean.** Their line plays in the natural Korean voice (with a slower version).
+  Tap any word for its meaning, or English for the whole line. Then it's your turn: tap one of two or three
+  Korean answers, or type your own, in Korean or in English letters spelled roughly the way it sounds.
+- **Your answer changes the conversation.** Say you'll drink your coffee there, and you get a seat; say you'll
+  take it with you, and it's made to go. A small mistake (like using the polite form meant for someone else
+  about yourself) gets a friendly hint and another try.
+- **At the end, a short debrief**: what went well, up to two things to work on, and the phrases you needed, which
+  go into My words. The best conversation for you is at the top of the list, like in Story Lagoon.
+- Open it from the treasure map (The sea, then Harbor Town) or from My course in the Library. Shelly points it
+  out the first time.
+
 ## Story Lagoon opens (November 5, 2026)
 
 - **The first new island of the sea is open: Story Lagoon**, for listening and reading. Twelve short conversations
