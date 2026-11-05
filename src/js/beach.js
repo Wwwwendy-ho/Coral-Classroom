@@ -150,7 +150,7 @@
       '<section class="tw-sec bb-fix" role="status"><h3>' + ccIcon('bulb') + (fb.fixes.length === 1 ? ' One thing to look at' : ' Two things to look at') + '</h3><ul>' +
         fb.fixes.map(function(f){
           var p = f.pat && patById(f.pat);
-          return '<li><span><b lang="ko">' + esc(f.word) + '</b>' + (f.fix ? ' → <b lang="ko">' + esc(f.fix) + '</b>' : '') + '<small>' + esc(f.kind === 'spell' ? 'Maybe a spelling slip. ' + f.why : f.why) + '</small></span>' +
+          return '<li><span><span class="bb-pair"><b lang="ko">' + esc(f.word) + '</b>' + (f.fix ? ' → <b lang="ko">' + esc(f.fix) + '</b>' : '') + '</span><small>' + esc(f.kind === 'spell' ? 'Maybe a spelling slip. ' + f.why : f.why) + '</small></span>' +
             (p ? '<button type="button" class="btn btn-ghost" data-bb-pat="' + p.id + '">' + ccIcon('sentence') + '<span>See it in Pattern Reef<small>' + esc(p.en) + ' <span lang="ko">' + esc(p.ko) + '</span></small></span></button>' : '') + '</li>';
         }).join('') + '</ul><p>Fix it and check again, or send it as it is: 지수 will understand.</p></section>';
     return good + fixes;

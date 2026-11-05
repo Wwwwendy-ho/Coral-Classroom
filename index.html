@@ -16132,7 +16132,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       '<section class="tw-sec bb-fix" role="status"><h3>' + ccIcon('bulb') + (fb.fixes.length === 1 ? ' One thing to look at' : ' Two things to look at') + '</h3><ul>' +
         fb.fixes.map(function(f){
           var p = f.pat && patById(f.pat);
-          return '<li><span><b lang="ko">' + esc(f.word) + '</b>' + (f.fix ? ' → <b lang="ko">' + esc(f.fix) + '</b>' : '') + '<small>' + esc(f.kind === 'spell' ? 'Maybe a spelling slip. ' + f.why : f.why) + '</small></span>' +
+          return '<li><span><span class="bb-pair"><b lang="ko">' + esc(f.word) + '</b>' + (f.fix ? ' → <b lang="ko">' + esc(f.fix) + '</b>' : '') + '</span><small>' + esc(f.kind === 'spell' ? 'Maybe a spelling slip. ' + f.why : f.why) + '</small></span>' +
             (p ? '<button type="button" class="btn btn-ghost" data-bb-pat="' + p.id + '">' + ccIcon('sentence') + '<span>See it in Pattern Reef<small>' + esc(p.en) + ' <span lang="ko">' + esc(p.ko) + '</span></small></span></button>' : '') + '</li>';
         }).join('') + '</ul><p>Fix it and check again, or send it as it is: 지수 will understand.</p></section>';
     return good + fixes;
@@ -27771,13 +27771,13 @@ body.reef-calm .bb-reply.wash{ animation:none; }
 .bb-write textarea:focus{ outline:none; border-color:var(--lg-teal); }
 .bb-tilebar{ display:flex; gap:8px; flex-wrap:wrap; }
 .bb-tiles-h{ margin:4px 0 0; font-weight:800; font-size:.9rem; color:var(--lg-soft); }
-.bb-tiles{ display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-start; }
+.bb-tiles{ display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-start; margin:0; }
 .bb-page .build-tile{ font-family:inherit; min-height:46px; }
 .bb-tile.mine{ border-style:dashed; }
 .bb-exbtn{ align-self:flex-start; }
 .bb-ex{ margin-top:4px; }
 .bb-good ul, .bb-fix ul{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px; }
-.bb-good li{ position:relative; padding-left:22px; font-weight:700; line-height:1.45; }
+.bb-good li{ position:relative; padding-left:22px; font-weight:700; line-height:1.45; word-break:keep-all; }
 .bb-good li::before{ content:''; position:absolute; left:4px; top:.5em; width:9px; height:9px; border-radius:50%; background:var(--lg-ok); }
 .bb-good h3 .cc-ic{ color:var(--lg-ok); }
 .bb-known{ margin:8px 0 0; display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
@@ -27787,6 +27787,7 @@ body.reef-calm .bb-reply.wash{ animation:none; }
 .bb-fix li{ display:flex; gap:10px; align-items:center; justify-content:space-between; padding-left:12px; border-left:3px solid #e8a33d; }
 .bb-fix li > span{ display:flex; flex-direction:column; gap:2px; font-weight:700; min-width:0; }
 .bb-fix li b{ font-size:1.2rem; }
+.bb-pair{ display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 8px; }
 .bb-fix small{ color:var(--lg-soft); font-weight:700; }
 .bb-fix > p{ margin:10px 0 0; }
 .bb-fix .btn{ min-height:48px; display:inline-flex; align-items:center; gap:8px; font-weight:800; flex:none; text-align:left; }
@@ -27868,8 +27869,7 @@ body.reef-calm .bb-reply.wash{ animation:none; }
 .lh-pair .lh-w{ width:72px; height:72px; font-size:2rem; font-weight:900; color:#fff; border-radius:12px; border-bottom:none; }
 .lh-pair > span:first-child .lh-w{ background:#1f5fae; }
 .lh-pair .lh-r .lh-w{ background:#c23a3a; }
-.lh-lock{ justify-content:center; margin-top:8px; }
-.lh-lock .lh-w{ background:#c23a3a; color:#fff; border-radius:6px; border-bottom:none; padding:2px 10px; }
+.lh-lock{ align-self:center; margin-top:8px; background:#c23a3a; color:#fff; border-radius:8px; padding:0 12px; }
 .lh-opt{ word-break:keep-all; }
 .lh-opt[aria-disabled="true"]{ cursor:default; }
 .lh-page .lg-fb{ flex-wrap:nowrap; align-items:flex-start; line-height:1.45; }
