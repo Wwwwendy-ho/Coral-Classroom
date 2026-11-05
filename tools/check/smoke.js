@@ -166,6 +166,27 @@ async function newPage(browser) {
   await p.click('[data-act="lg-back"]'); await p.waitForTimeout(500);
   await p.click('[data-act="lg-home"]'); await p.waitForTimeout(6000);
   check('grown-up: leaving Story Lagoon goes back to the board', await p.evaluate(() => !!document.querySelector('.r3 canvas')));
+  // Harbor Town: open from the sea chart, start the cafe talk, pick an answer and see the next line, then type
+  // the next answer in rough English letters and see it accepted
+  await p.click('[data-r3-map]'); await p.waitForTimeout(1200);
+  await p.click('.r3-map-tab[data-sea-tab="sea"]'); await p.waitForTimeout(400);
+  await p.click('.r3-sea-isle[data-sea="town"]'); await p.waitForTimeout(400);
+  const twBtn = await p.$('[data-sea-go="town"]');
+  check('grown-up: the sea chart has an Open Harbor Town button', !!twBtn && /Open Harbor Town/.test(await twBtn.textContent()));
+  if (twBtn) { await twBtn.click(); await p.waitForTimeout(2500); }
+  check('grown-up: Harbor Town lists its eight townsfolk', await p.evaluate(() => document.querySelectorAll('.tw-folk').length === 8));
+  await p.click('[data-tw-open="cafe"]'); await p.waitForTimeout(800);
+  check('grown-up: a conversation starts with the townsperson\'s line and answers to pick', await p.evaluate(() =>
+    document.querySelectorAll('.tw-log .lg-line:not(.lg-me)').length === 1 && document.querySelectorAll('.tw-opt').length >= 2 && !!document.querySelector('#twType')));
+  await p.click('.tw-opt');
+  const twNext = await p.waitForFunction(() => document.querySelectorAll('.tw-log .lg-line:not(.lg-me):not(.tw-dots)').length === 2 && document.querySelector('.tw-opt'), null, { timeout: 15000 }).then(() => true, () => false);
+  check('grown-up: picking an answer brings the next line', twNext, await p.evaluate(() => document.querySelector('.tw-log').innerText.replace(/\s+/g, ' ').slice(0, 200)));
+  await p.fill('#twType', 'yogiso masilgeyo'); await p.click('.tw-type button[type="submit"]');
+  const twTyped = await p.waitForFunction(() => document.querySelectorAll('.tw-log .lg-me').length === 2 && document.querySelectorAll('.tw-log .lg-line:not(.lg-me):not(.tw-dots)').length === 3, null, { timeout: 15000 }).then(() => true, () => false);
+  check('grown-up: a typed answer in rough English letters is accepted', twTyped, await p.evaluate(() => [...document.querySelectorAll('.tw-log .lg-me')].map(x => x.innerText.replace(/\s+/g, ' ')).join(' | ')));
+  await p.click('[data-act="tw-back"]'); await p.waitForTimeout(500);
+  await p.click('[data-act="tw-home"]'); await p.waitForTimeout(6000);
+  check('grown-up: leaving Harbor Town goes back to the board', await p.evaluate(() => !!document.querySelector('.r3 canvas')));
   await menuPick(p, 'Edit decks'); await p.waitForTimeout(1200);
   await p.click('[data-act="open-library"]', { force: true }); await p.waitForTimeout(800);
   check('grown-up: the Library opens on the Korean goal', await p.evaluate(() => [...document.querySelectorAll('.clib-tab')].map(t => t.dataset.tab).join(',') === 'korean'));
