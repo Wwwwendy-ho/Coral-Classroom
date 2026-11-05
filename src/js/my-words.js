@@ -75,7 +75,7 @@
     return '';
   }
 
-  // Adds a word (or brings it back to the top as due now). from: 'missed', 'asked' or 'shaky'. A shaky word that
+  // Adds a word (or brings it back to the top as due now). from: 'missed', 'asked', 'shaky' or 'town' (a phrase Harbor Town's talk needed). A shaky word that
   // is already listed is left as it is, so the weekly drift of memory doesn't keep resetting it.
   function myWordsAdd(ko, en, from){
     ko = myWordsPlain(ko).replace(/^[\s"'“”‘’]+|[\s"'“”‘’]+$/g, '');

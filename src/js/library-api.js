@@ -25,6 +25,7 @@
     sound: function(name){ try { if(Sound[name]) Sound[name](); } catch(e){} },
     startDeck: function(id){ reefStartDeck(id); },
     openLagoon: function(){ openLagoon(); },   // Story Lagoon (lagoon.js), from My course
+    openTown: function(){ openTown(); },       // Harbor Town (town.js), from My course
     night: function(){ try { return reefNight(); } catch(e){ return false; } },
     calm: function(){ try { return reefCalm(); } catch(e){ return false; } },
     // false in the Claude version and inside a grown-up profile, where the app asks no grown-up questions

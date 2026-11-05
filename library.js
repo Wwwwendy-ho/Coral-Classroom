@@ -515,6 +515,9 @@
     // Story Lagoon (the app's lagoon.js) is the course's listening and reading practice
     if(CC() && CC().openLagoon) html += '<section class="clib-card co-lagoon"><h2>' + icon('story', '') + ' Story Lagoon</h2><p>Short conversations for your trip. Listen first, then read, then answer two questions.</p>' +
       '<div class="clib-row"><button type="button" class="clib-btn main" data-co-lagoon>Open Story Lagoon</button></div></section>';
+    // Harbor Town (the app's town.js) is its conversation practice
+    if(CC() && CC().openTown) html += '<section class="clib-card co-town"><h2>' + icon('talk', '') + ' Harbor Town</h2><p>Talk with the townsfolk of your trip: a cafe, a taxi, a shop, the hotel and more. Tap an answer or type your own.</p>' +
+      '<div class="clib-row"><button type="button" class="clib-btn main" data-co-town>Open Harbor Town</button></div></section>';
     html += '<h3 class="clib-more-h">The course</h3><ol class="co-line">' + co.units.map(function(u, i){
       var st = u.done ? 'done' : u === now ? 'now' : u.start > t ? 'later' : 'open';
       return '<li class="co-u ' + st + (u.review ? ' review' : '') + '"><details' + (u === now ? ' open' : '') + '><summary><span class="co-dot" aria-hidden="true">' + (u.done ? '✓' : i + 1) + '</span><span class="co-ut"><b>' + esc(u.title) + '</b><small>' + niceDate(u.start) + ' – ' + niceDate(u.end) + ' · ' + u.weeks + ' week' + (u.weeks === 1 ? '' : 's') + (u.testedOut ? ' · quick review' : '') + (u.done ? ' · done' : '') + '</small></span></summary>' +
@@ -533,6 +536,7 @@
     $('[data-co-goalsave]', el).addEventListener('click', function(){ co.goal = $('#coGoalEdit', el).value.trim() || co.goal; co.log.push({ date: today(), text: 'Goal changed to "' + co.goal + '".' }); saveCourse(co).then(function(){ $('[data-co-goalmsg]', el).textContent = 'Saved. To re-plan around the new goal, use Change my answers.'; }); });
     $$('[data-co-check]', el).forEach(function(b){ b.addEventListener('click', function(){ go('courseCheck', b.dataset.coCheck); }); });
     $$('[data-co-lagoon]', el).forEach(function(b){ b.addEventListener('click', function(){ sound('tap'); close(); CC().openLagoon(); }); });
+    $$('[data-co-town]', el).forEach(function(b){ b.addEventListener('click', function(){ sound('tap'); close(); CC().openTown(); }); });
     $$('[data-co-skip]', el).forEach(function(b){ b.addEventListener('click', function(){ var u = co.units[+b.dataset.coSkip]; u.done = true; u.doneOn = today(); co.log.push({ date: today(), text: u.title + ' marked done without a check.' }); courseSchedule(co); saveCourse(co).then(function(){ go('classroom', null, true); }); }); });
     $('[data-co-off]', el).addEventListener('click', function(){ var c = CC(); if(c && c.setCourseOn) Promise.resolve(c.setCourseOn(false)).then(function(){ go('home', null, true); }); });
   } };

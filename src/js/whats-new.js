@@ -30,6 +30,9 @@
     ] },
     { id:'story-lagoon', date:'2026-11-04', need:'course', steps:[
       { at:'.r3-mapbtn', say:'Story Lagoon is open on the treasure map, with short Korean stories to hear and then read.' }
+    ] },
+    { id:'harbor-town', date:'2026-11-05', need:'course', steps:[
+      { at:'.r3-mapbtn', say:'Harbor Town is open on the treasure map. Talk with the townsfolk of your trip, in Korean.' }
     ] }
   ];
   var WN_RECENT_DAYS = 14;   // a brand-new profile is shown only what's new in the last two weeks, not the whole history

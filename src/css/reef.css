@@ -519,3 +519,47 @@ body.reef-calm .lg-line.playing .lg-bubble{ transform:none; }
 .lg-done .btn .cc-ic{ width:22px; height:22px; }
 @media (max-width:420px){ .lg-line{ max-width:96%; } .lg-ko{ font-size:1.25rem; } .lg-bar .btn{ flex:1 1 auto; justify-content:center; } }
 @media (min-width:700px){ .lg-ko{ font-size:1.6rem; } .lg-q b, .lg-opt{ font-size:1.45rem; } .lg-page{ font-size:1.05rem; } }
+
+/* ---------- Harbor Town (town.js): the townsfolk and a conversation ----------
+   The same panels, bubbles and --lg-* tokens as Story Lagoon, so the two islands feel like one game. Added here:
+   hint notes between bubbles, the "typing" dots, the answer panel with its typing box, and the debrief. */
+.tw-hint{ display:flex; gap:8px; align-items:flex-start; align-self:center; max-width:92%; background:var(--lg-panel); border:2px dashed var(--lg-edge); border-radius:var(--r-md); padding:10px 12px; font-weight:700; color:var(--lg-ink); }
+.tw-hint .cc-ic{ flex:none; width:22px; height:22px; color:#e8a33d; }
+.tw-note .cc-ic{ color:var(--lg-teal); }
+.tw-hint b{ font-size:1.1rem; }
+.lg-line.tw-oops .lg-bubble{ border-color:var(--lg-no); border-style:dashed; }
+.tw-typed{ display:block; margin-top:4px; font-size:.85rem; font-weight:700; color:var(--lg-soft); }
+.tw-dots .lg-bubble{ display:flex; gap:6px; padding:14px 16px; }
+.tw-dots i{ width:9px; height:9px; border-radius:50%; background:var(--lg-soft); animation:twDot 1s ease-in-out infinite; }
+.tw-dots i:nth-child(2){ animation-delay:.15s; }
+.tw-dots i:nth-child(3){ animation-delay:.3s; }
+@keyframes twDot{ 0%, 100%{ opacity:.35; transform:translateY(0); } 50%{ opacity:1; transform:translateY(-3px); } }
+body.reef-calm .tw-dots i{ animation:none; opacity:.7; }
+.tw-turn{ display:flex; flex-direction:column; gap:10px; background:var(--lg-panel); border:2px solid var(--lg-teal); border-radius:var(--r-md); padding:12px; }
+.tw-turn-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.tw-turn-head b{ font-family:'Baloo 2',system-ui,sans-serif; font-size:1.15rem; }
+.tw-opt{ min-height:52px; font-size:1.2rem; }
+.tw-opt:disabled{ cursor:default; opacity:.6; }
+.tw-type{ display:flex; flex-direction:column; gap:6px; }
+.tw-type label{ font-weight:700; color:var(--lg-soft); font-size:.92rem; }
+.tw-type-row{ display:flex; gap:8px; }
+.tw-type input{ flex:1; min-width:0; min-height:48px; font:600 16px 'Nunito',sans-serif;   /* 16px keeps iPhone from zooming in */
+  color:var(--lg-ink); background:var(--lg-you); border:2px solid var(--lg-edge); border-radius:var(--r-sm); padding:8px 12px; }
+.tw-type input:focus{ outline:none; border-color:var(--lg-teal); }
+.tw-type .btn{ min-height:48px; padding:8px 18px; font-weight:800; }
+.tw-type-msg{ font-weight:700; color:var(--lg-ink); }
+.tw-bar{ justify-content:flex-end; }
+.tw-done h2{ margin:4px 0; }
+.tw-sec{ background:var(--lg-panel); border:2px solid var(--lg-edge); border-radius:var(--r-md); padding:12px 14px; }
+.tw-sec h3{ margin:0 0 6px; display:flex; align-items:center; gap:8px; font-family:'Baloo 2',system-ui,sans-serif; font-size:1.15rem; color:var(--lg-ink); }
+.tw-sec h3 .cc-ic{ width:22px; height:22px; color:var(--lg-teal); }
+.tw-sec p{ margin:0 0 6px; color:var(--lg-soft); font-weight:700; }
+.tw-phr, .tw-fix{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.tw-phr b{ display:block; font-size:1.2rem; }
+.tw-phr small{ display:block; color:var(--lg-soft); font-weight:700; }
+.tw-fix li{ font-weight:700; line-height:1.45; padding-left:12px; border-left:3px solid #e8a33d; }
+.tw-need li{ display:flex; gap:10px; align-items:center; }
+.tw-actions{ justify-content:center; }
+.tw-actions .btn{ min-height:48px; display:inline-flex; align-items:center; gap:8px; padding:10px 18px; font-weight:800; }
+.tw-actions .btn .cc-ic{ width:22px; height:22px; }
+@media (min-width:700px){ .tw-opt{ font-size:1.4rem; } .tw-phr b{ font-size:1.35rem; } }

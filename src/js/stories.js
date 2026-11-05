@@ -743,7 +743,7 @@
     });
     var LABEL = { known: '✅ Known', learning: '🌱 Learning', 'new': '✨ New' };
     // "Mine": the My words list (my-words.js), the words she missed, looked up or is losing hold of
-    var mine = myWordsList(), FROM = { missed: 'Missed', asked: 'Looked up', shaky: 'Fading' };
+    var mine = myWordsList(), FROM = { missed: 'Missed', asked: 'Looked up', shaky: 'Fading', town: 'Harbor Town' };
     if(filter === 'mine'){
       if(!mine.length) filter = wb.filter = 'all';
       else shown = mine.filter(function(e){ return !q || e.ko.toLowerCase().indexOf(q) !== -1 || String(e.en).toLowerCase().indexOf(q) !== -1; })

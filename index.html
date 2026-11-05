@@ -1987,6 +1987,8 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
      js/my-words.js             MY WORDS: missed, looked-up and shaky Korean words, practiced in their weakest way
      js/lagoon-stories.js       STORY LAGOON's built-in stories: twelve trip conversations with word meanings and questions
      js/lagoon.js               STORY LAGOON: the story list (best fit first) and the reader (listen, read, questions)
+     js/town-talks.js           HARBOR TOWN's townsfolk: eight branching trip conversations with word meanings
+     js/town.js                 HARBOR TOWN: the townsfolk list (best fit first), the conversation and its debrief
      js/ui-icons.js             drawn icons in place of emoji in every screen's titles, buttons and labels
      js/whats-new.js            What's new: Shelly points out new things after an update (one entry per release)
      js/vendor/three-gltfloader.js   THIRD-PARTY CODE: three.js GLTFLoader and BufferGeometryUtils (don't edit)
@@ -4100,6 +4102,8 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     if(S.view === 'wordBank') return renderWordBank();
     if(S.view === 'lagoon') return renderLagoon();
     if(S.view === 'lagoonRead') return renderLagoonRead();
+    if(S.view === 'town') return renderTown();
+    if(S.view === 'townTalk') return renderTownTalk();
     if(S.view === 'plan') return renderPlan();
     if(S.view === 'planMonth') return renderPlanMonth();
     if(S.view === 'flashFeed') return renderFlashFeed();         // Flash Feed -- same reasoning again,
@@ -6966,7 +6970,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     });
     var LABEL = { known: '✅ Known', learning: '🌱 Learning', 'new': '✨ New' };
     // "Mine": the My words list (my-words.js), the words she missed, looked up or is losing hold of
-    var mine = myWordsList(), FROM = { missed: 'Missed', asked: 'Looked up', shaky: 'Fading' };
+    var mine = myWordsList(), FROM = { missed: 'Missed', asked: 'Looked up', shaky: 'Fading', town: 'Harbor Town' };
     if(filter === 'mine'){
       if(!mine.length) filter = wb.filter = 'all';
       else shown = mine.filter(function(e){ return !q || e.ko.toLowerCase().indexOf(q) !== -1 || String(e.en).toLowerCase().indexOf(q) !== -1; })
@@ -11459,7 +11463,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     setTimeout(function(){ ov.remove(); reefBusy = false; window.__reefTx = false; }, end);
   }
   function reefInDeck(){
-    return ['study','summary','feed','story','equationFeed','langFeed','readAlong','flashFeed','miniStory','wordBank','lagoon','lagoonRead'].indexOf(S.view) !== -1;
+    return ['study','summary','feed','story','equationFeed','langFeed','readAlong','flashFeed','miniStory','wordBank','lagoon','lagoonRead','town','townTalk'].indexOf(S.view) !== -1;
   }
   // Every way out of a deck goes through goHome(), so this is the one place that adds the pop-up.
   function goHome(){
@@ -12766,6 +12770,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     sound: function(name){ try { if(Sound[name]) Sound[name](); } catch(e){} },
     startDeck: function(id){ reefStartDeck(id); },
     openLagoon: function(){ openLagoon(); },   // Story Lagoon (lagoon.js), from My course
+    openTown: function(){ openTown(); },       // Harbor Town (town.js), from My course
     night: function(){ try { return reefNight(); } catch(e){ return false; } },
     calm: function(){ try { return reefCalm(); } catch(e){ return false; } },
     // false in the Claude version and inside a grown-up profile, where the app asks no grown-up questions
@@ -13149,7 +13154,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     return '';
   }
 
-  // Adds a word (or brings it back to the top as due now). from: 'missed', 'asked' or 'shaky'. A shaky word that
+  // Adds a word (or brings it back to the top as due now). from: 'missed', 'asked', 'shaky' or 'town' (a phrase Harbor Town's talk needed). A shaky word that
   // is already listed is left as it is, so the weekly drift of memory doesn't keep resetting it.
   function myWordsAdd(ko, en, from){
     ko = myWordsPlain(ko).replace(/^[\s"'“”‘’]+|[\s"'“”‘’]+$/g, '');
@@ -13775,6 +13780,622 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     on('[data-lg-again]', function(){ lagoonOpenStory(s.id); });
   }
 /* end of src/js/lagoon.js */
+/* from src/js/town-talks.js */
+  /* ---------- HARBOR TOWN: the townsfolk and their conversations ----------
+     Eight people a traveler meets on a trip to Korea. Each conversation is a small map of turns (nodes): the
+     townsperson says a line, then the player answers. Nodes are { t, c } or { t, end:true }:
+       t   [Korean, English, words]: words glosses every space-separated piece of the Korean, in order, as
+           "piece=meaning" or "piece=meaning=base", joined by ";" (the same as Story Lagoon's lagoon-stories.js),
+           with the piece written without its punctuation and base the plain word as the decks have it.
+       c   the player's two or three answers. Each is { ko, en, w, g, to | hint, also, re }:
+             g      'best' (what a Korean would say), 'ok' (fine, it works) or 'oops' (a gentle mistake)
+             to     the node it leads to: different answers can lead to different next lines
+             hint   for an 'oops' only: what went wrong, in plain words, with the better phrase. An 'oops'
+                    leads nowhere; the player tries again.
+             also   other Korean answers that mean the same, accepted when typed (Hangul or English letters)
+             re     for answers that hold the player's own words (a country), a pattern a typed answer can match
+     Townspeople who serve customers use the honorific forms they would really use (드시고 가세요?, 있으세요?,
+     하시겠어요?); the player answers in polite 해요체. Several mistakes are the ones learners really make: using
+     the honorific -세요 about yourself, or 있어요 ("there is") where 주세요 ("please give me") is meant. */
+  var TOWN_FOLK = [
+    { id:'cafe', en:'Cafe owner', ko:'카페 사장님', place:'At a cafe', icon:'cup', start:'a', nodes:{
+      a:{ t:['어서 오세요. 뭐 드릴까요?', 'Welcome. What can I get you?', '어서=welcome (with 오세요)=어서 오세요;오세요=welcome, please come in=어서 오세요;뭐=what=뭐;드릴까요=shall I give you'],
+        c:[ { ko:'아이스 아메리카노 한 잔 주세요.', en:'One iced americano, please.', w:'아이스=iced;아메리카노=americano;한=one;잔=cup (counter)=잔;주세요=please give me=주세요', g:'best', to:'b',
+              also:['아이스 아메리카노 주세요', '아메리카노 한 잔 주세요', '아메리카노 주세요', '아이스 아메리카노 하나 주세요', '아아 주세요'] },
+            { ko:'따뜻한 라떼 한 잔 주세요.', en:'One hot latte, please.', w:'따뜻한=hot, warm=따뜻해요;라떼=latte;한=one;잔=cup (counter)=잔;주세요=please give me=주세요', g:'best', to:'b',
+              also:['라떼 주세요', '라떼 한 잔 주세요', '따뜻한 라떼 주세요', '카페라떼 주세요'] },
+            { ko:'아메리카노 있어요.', en:'There is an americano.', w:'아메리카노=americano;있어요=there is=있어요', g:'oops',
+              hint:'있어요 means "there is". To order, say what you want and add 주세요 (please give me): 아메리카노 주세요.' } ] },
+      b:{ t:['드시고 가세요?', 'Is it for here?', '드시고=have it (eat or drink, polite), and;가세요=go (are you going)'],
+        c:[ { ko:'네, 여기서 마실게요.', en:'Yes, I will drink it here.', w:'네=yes;여기서=here=여기;마실게요=I will drink=마셔요', g:'best', to:'here',
+              also:['여기서 마실게요', '여기서 먹을게요', '네 여기서 먹을게요', '먹고 갈게요', '마시고 갈게요', '네'] },
+            { ko:'아니요, 가져갈게요.', en:'No, I will take it with me.', w:'아니요=no=아니요;가져갈게요=I will take it with me', g:'best', to:'out',
+              also:['가져갈게요', '테이크아웃이요', '테이크아웃할게요', '포장이요', '포장해 주세요', '아니요'] },
+            { ko:'네, 가세요.', en:'Yes, please go.', w:'네=yes;가세요=please go', g:'oops',
+              hint:'가세요 on its own tells her to go! Answer with what you will do: 여기서 마실게요 (I will drink it here) or 가져갈게요 (I will take it).' } ] },
+      here:{ t:['네, 자리에 앉아 계시면 갖다 드릴게요.', 'Sure. Have a seat and I will bring it to you.', '네=sure, yes;자리에=at a seat;앉아=sit=앉아요;계시면=if you stay (polite);갖다=bring;드릴게요=I will give you'],
+        c:[ { ko:'감사합니다. 카드 돼요?', en:'Thank you. Can I pay by card?', w:'감사합니다=thank you=감사합니다;카드=card;돼요=does it work, is it okay', g:'best', to:'pay',
+              also:['카드 돼요', '카드 되나요', '카드로 할게요', '카드로 계산할게요'] },
+            { ko:'네, 감사합니다.', en:'Okay, thank you.', w:'네=okay, yes;감사합니다=thank you=감사합니다', g:'ok', to:'pay', also:['감사합니다', '고마워요'] } ] },
+      out:{ t:['네, 금방 해 드릴게요.', 'Sure, I will make it right away.', '네=sure, yes;금방=right away, soon;해=do, make;드릴게요=I will (do it for you)'],
+        c:[ { ko:'감사합니다. 카드 돼요?', en:'Thank you. Can I pay by card?', w:'감사합니다=thank you=감사합니다;카드=card;돼요=does it work, is it okay', g:'best', to:'pay',
+              also:['카드 돼요', '카드 되나요', '카드로 할게요', '카드로 계산할게요'] },
+            { ko:'네, 감사합니다.', en:'Okay, thank you.', w:'네=okay, yes;감사합니다=thank you=감사합니다', g:'ok', to:'pay', also:['감사합니다', '고마워요'] } ] },
+      pay:{ t:['네, 카드 돼요. 사천오백 원이에요.', 'Yes, cards are fine. It is four thousand five hundred won.', '네=yes;카드=card;돼요=works, is okay;사천오백=four thousand five hundred;원이에요=won it is=원'],
+        c:[ { ko:'여기요.', en:'Here you are.', w:'여기요=here you are=여기', g:'best', to:'end', also:['여기 있어요', '여기 있습니다', '네 여기요'] },
+            { ko:'카드 주세요.', en:'Give me a card, please.', w:'카드=card;주세요=please give me=주세요', g:'oops',
+              hint:'카드 주세요 asks her to give you a card. Hand yours over with 여기요 (here you are).' } ] },
+      end:{ t:['감사합니다. 좋은 하루 보내세요!', 'Thank you. Have a nice day!', '감사합니다=thank you=감사합니다;좋은=good, nice;하루=day;보내세요=have (spend) it'], end:true }
+    } },
+
+    { id:'restaurant', en:'Restaurant server', ko:'식당 직원', place:'At a restaurant', icon:'bowl', start:'a', nodes:{
+      a:{ t:['어서 오세요. 몇 분이세요?', 'Welcome. How many are you?', '어서=welcome (with 오세요)=어서 오세요;오세요=welcome, please come in=어서 오세요;몇=how many=몇;분이세요=people (polite) are you'],
+        c:[ { ko:'두 명이요.', en:'Two people.', w:'두=two=둘;명이요=people (counter)=명', g:'best', to:'menu', also:['두 명', '두 명이에요', '두 명입니다', '둘이요', '두 사람이요'] },
+            { ko:'한 명이요.', en:'Just one.', w:'한=one=하나;명이요=person (counter)=명', g:'best', to:'menu', also:['한 명', '한 명이에요', '혼자예요', '혼자요', '한 명입니다'] },
+            { ko:'둘 명이요.', en:'(Two, said the wrong way.)', w:'둘=two=둘;명이요=people (counter)=명', g:'oops',
+              hint:'Before a counter like 명, 둘 becomes 두 (and 하나 becomes 한): 두 명이요.' } ] },
+      menu:{ t:['이쪽으로 앉으세요. 여기 메뉴판이요.', 'Please sit over here. Here is the menu.', '이쪽으로=this way, over here;앉으세요=please sit=앉아요;여기=here=여기;메뉴판이요=the menu'],
+        c:[ { ko:'뭐가 맛있어요?', en:'What is good here?', w:'뭐가=what=뭐;맛있어요=is delicious=맛있어요', g:'best', to:'rec',
+              also:['뭐가 맛있어요', '추천해 주세요', '뭐 추천해요', '추천 메뉴 있어요'] },
+            { ko:'비빔밥 하나 주세요.', en:'One bibimbap, please.', w:'비빔밥=bibimbap (rice mixed with vegetables);하나=one=하나;주세요=please give me=주세요', g:'best', to:'order',
+              also:['비빔밥 주세요', '비빔밥 하나요', '비빔밥 한 그릇 주세요'] },
+            { ko:'비빔밥 하나 줘.', en:'Give me one bibimbap. (casual)', w:'비빔밥=bibimbap=비빔밥;하나=one=하나;줘=give me (casual)', g:'oops',
+              hint:'줘 is casual, for close friends. With a server, use 주세요: 비빔밥 하나 주세요.' } ] },
+      rec:{ t:['김치찌개가 맛있어요. 조금 매워요.', 'The kimchi stew is good. It is a little spicy.', '김치찌개가=the kimchi stew=김치;맛있어요=is delicious=맛있어요;조금=a little;매워요=is spicy'],
+        c:[ { ko:'그럼 김치찌개 하나 주세요.', en:'Then one kimchi stew, please.', w:'그럼=then, in that case;김치찌개=kimchi stew=김치;하나=one=하나;주세요=please give me=주세요', g:'best', to:'order',
+              also:['김치찌개 주세요', '김치찌개 하나 주세요', '그럼 김치찌개 주세요', '김치찌개 하나요'] },
+            { ko:'안 매운 거 있어요?', en:'Do you have something that is not spicy?', w:'안=not;매운=spicy=매워요;거=thing, one;있어요=do you have=있어요', g:'best', to:'mild',
+              also:['안 매운 거 있어요', '안 매운 음식 있어요', '덜 매운 거 있어요'] },
+            { ko:'김치찌개 하나 있어요.', en:'There is one kimchi stew.', w:'김치찌개=kimchi stew=김치;하나=one=하나;있어요=there is=있어요', g:'oops',
+              hint:'있어요 means "there is". To order, use 주세요: 김치찌개 하나 주세요.' } ] },
+      mild:{ t:['그럼 불고기 어떠세요? 안 매워요.', 'Then how about bulgogi? It is not spicy.', '그럼=then, in that case;불고기=bulgogi (sweet grilled beef);어떠세요=how about it (polite)=어때요;안=not;매워요=is spicy'],
+        c:[ { ko:'좋아요. 불고기 하나 주세요.', en:'Sounds good. One bulgogi, please.', w:'좋아요=good, sounds good=좋아요;불고기=bulgogi=불고기;하나=one=하나;주세요=please give me=주세요', g:'best', to:'order',
+              also:['불고기 주세요', '불고기 하나 주세요', '좋아요', '그걸로 주세요', '네 그걸로 할게요'] },
+            { ko:'네, 그거 주세요.', en:'Okay, that one, please.', w:'네=okay, yes;그거=that one=그것;주세요=please give me=주세요', g:'ok', to:'order', also:['그거 주세요', '네 그거요'] } ] },
+      order:{ t:['네, 잠시만 기다려 주세요. 물은 셀프예요.', 'Okay, please wait a moment. Water is self-service.', '네=okay, yes;잠시만=just a moment;기다려=wait=기다려요;주세요=please (do it for me);물은=water=물;셀프예요=is self-service'],
+        c:[ { ko:'네, 감사합니다.', en:'Okay, thank you.', w:'네=okay, yes;감사합니다=thank you=감사합니다', g:'best', to:'meal', also:['감사합니다', '알겠어요', '네 알겠습니다'] },
+            { ko:'물은 어디 있어요?', en:'Where is the water?', w:'물은=the water=물;어디=where=어디;있어요=is it=있어요', g:'best', to:'water', also:['물 어디 있어요', '물은 어디에 있어요', '물 어디예요'] } ] },
+      water:{ t:['저기 정수기에 있어요.', 'It is at the water dispenser over there.', '저기=over there;정수기에=at the water dispenser;있어요=it is=있어요'],
+        c:[ { ko:'아, 네. 감사합니다.', en:'Oh, okay. Thank you.', w:'아=oh;네=okay, yes;감사합니다=thank you=감사합니다', g:'best', to:'meal', also:['감사합니다', '네 감사합니다'] } ] },
+      meal:{ t:['맛있게 드셨어요?', 'Did you enjoy your meal?', '맛있게=deliciously, with enjoyment=맛있어요;드셨어요=did you eat (polite)'],
+        c:[ { ko:'네, 정말 맛있었어요.', en:'Yes, it was really delicious.', w:'네=yes;정말=really;맛있었어요=was delicious=맛있어요', g:'best', to:'end',
+              also:['맛있었어요', '정말 맛있었어요', '네 맛있었어요', '잘 먹었습니다', '잘 먹었어요'] },
+            { ko:'네, 계산해 주세요.', en:'Yes, the bill, please.', w:'네=yes;계산해=pay, settle the bill;주세요=please (do it for me)', g:'ok', to:'end', also:['계산해 주세요', '계산할게요'] },
+            { ko:'네, 맛있게 드셨어요.', en:'Yes, you enjoyed your meal.', w:'네=yes;맛있게=deliciously=맛있어요;드셨어요=ate (polite, about someone else)', g:'oops',
+              hint:'드셨어요 is the polite form for someone else. About your own meal, say 맛있었어요 (it was delicious).' } ] },
+      end:{ t:['감사합니다. 또 오세요!', 'Thank you. Please come again!', '감사합니다=thank you=감사합니다;또=again;오세요=please come'], end:true }
+    } },
+
+    { id:'shop', en:'Shop clerk', ko:'가게 직원', place:'At a clothes shop', icon:'bag', start:'a', nodes:{
+      a:{ t:['어서 오세요. 찾으시는 거 있으세요?', 'Welcome. Are you looking for anything?', '어서=welcome (with 오세요)=어서 오세요;오세요=welcome, please come in=어서 오세요;찾으시는=you are looking for (polite);거=thing;있으세요=is there (polite)'],
+        c:[ { ko:'그냥 구경하고 있어요.', en:'I am just looking.', w:'그냥=just;구경하고=looking around;있어요=I am (doing)', g:'best', to:'look',
+              also:['그냥 구경할게요', '구경하고 있어요', '그냥 볼게요', '그냥 보고 있어요'] },
+            { ko:'이 티셔츠 얼마예요?', en:'How much is this T-shirt?', w:'이=this=이것;티셔츠=T-shirt=셔츠;얼마예요=how much is it=얼마', g:'best', to:'price',
+              also:['이거 얼마예요', '티셔츠 얼마예요', '얼마예요'] },
+            { ko:'네, 찾으세요.', en:'Yes, please look for it.', w:'네=yes;찾으세요=please look for (polite, to someone else)', g:'oops',
+              hint:'찾으세요 asks her to look. Say what you want instead: 이거 얼마예요? (how much is this?) or 그냥 구경하고 있어요 (I am just looking).' } ] },
+      look:{ t:['네, 천천히 보세요.', 'Sure, take your time.', '네=sure, yes;천천히=slowly, take your time;보세요=please look'],
+        c:[ { ko:'이 티셔츠 얼마예요?', en:'How much is this T-shirt?', w:'이=this=이것;티셔츠=T-shirt=셔츠;얼마예요=how much is it=얼마', g:'best', to:'price',
+              also:['이거 얼마예요', '티셔츠 얼마예요', '얼마예요'] },
+            { ko:'이 티셔츠 몇 개예요?', en:'How many is this T-shirt?', w:'이=this=이것;티셔츠=T-shirt=셔츠;몇=how many=몇;개예요=items is it=개', g:'oops',
+              hint:'몇 개 asks how many. For the price, ask 얼마예요? (how much is it?).' } ] },
+      price:{ t:['만 오천 원이에요.', 'It is fifteen thousand won.', '만=ten thousand;오천=five thousand;원이에요=won it is=원'],
+        c:[ { ko:'이거 주세요.', en:'I will take this, please.', w:'이거=this one=이것;주세요=please give me=주세요', g:'best', to:'pay', also:['이거 살게요', '이걸로 주세요', '이거 할게요', '주세요'] },
+            { ko:'다른 색도 있어요?', en:'Do you have other colors too?', w:'다른=other;색도=color too=색;있어요=do you have=있어요', g:'best', to:'color',
+              also:['다른 색 있어요', '다른 색깔 있어요', '다른 색깔도 있어요'] },
+            { ko:'만 오천 원 주세요.', en:'Give me fifteen thousand won, please.', w:'만=ten thousand;오천=five thousand;원=won=원;주세요=please give me=주세요', g:'oops',
+              hint:'That asks her to give you 15,000 won! To buy it, say 이거 주세요 (I will take this).' } ] },
+      color:{ t:['네, 검은색하고 흰색 있어요.', 'Yes, we have black and white.', '네=yes;검은색하고=black, and=검은색;흰색=white=흰색;있어요=we have=있어요'],
+        c:[ { ko:'흰색으로 주세요.', en:'The white one, please.', w:'흰색으로=the white one=흰색;주세요=please give me=주세요', g:'best', to:'pay', also:['흰색 주세요', '흰색으로 할게요', '흰색이요'] },
+            { ko:'검은색으로 주세요.', en:'The black one, please.', w:'검은색으로=the black one=검은색;주세요=please give me=주세요', g:'best', to:'pay', also:['검은색 주세요', '검은색으로 할게요', '검은색이요', '까만색으로 주세요'] },
+            { ko:'흰색 있어요.', en:'There is white.', w:'흰색=white=흰색;있어요=there is=있어요', g:'oops',
+              hint:'She just told you there is white. To choose it, say 흰색으로 주세요 (the white one, please).' } ] },
+      pay:{ t:['카드로 하시겠어요?', 'Will you pay by card?', '카드로=by card=카드;하시겠어요=will you do (polite)'],
+        c:[ { ko:'네, 카드로 할게요.', en:'Yes, I will pay by card.', w:'네=yes;카드로=by card=카드;할게요=I will do', g:'best', to:'bag', also:['카드로 할게요', '네 카드요', '카드요', '네'] },
+            { ko:'아니요, 현금으로 할게요.', en:'No, I will pay in cash.', w:'아니요=no=아니요;현금으로=in cash=현금;할게요=I will do', g:'best', to:'bag', also:['현금으로 할게요', '현금이요', '현금으로요'] },
+            { ko:'네, 카드로 하시겠어요.', en:'Yes, you will pay by card. (polite, about someone else)', w:'네=yes;카드로=by card=카드;하시겠어요=will you do (polite, about someone else)', g:'oops',
+              hint:'하시겠어요 is the polite form for someone else. About yourself, say 카드로 할게요 (I will pay by card).' } ] },
+      bag:{ t:['봉투 필요하세요?', 'Do you need a bag?', '봉투=bag (paper or plastic);필요하세요=do you need (polite)=필요해요'],
+        c:[ { ko:'네, 주세요.', en:'Yes, please.', w:'네=yes;주세요=please give me=주세요', g:'best', to:'end', also:['봉투 주세요', '네 필요해요', '필요해요'] },
+            { ko:'아니요, 괜찮아요.', en:'No, I am fine.', w:'아니요=no=아니요;괜찮아요=it is fine=괜찮아요', g:'best', to:'end', also:['괜찮아요', '필요 없어요', '아니요'] } ] },
+      end:{ t:['감사합니다. 안녕히 가세요.', 'Thank you. Goodbye.', '감사합니다=thank you=감사합니다;안녕히=in peace, safely=안녕히 가세요;가세요=go (goodbye, to someone leaving)=안녕히 가세요'], end:true }
+    } },
+
+    { id:'taxi', en:'Taxi driver', ko:'택시 기사님', place:'In a taxi', icon:'car', start:'a', nodes:{
+      a:{ t:['안녕하세요. 어디로 가세요?', 'Hello. Where are you going?', '안녕하세요=hello;어디로=where to=어디;가세요=are you going (polite)=가요'],
+        c:[ { ko:'명동역으로 가 주세요.', en:'To Myeongdong Station, please.', w:'명동역으로=to Myeongdong Station=역;가=go=가요;주세요=please (do it for me)', g:'best', to:'belt',
+              also:['명동역 가 주세요', '명동역으로 가주세요', '명동역이요', '명동역으로요', '명동 가 주세요'] },
+            { ko:'이 주소로 가 주세요.', en:'To this address, please.', w:'이=this=이것;주소로=to the address;가=go=가요;주세요=please (do it for me)', g:'best', to:'addr',
+              also:['여기로 가 주세요', '이 주소로 가주세요', '여기 가 주세요', '이 주소요'] },
+            { ko:'명동역이에요.', en:'It is Myeongdong Station.', w:'명동역이에요=it is Myeongdong Station=역', g:'oops',
+              hint:'That only says "it is Myeongdong Station". Add 가 주세요 (please take me): 명동역으로 가 주세요.' } ] },
+      addr:{ t:['아, 서울 호텔이요? 알겠습니다.', 'Ah, the Seoul Hotel? Got it.', '아=ah;서울=Seoul;호텔이요=the hotel?;알겠습니다=got it, understood'],
+        c:[ { ko:'네, 맞아요.', en:'Yes, that is right.', w:'네=yes;맞아요=that is right', g:'best', to:'belt', also:['맞아요', '네', '네 거기요'] } ] },
+      belt:{ t:['네. 안전벨트 매 주세요.', 'All right. Please fasten your seat belt.', '네=all right, yes;안전벨트=seat belt;매=fasten, tie;주세요=please (do it for me)'],
+        c:[ { ko:'네. 얼마나 걸려요?', en:'Okay. How long does it take?', w:'네=okay, yes;얼마나=how long, how much=얼마나;걸려요=does it take (time)', g:'best', to:'traffic',
+              also:['얼마나 걸려요', '시간 얼마나 걸려요', '멀어요', '오래 걸려요'] },
+            { ko:'네.', en:'Okay.', w:'네=okay, yes', g:'ok', to:'arrive', also:['알겠어요', '네 알겠습니다'] } ] },
+      traffic:{ t:['길이 좀 막혀서 삼십 분쯤 걸려요.', 'The roads are a bit jammed, so it takes about thirty minutes.', '길이=the road;좀=a bit;막혀서=is jammed, so;삼십=thirty=삼십 분;분쯤=minutes, about=분;걸려요=it takes (time)'],
+        c:[ { ko:'네, 괜찮아요.', en:'Okay, that is fine.', w:'네=okay, yes;괜찮아요=it is fine=괜찮아요', g:'best', to:'arrive', also:['괜찮아요', '알겠어요', '네'] },
+            { ko:'삼십 분 주세요.', en:'Thirty minutes, please.', w:'삼십=thirty=삼십 분;분=minutes=분;주세요=please give me=주세요', g:'oops',
+              hint:'That asks him for thirty minutes. To say it is fine, say 네, 괜찮아요.' } ] },
+      arrive:{ t:['도착했습니다. 만 이천 원입니다.', 'We have arrived. It is twelve thousand won.', '도착했습니다=we have arrived;만=ten thousand;이천=two thousand;원입니다=won it is=원'],
+        c:[ { ko:'카드로 할게요.', en:'I will pay by card.', w:'카드로=by card=카드;할게요=I will do', g:'best', to:'receipt', also:['카드요', '카드로 계산할게요', '카드 돼요'] },
+            { ko:'여기요.', en:'Here you are.', w:'여기요=here you are=여기', g:'best', to:'receipt', also:['여기 있어요', '여기 있습니다'] },
+            { ko:'카드 주세요.', en:'Give me a card, please.', w:'카드=card;주세요=please give me=주세요', g:'oops',
+              hint:'카드 주세요 asks him to give you a card. Say 카드로 할게요 (I will pay by card).' } ] },
+      receipt:{ t:['영수증 드릴까요?', 'Would you like a receipt?', '영수증=receipt;드릴까요=shall I give you'],
+        c:[ { ko:'네, 주세요.', en:'Yes, please.', w:'네=yes;주세요=please give me=주세요', g:'best', to:'end', also:['영수증 주세요', '네 영수증 주세요'] },
+            { ko:'아니요, 괜찮아요.', en:'No, that is all right.', w:'아니요=no=아니요;괜찮아요=it is fine=괜찮아요', g:'best', to:'end', also:['괜찮아요', '아니요'] } ] },
+      end:{ t:['감사합니다. 안녕히 가세요.', 'Thank you. Goodbye.', '감사합니다=thank you=감사합니다;안녕히=in peace, safely=안녕히 가세요;가세요=go (goodbye, to someone leaving)=안녕히 가세요'], end:true }
+    } },
+
+    { id:'subway', en:'Subway helper', ko:'역 직원', place:'At the subway station', icon:'train', start:'a', nodes:{
+      a:{ t:['무엇을 도와드릴까요?', 'How can I help you?', '무엇을=what=뭐;도와드릴까요=shall I help you'],
+        c:[ { ko:'명동역에 어떻게 가요?', en:'How do I get to Myeongdong Station?', w:'명동역에=to Myeongdong Station=역;어떻게=how=어떻게;가요=do I go=가요', g:'best', to:'line',
+              also:['명동역 어떻게 가요', '명동역에 가고 싶어요', '명동역 가고 싶어요', '실례지만 명동역에 어떻게 가요'] },
+            { ko:'명동역 어디예요?', en:'Where is Myeongdong Station?', w:'명동역=Myeongdong Station=역;어디예요=where is it=어디', g:'ok', to:'line', also:['명동역이 어디예요', '명동역은 어디예요'] },
+            { ko:'명동역 가세요?', en:'Are you going to Myeongdong Station?', w:'명동역=Myeongdong Station=역;가세요=are you going (polite, about someone else)=가요', g:'oops',
+              hint:'가세요? asks if she is going there. Ask the way: 명동역에 어떻게 가요? (how do I get to Myeongdong Station?)' } ] },
+      line:{ t:['사 호선을 타세요. 하늘색이에요.', 'Take Line 4. It is the light blue one.', '사=four=사;호선을=subway line;타세요=please take (ride);하늘색이에요=it is light blue'],
+        c:[ { ko:'몇 정거장 가요?', en:'How many stops is it?', w:'몇=how many=몇;정거장=stops;가요=do I go=가요', g:'best', to:'stops', also:['몇 정거장이에요', '멀어요', '몇 정거장 가야 돼요'] },
+            { ko:'어디에서 타요?', en:'Where do I get on?', w:'어디에서=where=어디;타요=do I get on (ride)', g:'best', to:'where', also:['어디서 타요', '어디에서 타야 돼요', '타는 곳이 어디예요'] },
+            { ko:'사 호선 주세요.', en:'Line 4, please.', w:'사=four=사;호선=subway line;주세요=please give me=주세요', g:'oops',
+              hint:'주세요 asks for a thing. To ask how far it is, say 몇 정거장 가요? (how many stops?)' } ] },
+      stops:{ t:['다섯 정거장 가면 돼요.', 'Go five stops and you are there.', '다섯=five=다섯;정거장=stops;가면=if you go=가요;돼요=it works, that is it'],
+        c:[ { ko:'어디에서 타요?', en:'Where do I get on?', w:'어디에서=where=어디;타요=do I get on (ride)', g:'best', to:'where', also:['어디서 타요', '어디에서 타야 돼요', '타는 곳이 어디예요'] },
+            { ko:'네, 감사합니다.', en:'Okay, thank you.', w:'네=okay, yes;감사합니다=thank you=감사합니다', g:'ok', to:'card', also:['감사합니다', '고마워요'] } ] },
+      where:{ t:['저쪽 계단으로 내려가세요.', 'Go down the stairs over there.', '저쪽=over there;계단으로=by the stairs;내려가세요=please go down'],
+        c:[ { ko:'네, 감사합니다.', en:'Okay, thank you.', w:'네=okay, yes;감사합니다=thank you=감사합니다', g:'best', to:'card', also:['감사합니다', '알겠어요', '고마워요'] } ] },
+      card:{ t:['교통카드 있으세요?', 'Do you have a transit card?', '교통카드=transit card;있으세요=do you have (polite)=있어요'],
+        c:[ { ko:'네, 있어요.', en:'Yes, I have one.', w:'네=yes;있어요=I have=있어요', g:'best', to:'end', also:['있어요', '네'] },
+            { ko:'아니요, 없어요. 어디서 사요?', en:'No, I do not. Where do I buy one?', w:'아니요=no=아니요;없어요=I do not have=없어요;어디서=where=어디;사요=do I buy=사요', g:'best', to:'buy',
+              also:['없어요', '아니요 없어요', '어디서 사요', '어디에서 사요'] },
+            { ko:'네, 있으세요.', en:'(Yes, you have one, said about yourself.)', w:'네=yes;있으세요=have (polite, about someone else)=있어요', g:'oops',
+              hint:'있으세요 is the polite form for someone else. About yourself, say 있어요.' } ] },
+      buy:{ t:['편의점에서 살 수 있어요.', 'You can buy one at a convenience store.', '편의점에서=at a convenience store;살=buy=사요;수=can (with 있어요);있어요=can (with 수)=있어요'],
+        c:[ { ko:'아, 네. 감사합니다.', en:'Oh, okay. Thank you.', w:'아=oh;네=okay, yes;감사합니다=thank you=감사합니다', g:'best', to:'end', also:['감사합니다', '네 감사합니다', '알겠어요'] } ] },
+      end:{ t:['네, 조심히 가세요.', 'You are welcome. Take care on your way.', '네=yes, you are welcome;조심히=carefully, safely;가세요=go (polite)=가요'], end:true }
+    } },
+
+    { id:'hotel', en:'Hotel front desk', ko:'호텔 직원', place:'At the hotel', icon:'bed', start:'a', nodes:{
+      a:{ t:['안녕하세요. 체크인하시겠어요?', 'Hello. Are you checking in?', '안녕하세요=hello;체크인하시겠어요=will you check in (polite)'],
+        c:[ { ko:'네, 예약했어요.', en:'Yes, I have a reservation.', w:'네=yes;예약했어요=I made a reservation', g:'best', to:'name', also:['예약했어요', '네 예약했습니다', '네 예약했는데요'] },
+            { ko:'네, 체크인하고 싶어요.', en:'Yes, I would like to check in.', w:'네=yes;체크인하고=check in;싶어요=I would like to', g:'best', to:'name', also:['체크인하고 싶어요', '체크인할게요', '네 체크인할게요', '네'] },
+            { ko:'네, 체크인하시겠어요.', en:'(Yes, you will check in, said about yourself.)', w:'네=yes;체크인하시겠어요=will check in (polite, about someone else)', g:'oops',
+              hint:'하시겠어요 is the polite form for someone else. About yourself, say 체크인하고 싶어요 or 예약했어요.' } ] },
+      name:{ t:['성함이 어떻게 되세요?', 'May I have your name?', '성함이=name (polite)=이름;어떻게=how=어떻게;되세요=is (polite)'],
+        c:[ { ko:'여기 여권 있어요.', en:'Here is my passport.', w:'여기=here=여기;여권=passport;있어요=it is (there is)=있어요', g:'best', to:'room',
+              also:['여권 여기 있어요', '여기 여권이요', '여권이요', '여기요'] },
+            { ko:'제 이름은 사라예요.', en:'My name is Sarah.', w:'제=my;이름은=name=이름;사라예요=is Sarah', g:'ok', to:'room', re:/이름은.*(예요|이에요|입니다)$/ },
+            { ko:'제 성함은 사라예요.', en:'My name (polite) is Sarah.', w:'제=my;성함은=name (polite, for someone else)=이름;사라예요=is Sarah', g:'oops',
+              hint:'성함 is the polite word for someone else\'s name. For your own, say 제 이름은 … 예요, or show your passport: 여기 여권 있어요.' } ] },
+      room:{ t:['네, 확인됐습니다. 방은 십이 층이에요.', 'Thank you, you are all set. Your room is on the twelfth floor.', '네=yes, all right;확인됐습니다=it is confirmed;방은=the room=방;십이=twelve;층이에요=is the floor=층'],
+        c:[ { ko:'아침 식사는 몇 시예요?', en:'What time is breakfast?', w:'아침=morning=아침;식사는=meal=아침 식사;몇=what (how many)=몇;시예요=o\'clock is it=시', g:'best', to:'breakfast',
+              also:['아침 몇 시예요', '조식은 몇 시예요', '아침 식사 몇 시예요', '아침은 몇 시예요'] },
+            { ko:'와이파이 비밀번호가 뭐예요?', en:'What is the Wi-Fi password?', w:'와이파이=Wi-Fi;비밀번호가=password=비밀번호;뭐예요=what is it=뭐', g:'best', to:'wifi',
+              also:['와이파이 비밀번호 뭐예요', '와이파이 비밀번호요', '비밀번호가 뭐예요'] },
+            { ko:'아침 식사는 몇 개예요?', en:'How many is breakfast?', w:'아침=morning=아침;식사는=meal=아침 식사;몇=how many=몇;개예요=items is it=개', g:'oops',
+              hint:'몇 개 counts things. For the time, ask 몇 시예요? (what time is it?)' } ] },
+      breakfast:{ t:['일곱 시부터 열 시까지예요. 이 층 식당에서 드시면 돼요.', 'From seven to ten. You can eat at the restaurant on the second floor.',
+          '일곱=seven=일곱;시부터=o\'clock, from=시;열=ten=열;시까지예요=o\'clock, until=시;이=two=이;층=floor=층;식당에서=at the restaurant=식당;드시면=if you eat (polite);돼요=it works, that is it'],
+        c:[ { ko:'와이파이 비밀번호가 뭐예요?', en:'What is the Wi-Fi password?', w:'와이파이=Wi-Fi;비밀번호가=password=비밀번호;뭐예요=what is it=뭐', g:'best', to:'wifi',
+              also:['와이파이 비밀번호 뭐예요', '와이파이 비밀번호요', '비밀번호가 뭐예요'] },
+            { ko:'네, 감사합니다.', en:'Okay, thank you.', w:'네=okay, yes;감사합니다=thank you=감사합니다', g:'ok', to:'end', also:['감사합니다', '알겠어요'] } ] },
+      wifi:{ t:['방 카드 뒤에 있어요.', 'It is on the back of your room card.', '방=room=방;카드=card;뒤에=on the back, behind=뒤;있어요=it is=있어요'],
+        c:[ { ko:'네, 감사합니다.', en:'Okay, thank you.', w:'네=okay, yes;감사합니다=thank you=감사합니다', g:'best', to:'end', also:['감사합니다', '알겠어요', '고마워요'] } ] },
+      end:{ t:['편히 쉬세요.', 'Have a restful stay.', '편히=comfortably;쉬세요=please rest'], end:true }
+    } },
+
+    { id:'pharmacy', en:'Pharmacist', ko:'약사', place:'At the pharmacy', icon:'plus', start:'a', nodes:{
+      a:{ t:['어서 오세요. 어디가 불편하세요?', 'Welcome. What seems to be the trouble?', '어서=welcome (with 오세요)=어서 오세요;오세요=welcome, please come in=어서 오세요;어디가=where=어디;불편하세요=are you uncomfortable (polite)'],
+        c:[ { ko:'머리가 아파요.', en:'I have a headache.', w:'머리가=head=머리;아파요=hurts=아파요', g:'best', to:'head', also:['머리 아파요', '두통이 있어요', '머리가 너무 아파요'] },
+            { ko:'목이 아프고 기침을 해요.', en:'My throat hurts and I am coughing.', w:'목이=throat=목;아프고=hurts, and=아파요;기침을=a cough;해요=I do=해요', g:'best', to:'cold',
+              also:['목이 아파요', '기침을 해요', '감기에 걸렸어요', '감기 걸렸어요', '기침해요'] },
+            { ko:'머리가 아프세요.', en:'(Your head hurts, said about yourself.)', w:'머리가=head=머리;아프세요=hurts (polite, about someone else)=아파요', g:'oops',
+              hint:'아프세요 is the polite form for someone else. About yourself, say 아파요: 머리가 아파요.' } ] },
+      head:{ t:['언제부터 아프셨어요?', 'Since when has it hurt?', '언제부터=since when;아프셨어요=has it hurt (polite)=아파요'],
+        c:[ { ko:'어제부터요.', en:'Since yesterday.', w:'어제부터요=since yesterday=어제', g:'best', to:'pill', also:['어제부터 아파요', '어제부터 아팠어요', '어제요'] },
+            { ko:'오늘 아침부터요.', en:'Since this morning.', w:'오늘=today=오늘;아침부터요=since the morning=아침', g:'best', to:'pill', also:['아침부터요', '오늘부터요', '오늘 아침부터 아파요'] },
+            { ko:'내일부터요.', en:'Since tomorrow.', w:'내일부터요=since tomorrow=내일', g:'oops',
+              hint:'내일 is tomorrow. For since yesterday, say 어제부터요.' } ] },
+      cold:{ t:['열도 있으세요?', 'Do you have a fever too?', '열도=fever too=열;있으세요=do you have (polite)=있어요'],
+        c:[ { ko:'아니요, 열은 없어요.', en:'No, I do not have a fever.', w:'아니요=no=아니요;열은=a fever=열;없어요=I do not have=없어요', g:'best', to:'syrup', also:['열은 없어요', '없어요', '아니요 없어요', '아니요'] },
+            { ko:'네, 조금 있어요.', en:'Yes, a little.', w:'네=yes;조금=a little;있어요=I have=있어요', g:'best', to:'syrup', also:['조금 있어요', '네 있어요', '열이 있어요', '있어요'] },
+            { ko:'네, 열이 있으세요.', en:'(Yes, you have a fever, said about yourself.)', w:'네=yes;열이=a fever=열;있으세요=have (polite, about someone else)=있어요', g:'oops',
+              hint:'있으세요 is the polite form for someone else. About yourself, say 있어요: 네, 조금 있어요.' } ] },
+      pill:{ t:['이 약 드세요. 하루에 세 번, 식후에 드세요.', 'Take this medicine. Three times a day, after meals.', '이=this=이것;약=medicine;드세요=please take (eat, polite);하루에=a day;세=three=셋;번=times;식후에=after meals;드세요=please take (eat, polite)'],
+        c:[ { ko:'네, 알겠어요. 얼마예요?', en:'Okay, I see. How much is it?', w:'네=okay, yes;알겠어요=I see, got it;얼마예요=how much is it=얼마', g:'best', to:'end', also:['얼마예요', '알겠어요', '네 알겠습니다'] },
+            { ko:'식후가 뭐예요?', en:'What does 식후 mean?', w:'식후가=식후 (after meals);뭐예요=what is it=뭐', g:'best', to:'meal', also:['식후가 뭐예요', '식후는 뭐예요', '식후요'] } ] },
+      syrup:{ t:['이 감기약 드세요. 하루에 세 번, 식후에 드세요.', 'Take this cold medicine. Three times a day, after meals.', '이=this=이것;감기약=cold medicine=감기;드세요=please take (eat, polite);하루에=a day;세=three=셋;번=times;식후에=after meals;드세요=please take (eat, polite)'],
+        c:[ { ko:'네, 알겠어요. 얼마예요?', en:'Okay, I see. How much is it?', w:'네=okay, yes;알겠어요=I see, got it;얼마예요=how much is it=얼마', g:'best', to:'end', also:['얼마예요', '알겠어요', '네 알겠습니다'] },
+            { ko:'식후가 뭐예요?', en:'What does 식후 mean?', w:'식후가=식후 (after meals);뭐예요=what is it=뭐', g:'best', to:'meal', also:['식후가 뭐예요', '식후는 뭐예요', '식후요'] } ] },
+      meal:{ t:['밥 먹고 삼십 분 후에 드시라는 뜻이에요.', 'It means take it thirty minutes after you eat.', '밥=a meal, rice=밥;먹고=eat, and=먹어요;삼십=thirty=삼십 분;분=minutes=분;후에=after;드시라는=to take it (polite);뜻이에요=it means'],
+        c:[ { ko:'아, 네. 감사합니다. 얼마예요?', en:'Oh, okay. Thank you. How much is it?', w:'아=oh;네=okay, yes;감사합니다=thank you=감사합니다;얼마예요=how much is it=얼마', g:'best', to:'end',
+              also:['얼마예요', '감사합니다', '알겠어요'] } ] },
+      end:{ t:['오천 원이에요. 빨리 나으세요.', 'It is five thousand won. Get well soon.', '오천=five thousand;원이에요=won it is=원;빨리=soon, quickly;나으세요=please get better'], end:true }
+    } },
+
+    { id:'friend', en:'A new friend', ko:'새 친구 지수', place:'Meeting someone', icon:'wave', start:'a', nodes:{
+      a:{ t:['안녕하세요! 저는 지수예요. 만나서 반가워요.', 'Hi! I am Jisu. Nice to meet you.', '안녕하세요=hello;저는=I=저;지수예요=am Jisu;만나서=meeting you, so=만나요;반가워요=I am glad'],
+        c:[ { ko:'저도 반가워요.', en:'Nice to meet you too.', w:'저도=me too=저;반가워요=I am glad', g:'best', to:'from', also:['반가워요', '저도 만나서 반가워요', '만나서 반가워요', '반갑습니다'] },
+            { ko:'저는 지수예요.', en:'I am Jisu.', w:'저는=I=저;지수예요=am Jisu', g:'oops',
+              hint:'That says "I am Jisu", but she is Jisu! Answer 저도 반가워요 (nice to meet you too).' } ] },
+      from:{ t:['어느 나라에서 왔어요?', 'What country are you from?', '어느=which;나라에서=country, from=나라;왔어요=did you come=와요'],
+        c:[ { ko:'미국에서 왔어요.', en:'I am from the United States.', w:'미국에서=from the United States=미국;왔어요=I came=와요', g:'best', to:'why', also:['미국 사람이에요', '미국이요'], re:/에서\s*왔어요$|사람이에요$/ },
+            { ko:'캐나다에서 왔어요.', en:'I am from Canada.', w:'캐나다에서=from Canada=캐나다;왔어요=I came=와요', g:'best', to:'why', also:['캐나다 사람이에요', '캐나다요'] },
+            { ko:'미국에 왔어요.', en:'I came to the United States.', w:'미국에=to the United States=미국;왔어요=I came=와요', g:'oops',
+              hint:'에 means "to". For "from", use 에서: 미국에서 왔어요.' } ] },
+      why:{ t:['한국에는 무슨 일로 왔어요?', 'What brings you to Korea?', '한국에는=to Korea=한국;무슨=what;일로=for (what) reason;왔어요=did you come=와요'],
+        c:[ { ko:'여행 왔어요.', en:'I came to travel.', w:'여행=travel, a trip;왔어요=I came=와요', g:'best', to:'food', also:['여행이요', '여행하러 왔어요', '여행 왔어요'] },
+            { ko:'친구 만나러 왔어요.', en:'I came to see a friend.', w:'친구=friend=친구;만나러=to meet=만나요;왔어요=I came=와요', g:'best', to:'food', also:['친구 보러 왔어요', '친구 만나러요'] },
+            { ko:'여행 갔어요.', en:'I went traveling.', w:'여행=travel, a trip;갔어요=I went=가요', g:'oops',
+              hint:'갔어요 means "went". For "came", say 왔어요: 여행 왔어요.' } ] },
+      food:{ t:['한국 음식 좋아해요?', 'Do you like Korean food?', '한국=Korea=한국;음식=food=음식;좋아해요=do you like=좋아해요'],
+        c:[ { ko:'네, 정말 좋아해요!', en:'Yes, I really like it!', w:'네=yes;정말=really;좋아해요=I like=좋아해요', g:'best', to:'eat', also:['좋아해요', '네 좋아해요', '너무 좋아해요', '네 너무 좋아요'] },
+            { ko:'네, 그런데 매운 건 잘 못 먹어요.', en:'Yes, but I cannot eat spicy food very well.', w:'네=yes;그런데=but;매운=spicy=매워요;건=things (the ones that are);잘=well;못=cannot;먹어요=eat=먹어요', g:'best', to:'mild',
+              also:['매운 건 못 먹어요', '매운 거 못 먹어요', '매운 건 잘 못 먹어요'] },
+            { ko:'네, 좋아요해요.', en:'(Two forms of "like" mixed together.)', w:'네=yes;좋아요해요=(좋아요 and 좋아해요 mixed)', g:'oops',
+              hint:'좋아요 and 좋아해요 are two different words. Use one: 좋아해요 (I like it).' } ] },
+      eat:{ t:['그럼 내일 같이 밥 먹을래요?', 'Then do you want to have a meal together tomorrow?', '그럼=then, in that case;내일=tomorrow=내일;같이=together;밥=a meal, rice=밥;먹을래요=do you want to eat=먹어요'],
+        c:[ { ko:'좋아요! 몇 시에 만날까요?', en:'Sounds good! What time shall we meet?', w:'좋아요=sounds good=좋아요;몇=what (how many)=몇;시에=o\'clock, at=시;만날까요=shall we meet=만나요', g:'best', to:'end',
+              also:['좋아요', '몇 시에 만나요', '네 좋아요', '몇 시에 만날까요'] },
+            { ko:'미안해요, 내일은 바빠요.', en:'Sorry, I am busy tomorrow.', w:'미안해요=sorry;내일은=tomorrow=내일;바빠요=I am busy', g:'ok', to:'later', also:['내일은 바빠요', '미안해요', '죄송해요 내일은 바빠요'] } ] },
+      mild:{ t:['괜찮아요! 안 매운 음식도 많아요. 내일 같이 밥 먹을래요?', 'That is okay! There is lots of food that is not spicy. Do you want to have a meal together tomorrow?',
+          '괜찮아요=it is okay=괜찮아요;안=not;매운=spicy=매워요;음식도=food too=음식;많아요=there is a lot;내일=tomorrow=내일;같이=together;밥=a meal, rice=밥;먹을래요=do you want to eat=먹어요'],
+        c:[ { ko:'좋아요! 몇 시에 만날까요?', en:'Sounds good! What time shall we meet?', w:'좋아요=sounds good=좋아요;몇=what (how many)=몇;시에=o\'clock, at=시;만날까요=shall we meet=만나요', g:'best', to:'end',
+              also:['좋아요', '몇 시에 만나요', '네 좋아요', '몇 시에 만날까요'] },
+            { ko:'미안해요, 내일은 바빠요.', en:'Sorry, I am busy tomorrow.', w:'미안해요=sorry;내일은=tomorrow=내일;바빠요=I am busy', g:'ok', to:'later', also:['내일은 바빠요', '미안해요', '죄송해요 내일은 바빠요'] } ] },
+      end:{ t:['열두 시 어때요? 내일 봐요!', 'How about twelve? See you tomorrow!', '열두=twelve=열두;시=o\'clock=시;어때요=how about it=어때요;내일=tomorrow=내일;봐요=see you=봐요'], end:true },
+      later:{ t:['괜찮아요. 다음에 같이 먹어요!', 'That is okay. Let us eat together next time!', '괜찮아요=it is okay=괜찮아요;다음에=next time;같이=together;먹어요=let us eat=먹어요'], end:true }
+    } }
+  ];
+/* end of src/js/town-talks.js */
+/* from src/js/town.js */
+  /* ---------- HARBOR TOWN: talk with the townsfolk ----------
+     The second new region of the sea chart (seamap.js), for conversation. A list of the townsfolk (town-talks.js),
+     the best fit first, then one conversation as chat bubbles:
+       the townsperson's line appears and plays in the natural Korean voice (tap a word for its meaning, or
+       English for the whole line)
+       the player answers: taps one of two or three Korean answers, or types one (Hangul, or Korean spelled in
+       English letters, matched loosely as Ask Shelly does it: koLoose and koRomSaid in reef.js)
+       a good answer moves the talk on, and different answers can lead to different lines; a gentle mistake
+       gets a hint and another try
+       a debrief at the end: what went well, up to two things to fix, and the phrases she needed, which go in
+       My words
+     It looks and behaves like Story Lagoon (lagoon.js) and reuses its word-knowledge helpers (lagoonKnows,
+     lagoonMiss, lagoonDeckWords), so "best fit" means the same in both: about 90–95% of the words known.
+     The learner model hears about it all: 'hear' for each townsperson line (hard if she needed the English),
+     'use' for each answer (good when right the first time, again when she first slipped), 'read' for a looked-up
+     word. Screens: S.view 'town' (the list) and 'townTalk' (one conversation), state in S.town. Which talks she
+     has finished is kept per profile in localStorage (cc-town-done-<profile id>); losing it only loses the ticks. */
+  function townFolk(id){ return TOWN_FOLK.find(function(f){ return f.id === id; }) || null; }
+  // "여권=passport;좀=please" -> [{ ko, en, base }]
+  function townWords(gloss){
+    return String(gloss || '').split(';').map(function(p){ var b = p.split('='); return { ko: b[0], en: b[1] || '', base: b[2] || '' }; });
+  }
+  function townDoneKey(){ return 'cc-town-done-' + (S.profile && S.profile.id || 'guest'); }
+  function townDone(){ try { return JSON.parse(localStorage.getItem(townDoneKey()) || '{}') || {}; } catch(e){ return {}; } }
+  function townMarkDone(id, good){
+    var d = townDone(); d[id] = { at: Date.now(), good: good };
+    try { localStorage.setItem(townDoneKey(), JSON.stringify(d)); } catch(e){}
+  }
+  // The words she needs for a talk: everything the townsperson says, and the best answers (the mistakes are left out)
+  function townCoverage(f, deck){
+    var seen = {}, known = 0, total = 0;
+    function add(gloss){ townWords(gloss).forEach(function(w){
+      var k = learnerKey(w.ko); if(!k || seen[k]) return; seen[k] = 1; total++;
+      if(lagoonKnows(w, deck)) known++;
+    }); }
+    Object.keys(f.nodes).forEach(function(id){
+      var n = f.nodes[id]; add(n.t[2]);
+      (n.c || []).forEach(function(c){ if(c.g === 'best') add(c.w); });
+    });
+    return { known: known, total: total, share: total ? known / total : 0 };
+  }
+  function townRanked(deck){
+    var done = townDone();
+    return TOWN_FOLK.map(function(f, i){
+      var c = townCoverage(f, deck);
+      return { f: f, i: i, c: c, done: !!done[f.id], miss: lagoonMiss(c.share) };
+    }).sort(function(a, b){ return (a.done - b.done) || (a.miss - b.miss) || (a.i - b.i); });   // talks already had go last
+  }
+
+  function openTown(){
+    try { Speech.stop(); } catch(e){}
+    S.currentDeckId = null;
+    S.town = { deck: S.town && S.town.deck || null, slow: !!(S.town && S.town.slow) };
+    S.view = 'town';
+    render(); window.scrollTo(0, 0);
+    var decks = (S.decks || []).filter(function(d){ return !d.archived; });
+    Promise.all(decks.map(function(d){ return S.store.getCardsOnce(d.id).catch(function(){ return []; }); })).then(function(lists){
+      if(!S.town) return;
+      S.town.deck = lagoonDeckWords([].concat.apply([], lists));
+      if(S.view === 'town') render();
+    }).catch(function(){});
+  }
+  function renderTown(){
+    var T = S.town || (S.town = {}), list = townRanked(T.deck);
+    var best = list.find(function(x){ return !x.done; });
+    var rows = list.map(function(x){
+      var pct = Math.round(x.c.share * 100), fit = !x.miss && !x.done;
+      return '<li><button type="button" class="lg-story tw-folk' + (x.done ? ' done' : '') + (x === best ? ' best' : '') + '" data-tw-open="' + x.f.id + '">' +
+        '<span class="lg-ic" aria-hidden="true">' + ccIcon(x.f.icon) + '</span>' +
+        '<span class="lg-st"><b>' + esc(x.f.en) + '</b><span lang="ko">' + esc(x.f.ko) + '</span><small>' + esc(x.f.place) + '</small>' +
+          '<span class="lg-meter" role="img" aria-label="You know ' + x.c.known + ' of the ' + x.c.total + ' words you need"><i style="width:' + pct + '%"></i></span>' +
+          '<small>' + (T.deck ? 'Words you know: ' + pct + '%' : 'Counting your words…') + '</small></span>' +
+        '<span class="lg-tag">' + (x.done ? ccIcon('check') + ' Talked' : x === best ? 'Try this' : fit ? 'Good fit' : '') + '</span>' +
+      '</button></li>';
+    }).join('');
+    app.innerHTML = '<div class="nav-row"><button class="back-btn" data-act="tw-home">⟵ Lagoon</button><span class="nav-title">' + ccIcon('talk') + ' Harbor Town</span></div>' +
+      '<div class="lg-page">' +
+        '<div class="lg-intro"><h2>Talk with the townsfolk</h2><p>Real conversations for your trip, in Korean. Listen, then answer: tap a reply or type your own. The best one for you is at the top.</p></div>' +
+        '<ul class="lg-list">' + rows + '</ul>' +
+      '</div>';
+    app.querySelector('[data-act="tw-home"]').addEventListener('click', function(){ goHome(); });
+    app.querySelectorAll('[data-tw-open]').forEach(function(b){ b.addEventListener('click', function(){ townOpenTalk(b.dataset.twOpen); }); });
+  }
+
+  function townOpenTalk(id){
+    var f = townFolk(id); if(!f) return;
+    try { Speech.stop(); } catch(e){}
+    var T = S.town || (S.town = {});
+    T.id = id; T.node = f.start; T.log = []; T.tried = {}; T.turns = {}; T.showEn = {}; T.word = null; T.typed = ''; T.typeMsg = '';
+    T.choiceEn = false; T.phase = 'talk'; T.speaking = false; T.waiting = false; T.debrief = null;
+    S.view = 'townTalk';
+    try { Sound.bloop(560); } catch(e){}
+    townSay(f, f.start, true);
+    window.scrollTo(0, 0);
+  }
+  // The townsperson's next line: a moment of "typing" dots, then the line appears and plays
+  function townSay(f, id, first){
+    var T = S.town, n = f.nodes[id];
+    T.node = id; T.waiting = !first;
+    var token = T.token = (T.token || 0) + 1;
+    function show(){
+      if(token !== T.token || S.view !== 'townTalk') return;
+      T.waiting = false;
+      T.log.push({ who: 'them', ko: n.t[0], en: n.t[1], w: n.t[2], node: id });
+      renderTownTalk(); townScrollEnd();
+      townPlay(T.log.length - 1);
+    }
+    if(first) show();
+    else { renderTownTalk(); townScrollEnd(); setTimeout(show, reefCalm() ? 250 : 650); }
+  }
+  function townOpts(T){ return T.slow ? { rate: 0.7, variant: 'slow' } : null; }
+  function townPlay(i){
+    var T = S.town, e = T.log[i]; if(!e) return;
+    var token = T.token = (T.token || 0) + 1;
+    T.speaking = i; townPaint();
+    Speech.speakThen(e.ko, function(){ if(token === T.token){ T.speaking = false; townPaint(); } }, e.who === 'them' ? townOpts(T) : null);
+  }
+  function townStop(){ var T = S.town; if(T){ T.token = (T.token || 0) + 1; T.speaking = false; } try { Speech.stop(); } catch(e){} }
+  function townScrollEnd(){
+    var end = app.querySelector('.tw-turn') || app.querySelector('.tw-log li:last-child');
+    if(end) try { end.scrollIntoView({ block: 'end', behavior: reefCalm() ? 'auto' : 'smooth' }); } catch(e){ end.scrollIntoView(false); }
+  }
+  // Only the playing highlight changes while a line plays, so the page doesn't jump about
+  function townPaint(){
+    var T = S.town;
+    app.querySelectorAll('[data-tw-line]').forEach(function(el){ el.classList.toggle('playing', +el.dataset.twLine === T.speaking); });
+  }
+
+  /* ---------- Typed answers ----------
+     She can type an answer in Hangul or in English letters, roughly. Each answer (and its "also" list of other
+     ways to say the same) is compared without spaces or punctuation: Hangul exactly or a letter off in a long one,
+     English letters loosely, both as spelled and as said (koRom / koRomSaid), the way Ask Shelly reads them.
+     Returns the matching answer, or null. */
+  function townPlain(s){ return String(s || '').normalize('NFC').replace(/[^가-힣a-zA-Z]/g, '').toLowerCase(); }
+  function townMatch(typed, choices){
+    var raw = String(typed || '').trim(); if(!raw) return null;
+    var hangul = /[가-힣]/.test(raw), t = townPlain(raw), best = null;
+    if(!t) return null;
+    var loose = hangul ? '' : koLoose(raw), L = loose.length;
+    var allow = hangul ? (t.length >= 6 ? 1 : 0) : L <= 3 ? 0 : L <= 5 ? 1 : L <= 8 ? 2 : Math.ceil(L / 4);
+    choices.forEach(function(c, ci){
+      [c.ko].concat(c.also || []).forEach(function(say){
+        var p = townPlain(say), d;
+        if(hangul) d = koEdit(t, p);
+        else d = Math.min(koEdit(loose, koLoose(koRom(p))), koEdit(loose, koLoose(koRomSaid(p))));
+        if(d > allow) return;
+        // a closer match wins; on a tie the better answer does
+        var score = d + (c.g === 'best' ? 0 : c.g === 'ok' ? .1 : .2);
+        if(!best || score < best.score) best = { i: ci, score: score };
+      });
+    });
+    if(!best && hangul) choices.forEach(function(c, ci){ if(!best && c.re && c.re.test(raw.replace(/[.,!?~\s]+$/, ''))) best = { i: ci }; });
+    return best ? best.i : null;
+  }
+
+  function townBest(n){ return n.c.find(function(c){ return c.g === 'best'; }); }
+  function townAnswer(f, i, typed){
+    var T = S.town, id = T.node, n = f.nodes[id], c = n && n.c && n.c[i];
+    if(!c || T.phase !== 'talk' || T.waiting || (T.tried[id] || []).indexOf(i) !== -1) return;
+    townStop();
+    T.word = null; T.typeMsg = ''; T.typed = '';
+    var turn = T.turns[id] || (T.turns[id] = { slipped: false, hints: [] });
+    T.log.push({ who: 'me', ko: c.ko, en: c.en, w: c.w, g: c.g, typed: typed || '' });
+    var mine = T.log.length - 1;
+    if(c.g === 'oops'){
+      (T.tried[id] = T.tried[id] || []).push(i);
+      turn.slipped = true; turn.hints.push(c.hint);
+      T.log.push({ who: 'hint', text: c.hint });
+      try { Sound.wrong(); } catch(e){}
+      renderTownTalk(); townScrollEnd();
+      return;
+    }
+    turn.said = c.ko; turn.en = c.en; turn.g = c.g; turn.typed = !!typed;
+    if(c.g === 'ok'){ var b = townBest(n); turn.better = b; if(b) T.log.push({ who: 'note', ko: b.ko, en: b.en }); }
+    // 'use': right the first time is good (typed from memory, easy); after a slip, the phrase she needed is missed
+    try { Learner.record(c.ko, 'use', turn.slipped ? 'again' : typed && c.g === 'best' ? 'easy' : 'good'); } catch(e){}
+    try { if(!turn.slipped) Sound.correct(); } catch(e){}
+    // she hears her answer said well, then the townsperson replies; the answers are put away meanwhile
+    var token = T.token = (T.token || 0) + 1;
+    T.waiting = 'me'; T.speaking = mine;
+    renderTownTalk(); townScrollEnd();
+    Speech.speakThen(c.ko, function(){ if(token === T.token && S.view === 'townTalk'){ T.speaking = false; townSay(f, c.to); } });
+  }
+  function townTyped(f){
+    var T = S.town, n = f.nodes[T.node], inp = app.querySelector('#twType');
+    var text = inp ? inp.value : '';
+    if(!text.trim() || !n || !n.c) return;
+    var tried = T.tried[T.node] || [];
+    // a mistake she has already made is out of the running, so typing it again isn't matched to it
+    var i = townMatch(text, n.c.map(function(c, ci){ return tried.indexOf(ci) === -1 ? c : { ko: '', g: 'oops' }; }));
+    if(i == null){
+      T.typed = text;
+      T.typeMsg = 'I did not quite catch that. Try again, or tap one of the answers.';
+      renderTownTalk();
+      var again = app.querySelector('#twType'); if(again){ again.focus(); }
+      return;
+    }
+    townAnswer(f, i, text.trim());
+  }
+
+  function townFinish(f){
+    var T = S.town;
+    townStop();
+    var turns = Object.keys(T.turns).map(function(k){ return T.turns[k]; }).filter(function(t){ return t.said; });
+    var well = turns.filter(function(t){ return !t.slipped && t.g === 'best'; });
+    var fixes = [];
+    turns.forEach(function(t){ t.hints.forEach(function(h){ if(fixes.length < 2) fixes.push({ hint: h }); }); });
+    turns.forEach(function(t){ if(fixes.length < 2 && t.better) fixes.push({ said: t.said, better: t.better }); });
+    // the phrases she needed: the answer she reached after a slip, and the better one where hers only worked
+    var need = [], seen = {};
+    turns.forEach(function(t){
+      var p = t.slipped ? { ko: t.said, en: t.en } : t.better ? { ko: t.better.ko, en: t.better.en } : null;
+      if(p && !seen[p.ko]){ seen[p.ko] = 1; need.push(p); }
+    });
+    need.forEach(function(p){ try { myWordsAdd(p.ko.replace(/[.?!]+$/, ''), p.en, 'town'); } catch(e){} });
+    // 'hear' for every line of hers she heard: good, or hard if she needed the English
+    T.log.forEach(function(e, i){ if(e.who === 'them') try { Learner.record(e.ko, 'hear', T.showEn[i] ? 'hard' : 'good'); } catch(x){} });
+    T.debrief = { well: well, fixes: fixes, need: need, turns: turns.length };
+    T.phase = 'done';
+    townMarkDone(f.id, well.length);
+    try { reefWinSound(true); } catch(e){}
+    try { if(!reefCalm()) Ocean.bubbles(10); } catch(e){}
+    renderTownTalk(); window.scrollTo(0, 0);
+  }
+
+  function renderTownTalk(){
+    var T = S.town || {}, f = townFolk(T.id);
+    if(!f){ S.view = 'town'; return renderTown(); }
+    var head = '<div class="nav-row"><button class="back-btn" data-act="tw-back">⟵ Town</button><span class="nav-title">' + ccIcon(f.icon) + ' ' + esc(f.en) + '</span></div>';
+    var title = '<div class="lg-title"><h2 lang="ko">' + esc(f.ko) + '</h2><span>' + esc(f.place) + '</span></div>';
+    app.innerHTML = head + '<div class="lg-page tw-page">' + title + (T.phase === 'done' ? townDebriefHTML(f, T) : townChatHTML(f, T)) + '</div>';
+    townWire(f, T);
+  }
+  function townWordsHTML(e, li){
+    return '<span class="lg-ko" lang="ko">' + e.ko.split(/\s+/).map(function(tok, wi){
+      return '<button type="button" class="lg-w' + (S.town.word && S.town.word[0] === li && S.town.word[1] === wi ? ' on' : '') + '" data-tw-w="' + li + ':' + wi + '">' + esc(tok) + '</button>'; }).join(' ') + '</span>';
+  }
+  function townChatHTML(f, T){
+    var n = f.nodes[T.node];
+    var log = T.log.map(function(e, i){
+      if(e.who === 'hint') return '<li class="tw-hint" role="status">' + ccIcon('bulb') + '<span>' + esc(e.text) + '</span></li>';
+      if(e.who === 'note') return '<li class="tw-hint tw-note" role="status">' + ccIcon('sparkle') + '<span>That works. You could also say <b lang="ko">' + esc(e.ko) + '</b> (' + esc(e.en) + ').</span></li>';
+      var me = e.who === 'me';
+      return '<li class="lg-line' + (me ? ' lg-me' : '') + (me && e.g === 'oops' ? ' tw-oops' : '') + (T.speaking === i ? ' playing' : '') + '" data-tw-line="' + i + '">' +
+        '<span class="lg-who">' + esc(me ? 'You' : f.en) + '</span>' +
+        '<div class="lg-bubble">' + townWordsHTML(e, i) +
+          (e.typed ? '<span class="tw-typed">You typed: ' + esc(e.typed) + '</span>' : '') +
+          (T.showEn[i] ? '<span class="lg-en">' + esc(e.en) + '</span>' : '') +
+          '<span class="lg-tools"><button type="button" class="lg-mini" data-tw-say="' + i + '" aria-label="Hear this line">' + ccIcon('sound') + '</button>' +
+            '<button type="button" class="lg-mini" data-tw-en="' + i + '" aria-pressed="' + !!T.showEn[i] + '">' + (T.showEn[i] ? 'Hide English' : 'English') + '</button></span>' +
+        '</div></li>';
+    }).join('');
+    if(T.waiting === true) log += '<li class="lg-line tw-dots" aria-label="' + esc(f.en) + ' is answering"><div class="lg-bubble"><i></i><i></i><i></i></div></li>';
+    var wordBox = '';
+    if(T.word){
+      var e = T.log[T.word[0]], w = e && townWords(e.w)[T.word[1]];
+      if(w) wordBox = '<div class="lg-word" role="status"><button type="button" class="lg-mini lg-wsay" data-tw-wsay aria-label="Hear ' + esc(w.ko) + '">' + ccIcon('sound') + '</button>' +
+        '<div><b lang="ko">' + esc(w.ko) + '</b><span>' + esc(w.en) + '</span>' + (w.base && w.base !== w.ko ? '<small>From <span lang="ko">' + esc(w.base) + '</span></small>' : '') +
+        (T.wordAdded ? '<small class="lg-added">' + ccIcon('sparkle') + ' Added to My words</small>' : '') + '</div>' +
+        '<button type="button" class="lg-mini lg-wclose" data-tw-wclose aria-label="Close">' + ccIcon('close') + '</button></div>';
+    }
+    var turn = '';
+    if(!T.waiting && n && n.end){
+      turn = '<div class="tw-turn"><div class="lg-bar"><button type="button" class="btn btn-primary" data-tw-finish>' + ccIcon('check') + ' Finish</button></div></div>';
+    } else if(!T.waiting && n && n.c){
+      var tried = T.tried[T.node] || [];
+      var opts = n.c.map(function(c, i){
+        var off = tried.indexOf(i) !== -1;
+        return '<li><button type="button" class="lg-opt tw-opt' + (off ? ' wrong' : '') + '" data-tw-opt="' + i + '"' + (off ? ' disabled aria-disabled="true"' : '') + '><span lang="ko">' + esc(c.ko) + '</span>' +
+          (T.choiceEn || off ? '<small>' + esc(c.en) + '</small>' : '') + '</button></li>'; }).join('');
+      turn = '<div class="tw-turn" role="group" aria-label="Your answer">' +
+        '<div class="tw-turn-head"><b>Your turn</b><button type="button" class="lg-mini" data-tw-cen aria-pressed="' + !!T.choiceEn + '">' + (T.choiceEn ? 'Hide English' : 'English') + '</button></div>' +
+        '<ul class="lg-opts">' + opts + '</ul>' +
+        '<form class="tw-type" data-tw-form autocomplete="off"><label for="twType">Or type your answer, in Korean or in English letters</label>' +
+          '<span class="tw-type-row"><input id="twType" type="text" lang="ko" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" placeholder="예: 네, 감사합니다 / ne, gamsahamnida" value="' + esc(T.typed || '') + '">' +
+          '<button type="submit" class="btn btn-primary">Send</button></span>' +
+          (T.typeMsg ? '<span class="tw-type-msg" role="status">' + esc(T.typeMsg) + '</span>' : '') + '</form></div>';
+    }
+    var bar = '<div class="lg-bar tw-bar"><button type="button" class="btn btn-ghost lg-slow" data-tw-slow aria-pressed="' + !!T.slow + '">' + ccIcon('turtle') + (T.slow ? ' Slower: on' : ' Slower') + '</button></div>';
+    return '<p class="lg-hint">' + ccIcon('talk') + ' Listen, then answer. Tap any word to see what it means.</p>' +
+      '<ol class="lg-lines tw-log">' + log + '</ol>' + turn + wordBox + bar;
+  }
+  function townDebriefHTML(f, T){
+    var D = T.debrief || { well: [], fixes: [], need: [] }, perfect = !D.fixes.length;
+    var nextUp = townRanked(T.deck).find(function(x){ return !x.done && x.f.id !== f.id; });
+    var well = D.well.slice(0, 3).map(function(t){ return '<li><b lang="ko">' + esc(t.said) + '</b><small>' + esc(t.en) + (t.typed ? ' · typed from memory' : '') + '</small></li>'; }).join('');
+    var fixes = D.fixes.map(function(x){
+      return '<li>' + (x.hint ? esc(x.hint) : 'You said <b lang="ko">' + esc(x.said) + '</b>, which works. Also natural: <b lang="ko">' + esc(x.better.ko) + '</b> (' + esc(x.better.en) + ').') + '</li>'; }).join('');
+    var need = D.need.map(function(p){ return '<li><button type="button" class="lg-mini tw-needsay" data-tw-sayko="' + esc(p.ko) + '" aria-label="Hear ' + esc(p.ko) + '">' + ccIcon('sound') + '</button><span><b lang="ko">' + esc(p.ko) + '</b><small>' + esc(p.en) + '</small></span></li>'; }).join('');
+    return '<div class="summary-card reef-sum-card lg-done tw-done">' +
+        '<span class="lg-done-ic" aria-hidden="true">' + ccIcon(perfect ? 'trophy' : 'star') + '</span>' +
+        '<h2>' + (perfect ? 'A perfect conversation!' : 'Conversation finished!') + '</h2>' +
+        '<p>' + esc(perfect ? reefPraiseLine() : 'Good talking. The phrases you needed will come back in your practice.') + '</p>' +
+      '</div>' +
+      '<section class="tw-sec"><h3>' + ccIcon('check') + ' What went well</h3>' +
+        (well ? '<ul class="tw-phr">' + well + '</ul>' : '<p>You kept the conversation going to the end. That is the hardest part.</p>') + '</section>' +
+      '<section class="tw-sec"><h3>' + ccIcon('bulb') + ' ' + (perfect ? 'Nothing to fix' : 'To work on') + '</h3>' +
+        (fixes ? '<ul class="tw-fix">' + fixes + '</ul>' : '<p>Every answer was right the first time.</p>') + '</section>' +
+      (need ? '<section class="tw-sec"><h3>' + ccIcon('sparkle') + ' Phrases you needed</h3><p>These are now in My words, to practice.</p><ul class="tw-phr tw-need">' + need + '</ul></section>' : '') +
+      '<div class="reef-sum-actions tw-actions">' +
+        (nextUp ? '<button type="button" class="btn btn-primary" data-tw-open="' + nextUp.f.id + '">Next: ' + esc(nextUp.f.en) + '</button>' : '') +
+        '<button type="button" class="btn btn-ghost" data-tw-again>' + ccIcon('replay') + ' Talk again</button>' +
+        '<button type="button" class="btn btn-ghost" data-act="tw-back">' + ccIcon('talk') + ' All townsfolk</button>' +
+      '</div>';
+  }
+
+  function townTapWord(f, T, li, wi){
+    var e = T.log[li], w = e && townWords(e.w)[wi]; if(!w) return;
+    townStop();
+    var known = lagoonKnows(w, T.deck);
+    T.word = [li, wi]; T.wordAdded = false;
+    T.looked = T.looked || {};
+    // looking a word up says she wasn't sure: a word she didn't know is missed, one she did is "hard" (once per talk)
+    var k = learnerKey(w.ko);
+    if(k && !T.looked[k]){ T.looked[k] = 1; try { Learner.record(w.ko, 'read', known ? 'hard' : 'again'); } catch(x){} }
+    if(!known) myWordsAdd(w.ko, w.en, 'asked').then(function(ok){ if(ok && T.word && T.word[0] === li && T.word[1] === wi && S.view === 'townTalk'){ T.wordAdded = true; renderTownTalk(); } }).catch(function(){});
+    try { Speech.speak(w.ko); } catch(x){}
+    var y = window.scrollY;
+    renderTownTalk(); window.scrollTo(0, y);
+    // the meaning card sits at the bottom of the screen: a word low down scrolls up so the card doesn't cover it
+    var on = app.querySelector('.lg-w.on'), card = app.querySelector('.lg-word');
+    if(on && card){ var gap = on.getBoundingClientRect().bottom - card.getBoundingClientRect().top + 16; if(gap > 0) window.scrollBy({ top: gap, behavior: reefCalm() ? 'auto' : 'smooth' }); }
+  }
+  function townWire(f, T){
+    function on(sel, fn){ app.querySelectorAll(sel).forEach(function(b){ b.addEventListener('click', function(e){ fn(b, e); }); }); }
+    on('[data-act="tw-back"]', function(){ townStop(); S.view = 'town'; render(); window.scrollTo(0, 0); });
+    on('[data-tw-opt]', function(b){ townAnswer(f, +b.dataset.twOpt); });
+    on('[data-tw-say]', function(b){ townPlay(+b.dataset.twSay); });
+    on('[data-tw-en]', function(b){ var i = +b.dataset.twEn; T.showEn[i] = !T.showEn[i]; var y = window.scrollY; renderTownTalk(); window.scrollTo(0, y); });
+    on('[data-tw-cen]', function(){ T.choiceEn = !T.choiceEn; var y = window.scrollY; renderTownTalk(); window.scrollTo(0, y); });
+    on('[data-tw-slow]', function(b){ T.slow = !T.slow; b.setAttribute('aria-pressed', String(T.slow)); b.innerHTML = ccIcon('turtle') + (T.slow ? ' Slower: on' : ' Slower'); });
+    on('[data-tw-w]', function(b){ var p = b.dataset.twW.split(':'); townTapWord(f, T, +p[0], +p[1]); });
+    on('[data-tw-wsay]', function(){ var e = T.word && T.log[T.word[0]], w = e && townWords(e.w)[T.word[1]]; if(w) try { Speech.speak(w.ko); } catch(x){} });
+    on('[data-tw-wclose]', function(){ T.word = null; var y = window.scrollY; renderTownTalk(); window.scrollTo(0, y); });
+    on('[data-tw-finish]', function(){ townFinish(f); });
+    on('[data-tw-open]', function(b){ townOpenTalk(b.dataset.twOpen); });
+    on('[data-tw-again]', function(){ townOpenTalk(f.id); });
+    on('[data-tw-sayko]', function(b){ try { Speech.speak(b.dataset.twSayko); } catch(x){} });
+    var form = app.querySelector('[data-tw-form]');
+    if(form) form.addEventListener('submit', function(e){ e.preventDefault(); townTyped(f); });
+    var inp = app.querySelector('#twType');
+    if(inp) inp.addEventListener('input', function(){ T.typed = inp.value; });
+  }
+/* end of src/js/town.js */
 /* from src/js/ui-icons.js */
   /* ---------- One look for every screen: drawn icons, never emoji, in the app's own chrome ----------
      Titles, buttons, labels, badges and chips across the app (and the Library) were written over years with
@@ -13877,6 +14498,9 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     ] },
     { id:'story-lagoon', date:'2026-11-04', need:'course', steps:[
       { at:'.r3-mapbtn', say:'Story Lagoon is open on the treasure map, with short Korean stories to hear and then read.' }
+    ] },
+    { id:'harbor-town', date:'2026-11-05', need:'course', steps:[
+      { at:'.r3-mapbtn', say:'Harbor Town is open on the treasure map. Talk with the townsfolk of your trip, in Korean.' }
     ] }
   ];
   var WN_RECENT_DAYS = 14;   // a brand-new profile is shown only what's new in the last two weeks, not the whole history
@@ -22429,7 +23053,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
      The treasure map gains a second page, The sea: a drawn chart with an island for each region of the language
      school (see the architecture doc). Coral Cove, the flashcard reef, is in the middle and is where you are;
      the others show what they will teach and open one by one as they're built (open, with a `go` function that
-     starts it). Story Lagoon (lagoon.js) is the first. Only profiles with a language
+     starts it, and the icon on its button). Story Lagoon (lagoon.js) was the first, Harbor Town (town.js) the second. Only profiles with a language
      course see it for now (reefCourseOn). Tapping an island shows its card; Coral Cove's card leads back to the
      board's own map. */
   var REEF_REGIONS = [
@@ -22437,12 +23061,12 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       about:'The flashcard reef. Every word you meet anywhere ends up here, reviewed just when you are about to forget it.' },
     { id:'deck', say:'Captain\'s Deck, for your plan and progress.', name:'Captain\'s Deck', teaches:'Plan and progress', x:150, y:58,
       about:'Today\'s voyage, your course with its dates, checkpoints, and what you can now do.' },
-    { id:'lagoon', say:'Story Lagoon, for listening and reading.', name:'Story Lagoon', teaches:'Listening and reading', x:62, y:124, open:true, go:'openLagoon',
+    { id:'lagoon', say:'Story Lagoon, for listening and reading.', name:'Story Lagoon', teaches:'Listening and reading', x:62, y:124, open:true, go:'openLagoon', icon:'story',
       about:'Short stories and conversations made from words you know, to listen to first and then read.' },
     { id:'caves', say:'Echo Caves, for pronunciation.', name:'Echo Caves', teaches:'Pronunciation', x:238, y:124,
       about:'The sounds you mix up, and shadowing a native voice with your pitch shown beside it.' },
-    { id:'town', say:'Harbor Town, for conversation.', name:'Harbor Town', teaches:'Conversation', x:52, y:252,
-      about:'Townsfolk for each part of your trip: cafes, taxis, shops and a hotel, all in Korean.' },
+    { id:'town', say:'Harbor Town, for conversation.', name:'Harbor Town', teaches:'Conversation', x:52, y:252, open:true, go:'openTown', icon:'talk',
+      about:'Townsfolk for each part of your trip: a cafe, a taxi, a shop, the hotel and a new friend. Listen, then answer in Korean.' },
     { id:'reef', say:'Pattern Reef, for grammar.', name:'Pattern Reef', teaches:'Grammar', x:248, y:252,
       about:'One sentence pattern at a time: build it, break it and rebuild it.' },
     { id:'beach', say:'Bottle Beach, for writing.', name:'Bottle Beach', teaches:'Writing', x:92, y:340,
@@ -22488,13 +23112,13 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     ov.querySelectorAll('.r3-sea-isle').forEach(function(b){ b.classList.toggle('picked', b.dataset.sea === id); });
     box.innerHTML = '<b>' + esc(r.name) + '</b><small>' + esc(r.teaches) + '</small><p>' + esc(r.about) + '</p>' +
       (r.id === 'cove' ? '<button type="button" class="r3-btn main" data-sea-tab="cove">' + ccIcon('map') + ' Open Coral Cove</button>' :
-       r.open ? '<button type="button" class="r3-btn main" data-sea-go="' + r.id + '">' + ccIcon('story') + ' Open ' + esc(r.name) + '</button>' :
+       r.open ? '<button type="button" class="r3-btn main" data-sea-go="' + r.id + '">' + ccIcon(r.icon || 'story') + ' Open ' + esc(r.name) + '</button>' :
        '<span class="r3-sea-soon">' + ccIcon('sparkle') + ' Opening soon</span>');
     try { Speech.speak(r.say); } catch(e){}
   }
   // Leaves the board for an open region: the map closes and the water covers the change, as when diving into a deck
   function reefSeaGo(ov, id){
-    var r = REEF_REGIONS.find(function(x){ return x.id === id; }), fn = r && r.go === 'openLagoon' ? openLagoon : null;
+    var r = REEF_REGIONS.find(function(x){ return x.id === id; }), fn = r && { openLagoon: openLagoon, openTown: openTown }[r.go];
     if(!fn) return;
     try { Speech.stop(); } catch(e){}
     ov.remove();
@@ -24751,6 +25375,50 @@ body.reef-calm .lg-line.playing .lg-bubble{ transform:none; }
 .lg-done .btn .cc-ic{ width:22px; height:22px; }
 @media (max-width:420px){ .lg-line{ max-width:96%; } .lg-ko{ font-size:1.25rem; } .lg-bar .btn{ flex:1 1 auto; justify-content:center; } }
 @media (min-width:700px){ .lg-ko{ font-size:1.6rem; } .lg-q b, .lg-opt{ font-size:1.45rem; } .lg-page{ font-size:1.05rem; } }
+
+/* ---------- Harbor Town (town.js): the townsfolk and a conversation ----------
+   The same panels, bubbles and --lg-* tokens as Story Lagoon, so the two islands feel like one game. Added here:
+   hint notes between bubbles, the "typing" dots, the answer panel with its typing box, and the debrief. */
+.tw-hint{ display:flex; gap:8px; align-items:flex-start; align-self:center; max-width:92%; background:var(--lg-panel); border:2px dashed var(--lg-edge); border-radius:var(--r-md); padding:10px 12px; font-weight:700; color:var(--lg-ink); }
+.tw-hint .cc-ic{ flex:none; width:22px; height:22px; color:#e8a33d; }
+.tw-note .cc-ic{ color:var(--lg-teal); }
+.tw-hint b{ font-size:1.1rem; }
+.lg-line.tw-oops .lg-bubble{ border-color:var(--lg-no); border-style:dashed; }
+.tw-typed{ display:block; margin-top:4px; font-size:.85rem; font-weight:700; color:var(--lg-soft); }
+.tw-dots .lg-bubble{ display:flex; gap:6px; padding:14px 16px; }
+.tw-dots i{ width:9px; height:9px; border-radius:50%; background:var(--lg-soft); animation:twDot 1s ease-in-out infinite; }
+.tw-dots i:nth-child(2){ animation-delay:.15s; }
+.tw-dots i:nth-child(3){ animation-delay:.3s; }
+@keyframes twDot{ 0%, 100%{ opacity:.35; transform:translateY(0); } 50%{ opacity:1; transform:translateY(-3px); } }
+body.reef-calm .tw-dots i{ animation:none; opacity:.7; }
+.tw-turn{ display:flex; flex-direction:column; gap:10px; background:var(--lg-panel); border:2px solid var(--lg-teal); border-radius:var(--r-md); padding:12px; }
+.tw-turn-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.tw-turn-head b{ font-family:'Baloo 2',system-ui,sans-serif; font-size:1.15rem; }
+.tw-opt{ min-height:52px; font-size:1.2rem; }
+.tw-opt:disabled{ cursor:default; opacity:.6; }
+.tw-type{ display:flex; flex-direction:column; gap:6px; }
+.tw-type label{ font-weight:700; color:var(--lg-soft); font-size:.92rem; }
+.tw-type-row{ display:flex; gap:8px; }
+.tw-type input{ flex:1; min-width:0; min-height:48px; font:600 16px 'Nunito',sans-serif;   /* 16px keeps iPhone from zooming in */
+  color:var(--lg-ink); background:var(--lg-you); border:2px solid var(--lg-edge); border-radius:var(--r-sm); padding:8px 12px; }
+.tw-type input:focus{ outline:none; border-color:var(--lg-teal); }
+.tw-type .btn{ min-height:48px; padding:8px 18px; font-weight:800; }
+.tw-type-msg{ font-weight:700; color:var(--lg-ink); }
+.tw-bar{ justify-content:flex-end; }
+.tw-done h2{ margin:4px 0; }
+.tw-sec{ background:var(--lg-panel); border:2px solid var(--lg-edge); border-radius:var(--r-md); padding:12px 14px; }
+.tw-sec h3{ margin:0 0 6px; display:flex; align-items:center; gap:8px; font-family:'Baloo 2',system-ui,sans-serif; font-size:1.15rem; color:var(--lg-ink); }
+.tw-sec h3 .cc-ic{ width:22px; height:22px; color:var(--lg-teal); }
+.tw-sec p{ margin:0 0 6px; color:var(--lg-soft); font-weight:700; }
+.tw-phr, .tw-fix{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.tw-phr b{ display:block; font-size:1.2rem; }
+.tw-phr small{ display:block; color:var(--lg-soft); font-weight:700; }
+.tw-fix li{ font-weight:700; line-height:1.45; padding-left:12px; border-left:3px solid #e8a33d; }
+.tw-need li{ display:flex; gap:10px; align-items:center; }
+.tw-actions{ justify-content:center; }
+.tw-actions .btn{ min-height:48px; display:inline-flex; align-items:center; gap:8px; padding:10px 18px; font-weight:800; }
+.tw-actions .btn .cc-ic{ width:22px; height:22px; }
+@media (min-width:700px){ .tw-opt{ font-size:1.4rem; } .tw-phr b{ font-size:1.35rem; } }
 /* end of src/css/reef.css */
 /* from src/css/reef-3d.css */
 /* ---------- REEF 3D board ---------- */
