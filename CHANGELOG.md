@@ -1,5 +1,24 @@
 # Changelog
 
+## Echo Caves opens (November 5, 2026)
+
+- **The third new island of the sea is open: Echo Caves**, for pronunciation, in three parts.
+- **Sound pairs.** A word plays, and you pick which of two or three look-alike words it was: 달 (moon), 탈 (mask)
+  or 딸 (daughter); 불, 풀 or 뿔; 거리 or 고리; 밥, 밖 or 밭. They cover the sounds English speakers mix up most:
+  plain, breathy and tight consonants, ㅅ and ㅆ, the vowels ㅓ/ㅗ and ㅡ/ㅜ, and word endings. Every word is real,
+  with its meaning. The sounds you miss come up more, and the ones you keep missing show as "your tricky sounds",
+  each with a tip. (ㅐ and ㅔ are explained but not tested: most people in Seoul say them the same way.)
+- **Shadowing.** Pick a line you have met (your Korean cards, and the Story Lagoon and Harbor Town lines you have
+  finished, shortest first), hear it, then record yourself. Your pitch line and your length appear beside the
+  voice's, then both play, one after the other. It only says how alike the pitch shape and the length are, in
+  kind words; you decide whether it sounded right. Everything is measured on your device, and recordings never
+  leave it. Without a microphone, you say it along with the voice.
+- **Sound rules.** Seven short cards on the changes you hear first: linking (한국어, said [한구거]), 감사합니다
+  said [감사함니다], 학교 said [학꾜], the silent ㅎ in 좋아요, 축하해요 said [추카해요], 같이 said [가치], and 연락
+  said [열락]. Each has words to hear and a quick check: which spelling matches what you hear?
+- Open it from the treasure map (The sea, then Echo Caves) or from My course in the Library. Shelly points it
+  out the first time. 54 new words have the natural Korean voice.
+
 ## Harbor Town opens (November 5, 2026)
 
 - **The second new island of the sea is open: Harbor Town**, for conversation. Eight people you meet on a trip

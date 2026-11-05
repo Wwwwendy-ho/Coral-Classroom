@@ -104,6 +104,14 @@ lead to different lines) and `src/js/town.js` (the list, best fit first by Story
 and the chat: tap or type an answer, matched in Hangul or loose romanization with reef.js's `koLoose` and
 `koRomSaid`, then a debrief). It records 'hear', 'use' and 'read' in the learner model and adds the phrases
 she needed to My words (from 'town'). `tools/check/test_town.js` checks every line is glossed and every path ends.
+Echo Caves, the third region, is `src/js/caves-sounds.js` (the minimal-pair sets for each sound contrast, the
+sound-rule cards, and `cavesPitch`: pitch by autocorrelation on 40 ms frames, median-smoothed, plus the span and
+shape helpers that compare two pitch lines in semitones) and `src/js/caves.js` (one screen, S.view 'caves', with
+three parts: sound pairs weighted toward the contrasts she misses, shadowing that records with Echo's `Mic` and
+measures both clips with `echoDecode`, and the rule cards). Recordings stay in page memory. It records 'hear' and
+'say' in the learner model; per-contrast misses, checked rules and shadowed lines live in localStorage
+(cc-caves-<profile id>). `tools/check/test_caves.js` checks the pitch measure on synthetic tones and that every word
+has a voice clip.
 
 ## Grown-up checks
 
