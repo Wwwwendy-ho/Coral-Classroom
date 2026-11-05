@@ -623,3 +623,6 @@ body.reef-calm .tw-dots i{ animation:none; opacity:.7; }
 .cv-more b{ font-size:1.25rem; }
 .cv-more small{ display:block; color:var(--lg-soft); font-weight:700; }
 @media (min-width:700px){ .cv-opt{ font-size:2rem; } .cv-big b{ font-size:2.3rem; } .cv-say h2{ font-size:2rem; } }
+.cv-page .lg-fb{ flex-wrap:nowrap; align-items:flex-start; line-height:1.45; }
+.cv-page .lg-fb .cc-ic{ flex:none; }
+.cv-stage .echo-mic:empty{ display:none; }

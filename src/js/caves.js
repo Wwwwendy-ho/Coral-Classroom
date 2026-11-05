@@ -31,9 +31,9 @@
   function cavesContrast(id){ return CAVES_PAIRS.find(function(c){ return c.id === id; }) || null; }
   // How shaky a contrast is, 0–1: a running share of misses that leans on the latest answers. Untried starts at .5.
   function cavesWeak(d, id){ var s = d.c[id]; return s ? s.w : 0.5; }
-  // Her tricky sounds: tried a few times, and missed often enough lately; shakiest first
+  // Her tricky sounds: tried twice or more, and missed often enough lately (a miss and then a right answer still counts); shakiest first
   function cavesTricky(d){
-    return CAVES_PAIRS.filter(function(c){ var s = d.c[c.id]; return s && s.n >= 3 && s.w >= 0.3; })
+    return CAVES_PAIRS.filter(function(c){ var s = d.c[c.id]; return s && s.n >= 2 && s.w >= 0.4; })
       .sort(function(a, b){ return d.c[b.id].w - d.c[a.id].w; }).slice(0, 4);
   }
 
@@ -164,8 +164,8 @@
     var fb = '';
     if(picked != null){
       var right = q.set[q.a], ok = picked === q.a;
-      fb = '<p class="lg-fb ' + (ok ? 'ok' : 'no') + '" role="status">' + ccIcon(ok ? 'check' : 'ear') + (ok ? ' Yes: <b lang="ko">' + esc(right[0]) + '</b> (' + esc(right[1]) + ').' :
-          ' That was <b lang="ko">' + esc(right[0]) + '</b> (' + esc(right[1]) + '). Hear them side by side:') + '</p>' +
+      fb = '<p class="lg-fb ' + (ok ? 'ok' : 'no') + '" role="status">' + ccIcon(ok ? 'check' : 'ear') + '<span>' + (ok ? 'Yes: <b lang="ko">' + esc(right[0]) + '</b> (' + esc(right[1]) + ').' :
+          'That was <b lang="ko">' + esc(right[0]) + '</b> (' + esc(right[1]) + '). Hear them side by side:') + '</span></p>' +
         '<div class="cv-hear-each">' + q.set.map(function(w){ return '<button type="button" class="lg-mini" data-cv-say="' + esc(w[0]) + '" aria-label="Hear ' + esc(w[0]) + '">' + ccIcon('sound') + '<span lang="ko">' + esc(w[0]) + '</span></button>'; }).join('') + '</div>' +
         '<p class="cv-tip">' + ccIcon('bulb') + '<span>' + esc(c.tip) + '</span></p>' +
         '<div class="lg-bar"><button type="button" class="btn btn-primary" data-cv-next>' + (R.i + 1 < CAVES_ROUND ? 'Next sound' : 'Finish') + '</button></div>';
@@ -176,6 +176,8 @@
       '<ul class="lg-opts cv-opts">' + opts + '</ul>' + fb +
       (R.i === 0 && picked == null ? '<p class="cv-note">' + ccIcon('sparkle') + '<span><b lang="ko">' + esc(CAVES_MERGED.label) + '</b>: ' + esc(CAVES_MERGED.say) + '</span></p>' : '');
   }
+  // Test helper: which answer of the sound pair on screen is right, so a test or screenshot can miss one on purpose
+  window.__cavesAnswer = function(){ var R = S.view === 'caves' && S.caves && S.caves.round; return R && R.q && !R.done ? R.q.a : null; };
   function cavesRoundDoneHTML(R){
     var all = R.right === CAVES_ROUND, tricky = cavesTricky(cavesData());
     return '<div class="summary-card reef-sum-card lg-done">' +
@@ -209,7 +211,7 @@
   }
   function cavesLinesHTML(C){
     if(!C.cards || !C.voice) return '<p class="lg-hint">' + ccIcon('mic') + ' Finding your lines…</p>';
-    var d = cavesData(), lines = cavesLines(C).slice(0, 40);
+    var d = cavesData(), all = cavesLines(C), lines = all.slice(0, C.more || 30);   // thirty at a time, so a long list stays quick
     C.lines = lines;
     return '<div class="lg-intro"><h2>Say it like the voice</h2><p>Pick a line, listen, then record yourself. Your pitch line and length appear beside the voice\'s. The shortest lines are first.</p></div>' +
       '<ul class="lg-list cv-lines">' + lines.map(function(l, i){
@@ -218,7 +220,7 @@
           '<span class="lg-ic" aria-hidden="true">' + ccIcon('mic') + '</span>' +
           '<span class="lg-st"><b lang="ko">' + esc(l.ko) + '</b><small>' + esc(l.en) + '</small><small class="cv-from">' + esc(l.from) + '</small></span>' +
           '<span class="lg-tag">' + (n ? ccIcon('check') + ' Said' : '') + '</span></button></li>';
-      }).join('') + '</ul>';
+      }).join('') + '</ul>' + (all.length > lines.length ? '<div class="lg-bar"><button type="button" class="btn btn-ghost" data-cv-more>Show longer lines</button></div>' : '');
   }
   function cavesOpenLine(i){
     var C = S.caves, l = C.lines && C.lines[i]; if(!l) return;
@@ -444,9 +446,9 @@
     var opts = Rs.opts.map(function(o, i){
       var cls = picked == null ? '' : o === r.check.word ? ' right' : i === picked ? ' wrong' : ' dim';
       return '<li><button type="button" class="lg-opt cv-opt' + cls + '" data-cv-ropt="' + i + '"' + (picked != null ? ' aria-disabled="true"' : '') + '><span lang="ko">' + esc(o) + '</span></button></li>'; }).join('');
-    var fb = picked == null ? '' : '<p class="lg-fb ' + (ok ? 'ok' : 'no') + '" role="status">' + ccIcon(ok ? 'check' : 'bulb') + ' ' +
+    var fb = picked == null ? '' : '<p class="lg-fb ' + (ok ? 'ok' : 'no') + '" role="status">' + ccIcon(ok ? 'check' : 'bulb') + '<span>' +
       (ok ? 'Yes: it\'s spelled <b lang="ko">' + esc(r.check.word) + '</b> and said [<span lang="ko">' + esc(r.check.opts[1]) + '</span>].' :
-        'It\'s spelled <b lang="ko">' + esc(r.check.word) + '</b>, and said [<span lang="ko">' + esc(r.check.opts[1]) + '</span>].') + '</p>' +
+        'It\'s spelled <b lang="ko">' + esc(r.check.word) + '</b>, and said [<span lang="ko">' + esc(r.check.opts[1]) + '</span>].') + '</span></p>' +
       '<div class="lg-bar">' + (next ? '<button type="button" class="btn btn-primary" data-cv-rule="' + next.id + '">Next: ' + esc(next.en) + '</button>' : '') +
         '<button type="button" class="btn btn-ghost" data-cv-rules>' + ccIcon('bulb') + ' All rules</button></div>';
     return '<div class="lg-title"><h2>' + esc(r.en) + '</h2><span lang="ko">' + esc(r.ko) + '</span></div>' +
@@ -475,6 +477,7 @@
     on('[data-cv-again]', function(){ cavesRoundStart(); renderCaves(); window.scrollTo(0, 0); setTimeout(function(){ if(S.view === 'caves') cavesPlayQ(); }, 300); });
     on('[data-cv-say]', function(b){ try { Speech.speak(b.dataset.cvSay); } catch(e){} });
     on('[data-cv-line]', function(b){ cavesOpenLine(+b.dataset.cvLine); });
+    on('[data-cv-more]', function(){ C.more = (C.more || 30) + 30; var y = window.scrollY; renderCaves(); window.scrollTo(0, y); });
     on('[data-cv-voice]', function(){ if(C.line) cavesSay(C.line); });
     on('[data-cv-slow]', function(){ if(C.line) cavesSay(C.line, true); });
     on('[data-cv-mic]', function(b){
