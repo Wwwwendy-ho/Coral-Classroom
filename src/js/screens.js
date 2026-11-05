@@ -293,6 +293,7 @@
     if(S.view === 'town') return renderTown();
     if(S.view === 'townTalk') return renderTownTalk();
     if(S.view === 'caves') return renderCaves();
+    if(S.view === 'patterns') return renderPatterns();
     if(S.view === 'plan') return renderPlan();
     if(S.view === 'planMonth') return renderPlanMonth();
     if(S.view === 'flashFeed') return renderFlashFeed();         // Flash Feed -- same reasoning again,

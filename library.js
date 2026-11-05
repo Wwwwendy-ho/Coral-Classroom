@@ -521,6 +521,9 @@
     // Echo Caves (the app's caves.js) is its pronunciation practice
     if(CC() && CC().openCaves) html += '<section class="clib-card co-caves"><h2>' + icon('mic', '') + ' Echo Caves</h2><p>The Korean sounds English doesn\'t have: hear them apart, learn the sound rules, and shadow the voice with your pitch shown beside it.</p>' +
       '<div class="clib-row"><button type="button" class="clib-btn main" data-co-caves>Open Echo Caves</button></div></section>';
+    // Pattern Reef (the app's patterns.js) is its grammar practice
+    if(CC() && CC().openPatterns) html += '<section class="clib-card co-patterns"><h2>' + icon('sentence', '') + ' Pattern Reef</h2><p>Twelve sentence patterns for your trip, one at a time: see how each works, then build it, change it and fix it.</p>' +
+      '<div class="clib-row"><button type="button" class="clib-btn main" data-co-patterns>Open Pattern Reef</button></div></section>';
     html += '<h3 class="clib-more-h">The course</h3><ol class="co-line">' + co.units.map(function(u, i){
       var st = u.done ? 'done' : u === now ? 'now' : u.start > t ? 'later' : 'open';
       return '<li class="co-u ' + st + (u.review ? ' review' : '') + '"><details' + (u === now ? ' open' : '') + '><summary><span class="co-dot" aria-hidden="true">' + (u.done ? '✓' : i + 1) + '</span><span class="co-ut"><b>' + esc(u.title) + '</b><small>' + niceDate(u.start) + ' – ' + niceDate(u.end) + ' · ' + u.weeks + ' week' + (u.weeks === 1 ? '' : 's') + (u.testedOut ? ' · quick review' : '') + (u.done ? ' · done' : '') + '</small></span></summary>' +
@@ -541,6 +544,7 @@
     $$('[data-co-lagoon]', el).forEach(function(b){ b.addEventListener('click', function(){ sound('tap'); close(); CC().openLagoon(); }); });
     $$('[data-co-town]', el).forEach(function(b){ b.addEventListener('click', function(){ sound('tap'); close(); CC().openTown(); }); });
     $$('[data-co-caves]', el).forEach(function(b){ b.addEventListener('click', function(){ sound('tap'); close(); CC().openCaves(); }); });
+    $$('[data-co-patterns]', el).forEach(function(b){ b.addEventListener('click', function(){ sound('tap'); close(); CC().openPatterns(); }); });
     $$('[data-co-skip]', el).forEach(function(b){ b.addEventListener('click', function(){ var u = co.units[+b.dataset.coSkip]; u.done = true; u.doneOn = today(); co.log.push({ date: today(), text: u.title + ' marked done without a check.' }); courseSchedule(co); saveCourse(co).then(function(){ go('classroom', null, true); }); }); });
     $('[data-co-off]', el).addEventListener('click', function(){ var c = CC(); if(c && c.setCourseOn) Promise.resolve(c.setCourseOn(false)).then(function(){ go('home', null, true); }); });
   } };

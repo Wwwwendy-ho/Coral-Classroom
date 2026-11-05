@@ -87,7 +87,7 @@
     try { Speech.stop(); } catch(e){}
     var T = S.town || (S.town = {});
     T.id = id; T.node = f.start; T.log = []; T.tried = {}; T.turns = {}; T.showEn = {}; T.word = null; T.typed = ''; T.typeMsg = '';
-    T.choiceEn = false; T.phase = 'talk'; T.speaking = false; T.waiting = false; T.debrief = null;
+    T.choiceEn = false; T.phase = 'talk'; T.speaking = false; T.waiting = false; T.debrief = null; T.pat = {};
     S.view = 'townTalk';
     try { Sound.bloop(560); } catch(e){}
     townSay(f, f.start, true);
@@ -170,11 +170,14 @@
       (T.tried[id] = T.tried[id] || []).push(i);
       turn.slipped = true; turn.hints.push(c.hint);
       T.log.push({ who: 'hint', text: c.hint });
+      if(!townPatCheck(T, c.ko, { self: true }).length && typed) townPatCheck(T, typed, { typed: true });
       try { Sound.wrong(); } catch(e){}
       renderTownTalk(); townScrollEnd();
       return;
     }
     turn.said = c.ko; turn.en = c.en; turn.g = c.g; turn.typed = !!typed;
+    // a typed answer close enough to count can still hold a slip the rules know (물를 for 물을): say so, gently
+    if(typed) townPatCheck(T, typed, { typed: true }).slice(0, 1).forEach(function(x){ T.log.push({ who: 'hint', text: 'You typed ' + x.word + '. ' + x.why }); });
     if(c.g === 'ok'){ var b = townBest(n); turn.better = b; if(b) T.log.push({ who: 'note', ko: b.ko, en: b.en }); }
     // 'use': right the first time is good (typed from memory, easy); after a slip, the phrase she needed is missed
     try { Learner.record(c.ko, 'use', turn.slipped ? 'again' : typed && c.g === 'best' ? 'easy' : 'good'); } catch(e){}
@@ -194,7 +197,8 @@
     var i = townMatch(text, n.c.map(function(c, ci){ return tried.indexOf(ci) === -1 ? c : { ko: '', g: 'oops' }; }));
     if(i == null){
       T.typed = text;
-      T.typeMsg = 'I did not quite catch that. Try again, or tap one of the answers.';
+      var slip = townPatCheck(T, text, { typed: true })[0];
+      T.typeMsg = 'I did not quite catch that. ' + (slip ? 'Check ' + slip.word + ': ' + slip.why + ' ' : '') + 'Try again, or tap one of the answers.';
       renderTownTalk();
       var again = app.querySelector('#twType'); if(again){ again.focus(); }
       return;
@@ -219,7 +223,7 @@
     need.forEach(function(p){ try { myWordsAdd(p.ko.replace(/[.?!]+$/, ''), p.en, 'town'); } catch(e){} });
     // 'hear' for every line of hers she heard: good, or hard if she needed the English
     T.log.forEach(function(e, i){ if(e.who === 'them') try { Learner.record(e.ko, 'hear', T.showEn[i] ? 'hard' : 'good'); } catch(x){} });
-    T.debrief = { well: well, fixes: fixes, need: need, turns: turns.length };
+    T.debrief = { well: well, fixes: fixes, need: need, turns: turns.length, pat: Object.keys(T.pat || {}) };
     T.phase = 'done';
     townMarkDone(f.id, well.length);
     try { reefWinSound(true); } catch(e){}
@@ -299,7 +303,7 @@
       '<section class="tw-sec"><h3>' + ccIcon('check') + ' What went well</h3>' +
         (well ? '<ul class="tw-phr">' + well + '</ul>' : '<p>You kept the conversation going to the end. That is the hardest part.</p>') + '</section>' +
       '<section class="tw-sec"><h3>' + ccIcon('bulb') + ' ' + (perfect ? 'Nothing to fix' : 'To work on') + '</h3>' +
-        (fixes ? '<ul class="tw-fix">' + fixes + '</ul>' : '<p>Every answer was right the first time.</p>') + '</section>' +
+        (fixes ? '<ul class="tw-fix">' + fixes + '</ul>' : '<p>Every answer was right the first time.</p>') + townPatHTML(D) + '</section>' +
       (need ? '<section class="tw-sec"><h3>' + ccIcon('sparkle') + ' Phrases you needed</h3><p>These are now in My words, to practice.</p><ul class="tw-phr tw-need">' + need + '</ul></section>' : '') +
       '<div class="reef-sum-actions tw-actions">' +
         (nextUp ? '<button type="button" class="btn btn-primary" data-tw-open="' + nextUp.f.id + '">Next: ' + esc(nextUp.f.en) + '</button>' : '') +
@@ -308,6 +312,21 @@
       '</div>';
   }
 
+  /* Pattern Reef's mistake rules (patterns-data.js) on what she said: a slip they recognize is counted there, and
+     the debrief offers to repair that pattern. Returns what they found. */
+  function townPatCheck(T, text, ctx){
+    var found = [];
+    try { found = patNote(text, ctx, 'Harbor Town'); } catch(e){}
+    found.forEach(function(x){ T.pat = T.pat || {}; T.pat[x.pat] = x; });
+    return found;
+  }
+  function townPatHTML(D){
+    var pats = (D.pat || []).map(patById).filter(Boolean).slice(0, 2);
+    if(!pats.length) return '';
+    return '<div class="tw-pat">' + pats.map(function(p){
+      return '<button type="button" class="btn btn-ghost" data-tw-pat="' + p.id + '">' + ccIcon('sentence') + '<span>Repair this in Pattern Reef<small>' + esc(p.en) + ' <span lang="ko">' + esc(p.ko) + '</span></small></span></button>';
+    }).join('') + '</div>';
+  }
   function townTapWord(f, T, li, wi){
     var e = T.log[li], w = e && townWords(e.w)[wi]; if(!w) return;
     townStop();
@@ -340,6 +359,7 @@
     on('[data-tw-open]', function(b){ townOpenTalk(b.dataset.twOpen); });
     on('[data-tw-again]', function(){ townOpenTalk(f.id); });
     on('[data-tw-sayko]', function(b){ try { Speech.speak(b.dataset.twSayko); } catch(x){} });
+    on('[data-tw-pat]', function(b){ townStop(); openPatterns(b.dataset.twPat); });
     var form = app.querySelector('[data-tw-form]');
     if(form) form.addEventListener('submit', function(e){ e.preventDefault(); townTyped(f); });
     var inp = app.querySelector('#twType');

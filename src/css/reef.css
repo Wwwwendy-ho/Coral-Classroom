@@ -626,3 +626,58 @@ body.reef-calm .tw-dots i{ animation:none; opacity:.7; }
 .cv-page .lg-fb{ flex-wrap:nowrap; align-items:flex-start; line-height:1.45; }
 .cv-page .lg-fb .cc-ic{ flex:none; }
 .cv-stage .echo-mic:empty{ display:none; }
+
+/* ---------- Pattern Reef (patterns.js): the patterns, how each works, and its practice round ----------
+   The same panels and --lg-* tokens as the other islands. Added here: the numbered list, the "patterns to repair"
+   panel, the explanation card, the progress dots of a round, the word tiles (Sentence Builder's .build-* look) and
+   the tappable words of a "fix it" sentence. */
+.pr-page{ padding-bottom:96px; }   /* the last buttons scroll clear of the Ask Shelly button */
+.pr-num{ font:800 1.3rem 'Baloo 2',system-ui,sans-serif; color:var(--lg-teal); }
+.lg-title .lg-meter{ margin-top:8px; }
+.lg-title h2 .cc-ic{ width:26px; height:26px; vertical-align:-4px; color:var(--lg-teal); }
+.pr-rlist{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+.pr-rlist li{ display:flex; gap:10px; align-items:center; justify-content:space-between; padding-left:12px; border-left:3px solid #e8a33d; }
+.pr-rlist li > span{ display:flex; flex-direction:column; gap:2px; font-weight:700; min-width:0; }
+.pr-rlist small{ color:var(--lg-soft); font-weight:700; }
+.pr-rlist .btn, .tw-pat .btn{ min-height:48px; display:inline-flex; align-items:center; gap:8px; font-weight:800; flex:none; }
+.pr-rlist .btn .cc-ic, .tw-pat .btn .cc-ic{ width:20px; height:20px; }
+.pr-rule{ background:var(--lg-panel); border:2px solid var(--lg-edge); border-radius:var(--r-md); padding:12px 14px; }
+.pr-rule h3{ margin:0 0 6px; display:flex; align-items:center; gap:8px; font-family:'Baloo 2',system-ui,sans-serif; font-size:1.15rem; }
+.pr-rule h3 .cc-ic{ width:22px; height:22px; color:#e8a33d; }
+.pr-rule p{ margin:0 0 8px; font-weight:600; line-height:1.55; }
+.pr-rule p:last-child{ margin-bottom:0; }
+.pr-ex{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.pr-ex li{ display:flex; gap:10px; align-items:center; }
+.pr-ex b{ font-size:1.25rem; word-break:keep-all; }
+.pr-ex small{ display:block; color:var(--lg-soft); font-weight:700; }
+.pr-note, .pr-why{ margin:0; display:flex; gap:8px; align-items:flex-start; font-weight:700; line-height:1.45; color:var(--lg-ink);
+  background:var(--lg-panel); border:2px dashed var(--lg-edge); border-radius:var(--r-md); padding:10px 12px; }
+.pr-note .cc-ic, .pr-why .cc-ic{ flex:none; width:22px; height:22px; color:#e8a33d; }
+.pr-dots{ list-style:none; margin:8px 0 0; padding:0; display:flex; gap:6px; }
+.pr-dots li{ width:22px; height:6px; border-radius:99px; background:var(--lg-edge); }
+.pr-dots li.past{ background:var(--lg-teal); opacity:.55; }
+.pr-dots li.now{ background:var(--lg-teal); }
+.pr-qic .cc-ic{ width:28px; height:28px; color:var(--lg-teal); }
+.pr-from b{ word-break:keep-all; }
+.lg-q .pr-ask{ display:flex; gap:6px; align-items:center; margin-top:6px; color:var(--lg-ink); }
+.pr-ask .cc-ic{ flex:none; width:20px; height:20px; color:var(--lg-teal); }
+.pr-opt{ word-break:keep-all; }
+.pr-opt[aria-disabled="true"]{ cursor:default; }
+.pr-line{ border-color:var(--lg-edge); background:var(--lg-panel); }
+.pr-page .build-tile{ font-family:inherit; }
+.pr-fixline{ margin:0; display:flex; flex-wrap:wrap; gap:8px; justify-content:center; background:var(--lg-panel); border:2px solid var(--lg-edge); border-radius:var(--r-md); padding:12px; }
+.pr-word{ min-height:48px; min-width:44px; padding:6px 12px; border-radius:12px; border:2px solid var(--lg-edge); background:var(--lg-you); color:var(--lg-ink);
+  font:700 1.3rem 'Nunito',sans-serif; cursor:pointer; }
+.pr-word:disabled{ cursor:default; }
+.pr-word.spot{ border-color:#e8a33d; background:var(--lg-glow); }
+.pr-word.miss{ border-color:var(--lg-no); opacity:.7; }
+.pr-done-meter{ display:flex; flex-direction:column; align-items:center; gap:4px; margin:6px 0 10px; }
+.pr-done-meter .lg-meter{ width:220px; max-width:80%; }
+.pr-done-meter small{ font-weight:800; color:var(--reef-soft); }
+.pr-page .lg-fb{ flex-wrap:nowrap; align-items:center; line-height:1.45; }
+.pr-page .lg-fb .cc-ic{ flex:none; }
+.tw-pat{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.tw-pat .btn small{ display:block; font-weight:700; opacity:.8; }
+.tw-pat .btn > span{ text-align:left; }
+@media (max-width:420px){ .pr-rlist li{ flex-direction:column; align-items:stretch; } }
+@media (min-width:700px){ .pr-ex b{ font-size:1.45rem; } .pr-word{ font-size:1.5rem; } }

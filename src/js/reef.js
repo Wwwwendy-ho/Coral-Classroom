@@ -223,7 +223,7 @@
     setTimeout(function(){ ov.remove(); reefBusy = false; window.__reefTx = false; }, end);
   }
   function reefInDeck(){
-    return ['study','summary','feed','story','equationFeed','langFeed','readAlong','flashFeed','miniStory','wordBank','lagoon','lagoonRead','town','townTalk','caves'].indexOf(S.view) !== -1;
+    return ['study','summary','feed','story','equationFeed','langFeed','readAlong','flashFeed','miniStory','wordBank','lagoon','lagoonRead','town','townTalk','caves','patterns'].indexOf(S.view) !== -1;
   }
   // Every way out of a deck goes through goHome(), so this is the one place that adds the pop-up.
   function goHome(){

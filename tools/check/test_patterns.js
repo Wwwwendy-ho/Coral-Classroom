@@ -14,7 +14,8 @@ function eq(what, got, want){ if(got !== want) bad.push(what + ': got ' + got + 
   .forEach(function(t){ eq('particle ' + t[0] + ' ' + t[1], P.particle(t[0], t[1]), t[2]); });
 
 // the rules: what each sentence should be flagged as ('' for nothing)
-function slips(text, ctx){ return P.find(text, ctx).map(function(f){ return f.slip; }).sort().join(','); }
+var ruled = 0;
+function slips(text, ctx){ ruled++; return P.find(text, ctx).map(function(f){ return f.slip; }).sort().join(','); }
 [ ['책를 읽어요.', 'p-object'], ['물를 주세요', 'p-object'], ['사과을 사요', 'p-object'], ['라면와 김밥을 먹어요', 'p-object'],
   ['학교은 커요', 'p-topic'], ['집는 커요', 'p-topic'], ['친구이 와요', 'p-topic'], ['선생님가 와요', 'p-topic'], ['저가 안나예요', 'p-topic'],
   ['책을 읽어요.', ''], ['커피와 빵을 주세요.', ''], ['선생님이 와요.', ''], ['제가 안나예요.', ''], ['저는 학생이에요.', ''],
@@ -69,5 +70,5 @@ P.L.forEach(function(p){
   ['notice', 'build', 'change', 'fix'].forEach(function(k){ if(!has[k]) bad.push(p.id + ': no ' + k + ' item'); });
 });
 if(bad.length){ console.log(bad.join('\n')); console.log('patterns: ' + bad.length + ' problems'); process.exit(1); }
-console.log('patterns: particle forms right, the mistake rules right on 37 sentences, 12 patterns (' + kinds.notice + ' notice, ' + kinds.build + ' build, ' +
+console.log('patterns: particle forms right, the mistake rules right on ' + ruled + ' sentences, 12 patterns (' + kinds.notice + ' notice, ' + kinds.build + ' build, ' +
   kinds.change + ' change, ' + kinds.fix + ' fix items), ' + spoken + ' spoken sentences all voiced');
