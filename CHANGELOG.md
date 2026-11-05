@@ -1,5 +1,22 @@
 # Changelog
 
+## Pattern Reef opens (November 5, 2026)
+
+- **The fourth new island of the sea is open: Pattern Reef**, for grammar, one sentence pattern at a time.
+- **Twelve patterns for a traveler, in the order to learn them:** 은/는 and 이/가; 을/를 (and 와/과); the polite
+  present -아요/어요; 있어요 and 없어요; -고 싶어요 (want to); -(으)세요 and 주세요 (please); 에 and 에서; the past
+  -았/었어요; the future -(으)ㄹ 거예요; 안 and -지 않아요 (not); -(으)ㄹ 수 있어요 (can); and counting with 개, 명,
+  잔 and 병. Each explains how it works in plain words, with examples to hear.
+- **A practice round for each:** notice it (pick the right sentence), build it (word tiles), change it (present to
+  past, a statement to "want to"...) and fix it (tap the wrong word, then pick the repair). Each pattern has a
+  mastery meter. The next one is suggested, but any can be opened.
+- **Patterns to repair.** The app now spots common slips on your device: the wrong particle after a consonant or
+  a vowel (책를 for 책을), -세요 used about yourself, 있어요 where 주세요 is meant, and the wrong numbers before a
+  counter (둘 명, 삼 명). Slips here and in Harbor Town show at the top of Pattern Reef, and Harbor Town's
+  debrief offers "Repair this in Pattern Reef". A good round puts them right.
+- Open it from the treasure map (The sea, then Pattern Reef) or from My course in the Library. Shelly points it
+  out the first time. 97 new Korean sentences have the natural voice.
+
 ## Echo Caves opens (November 5, 2026)
 
 - **The third new island of the sea is open: Echo Caves**, for pronunciation, in three parts.

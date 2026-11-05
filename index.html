@@ -15441,8 +15441,9 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
                     Builder), change it (present to past, a statement to "want to"...) and fix it (tap the wrong
                     word, then pick its repair). Then a celebration with the new mastery.
      Every answer tells the learner model: 'use' for the item's sentence, good when right the first time and
-     again otherwise. A wrong answer goes through the mistake rules (patFind): a slip they recognize is counted
-     against the pattern that repairs it, and anything else against the pattern being practiced.
+     again otherwise. A wrong answer counts as a slip in the pattern being practiced, and goes through the mistake
+     rules (patFind) so a slip they recognize is named by its word (저가, better 제가). A wrong particle picked while
+     practicing 은/는 isn't charged to the 을/를 pattern: here she was answering about this one.
      Per profile in localStorage (cc-patterns-<profile id>): m, each pattern's mastery (0–1, the latest round
      weighed equally with all before it); r, rounds played; s, slips per pattern ({ n: all, open: since the last
      good round, last: { said, fix, why, from } }). A round with at most one miss closes a pattern's open slips.
@@ -15572,8 +15573,9 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     if(ok){ R.right++; try { Sound.correct(); } catch(e){} }
     else {
       R.misses.push(it.ko);
-      var found = said ? patNote(said, {}, 'Pattern Reef') : [];
-      if(!found.some(function(f){ return f.pat === p.id; })) patCount([{ pat: p.id, said: said || '', fix: patBare(it.ko), why: it.why }], 'Pattern Reef');
+      // the slip counts against this pattern; when the rules recognize it as this pattern's mistake, their words say what's wrong
+      var f = (said ? patFind(said, {}) : []).find(function(x){ return x.pat === p.id; });
+      patCount([f ? { pat: p.id, said: f.word, fix: f.fix, why: f.why } : { pat: p.id, said: said || '', fix: patBare(it.ko), why: it.why }], 'Pattern Reef');
       try { Sound.wrong(); } catch(e){}
     }
     var y = window.scrollY; renderPatterns(); window.scrollTo(0, y);

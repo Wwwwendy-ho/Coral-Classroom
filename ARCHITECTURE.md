@@ -112,6 +112,15 @@ measures both clips with `echoDecode`, and the rule cards). Recordings stay in p
 'say' in the learner model; per-contrast misses, checked rules and shadowed lines live in localStorage
 (cc-caves-<profile id>). `tools/check/test_caves.js` checks the pitch measure on synthetic tones and that every word
 has a voice clip.
+Pattern Reef, the fourth region, is `src/js/patterns-data.js` (twelve grammar patterns in learning order, each with
+a plain-English explanation, examples and a practice round of notice / build / change / fix items; and `patFind`,
+the mistake rules: particle form after a consonant or vowel by the 받침 of a known noun, -세요 about yourself,
+있어요 for 주세요 when ordering, and Sino or long native numbers before a counter) and `src/js/patterns.js` (one
+screen, S.view 'patterns': the list with mastery meters and "patterns to repair", a pattern's page, and its round;
+the build item reuses Sentence Builder's `buildTokens` and look). Each answer records 'use' for its sentence.
+Harbor Town runs `patNote` on its mistake answers and typed answers, and its debrief links to the pattern. Mastery,
+rounds and slips live in localStorage (cc-patterns-<profile id>). `tools/check/test_patterns.js` checks the
+particle rules, the mistake rules on right and wrong sentences, the shape of every item, and the voice clips.
 
 ## Grown-up checks
 
