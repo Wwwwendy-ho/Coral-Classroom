@@ -116,9 +116,13 @@
     Speech.speakThen(e.ko, function(){ if(token === T.token){ T.speaking = false; townPaint(); } }, e.who === 'them' ? townOpts(T) : null);
   }
   function townStop(){ var T = S.town; if(T){ T.token = (T.token || 0) + 1; T.speaking = false; } try { Speech.stop(); } catch(e){} }
+  // Scrolls down to the newest part of the talk: as far as the page goes (the answers sit at the bottom), but never
+  // so far that the townsperson's newest line slides off the top, which on an iPhone held sideways it otherwise would
   function townScrollEnd(){
-    var end = app.querySelector('.tw-turn') || app.querySelector('.tw-log li:last-child');
-    if(end) try { end.scrollIntoView({ block: 'end', behavior: reefCalm() ? 'auto' : 'smooth' }); } catch(e){ end.scrollIntoView(false); }
+    var lines = app.querySelectorAll('.tw-log .lg-line:not(.lg-me)'), last = lines[lines.length - 1];
+    var bottom = document.documentElement.scrollHeight - window.innerHeight;
+    var y = last ? Math.min(bottom, last.getBoundingClientRect().top + window.scrollY - 70) : bottom;
+    if(y > window.scrollY) window.scrollTo({ top: y, behavior: reefCalm() ? 'auto' : 'smooth' });
   }
   // Only the playing highlight changes while a line plays, so the page doesn't jump about
   function townPaint(){
@@ -271,8 +275,8 @@
       turn = '<div class="tw-turn" role="group" aria-label="Your answer">' +
         '<div class="tw-turn-head"><b>Your turn</b><button type="button" class="lg-mini" data-tw-cen aria-pressed="' + !!T.choiceEn + '">' + (T.choiceEn ? 'Hide English' : 'English') + '</button></div>' +
         '<ul class="lg-opts">' + opts + '</ul>' +
-        '<form class="tw-type" data-tw-form autocomplete="off"><label for="twType">Or type your answer, in Korean or in English letters</label>' +
-          '<span class="tw-type-row"><input id="twType" type="text" lang="ko" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" placeholder="예: 네, 감사합니다 / ne, gamsahamnida" value="' + esc(T.typed || '') + '">' +
+        '<form class="tw-type" data-tw-form autocomplete="off"><label for="twType">Or type your answer, in Korean or in English letters (like <i>gamsahamnida</i>)</label>' +
+          '<span class="tw-type-row"><input id="twType" type="text" lang="ko" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" placeholder="Type your answer" value="' + esc(T.typed || '') + '">' +
           '<button type="submit" class="btn btn-primary">Send</button></span>' +
           (T.typeMsg ? '<span class="tw-type-msg" role="status">' + esc(T.typeMsg) + '</span>' : '') + '</form></div>';
     }

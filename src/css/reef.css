@@ -523,6 +523,7 @@ body.reef-calm .lg-line.playing .lg-bubble{ transform:none; }
 /* ---------- Harbor Town (town.js): the townsfolk and a conversation ----------
    The same panels, bubbles and --lg-* tokens as Story Lagoon, so the two islands feel like one game. Added here:
    hint notes between bubbles, the "typing" dots, the answer panel with its typing box, and the debrief. */
+.tw-page{ padding-bottom:96px; }   /* the last answer and the Slower button can scroll clear of the Ask Shelly button */
 .tw-hint{ display:flex; gap:8px; align-items:flex-start; align-self:center; max-width:92%; background:var(--lg-panel); border:2px dashed var(--lg-edge); border-radius:var(--r-md); padding:10px 12px; font-weight:700; color:var(--lg-ink); }
 .tw-hint .cc-ic{ flex:none; width:22px; height:22px; color:#e8a33d; }
 .tw-note .cc-ic{ color:var(--lg-teal); }
