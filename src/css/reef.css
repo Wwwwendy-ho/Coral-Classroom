@@ -564,3 +564,62 @@ body.reef-calm .tw-dots i{ animation:none; opacity:.7; }
 .tw-actions .btn{ min-height:48px; display:inline-flex; align-items:center; gap:8px; padding:10px 18px; font-weight:800; }
 .tw-actions .btn .cc-ic{ width:22px; height:22px; }
 @media (min-width:700px){ .tw-opt{ font-size:1.4rem; } .tw-phr b{ font-size:1.35rem; } }
+
+/* ---------- Echo Caves (caves.js): sound pairs, shadowing and the sound rules ----------
+   The same panels and --lg-* tokens as Story Lagoon and Harbor Town. Added here: the pair answers with their
+   meanings, the "hear each" row, the pitch lanes (the voice in teal, her in amber, on one time scale), the kind
+   feedback lines and the sound-rule card. The microphone parts reuse Echo's (.echo-rec, .mic-ask). */
+.cv-page{ padding-bottom:96px; }   /* the last buttons scroll clear of the Ask Shelly button */
+.cv-q{ align-items:center; }
+.cv-play.listen-play{ width:64px; height:64px; flex:none; }
+.cv-play.listen-play .cc-ic{ width:2rem; height:2rem; }
+.cv-opts{ display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 140px), 1fr)); }
+.cv-opt{ text-align:center; font-size:1.7rem; }
+.cv-opt[aria-disabled="true"]{ cursor:default; }
+.cv-hear-each{ display:flex; flex-wrap:wrap; gap:8px; }
+.cv-hear-each .lg-mini{ font-size:1.1rem; }
+.cv-tip, .cv-note{ margin:0; display:flex; gap:8px; align-items:flex-start; font-weight:700; line-height:1.45; color:var(--lg-ink);
+  background:var(--lg-panel); border:2px dashed var(--lg-edge); border-radius:var(--r-md); padding:10px 12px; }
+.cv-tip .cc-ic, .cv-note .cc-ic{ flex:none; width:22px; height:22px; color:#e8a33d; }
+.cv-note .cc-ic{ color:var(--lg-teal); }
+.cv-tlist{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.cv-tlist li{ display:flex; flex-direction:column; gap:2px; padding-left:12px; border-left:3px solid #e8a33d; font-weight:700; line-height:1.4; }
+.cv-tlist b{ font-size:1.2rem; }
+.cv-from{ font-size:.8rem; text-transform:uppercase; letter-spacing:.04em; }
+.cv-stage{ display:flex; flex-direction:column; align-items:center; gap:10px; background:var(--lg-panel); border:2px solid var(--lg-edge); border-radius:var(--r-md); padding:14px 12px; }
+.cv-stage .echo-mic{ margin-top:0; }
+.cv-hint{ margin:0; text-align:center; font-weight:700; color:var(--lg-soft); max-width:460px; }
+.cv-nomic .cv-hint{ color:var(--lg-ink); }
+.cv-pitch{ width:100%; max-width:560px; display:flex; flex-direction:column; gap:8px; }
+.cv-pitch:empty{ display:none; }
+.cv-lane{ display:flex; flex-direction:column; gap:2px; }
+.cv-lane-label{ display:flex; align-items:center; gap:6px; font-weight:800; font-size:.9rem; color:var(--lg-soft); }
+.cv-lane-label .cc-ic{ width:18px; height:18px; }
+.cv-lane svg{ display:block; width:100%; height:64px; background:var(--lg-you); border-radius:12px; overflow:visible; }
+.cv-mid{ stroke:var(--lg-edge); stroke-width:1; stroke-dasharray:4 4; vector-effect:non-scaling-stroke; }
+.cv-len{ fill:var(--lg-edge); }
+.cv-pline{ fill:none; stroke-width:3.5; stroke-linecap:round; stroke-linejoin:round; vector-effect:non-scaling-stroke; }
+.cv-lane.voice .cv-pline{ stroke:var(--lg-teal); }
+.cv-lane.voice .cc-ic{ color:var(--lg-teal); }
+.cv-lane.me .cv-pline{ stroke:#e8a33d; }
+.cv-lane.me .cv-len{ fill:#e8a33d; opacity:.45; }
+.cv-lane.me .cc-ic{ color:#e8a33d; }
+.cv-fb{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; max-width:520px; }
+.cv-fb li{ display:flex; gap:8px; align-items:flex-start; font-weight:700; line-height:1.4; }
+.cv-fb .cc-ic{ flex:none; width:22px; height:22px; color:var(--lg-teal); }
+.cv-compare .btn, .cv-rate .btn{ min-height:48px; display:inline-flex; align-items:center; gap:8px; font-weight:800; }
+.cv-compare .btn .cc-ic{ width:20px; height:20px; }
+.cv-say h2{ font-size:1.7rem; word-break:keep-all; }
+.cv-rulecard{ background:var(--lg-panel); border:2px solid var(--lg-edge); border-radius:var(--r-md); padding:14px; display:flex; flex-direction:column; gap:10px; }
+.cv-rulecard p{ margin:0; font-weight:700; line-height:1.5; }
+.cv-big{ display:flex; gap:12px; align-items:center; }
+.cv-big > span{ display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 10px; }
+.cv-big b{ font-family:'Baloo 2',system-ui,sans-serif; font-size:1.9rem; line-height:1.1; }
+.cv-big small{ flex-basis:100%; color:var(--lg-soft); font-weight:700; }
+.cv-arrow{ color:var(--lg-soft); font-weight:800; font-size:1.3rem; }
+.cv-said{ color:var(--lg-teal); }
+.cv-more{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.cv-more li{ display:flex; gap:10px; align-items:center; }
+.cv-more b{ font-size:1.25rem; }
+.cv-more small{ display:block; color:var(--lg-soft); font-weight:700; }
+@media (min-width:700px){ .cv-opt{ font-size:2rem; } .cv-big b{ font-size:2.3rem; } .cv-say h2{ font-size:2rem; } }

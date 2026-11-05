@@ -273,6 +273,7 @@
     // within Adult Mode (Manage Decks) actually opens the deck instead of silently falling through
     // to renderHome() -- previously the managingDecks branch had no case for these two views at all.
     if(S.view !== 'study' && (echoRec || S.echoState)) echoReset(); // left a card mid-recording: free the microphone
+    if(S.view !== 'caves' && cavesRec) cavesRecReset();               // the same for Echo Caves' shadowing
     if(S.view === 'study') return renderStudy();
     if(S.view === 'summary') return renderSummary();
     if(S.view === 'collection') return reefCollection();
@@ -291,6 +292,7 @@
     if(S.view === 'lagoonRead') return renderLagoonRead();
     if(S.view === 'town') return renderTown();
     if(S.view === 'townTalk') return renderTownTalk();
+    if(S.view === 'caves') return renderCaves();
     if(S.view === 'plan') return renderPlan();
     if(S.view === 'planMonth') return renderPlanMonth();
     if(S.view === 'flashFeed') return renderFlashFeed();         // Flash Feed -- same reasoning again,

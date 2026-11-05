@@ -335,8 +335,9 @@
     if(S.echoState && S.echoState.recUrl){ try { URL.revokeObjectURL(S.echoState.recUrl); } catch(e){} }
     S.echoState = null;
   }
-  // 48 bars describing how loud each slice of a clip is -- enough to see syllables and pauses.
-  function echoShape(url){
+  // A clip (a voice clip or a recording, by its URL) decoded into its samples: an AudioBuffer, or null if it can't be.
+  // Echo Caves (caves.js) measures pitch from the same thing.
+  function echoDecode(url){
     var AC = window.AudioContext || window.webkitAudioContext;
     if(!AC || !url || !window.fetch) return Promise.resolve(null);
     return fetch(url).then(function(r){ return r.arrayBuffer(); }).then(function(buf){
@@ -345,17 +346,21 @@
         var done = false;
         var p = ctx.decodeAudioData(buf, function(b){ if(!done){ done = true; res(b); } }, function(e){ if(!done){ done = true; rej(e); } });
         if(p && p.then) p.then(function(b){ if(!done){ done = true; res(b); } }, function(e){ if(!done){ done = true; rej(e); } });
-      }).then(function(ab){
-        try { ctx.close(); } catch(e){}
-        var d = ab.getChannelData(0), n = 48, step = Math.max(1, Math.floor(d.length / n)), bars = [], max = 0;
-        for(var i = 0; i < n; i++){
-          var sum = 0, cnt = 0;
-          for(var j = i * step; j < Math.min(d.length, (i + 1) * step); j += 4){ sum += d[j] * d[j]; cnt++; }
-          var v = cnt ? Math.sqrt(sum / cnt) : 0; bars.push(v); if(v > max) max = v;
-        }
-        return { bars: bars.map(function(v){ return max ? v / max : 0; }), secs: ab.duration };
-      });
+      }).then(function(ab){ try { ctx.close(); } catch(e){} return ab; }, function(e){ try { ctx.close(); } catch(x){} throw e; });
     }).catch(function(){ return null; });
+  }
+  // 48 bars describing how loud each slice of a clip is -- enough to see syllables and pauses.
+  function echoShape(url){
+    return echoDecode(url).then(function(ab){
+      if(!ab) return null;
+      var d = ab.getChannelData(0), n = 48, step = Math.max(1, Math.floor(d.length / n)), bars = [], max = 0;
+      for(var i = 0; i < n; i++){
+        var sum = 0, cnt = 0;
+        for(var j = i * step; j < Math.min(d.length, (i + 1) * step); j += 4){ sum += d[j] * d[j]; cnt++; }
+        var v = cnt ? Math.sqrt(sum / cnt) : 0; bars.push(v); if(v > max) max = v;
+      }
+      return { bars: bars.map(function(v){ return max ? v / max : 0; }), secs: ab.duration };
+    });
   }
   function echoShapeHTML(shape, label, cls, longest){
     if(!shape) return '';

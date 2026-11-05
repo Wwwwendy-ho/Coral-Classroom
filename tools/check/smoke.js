@@ -187,6 +187,51 @@ async function newPage(browser) {
   await p.click('[data-act="tw-back"]'); await p.waitForTimeout(500);
   await p.click('[data-act="tw-home"]'); await p.waitForTimeout(6000);
   check('grown-up: leaving Harbor Town goes back to the board', await p.evaluate(() => !!document.querySelector('.r3 canvas')));
+  // Echo Caves: open from the sea chart, answer a sound pair, check a sound rule, and open shadowing, where headless
+  // Chromium has no microphone: the line still plays and can be rated, said along with the voice
+  await p.click('[data-r3-map]'); await p.waitForTimeout(1200);
+  await p.click('.r3-map-tab[data-sea-tab="sea"]'); await p.waitForTimeout(400);
+  await p.click('.r3-sea-isle[data-sea="caves"]'); await p.waitForTimeout(400);
+  const cvBtn = await p.$('[data-sea-go="caves"]');
+  check('grown-up: the sea chart has an Open Echo Caves button', !!cvBtn && /Open Echo Caves/.test(await cvBtn.textContent()));
+  if (cvBtn) { await cvBtn.click(); await p.waitForTimeout(2500); }
+  check('grown-up: Echo Caves shows its three parts', await p.evaluate(() => document.querySelectorAll('.cv-sec').length === 3));
+  await p.click('[data-cv-go="pairs"]'); await p.waitForTimeout(600);
+  check('grown-up: a sound pair offers two or three look-alike words', await p.evaluate(() => { const n = document.querySelectorAll('.cv-opt').length; return n >= 2 && n <= 3; }));
+  await p.click('.cv-opt'); await p.waitForTimeout(500);
+  check('grown-up: answering a sound pair shows the answer, its tip and the next button, and is remembered', await p.evaluate(() =>
+    !!document.querySelector('.lg-fb') && !!document.querySelector('.cv-tip') && !!document.querySelector('[data-cv-next]') &&
+    Object.keys((JSON.parse(localStorage.getItem('cc-caves-wendy') || '{}').c) || {}).length === 1));
+  await p.click('[data-cv-next]'); await p.waitForTimeout(400);
+  check('grown-up: the next sound pair comes up', await p.evaluate(() => /Sound 2 of 8/.test(document.querySelector('.lg-title').textContent)));
+  await p.click('[data-act="cv-back"]'); await p.waitForTimeout(400);
+  await p.click('[data-cv-go="rules"]'); await p.waitForTimeout(400);
+  check('grown-up: Sound rules lists seven rules', await p.evaluate(() => document.querySelectorAll('.cv-rule').length === 7));
+  await p.click('.cv-rule'); await p.waitForTimeout(500);
+  check('grown-up: a sound-rule card shows the spelling, how it is said and a check', await p.evaluate(() =>
+    /한국어/.test(document.querySelector('.cv-big').textContent) && /\[한구거\]/.test(document.querySelector('.cv-big').textContent) && document.querySelectorAll('[data-cv-ropt]').length === 3));
+  await p.evaluate(() => [...document.querySelectorAll('[data-cv-ropt]')].find(b => b.textContent.trim() === '음악').click()); await p.waitForTimeout(400);
+  check('grown-up: picking the right spelling says so', await p.evaluate(() => !!document.querySelector('.lg-fb.ok')));
+  await p.click('[data-act="cv-back"]'); await p.waitForTimeout(300);
+  await p.click('[data-act="cv-back"]'); await p.waitForTimeout(300);
+  await p.click('[data-cv-go="shadow"]');
+  const cvLines = await p.waitForFunction(() => document.querySelectorAll('.cv-line').length > 0, null, { timeout: 10000 }).then(() => true, () => false);
+  check('grown-up: Shadowing lists lines from her cards, shortest first', cvLines && await p.evaluate(() => {
+    const t = [...document.querySelectorAll('.cv-line b')].map(b => b.textContent.length); return t.every((n, i) => !i || n >= t[i - 1]); }));
+  await p.click('.cv-line'); await p.waitForTimeout(800);
+  const ask = await p.$('[data-cv-mic="yes"]');
+  if (ask) await ask.click();
+  const noMic = await p.waitForFunction(() => !!document.querySelector('.cv-nomic') || !!document.querySelector('[data-cv-stop]'), null, { timeout: 10000 }).then(() => true, () => false);
+  if (await p.$('[data-cv-stop]')) { await p.click('[data-cv-stop]'); await p.waitForTimeout(1500); }
+  check('grown-up: shadowing without a microphone says so and still lets her say it along with the voice', noMic && await p.evaluate(() =>
+    !!document.querySelector('[data-cv-voice]') && !!document.querySelector('[data-cv-rate="good"]')), await p.evaluate(() => (document.querySelector('.cv-hint') || {}).textContent));
+  const first = await p.evaluate(() => document.querySelector('.cv-say h2').textContent);
+  await p.click('[data-cv-rate="good"]'); await p.waitForTimeout(600);
+  check('grown-up: "Sounded right" moves on to the next line', await p.evaluate(f => { const h = document.querySelector('.cv-say h2'); return !h || h.textContent !== f; }, first));
+  await p.click('[data-act="cv-back"]'); await p.waitForTimeout(300);
+  await p.click('[data-act="cv-back"]'); await p.waitForTimeout(300);
+  await p.click('[data-act="cv-home"]'); await p.waitForTimeout(6000);
+  check('grown-up: leaving Echo Caves goes back to the board', await p.evaluate(() => !!document.querySelector('.r3 canvas')));
   await menuPick(p, 'Edit decks'); await p.waitForTimeout(1200);
   await p.click('[data-act="open-library"]', { force: true }); await p.waitForTimeout(800);
   check('grown-up: the Library opens on the Korean goal', await p.evaluate(() => [...document.querySelectorAll('.clib-tab')].map(t => t.dataset.tab).join(',') === 'korean'));

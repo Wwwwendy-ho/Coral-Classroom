@@ -1989,6 +1989,8 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
      js/lagoon.js               STORY LAGOON: the story list (best fit first) and the reader (listen, read, questions)
      js/town-talks.js           HARBOR TOWN's townsfolk: eight branching trip conversations with word meanings
      js/town.js                 HARBOR TOWN: the townsfolk list (best fit first), the conversation and its debrief
+     js/caves-sounds.js         ECHO CAVES' sound pairs and sound rules, and the pitch measure (autocorrelation)
+     js/caves.js                ECHO CAVES: sound pairs, shadowing with pitch lines, and the sound rules
      js/ui-icons.js             drawn icons in place of emoji in every screen's titles, buttons and labels
      js/whats-new.js            What's new: Shelly points out new things after an update (one entry per release)
      js/vendor/three-gltfloader.js   THIRD-PARTY CODE: three.js GLTFLoader and BufferGeometryUtils (don't edit)
@@ -4086,6 +4088,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     // within Adult Mode (Manage Decks) actually opens the deck instead of silently falling through
     // to renderHome() -- previously the managingDecks branch had no case for these two views at all.
     if(S.view !== 'study' && (echoRec || S.echoState)) echoReset(); // left a card mid-recording: free the microphone
+    if(S.view !== 'caves' && cavesRec) cavesRecReset();               // the same for Echo Caves' shadowing
     if(S.view === 'study') return renderStudy();
     if(S.view === 'summary') return renderSummary();
     if(S.view === 'collection') return reefCollection();
@@ -4104,6 +4107,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     if(S.view === 'lagoonRead') return renderLagoonRead();
     if(S.view === 'town') return renderTown();
     if(S.view === 'townTalk') return renderTownTalk();
+    if(S.view === 'caves') return renderCaves();
     if(S.view === 'plan') return renderPlan();
     if(S.view === 'planMonth') return renderPlanMonth();
     if(S.view === 'flashFeed') return renderFlashFeed();         // Flash Feed -- same reasoning again,
@@ -8437,8 +8441,9 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     if(S.echoState && S.echoState.recUrl){ try { URL.revokeObjectURL(S.echoState.recUrl); } catch(e){} }
     S.echoState = null;
   }
-  // 48 bars describing how loud each slice of a clip is -- enough to see syllables and pauses.
-  function echoShape(url){
+  // A clip (a voice clip or a recording, by its URL) decoded into its samples: an AudioBuffer, or null if it can't be.
+  // Echo Caves (caves.js) measures pitch from the same thing.
+  function echoDecode(url){
     var AC = window.AudioContext || window.webkitAudioContext;
     if(!AC || !url || !window.fetch) return Promise.resolve(null);
     return fetch(url).then(function(r){ return r.arrayBuffer(); }).then(function(buf){
@@ -8447,17 +8452,21 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
         var done = false;
         var p = ctx.decodeAudioData(buf, function(b){ if(!done){ done = true; res(b); } }, function(e){ if(!done){ done = true; rej(e); } });
         if(p && p.then) p.then(function(b){ if(!done){ done = true; res(b); } }, function(e){ if(!done){ done = true; rej(e); } });
-      }).then(function(ab){
-        try { ctx.close(); } catch(e){}
-        var d = ab.getChannelData(0), n = 48, step = Math.max(1, Math.floor(d.length / n)), bars = [], max = 0;
-        for(var i = 0; i < n; i++){
-          var sum = 0, cnt = 0;
-          for(var j = i * step; j < Math.min(d.length, (i + 1) * step); j += 4){ sum += d[j] * d[j]; cnt++; }
-          var v = cnt ? Math.sqrt(sum / cnt) : 0; bars.push(v); if(v > max) max = v;
-        }
-        return { bars: bars.map(function(v){ return max ? v / max : 0; }), secs: ab.duration };
-      });
+      }).then(function(ab){ try { ctx.close(); } catch(e){} return ab; }, function(e){ try { ctx.close(); } catch(x){} throw e; });
     }).catch(function(){ return null; });
+  }
+  // 48 bars describing how loud each slice of a clip is -- enough to see syllables and pauses.
+  function echoShape(url){
+    return echoDecode(url).then(function(ab){
+      if(!ab) return null;
+      var d = ab.getChannelData(0), n = 48, step = Math.max(1, Math.floor(d.length / n)), bars = [], max = 0;
+      for(var i = 0; i < n; i++){
+        var sum = 0, cnt = 0;
+        for(var j = i * step; j < Math.min(d.length, (i + 1) * step); j += 4){ sum += d[j] * d[j]; cnt++; }
+        var v = cnt ? Math.sqrt(sum / cnt) : 0; bars.push(v); if(v > max) max = v;
+      }
+      return { bars: bars.map(function(v){ return max ? v / max : 0; }), secs: ab.duration };
+    });
   }
   function echoShapeHTML(shape, label, cls, longest){
     if(!shape) return '';
@@ -11463,7 +11472,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     setTimeout(function(){ ov.remove(); reefBusy = false; window.__reefTx = false; }, end);
   }
   function reefInDeck(){
-    return ['study','summary','feed','story','equationFeed','langFeed','readAlong','flashFeed','miniStory','wordBank','lagoon','lagoonRead','town','townTalk'].indexOf(S.view) !== -1;
+    return ['study','summary','feed','story','equationFeed','langFeed','readAlong','flashFeed','miniStory','wordBank','lagoon','lagoonRead','town','townTalk','caves'].indexOf(S.view) !== -1;
   }
   // Every way out of a deck goes through goHome(), so this is the one place that adds the pop-up.
   function goHome(){
@@ -12771,6 +12780,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     startDeck: function(id){ reefStartDeck(id); },
     openLagoon: function(){ openLagoon(); },   // Story Lagoon (lagoon.js), from My course
     openTown: function(){ openTown(); },       // Harbor Town (town.js), from My course
+    openCaves: function(){ openCaves(); },     // Echo Caves (caves.js), from My course
     night: function(){ try { return reefNight(); } catch(e){ return false; } },
     calm: function(){ try { return reefCalm(); } catch(e){ return false; } },
     // false in the Claude version and inside a grown-up profile, where the app asks no grown-up questions
@@ -14400,6 +14410,651 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     if(inp) inp.addEventListener('input', function(){ T.typed = inp.value; });
   }
 /* end of src/js/town.js */
+/* from src/js/caves-sounds.js */
+  /* ---------- ECHO CAVES: the sounds, the sound rules and the pitch measure ----------
+     The data for Echo Caves (caves.js), and its one piece of signal work, kept apart from the screens so the unit
+     test (tools/check/test_caves.js) can load this file on its own.
+
+     CAVES_PAIRS: the Korean sound contrasts English speakers find hardest, each with sets of real, common words
+     that differ only in that sound (a minimal pair or trio). A set is a list of [Korean, meaning].
+       stops     plain / breathy (aspirated) / tight (tense): ㄱㅋㄲ, ㄷㅌㄸ, ㅂㅍㅃ, ㅈㅊㅉ, and ㅅ/ㅆ
+       vowels    ㅓ/ㅗ and ㅡ/ㅜ (ㅐ/ㅔ is left out of the rounds: most speakers today say them the same; see CAVES_MERGED)
+       endings   the final consonant (받침): ㄴ / ㅇ / ㅁ, and the unreleased ㄱ / ㄷ / ㅂ
+     Each word is said by the natural voice (voice/index.json has a clip for every one).
+
+     CAVES_RULES: the sound changes a learner meets first, each with the spelling and how it's said, a few more
+     examples, and a check: the word is played, its meaning given, and she picks its spelling from three (the
+     right one, the way it sounds written out, and one more). Pronunciations follow the standard rules
+     (표준 발음법) and match what the voice says. */
+  var CAVES_PAIRS = [
+    { id:'k', label:'ㄱ ㅋ ㄲ', kind:'Plain, breathy or tight',
+      tip:'ㅋ comes with a puff of air. ㄲ is tight, with no puff at all. ㄱ is in between: a little air, and the vowel after it starts lower in pitch.',
+      sets:[ [['공', 'ball'], ['콩', 'bean']], [['굴', 'oyster'], ['꿀', 'honey']], [['개', 'dog'], ['깨', 'sesame']],
+        [['크다', 'to be big'], ['끄다', 'to turn off']], [['고리', 'ring, loop'], ['꼬리', 'tail']], [['가다', 'to go'], ['까다', 'to peel']] ] },
+    { id:'t', label:'ㄷ ㅌ ㄸ', kind:'Plain, breathy or tight',
+      tip:'ㅌ comes with a puff of air. ㄸ is tight, with no puff at all. ㄷ is in between: a little air, and the vowel after it starts lower in pitch.',
+      sets:[ [['달', 'moon'], ['탈', 'mask'], ['딸', 'daughter']], [['타다', 'to ride'], ['따다', 'to pick (fruit)']], [['덜', 'less'], ['털', 'fur, hair']] ] },
+    { id:'p', label:'ㅂ ㅍ ㅃ', kind:'Plain, breathy or tight',
+      tip:'ㅍ comes with a puff of air. ㅃ is tight, with no puff at all. ㅂ is in between: a little air, and the vowel after it starts lower in pitch.',
+      sets:[ [['불', 'fire'], ['풀', 'grass'], ['뿔', 'horn']], [['방', 'room'], ['빵', 'bread']], [['비', 'rain'], ['피', 'blood']],
+        [['발', 'foot'], ['팔', 'arm']], [['부리', 'beak'], ['뿌리', 'root']] ] },
+    { id:'c', label:'ㅈ ㅊ ㅉ', kind:'Plain, breathy or tight',
+      tip:'ㅊ comes with a puff of air. ㅉ is tight, with no puff at all. ㅈ is in between: a little air, and the vowel after it starts lower in pitch.',
+      sets:[ [['자다', 'to sleep'], ['차다', 'to kick'], ['짜다', 'to be salty']], [['지다', 'to lose'], ['치다', 'to hit'], ['찌다', 'to steam']],
+        [['자', 'ruler'], ['차', 'car; tea']] ] },
+    { id:'s', label:'ㅅ ㅆ', kind:'Soft or tight hiss',
+      tip:'ㅆ is a tight, sharp hiss, and the vowel after it starts higher. ㅅ is softer, with a little breath in it.',
+      sets:[ [['사다', 'to buy'], ['싸다', 'to be cheap']], [['살', 'flesh; years old'], ['쌀', 'rice (uncooked)']], [['시', 'poem; o\'clock'], ['씨', 'seed']] ] },
+    { id:'eo', label:'ㅓ ㅗ', kind:'Open or round',
+      tip:'ㅗ has round lips, like "oh". ㅓ is open, with the lips relaxed and not rounded, a little like the "u" in "cup", held longer.',
+      sets:[ [['거리', 'street'], ['고리', 'ring, loop']], [['섬', 'island'], ['솜', 'cotton']], [['벌', 'bee'], ['볼', 'cheek']], [['덜', 'less'], ['돌', 'stone']] ] },
+    { id:'eu', label:'ㅡ ㅜ', kind:'Flat or round',
+      tip:'ㅜ has round lips, like "oo". ㅡ keeps the tongue in the same place but the lips flat and spread, as if smiling.',
+      sets:[ [['들', 'field'], ['둘', 'two']], [['은', 'silver'], ['운', 'luck']], [['글', 'writing'], ['굴', 'oyster']] ] },
+    { id:'nasal', label:'ㄴ ㅇ ㅁ at the end', kind:'Word endings',
+      tip:'At the end of a syllable: ㄴ puts the tongue tip up behind the teeth, ㅇ is "ng" as in "sing", and ㅁ closes the lips.',
+      sets:[ [['반', 'half'], ['방', 'room'], ['밤', 'night']], [['간', 'liver'], ['강', 'river'], ['감', 'persimmon']], [['산', 'mountain'], ['상', 'prize']] ] },
+    { id:'stop', label:'ㄱ ㄷ ㅂ at the end', kind:'Word endings',
+      tip:'A final ㄱ, ㄷ or ㅂ is held, not let go: no puff after it. ㅂ closes the lips, ㄷ the tongue tip, ㄱ the back of the tongue. 밖 ends in a ㄱ sound and 밭 in a ㄷ sound.',
+      sets:[ [['밥', 'rice, a meal'], ['밖', 'outside'], ['밭', 'field (for crops)']], [['국', 'soup'], ['굽', 'heel (of a shoe)']] ] }
+  ];
+  // Shown beside the rounds, not tested: two vowels most speakers no longer tell apart
+  var CAVES_MERGED = { label:'ㅐ ㅔ', words:[['개', 'dog'], ['게', 'crab']],
+    say:'Most people in Seoul today say ㅐ and ㅔ the same way, so 개 (dog) and 게 (crab) sound alike. Even Koreans tell them apart by the meaning around them, so this one isn\'t in the rounds.' };
+
+  var CAVES_RULES = [
+    { id:'link', ko:'연음', en:'Linking', word:'한국어', said:'한구거', mean:'the Korean language',
+      rule:'When a syllable ends in a consonant and the next one starts with a silent ㅇ, the consonant slides over and starts the next syllable.',
+      more:[['음악', '으막', 'music'], ['직업', '지겁', 'job'], ['옷이', '오시', 'the clothes (subject)']],
+      check:{ word:'음악', mean:'music', opts:['음악', '으막', '음막'] } },
+    { id:'nasal', ko:'비음화', en:'Becoming ㅇ, ㄴ, ㅁ', word:'감사합니다', said:'감사함니다', mean:'thank you',
+      rule:'A ㄱ, ㄷ or ㅂ sound right before ㄴ or ㅁ turns into its nose sound: ㄱ becomes ㅇ, ㄷ becomes ㄴ, ㅂ becomes ㅁ.',
+      more:[['입니다', '임니다', 'it is'], ['작년', '장년', 'last year'], ['거짓말', '거진말', 'a lie']],
+      check:{ word:'국물', mean:'broth, soup', opts:['국물', '궁물', '군물'] } },
+    { id:'tense', ko:'경음화', en:'Tightening', word:'학교', said:'학꾜', mean:'school',
+      rule:'After a ㄱ, ㄷ or ㅂ sound, a plain ㄱ, ㄷ, ㅂ, ㅅ or ㅈ is said tight: ㄲ, ㄸ, ㅃ, ㅆ, ㅉ.',
+      more:[['잡지', '잡찌', 'magazine'], ['국밥', '국빱', 'soup with rice'], ['약속', '약쏙', 'a promise, an appointment']],
+      check:{ word:'식당', mean:'restaurant', opts:['식당', '식땅', '싱당'] } },
+    { id:'h-drop', ko:'ㅎ 탈락', en:'Silent ㅎ', word:'좋아요', said:'조아요', mean:'it\'s good',
+      rule:'A ㅎ at the end of a syllable goes silent when the next syllable starts with a vowel.',
+      more:[['괜찮아요', '괜차나요', 'it\'s okay'], ['넣어요', '너어요', 'I put it in'], ['싫어요', '시러요', 'I don\'t like it']],
+      check:{ word:'많이', mean:'a lot', opts:['많이', '마니', '만히'] } },
+    { id:'aspirate', ko:'격음화', en:'Adding a puff', word:'축하해요', said:'추카해요', mean:'congratulations',
+      rule:'A ㄱ, ㄷ, ㅂ or ㅈ next to a ㅎ joins with it into the breathy sound: ㅋ, ㅌ, ㅍ, ㅊ.',
+      more:[['좋다', '조타', 'to be good'], ['입학', '이팍', 'starting school'], ['어떻게', '어떠케', 'how']],
+      check:{ word:'입학', mean:'starting school', opts:['입학', '이팍', '임학'] } },
+    { id:'palatal', ko:'구개음화', en:'ㄷ, ㅌ before 이', word:'같이', said:'가치', mean:'together',
+      rule:'A final ㄷ or ㅌ before 이 is said ㅈ or ㅊ.',
+      more:[['굳이', '구지', 'going out of one\'s way'], ['해돋이', '해도지', 'sunrise'], ['밭이', '바치', 'the field (subject)']],
+      check:{ word:'해돋이', mean:'sunrise', opts:['해돋이', '해도지', '해도디'] } },
+    { id:'liquid', ko:'유음화', en:'ㄴ next to ㄹ', word:'연락', said:'열락', mean:'contact, getting in touch',
+      rule:'A ㄴ next to a ㄹ is said ㄹ too, so the two together sound like a long "l".',
+      more:[['설날', '설랄', 'Lunar New Year'], ['신라', '실라', 'Silla (an old kingdom)'], ['편리', '펼리', 'convenience']],
+      check:{ word:'연락', mean:'contact, getting in touch', opts:['연락', '열락', '연낙'] } }
+  ];
+
+  /* ---------- Pitch, measured on the device ----------
+     cavesPitch(samples, rate) -> { hop, f0: [Hz or 0 per 20 ms step] }. Plain autocorrelation: each 40 ms frame is
+     compared with itself shifted by every lag that fits a speaking voice (70–450 Hz), and the best lag gives the
+     pitch, refined between samples. A frame counts as voiced only if it's loud enough (compared with the loudest
+     frame) and clearly periodic; the result is then smoothed with a 5-step median, which also mends the odd
+     octave jump. The audio is first thinned to about 11 kHz, plenty for a voice's pitch, so it runs fast on a phone.
+     Nothing is judged: Echo Caves only draws the line and compares its shape and length with the voice's. */
+  function cavesPitch(samples, rate){
+    var step = Math.max(1, Math.floor(rate / 11025)), sr = rate / step, n = Math.floor(samples.length / step), x = new Float32Array(n), i, j, k;
+    for(i = 0; i < n; i++){ var s = 0; for(j = 0; j < step; j++) s += samples[i * step + j]; x[i] = s / step; }
+    var win = Math.round(sr * 0.04), hop = Math.round(sr * 0.02), minLag = Math.floor(sr / 450), maxLag = Math.ceil(sr / 70);
+    var frames = [], loudest = 0;
+    for(var at = 0; at + win + maxLag <= n; at += hop){
+      var e = 0; for(i = 0; i < win; i++) e += x[at + i] * x[at + i];
+      var rms = Math.sqrt(e / win); frames.push({ at: at, rms: rms }); if(rms > loudest) loudest = rms;
+    }
+    var f0 = frames.map(function(f){
+      if(f.rms < loudest * 0.12 || f.rms < 1e-4) return 0;
+      var best = 0, bestLag = 0, r = [];
+      for(var lag = minLag - 1; lag <= maxLag + 1; lag++){
+        var c = 0, e1 = 0, e2 = 0;
+        for(k = 0; k < win; k++){ var a = x[f.at + k], b = x[f.at + k + lag]; c += a * b; e1 += a * a; e2 += b * b; }
+        r[lag] = c / (Math.sqrt(e1 * e2) || 1);
+      }
+      for(lag = minLag; lag <= maxLag; lag++) if(r[lag] > best && r[lag] >= r[lag - 1] && r[lag] >= r[lag + 1]){ best = r[lag]; bestLag = lag; }
+      if(best < 0.5 || !bestLag) return 0;
+      // a shorter lag nearly as good is the true period (the longer one is a multiple of it)
+      for(var d = 2; d <= 4; d++){ var sub = Math.round(bestLag / d); if(sub >= minLag && r[sub] > best * 0.9 && r[sub] >= r[sub - 1] && r[sub] >= r[sub + 1]){ bestLag = sub; best = r[sub]; } }
+      var y0 = r[bestLag - 1], y1 = r[bestLag], y2 = r[bestLag + 1], den = y0 - 2 * y1 + y2;
+      var shift = den ? Math.max(-0.5, Math.min(0.5, 0.5 * (y0 - y2) / den)) : 0;
+      return sr / (bestLag + shift);
+    });
+    var out = f0.map(function(v, idx){
+      if(!v) return 0;
+      var w = []; for(var q = idx - 2; q <= idx + 2; q++) if(f0[q]) w.push(f0[q]);
+      w.sort(function(a, b){ return a - b; });
+      return w[Math.floor(w.length / 2)];
+    });
+    return { hop: hop / sr, f0: out };
+  }
+  // The stretch from the first voiced step to the last, in seconds (how long the speaking itself took)
+  function cavesSpan(p){
+    var a = -1, b = -1; p.f0.forEach(function(v, i){ if(v){ if(a < 0) a = i; b = i; } });
+    return a < 0 ? { from: 0, to: 0, secs: 0 } : { from: a, to: b, secs: (b - a + 1) * p.hop };
+  }
+  // The voiced part in semitones from the speaker's own middle pitch (so a low and a high voice compare fairly),
+  // stretched to `n` points, with the gaps between syllables filled in straight
+  function cavesShape(p, n){
+    var sp = cavesSpan(p); if(sp.to - sp.from < 4) return null;
+    var seg = p.f0.slice(sp.from, sp.to + 1), on = seg.filter(Boolean).slice().sort(function(a, b){ return a - b; });
+    if(on.length < 4) return null;
+    var mid = on[Math.floor(on.length / 2)], st = seg.map(function(v){ return v ? 12 * Math.log2(v / mid) : null; });
+    for(var i = 0; i < st.length; i++) if(st[i] == null){
+      var l = i - 1, r = i + 1; while(r < st.length && st[r] == null) r++;
+      st[i] = l < 0 ? st[r] : r >= st.length ? st[l] : st[l] + (st[r] - st[l]) * (i - l) / (r - l);
+    }
+    var out = []; for(var j = 0; j < n; j++){ var t = j * (st.length - 1) / (n - 1), lo = Math.floor(t), hi = Math.min(st.length - 1, lo + 1); out.push(st[lo] + (st[hi] - st[lo]) * (t - lo)); }
+    return out;
+  }
+  // How alike two pitch shapes are, -1 to 1 (a plain correlation); null if either has too little voice
+  function cavesLikeness(a, b){
+    if(!a || !b) return null;
+    var n = a.length, ma = 0, mb = 0, i; for(i = 0; i < n; i++){ ma += a[i]; mb += b[i]; } ma /= n; mb /= n;
+    var c = 0, va = 0, vb = 0; for(i = 0; i < n; i++){ c += (a[i] - ma) * (b[i] - mb); va += (a[i] - ma) * (a[i] - ma); vb += (b[i] - mb) * (b[i] - mb); }
+    return va < 0.5 || vb < 0.5 ? (va < 0.5 && vb < 0.5 ? 1 : 0) : c / Math.sqrt(va * vb);   // both flat counts as alike
+  }
+/* end of src/js/caves-sounds.js */
+/* from src/js/caves.js */
+  /* ---------- ECHO CAVES: hear the sounds, then say them ----------
+     The third new region of the sea chart (seamap.js), for pronunciation. One screen (S.view 'caves', state in
+     S.caves) with three parts, picked from its front page (S.caves.sec):
+       pairs    Sound pairs: a word plays, she picks which of two or three look-alike words it was (달 / 탈 / 딸).
+                Eight a round. The contrasts she misses come up more, and the ones she keeps missing are listed
+                as "your tricky sounds". No microphone.
+       shadow   Shadowing: a line she has met (her Korean cards, the Story Lagoon and Harbor Town lines she has
+                finished), shortest first. She hears it, records herself, and sees her pitch line and length beside
+                the voice's, both measured here on the device (cavesPitch in caves-sounds.js); then both play, one
+                after the other. Nothing claims to judge her sounds: it only says how alike the pitch shape and the
+                length are, kindly, and she says whether it sounded right. Without a microphone she says it along
+                with the voice, as in Echo cards.
+       rules    Sound rules: seven cards on the changes she meets first (한국어 said [한구거]...), each with examples
+                to hear and a quick check.
+     The microphone is asked for and handled exactly as in Echo cards (Mic, echoStartPhase in card-types.js), and
+     recordings never leave the device: they live in this page's memory and are let go when she moves on.
+     The learner model hears about it: 'hear' for each sound-pair word and each sound-rule check (good or again),
+     'say' for each shadowed line (good when it sounded right the first time, hard after another try).
+     Per profile in localStorage (cc-caves-<profile id>): how often each contrast is missed (c), which rules she has
+     checked (rules) and how often she shadowed each line (said); losing it only resets those. */
+  var CAVES_ROUND = 8;
+  var CAVES_ICON = { pairs: 'ear', shadow: 'mic', rules: 'bulb' };
+  function cavesStoreKey(){ return 'cc-caves-' + (S.profile && S.profile.id || 'guest'); }
+  function cavesData(){
+    var d = null; try { d = JSON.parse(localStorage.getItem(cavesStoreKey()) || 'null'); } catch(e){}
+    d = d && typeof d === 'object' ? d : {};
+    d.c = d.c || {}; d.rules = d.rules || {}; d.said = d.said || {};
+    return d;
+  }
+  function cavesSave(d){ try { localStorage.setItem(cavesStoreKey(), JSON.stringify(d)); } catch(e){} }
+  function cavesContrast(id){ return CAVES_PAIRS.find(function(c){ return c.id === id; }) || null; }
+  // How shaky a contrast is, 0–1: a running share of misses that leans on the latest answers. Untried starts at .5.
+  function cavesWeak(d, id){ var s = d.c[id]; return s ? s.w : 0.5; }
+  // Her tricky sounds: tried a few times, and missed often enough lately; shakiest first
+  function cavesTricky(d){
+    return CAVES_PAIRS.filter(function(c){ var s = d.c[c.id]; return s && s.n >= 3 && s.w >= 0.3; })
+      .sort(function(a, b){ return d.c[b.id].w - d.c[a.id].w; }).slice(0, 4);
+  }
+
+  function openCaves(sec){
+    try { Speech.stop(); } catch(e){}
+    cavesStopAll();
+    S.currentDeckId = null;
+    S.caves = { sec: sec || null, cards: S.caves && S.caves.cards || null, voice: !!(S.caves && S.caves.voice) };
+    S.view = 'caves';
+    render(); window.scrollTo(0, 0);
+    // her Korean cards, for shadowing, and the voice index, to know which lines have the natural voice
+    var decks = (S.decks || []).filter(function(d){ return !d.archived; });
+    Promise.all(decks.map(function(d){ return S.store.getCardsOnce(d.id).catch(function(){ return []; }); })).then(function(lists){
+      if(!S.caves) return;
+      S.caves.cards = [].concat.apply([], lists);
+      if(S.view === 'caves' && (!S.caves.sec || S.caves.sec === 'shadow') && !S.caves.line) render();
+    }).catch(function(){});
+    VoicePack.loadIndex().then(function(){
+      if(!S.caves) return; S.caves.voice = true;
+      if(S.view === 'caves' && (!S.caves.sec || S.caves.sec === 'shadow') && !S.caves.line) render();
+    });
+  }
+  function cavesGo(sec){
+    var C = S.caves; cavesStopAll();
+    C.sec = sec; C.round = null; C.line = null; C.rule = null;
+    if(sec === 'pairs') cavesRoundStart();
+    render(); window.scrollTo(0, 0);
+  }
+  function cavesStopAll(){
+    try { Speech.stop(); } catch(e){}
+    cavesRecReset();
+  }
+
+  function renderCaves(){
+    var C = S.caves || (S.caves = {});
+    if(cavesRec && !C.line) cavesRecReset();
+    var title = C.sec === 'pairs' ? 'Sound pairs' : C.sec === 'shadow' ? 'Shadowing' : C.sec === 'rules' ? 'Sound rules' : 'Echo Caves';
+    var back = C.sec ? '<button class="back-btn" data-act="cv-back">⟵ Caves</button>' : '<button class="back-btn" data-act="cv-home">⟵ Lagoon</button>';
+    var body = C.sec === 'pairs' ? cavesPairsHTML(C) : C.sec === 'shadow' ? (C.line ? cavesShadowHTML(C) : cavesLinesHTML(C)) :
+      C.sec === 'rules' ? (C.rule ? cavesRuleHTML(C) : cavesRulesHTML()) : cavesFrontHTML(C);
+    app.innerHTML = '<div class="nav-row">' + back + '<span class="nav-title">' + ccIcon(C.sec ? CAVES_ICON[C.sec] : 'mic') + ' ' + title + '</span></div>' +
+      '<div class="lg-page cv-page">' + body + '</div>';
+    cavesWire(C);
+  }
+
+  /* ---------- The front page: the three parts, and her tricky sounds ---------- */
+  function cavesFrontHTML(C){
+    var d = cavesData(), tricky = cavesTricky(d), lines = cavesLines(C), rulesDone = CAVES_RULES.filter(function(r){ return d.rules[r.id]; }).length;
+    var pct = Math.round(rulesDone / CAVES_RULES.length * 100);
+    function row(sec, name, ko, about, extra, tag){
+      return '<li><button type="button" class="lg-story cv-sec" data-cv-go="' + sec + '">' +
+        '<span class="lg-ic" aria-hidden="true">' + ccIcon(CAVES_ICON[sec]) + '</span>' +
+        '<span class="lg-st"><b>' + name + '</b><span lang="ko">' + ko + '</span><small>' + about + '</small>' + extra + '</span>' +
+        '<span class="lg-tag">' + (tag || '') + '</span></button></li>';
+    }
+    var rows = row('pairs', 'Sound pairs', '소리 짝', 'Hear a word, then pick which of two look-alike words it was.',
+        tricky.length ? '<small>Tricky for you: <span lang="ko">' + tricky.map(function(c){ return esc(c.label); }).join(', ') + '</span></small>' : '', tricky.length ? '' : 'Start here') +
+      row('shadow', 'Shadowing', '따라 말하기', 'Hear a line, say it yourself, and see your pitch beside the voice\'s.',
+        '<small>' + (C.cards && C.voice ? lines.length + ' lines from your cards and stories' : 'Finding your lines…') + '</small>') +
+      row('rules', 'Sound rules', '발음 규칙', 'Why 한국어 is said [한구거]: the changes you can hear.',
+        '<span class="lg-meter" role="img" aria-label="' + rulesDone + ' of ' + CAVES_RULES.length + ' rules checked"><i style="width:' + pct + '%"></i></span><small>' + rulesDone + ' of ' + CAVES_RULES.length + ' checked</small>',
+        rulesDone === CAVES_RULES.length ? ccIcon('check') + ' Done' : '');
+    return '<div class="lg-intro"><h2>Hear the sounds, then say them</h2><p>Korean sounds that English doesn\'t have, practiced by ear first and then out loud. Recordings stay on this device.</p></div>' +
+      '<ul class="lg-list cv-secs">' + rows + '</ul>' + cavesTrickyHTML(tricky);
+  }
+  function cavesTrickyHTML(tricky){
+    if(!tricky.length) return '';
+    return '<section class="tw-sec cv-tricky"><h3>' + ccIcon('ear') + ' Your tricky sounds</h3><p>These come up more often in Sound pairs until they settle.</p><ul class="cv-tlist">' +
+      tricky.map(function(c){ return '<li><b lang="ko">' + esc(c.label) + '</b><span>' + esc(c.tip) + '</span></li>'; }).join('') + '</ul></section>';
+  }
+
+  /* ---------- Sound pairs ----------
+     A round is eight words. Each picks a contrast at random, leaning on the shaky ones (weight .2 + how shaky), and
+     a contrast she just missed comes back two words later. Within a contrast a set is picked at random, but not the
+     same set twice running. */
+  function cavesRoundStart(){
+    S.caves.round = { i: 0, right: 0, q: null, again: [], last: {}, missed: [], done: false };
+    cavesNextQ();
+  }
+  function cavesNextQ(){
+    var R = S.caves.round, d = cavesData(), id = null;
+    var due = R.again.findIndex(function(a){ return a.at <= R.i; });
+    if(due >= 0){ id = R.again[due].id; R.again.splice(due, 1); }
+    else {
+      var prev = R.q && R.q.c, pool = CAVES_PAIRS.filter(function(c){ return c.id !== prev; });
+      var total = pool.reduce(function(s, c){ return s + 0.2 + cavesWeak(d, c.id); }, 0), r = Math.random() * total;
+      for(var i = 0; i < pool.length; i++){ r -= 0.2 + cavesWeak(d, pool[i].id); if(r <= 0){ id = pool[i].id; break; } }
+      id = id || pool[pool.length - 1].id;
+    }
+    var c = cavesContrast(id), choices = c.sets.map(function(s, si){ return si; }).filter(function(si){ return c.sets.length < 2 || si !== R.last[id]; });
+    var si = choices[Math.floor(Math.random() * choices.length)], set = c.sets[si];
+    R.last[id] = si;
+    R.q = { c: id, set: set, a: Math.floor(Math.random() * set.length), picked: null };
+  }
+  function cavesPlayQ(){ var R = S.caves.round; if(R && R.q) try { Speech.speak(R.q.set[R.q.a][0]); } catch(e){} }
+  function cavesPairsAnswer(i){
+    var R = S.caves.round, q = R && R.q; if(!q || q.picked != null) return;
+    q.picked = i;
+    var ok = i === q.a, word = q.set[q.a][0], d = cavesData(), s = d.c[q.c] || { n: 0, miss: 0, w: 0.5 };
+    s.n++; if(!ok) s.miss++;
+    s.w = s.w * 0.7 + (ok ? 0 : 0.3);   // a running share of misses: three right answers in a row take it from .5 to under .2
+    d.c[q.c] = s; cavesSave(d);
+    try { Learner.record(word, 'hear', ok ? 'good' : 'again'); } catch(e){}
+    if(ok){ R.right++; try { Sound.correct(); } catch(e){} }
+    else { R.missed.push(q.c); R.again.push({ id: q.c, at: R.i + 3 }); try { Sound.wrong(); } catch(e){} }
+    var y = window.scrollY; renderCaves(); window.scrollTo(0, y);
+  }
+  function cavesPairsNext(){
+    var R = S.caves.round;
+    R.i++;
+    if(R.i >= CAVES_ROUND){
+      R.done = true;
+      try { reefWinSound(R.right === CAVES_ROUND); } catch(e){}
+      try { if(!reefCalm()) Ocean.bubbles(10); } catch(e){}
+    } else cavesNextQ();
+    renderCaves(); window.scrollTo(0, 0);
+    if(!R.done) setTimeout(function(){ if(S.view === 'caves' && S.caves.round === R) cavesPlayQ(); }, 300);
+  }
+  function cavesPairsHTML(C){
+    var R = C.round; if(!R) return '';
+    if(R.done) return cavesRoundDoneHTML(R);
+    var q = R.q, c = cavesContrast(q.c), picked = q.picked;
+    var opts = q.set.map(function(w, i){
+      var cls = picked == null ? '' : i === q.a ? ' right' : i === picked ? ' wrong' : ' dim';
+      return '<li><button type="button" class="lg-opt cv-opt' + cls + '" data-cv-pick="' + i + '"' + (picked != null ? ' aria-disabled="true"' : '') + '>' +
+        '<span lang="ko">' + esc(w[0]) + '</span><small>' + esc(w[1]) + '</small></button></li>';
+    }).join('');
+    var fb = '';
+    if(picked != null){
+      var right = q.set[q.a], ok = picked === q.a;
+      fb = '<p class="lg-fb ' + (ok ? 'ok' : 'no') + '" role="status">' + ccIcon(ok ? 'check' : 'ear') + (ok ? ' Yes: <b lang="ko">' + esc(right[0]) + '</b> (' + esc(right[1]) + ').' :
+          ' That was <b lang="ko">' + esc(right[0]) + '</b> (' + esc(right[1]) + '). Hear them side by side:') + '</p>' +
+        '<div class="cv-hear-each">' + q.set.map(function(w){ return '<button type="button" class="lg-mini" data-cv-say="' + esc(w[0]) + '" aria-label="Hear ' + esc(w[0]) + '">' + ccIcon('sound') + '<span lang="ko">' + esc(w[0]) + '</span></button>'; }).join('') + '</div>' +
+        '<p class="cv-tip">' + ccIcon('bulb') + '<span>' + esc(c.tip) + '</span></p>' +
+        '<div class="lg-bar"><button type="button" class="btn btn-primary" data-cv-next>' + (R.i + 1 < CAVES_ROUND ? 'Next sound' : 'Finish') + '</button></div>';
+    }
+    return '<div class="lg-title"><h2>' + esc(c.label) + '</h2><span>' + esc(c.kind) + ' · Sound ' + (R.i + 1) + ' of ' + CAVES_ROUND + '</span></div>' +
+      '<div class="lg-q cv-q"><button type="button" class="listen-play cv-play" data-cv-hear aria-label="Hear it again">' + ccIcon('sound') + '</button>' +
+        '<div><b>Which word did you hear?</b><span>Tap the speaker to hear it again.</span></div></div>' +
+      '<ul class="lg-opts cv-opts">' + opts + '</ul>' + fb +
+      (R.i === 0 && picked == null ? '<p class="cv-note">' + ccIcon('sparkle') + '<span><b lang="ko">' + esc(CAVES_MERGED.label) + '</b>: ' + esc(CAVES_MERGED.say) + '</span></p>' : '');
+  }
+  function cavesRoundDoneHTML(R){
+    var all = R.right === CAVES_ROUND, tricky = cavesTricky(cavesData());
+    return '<div class="summary-card reef-sum-card lg-done">' +
+        '<span class="lg-done-ic" aria-hidden="true">' + ccIcon(all ? 'trophy' : 'star') + '</span>' +
+        '<h2>' + (all ? 'Sharp ears!' : 'Round finished!') + '</h2>' +
+        '<p>' + esc(all ? reefPraiseLine() : 'Good listening. The sounds you missed will come up again.') + '</p>' +
+        '<p class="lg-score">' + R.right + ' of ' + CAVES_ROUND + ' heard right</p>' +
+        '<div class="reef-sum-actions">' +
+          '<button type="button" class="btn btn-primary" data-cv-again>' + ccIcon('replay') + ' Another round</button>' +
+          '<button type="button" class="btn btn-ghost" data-act="cv-back">' + ccIcon('mic') + ' Echo Caves</button>' +
+        '</div></div>' + cavesTrickyHTML(tricky);
+  }
+
+  /* ---------- Shadowing ----------
+     The lines: the Korean side of her cards (a word or a short sentence, no English letters), and every line of the
+     Story Lagoon stories and Harbor Town talks she has finished, each once, only those with a natural-voice clip,
+     shortest first. Before she has any, the sound-rule words stand in. */
+  function cavesLines(C){
+    var seen = {}, out = [];
+    function add(ko, en, from){
+      ko = String(ko || '').trim(); var k = learnerKey(ko);
+      if(!k || seen[k] || !learnerHasHangul(ko) || /[A-Za-z]/.test(ko) || ko.length > 40 || !VoicePack.has(ko)) return;
+      seen[k] = 1; out.push({ ko: ko, en: String(en || '').trim(), from: from });
+    }
+    (C.cards || []).forEach(function(c){ if(learnerHasHangul(c.front) && !learnerHasHangul(c.back)) add(c.front, c.back, 'Your cards'); });
+    var ld = lagoonDone(), td = townDone();
+    LAGOON_STORIES.forEach(function(s){ if(ld[s.id]) s.lines.forEach(function(l){ add(l[1], l[2], 'Story Lagoon'); }); });
+    TOWN_FOLK.forEach(function(f){ if(td[f.id]) Object.keys(f.nodes).forEach(function(id){ var n = f.nodes[id]; add(n.t[0], n.t[1], 'Harbor Town'); }); });
+    if(!out.length) CAVES_RULES.forEach(function(r){ add(r.word, r.mean, 'Sound rules'); });
+    return out.sort(function(a, b){ return a.ko.length - b.ko.length; });
+  }
+  function cavesLinesHTML(C){
+    if(!C.cards || !C.voice) return '<p class="lg-hint">' + ccIcon('mic') + ' Finding your lines…</p>';
+    var d = cavesData(), lines = cavesLines(C).slice(0, 40);
+    C.lines = lines;
+    return '<div class="lg-intro"><h2>Say it like the voice</h2><p>Pick a line, listen, then record yourself. Your pitch line and length appear beside the voice\'s. The shortest lines are first.</p></div>' +
+      '<ul class="lg-list cv-lines">' + lines.map(function(l, i){
+        var n = d.said[learnerKey(l.ko)] || 0;
+        return '<li><button type="button" class="lg-story cv-line' + (n ? ' done' : '') + '" data-cv-line="' + i + '">' +
+          '<span class="lg-ic" aria-hidden="true">' + ccIcon('mic') + '</span>' +
+          '<span class="lg-st"><b lang="ko">' + esc(l.ko) + '</b><small>' + esc(l.en) + '</small><small class="cv-from">' + esc(l.from) + '</small></span>' +
+          '<span class="lg-tag">' + (n ? ccIcon('check') + ' Said' : '') + '</span></button></li>';
+      }).join('') + '</ul>';
+  }
+  function cavesOpenLine(i){
+    var C = S.caves, l = C.lines && C.lines[i]; if(!l) return;
+    cavesStopAll();
+    var ph = echoStartPhase(), blocked = ph === 'ready' && !Mic.frameAllows();
+    C.line = { i: i, ko: l.ko, en: l.en, from: l.from, phase: blocked ? 'nomic' : ph, micError: blocked ? 'blocked' : null, recUrl: null, tries: 0, model: null, me: null, rated: false };
+    renderCaves(); window.scrollTo(0, 0);
+    var L = C.line;
+    setTimeout(function(){ if(S.caves && S.caves.line === L && L.phase !== 'recording') cavesSay(L); }, 350);
+    VoicePack.find(L.ko, null, 4000).then(function(c){ return c ? cavesMeasure(c.url) : null; }).then(function(m){
+      if(S.caves && S.caves.line === L){ L.model = m; cavesPaintPitch(); }
+    });
+  }
+  function cavesSay(L, slow){ try { Speech.speak(L.ko, slow ? { rate: 0.7, variant: 'slow' } : null); } catch(e){} }
+  // A clip's pitch, its speaking span and its shape, measured here; null if it can't be decoded
+  function cavesMeasure(url){
+    return echoDecode(url).then(function(ab){
+      if(!ab) return null;
+      var p = cavesPitch(ab.getChannelData(0), ab.sampleRate), sp = cavesSpan(p);
+      return { p: p, span: sp, shape: cavesShape(p, 30), voiced: p.f0.filter(Boolean).length };
+    }).catch(function(){ return null; });
+  }
+
+  // The microphone, as in Echo cards: one recording at a time, stopped by her or after a time that suits the line
+  var cavesRec = null;
+  function cavesRecReset(){
+    if(cavesRec){
+      var r = cavesRec; cavesRec = null; r.dropped = true;
+      try { if(r.recorder && r.recorder.state !== 'inactive') r.recorder.stop(); } catch(e){}
+      cavesRecFree(r);
+    }
+    var L = S.caves && S.caves.line;
+    if(L && L.recUrl){ try { URL.revokeObjectURL(L.recUrl); } catch(e){} L.recUrl = null; }
+  }
+  function cavesRecFree(r){
+    try { if(r.raf) cancelAnimationFrame(r.raf); } catch(e){}
+    try { if(r.stopTimer) clearTimeout(r.stopTimer); } catch(e){}
+    try { r.stream.getTracks().forEach(function(t){ t.stop(); }); } catch(e){}
+    try { if(r.ctx && r.ctx.close) r.ctx.close(); } catch(e){}
+  }
+  function cavesRecord(){
+    var L = S.caves && S.caves.line; if(!L || L.phase === 'recording' || L.phase === 'starting') return;
+    try { Speech.stop(); } catch(e){}
+    L.phase = 'starting'; renderCaves();
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }).then(function(stream){
+      if(!S.caves || S.caves.line !== L || S.view !== 'caves'){ stream.getTracks().forEach(function(t){ t.stop(); }); return; }
+      var types = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg'], type = '';
+      for(var i = 0; i < types.length; i++){ try { if(MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(types[i])){ type = types[i]; break; } } catch(e){} }
+      var recorder = type ? new MediaRecorder(stream, { mimeType: type }) : new MediaRecorder(stream);
+      var rec = cavesRec = { stream: stream, recorder: recorder, chunks: [] };
+      recorder.ondataavailable = function(e){ if(e.data && e.data.size) rec.chunks.push(e.data); };
+      recorder.onstop = function(){
+        cavesRecFree(rec);
+        if(rec.dropped || !S.caves || S.caves.line !== L) return;
+        cavesRec = null;
+        var blob = new Blob(rec.chunks, { type: recorder.mimeType || type || 'audio/webm' });
+        if(L.recUrl){ try { URL.revokeObjectURL(L.recUrl); } catch(e){} }
+        L.recUrl = blob.size ? URL.createObjectURL(blob) : null;
+        L.phase = L.recUrl ? 'compare' : 'ready'; L.me = null;
+        if(L.recUrl) L.tries++;
+        renderCaves();
+        if(!L.recUrl) return;
+        cavesMeasure(L.recUrl).then(function(m){ if(S.caves && S.caves.line === L){ L.me = m || { failed: true }; cavesPaintPitch(); } });
+        cavesPlayBoth(L);
+      };
+      // a live level meter, so it's clear the microphone hears her
+      try {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        rec.ctx = new AC(); var an = rec.ctx.createAnalyser(); an.fftSize = 512; rec.ctx.createMediaStreamSource(stream).connect(an);
+        var data = new Uint8Array(an.fftSize);
+        (function tick(){
+          if(cavesRec !== rec) return;
+          an.getByteTimeDomainData(data);
+          var peak = 0; for(var k = 0; k < data.length; k++) peak = Math.max(peak, Math.abs(data[k] - 128));
+          var el = document.getElementById('cvLevel'); if(el) el.style.transform = 'scaleX(' + Math.min(1, peak / 64).toFixed(3) + ')';
+          rec.raf = requestAnimationFrame(tick);
+        })();
+      } catch(e){}
+      recorder.start();
+      L.phase = 'recording';
+      var secs = L.model && L.model.span.secs || 2;
+      rec.stopTimer = setTimeout(cavesStopRecording, Math.max(4000, Math.min(ECHO_MAX_MS, secs * 2600 + 2000)));
+      renderCaves();
+    }).catch(function(err){
+      if(!S.caves || S.caves.line !== L) return;
+      L.phase = 'nomic'; L.micError = Mic.why(err);
+      renderCaves();
+    });
+  }
+  function cavesStopRecording(){
+    var r = cavesRec; if(!r || !r.recorder) return;
+    try { if(r.recorder.state !== 'inactive') r.recorder.stop(); else { cavesRec = null; cavesRecFree(r); } } catch(e){ cavesRec = null; cavesRecFree(r); }
+  }
+  // The voice, then her, with a short gap: the comparison that makes shadowing work
+  function cavesPlayBoth(L){
+    Speech.speakThen(L.ko, function(){
+      if(S.caves && S.caves.line === L && L.recUrl) setTimeout(function(){ if(S.caves && S.caves.line === L && L.recUrl) Speech.playUrl(L.recUrl, 1); }, 350);
+    });
+  }
+  function cavesRate(good){
+    var C = S.caves, L = C.line; if(!L) return;
+    if(!good){
+      L.retried = true;
+      if(L.phase === 'compare' || L.phase === 'ready') cavesRecord(); else cavesSay(L);
+      return;
+    }
+    // 'say': right the first time is good; after another try it's hard
+    try { Learner.record(L.ko, 'say', L.retried ? 'hard' : 'good'); } catch(e){}
+    var d = cavesData(), k = learnerKey(L.ko); d.said[k] = (d.said[k] || 0) + 1; cavesSave(d);
+    try { Sound.correct(); } catch(e){}
+    if(C.lines && C.lines[L.i + 1]) cavesOpenLine(L.i + 1);
+    else { cavesStopAll(); C.line = null; renderCaves(); window.scrollTo(0, 0); }
+  }
+
+  // The pitch lines: one lane each for the voice and for her, on the same time scale (so the lengths compare too),
+  // in semitones from each speaker's own middle pitch (so a low voice and a high one compare fairly)
+  function cavesLaneHTML(m, who, cls, longest){
+    if(!m || m.failed || !m.span.secs) return '';
+    var p = m.p, sp = m.span, W = 300, H = 64, wpx = Math.max(0.2, sp.secs / longest) * W, n = sp.to - sp.from + 1;
+    var on = p.f0.slice(sp.from, sp.to + 1).filter(Boolean).sort(function(a, b){ return a - b; }), mid = on[Math.floor(on.length / 2)] || 1;
+    var path = '', pen = false;
+    for(var i = 0; i < n; i++){
+      var v = p.f0[sp.from + i];
+      if(!v){ pen = false; continue; }
+      var x = (n > 1 ? i / (n - 1) : 0) * wpx, st = Math.max(-9, Math.min(9, 12 * Math.log2(v / mid))), y = H / 2 - st * 3.2;
+      path += (pen ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1); pen = true;
+    }
+    return '<div class="cv-lane ' + cls + '"><span class="cv-lane-label">' + ccIcon(cls === 'voice' ? 'sound' : 'mic') + who + ' <small>' + sp.secs.toFixed(1) + ' s</small></span>' +
+      '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" aria-hidden="true"><line class="cv-mid" x1="0" y1="' + H / 2 + '" x2="' + W + '" y2="' + H / 2 + '"/>' +
+      '<rect class="cv-len" x="0" y="' + (H - 6) + '" width="' + wpx.toFixed(1) + '" height="6" rx="3"/><path class="cv-pline" d="' + path + '"/></svg></div>';
+  }
+  // Kind words about the pitch shape and the length: how alike they are, never a mark for her sounds
+  function cavesFeedback(L){
+    var a = L.model, b = L.me;
+    if(!b) return '<p class="lg-hint">' + ccIcon('sparkle') + ' Measuring…</p>';
+    if(b.failed || b.voiced < 5) return '<p class="lg-hint">' + ccIcon('mic') + ' I couldn\'t hear much voice in that one. Try again a little closer to the microphone.</p>';
+    if(!a) return '<p class="lg-hint">' + ccIcon('check') + ' Recorded. Listen to the voice and to yourself, then say how it went.</p>';
+    var like = cavesLikeness(a.shape, b.shape), ratio = b.span.secs / (a.span.secs || 1);
+    var pitch = like == null ? 'Listen for where the voice goes up and where it comes down.' :
+      like >= 0.6 ? 'Your pitch rises and falls much like the voice\'s.' :
+      like >= 0.25 ? 'Your pitch shape is close in places. Listen for where the voice goes up and where it comes down.' :
+      'Try following the voice\'s pitch: where it goes up, and where it comes down.';
+    var len = ratio <= 1.25 && ratio >= 0.8 ? 'It\'s about the same length as the voice.' :
+      ratio > 1.25 ? 'You took a little longer than the voice, which is normal while you learn.' : 'You were a little quicker than the voice. Try taking your time.';
+    return '<ul class="cv-fb" role="status"><li>' + ccIcon(like != null && like >= 0.6 ? 'star' : 'trend') + '<span>' + pitch + '</span></li><li>' + ccIcon('clock') + '<span>' + len + '</span></li></ul>';
+  }
+  function cavesPaintPitch(){
+    var L = S.caves && S.caves.line, box = document.getElementById('cvPitch'), fb = document.getElementById('cvFb'); if(!L || !box) return;
+    var longest = Math.max(L.model && L.model.span ? L.model.span.secs : 0, L.me && L.me.span ? L.me.span.secs : 0) || 1;
+    box.innerHTML = cavesLaneHTML(L.model, 'Voice', 'voice', longest) + cavesLaneHTML(L.me, 'You', 'me', longest);
+    if(fb) fb.innerHTML = L.phase === 'compare' ? cavesFeedback(L) : '';
+  }
+  function cavesShadowHTML(C){
+    var L = C.line, ph = L.phase, mic;
+    if(ph === 'recording') mic = '<button type="button" class="echo-rec on" data-cv-stop aria-label="Stop recording"><span class="echo-dot"></span>Stop</button><div class="echo-level"><i id="cvLevel"></i></div>';
+    else if(ph === 'starting') mic = '<button type="button" class="echo-rec" disabled><span class="echo-dot"></span>Getting the microphone…</button>';
+    else if(ph === 'ask') mic = '<div class="mic-ask" role="group" aria-labelledby="cvAskTitle"><div class="mic-ask-title" id="cvAskTitle">' + ccIcon('mic') + ' Use the microphone?</div>' +
+        '<p>Coral Classroom can record you saying it, so you can hear yourself next to the voice and see your pitch beside it. The recording stays on this device and is let go when you move on.</p>' +
+        '<div class="mic-ask-btns"><button type="button" class="btn btn-primary" data-cv-mic="yes">Yes, use the microphone</button><button type="button" class="btn btn-ghost" data-cv-mic="no">Not now</button></div>' +
+        '<small>Your browser will ask too. You can change this any time in Settings.</small></div>';
+    else if(ph === 'askadult') mic = '<div class="mic-ask"><p>' + ccIcon('mic') + ' A grown-up can turn on the microphone in Settings.</p></div>';
+    else if(ph === 'off') mic = '<button type="button" class="btn btn-ghost mic-turnon" data-cv-mic="yes">' + ccIcon('mic') + ' Turn on the microphone</button>';
+    else if(ph === 'nomic') mic = L.micError && ['blocked', 'unsupported', 'nomic'].indexOf(L.micError) < 0 ? '<button type="button" class="btn btn-ghost mic-turnon" data-cv-rec>' + ccIcon('mic') + ' Try again</button>' : '';
+    else mic = '<button type="button" class="echo-rec" data-cv-rec><span class="echo-dot"></span>' + (L.tries ? 'Record again' : 'Record yourself') + '</button>';
+    var along = 'Say it out loud along with the voice, then say how it went.';
+    var hint = ph === 'nomic' ? (L.micError ? Mic.msg(L.micError) + (L.micError === 'blocked' || L.micError === 'unsupported' ? '' : ' Or say it out loud along with the voice.') : along) :
+      (ph === 'ask' || ph === 'askadult' || ph === 'off') ? along :
+      ph === 'recording' ? 'Say it now, then tap Stop.' : ph === 'compare' ? 'Listen to both, and look at the two pitch lines.' : 'Listen, then record yourself saying it.';
+    var compare = ph === 'compare' ? '<div class="echo-compare cv-compare"><button type="button" class="btn btn-ghost" data-cv-both>' + ccIcon('replay') + ' Voice, then you</button><button type="button" class="btn btn-ghost" data-cv-me>' + ccIcon('mic') + ' Just you</button></div>' : '';
+    var rate = ph === 'recording' || ph === 'starting' || ph === 'ask' ? '' :
+      '<div class="lg-bar cv-rate"><button type="button" class="btn btn-primary" data-cv-rate="good">' + ccIcon('check') + ' Sounded right</button>' +
+        '<button type="button" class="btn btn-ghost" data-cv-rate="again">' + ccIcon('replay') + ' Try again</button></div>';
+    var nomic = ph === 'nomic' || ph === 'off' || ph === 'askadult';
+    return '<div class="lg-title cv-say"><h2 lang="ko">' + esc(L.ko) + '</h2><span>' + esc(L.en) + '</span></div>' +
+      '<div class="cv-stage' + (nomic ? ' cv-nomic' : '') + '">' +
+        '<div class="listen-big cv-listen"><button type="button" class="listen-play" data-cv-voice aria-label="Hear it">' + ccIcon('sound') + '</button>' +
+          '<button type="button" class="btn btn-ghost listen-slow" data-cv-slow>' + ccIcon('turtle') + ' Slower</button></div>' +
+        '<div class="echo-mic">' + mic + '</div>' +
+        '<p class="cv-hint" role="status">' + esc(hint) + '</p>' +
+        '<div class="cv-pitch" id="cvPitch" role="img" aria-label="Pitch lines of the voice and of your recording"></div>' +
+        '<div id="cvFb"></div>' + compare +
+      '</div>' + rate;
+  }
+
+  /* ---------- Sound rules ---------- */
+  function cavesRule(id){ return CAVES_RULES.find(function(r){ return r.id === id; }) || null; }
+  function cavesRulesHTML(){
+    var d = cavesData();
+    return '<div class="lg-intro"><h2>Why it sounds that way</h2><p>Korean is written one way and said a little differently. These are the changes you will hear first, each with words to listen to.</p></div>' +
+      '<ul class="lg-list cv-rules">' + CAVES_RULES.map(function(r){
+        var ok = !!d.rules[r.id];
+        return '<li><button type="button" class="lg-story cv-rule' + (ok ? ' done' : '') + '" data-cv-rule="' + r.id + '">' +
+          '<span class="lg-ic" aria-hidden="true">' + ccIcon('bulb') + '</span>' +
+          '<span class="lg-st"><b>' + esc(r.en) + '</b><span lang="ko">' + esc(r.ko) + '</span><small><span lang="ko">' + esc(r.word) + ' → [' + esc(r.said) + ']</span></small></span>' +
+          '<span class="lg-tag">' + (ok ? ccIcon('check') + ' Checked' : '') + '</span></button></li>';
+      }).join('') + '</ul>';
+  }
+  function cavesOpenRule(id){
+    var r = cavesRule(id); if(!r) return;
+    cavesStopAll();
+    var opts = r.check.opts.slice();
+    for(var i = opts.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)), t = opts[i]; opts[i] = opts[j]; opts[j] = t; }
+    S.caves.rule = { id: id, opts: opts, picked: null };
+    renderCaves(); window.scrollTo(0, 0);
+    setTimeout(function(){ if(S.caves && S.caves.rule && S.caves.rule.id === id) try { Speech.speak(r.word); } catch(e){} }, 350);
+  }
+  function cavesRuleAnswer(i){
+    var Rs = S.caves.rule, r = Rs && cavesRule(Rs.id); if(!r || Rs.picked != null) return;
+    Rs.picked = i;
+    var ok = Rs.opts[i] === r.check.word;
+    try { Learner.record(r.check.word, 'hear', ok ? 'good' : 'again'); } catch(e){}
+    if(ok){ var d = cavesData(); d.rules[r.id] = Date.now(); cavesSave(d); try { Sound.correct(); } catch(e){} }
+    else try { Sound.wrong(); } catch(e){}
+    var y = window.scrollY; renderCaves(); window.scrollTo(0, y);
+    try { Speech.speak(r.check.word); } catch(e){}
+  }
+  function cavesRuleHTML(C){
+    var Rs = C.rule, r = cavesRule(Rs.id), idx = CAVES_RULES.indexOf(r), next = CAVES_RULES[idx + 1];
+    function say(w){ return '<button type="button" class="lg-mini" data-cv-say="' + esc(w) + '" aria-label="Hear ' + esc(w) + '">' + ccIcon('sound') + '</button>'; }
+    var more = r.more.map(function(m){
+      return '<li>' + say(m[0]) + '<span><b lang="ko">' + esc(m[0]) + '</b> <span class="cv-said" lang="ko">[' + esc(m[1]) + ']</span><small>' + esc(m[2]) + '</small></span></li>'; }).join('');
+    var picked = Rs.picked, ok = picked != null && Rs.opts[picked] === r.check.word;
+    var opts = Rs.opts.map(function(o, i){
+      var cls = picked == null ? '' : o === r.check.word ? ' right' : i === picked ? ' wrong' : ' dim';
+      return '<li><button type="button" class="lg-opt cv-opt' + cls + '" data-cv-ropt="' + i + '"' + (picked != null ? ' aria-disabled="true"' : '') + '><span lang="ko">' + esc(o) + '</span></button></li>'; }).join('');
+    var fb = picked == null ? '' : '<p class="lg-fb ' + (ok ? 'ok' : 'no') + '" role="status">' + ccIcon(ok ? 'check' : 'bulb') + ' ' +
+      (ok ? 'Yes: it\'s spelled <b lang="ko">' + esc(r.check.word) + '</b> and said [<span lang="ko">' + esc(r.check.opts[1]) + '</span>].' :
+        'It\'s spelled <b lang="ko">' + esc(r.check.word) + '</b>, and said [<span lang="ko">' + esc(r.check.opts[1]) + '</span>].') + '</p>' +
+      '<div class="lg-bar">' + (next ? '<button type="button" class="btn btn-primary" data-cv-rule="' + next.id + '">Next: ' + esc(next.en) + '</button>' : '') +
+        '<button type="button" class="btn btn-ghost" data-cv-rules>' + ccIcon('bulb') + ' All rules</button></div>';
+    return '<div class="lg-title"><h2>' + esc(r.en) + '</h2><span lang="ko">' + esc(r.ko) + '</span></div>' +
+      '<div class="cv-rulecard"><div class="cv-big">' + say(r.word) + '<span><b lang="ko">' + esc(r.word) + '</b><span class="cv-arrow" aria-hidden="true">→</span><b class="cv-said" lang="ko">[' + esc(r.said) + ']</b><small>' + esc(r.mean) + '</small></span></div>' +
+        '<p>' + esc(r.rule) + '</p><ul class="cv-more">' + more + '</ul></div>' +
+      '<div class="lg-quiz cv-check"><p class="lg-qn">' + ccIcon('ear') + ' Check</p>' +
+        '<div class="lg-q"><button type="button" class="listen-play cv-play" data-cv-say="' + esc(r.check.word) + '" aria-label="Hear the word">' + ccIcon('sound') + '</button>' +
+          '<div><b>Which spelling matches what you hear?</b><span>It means "' + esc(r.check.mean) + '".</span></div></div>' +
+        '<ul class="lg-opts">' + opts + '</ul>' + fb + '</div>';
+  }
+
+  function cavesWire(C){
+    function on(sel, fn){ app.querySelectorAll(sel).forEach(function(b){ b.addEventListener('click', function(e){ fn(b, e); }); }); }
+    on('[data-act="cv-home"]', function(){ cavesStopAll(); goHome(); });
+    on('[data-act="cv-back"]', function(){
+      cavesStopAll();
+      if(C.sec === 'shadow' && C.line){ C.line = null; }
+      else if(C.sec === 'rules' && C.rule){ C.rule = null; }
+      else { C.sec = null; C.round = null; }
+      renderCaves(); window.scrollTo(0, 0);
+    });
+    on('[data-cv-go]', function(b){ cavesGo(b.dataset.cvGo); if(b.dataset.cvGo === 'pairs') setTimeout(function(){ if(S.view === 'caves') cavesPlayQ(); }, 350); });
+    on('[data-cv-hear]', function(){ cavesPlayQ(); });
+    on('[data-cv-pick]', function(b){ cavesPairsAnswer(+b.dataset.cvPick); });
+    on('[data-cv-next]', function(){ cavesPairsNext(); });
+    on('[data-cv-again]', function(){ cavesRoundStart(); renderCaves(); window.scrollTo(0, 0); setTimeout(function(){ if(S.view === 'caves') cavesPlayQ(); }, 300); });
+    on('[data-cv-say]', function(b){ try { Speech.speak(b.dataset.cvSay); } catch(e){} });
+    on('[data-cv-line]', function(b){ cavesOpenLine(+b.dataset.cvLine); });
+    on('[data-cv-voice]', function(){ if(C.line) cavesSay(C.line); });
+    on('[data-cv-slow]', function(){ if(C.line) cavesSay(C.line, true); });
+    on('[data-cv-mic]', function(b){
+      if(b.dataset.cvMic === 'yes'){ Mic.set('yes'); cavesRecord(); }
+      else { Mic.set('no'); C.line.phase = 'off'; renderCaves(); }
+    });
+    on('[data-cv-rec]', function(){ cavesRecord(); });
+    on('[data-cv-stop]', function(){ cavesStopRecording(); });
+    on('[data-cv-both]', function(){ if(C.line) cavesPlayBoth(C.line); });
+    on('[data-cv-me]', function(){ if(C.line && C.line.recUrl) Speech.playUrl(C.line.recUrl, 1); });
+    on('[data-cv-rate]', function(b){ cavesRate(b.dataset.cvRate === 'good'); });
+    on('[data-cv-rule]', function(b){ cavesOpenRule(b.dataset.cvRule); });
+    on('[data-cv-rules]', function(){ cavesStopAll(); C.rule = null; renderCaves(); window.scrollTo(0, 0); });
+    on('[data-cv-ropt]', function(b){ cavesRuleAnswer(+b.dataset.cvRopt); });
+    if(C.line) cavesPaintPitch();
+  }
+/* end of src/js/caves.js */
 /* from src/js/ui-icons.js */
   /* ---------- One look for every screen: drawn icons, never emoji, in the app's own chrome ----------
      Titles, buttons, labels, badges and chips across the app (and the Library) were written over years with
@@ -14505,6 +15160,9 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     ] },
     { id:'harbor-town', date:'2026-11-05', need:'course', steps:[
       { at:'.r3-mapbtn', say:'Harbor Town is open on the treasure map. Talk with the townsfolk of your trip, in Korean.' }
+    ] },
+    { id:'echo-caves', date:'2026-11-05', need:'course', steps:[
+      { at:'.r3-mapbtn', say:'Echo Caves is open on the treasure map. Hear tricky Korean sounds apart, then say them like the voice.' }
     ] }
   ];
   var WN_RECENT_DAYS = 14;   // a brand-new profile is shown only what's new in the last two weeks, not the whole history
@@ -23057,7 +23715,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
      The treasure map gains a second page, The sea: a drawn chart with an island for each region of the language
      school (see the architecture doc). Coral Cove, the flashcard reef, is in the middle and is where you are;
      the others show what they will teach and open one by one as they're built (open, with a `go` function that
-     starts it, and the icon on its button). Story Lagoon (lagoon.js) was the first, Harbor Town (town.js) the second. Only profiles with a language
+     starts it, and the icon on its button). Story Lagoon (lagoon.js) was the first, Harbor Town (town.js) the second, Echo Caves (caves.js) the third. Only profiles with a language
      course see it for now (reefCourseOn). Tapping an island shows its card; Coral Cove's card leads back to the
      board's own map. */
   var REEF_REGIONS = [
@@ -23067,8 +23725,8 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       about:'Today\'s voyage, your course with its dates, checkpoints, and what you can now do.' },
     { id:'lagoon', say:'Story Lagoon, for listening and reading.', name:'Story Lagoon', teaches:'Listening and reading', x:62, y:124, open:true, go:'openLagoon', icon:'story',
       about:'Short stories and conversations made from words you know, to listen to first and then read.' },
-    { id:'caves', say:'Echo Caves, for pronunciation.', name:'Echo Caves', teaches:'Pronunciation', x:238, y:124,
-      about:'The sounds you mix up, and shadowing a native voice with your pitch shown beside it.' },
+    { id:'caves', say:'Echo Caves, for pronunciation.', name:'Echo Caves', teaches:'Pronunciation', x:238, y:124, open:true, go:'openCaves', icon:'mic',
+      about:'The sounds you mix up, the sound rules of Korean, and shadowing the voice with your pitch shown beside it.' },
     { id:'town', say:'Harbor Town, for conversation.', name:'Harbor Town', teaches:'Conversation', x:52, y:252, open:true, go:'openTown', icon:'talk',
       about:'Townsfolk for each part of your trip: a cafe, a taxi, a shop, the hotel and a new friend. Listen, then answer in Korean.' },
     { id:'reef', say:'Pattern Reef, for grammar.', name:'Pattern Reef', teaches:'Grammar', x:248, y:252,
@@ -23122,7 +23780,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   }
   // Leaves the board for an open region: the map closes and the water covers the change, as when diving into a deck
   function reefSeaGo(ov, id){
-    var r = REEF_REGIONS.find(function(x){ return x.id === id; }), fn = r && { openLagoon: openLagoon, openTown: openTown }[r.go];
+    var r = REEF_REGIONS.find(function(x){ return x.id === id; }), fn = r && { openLagoon: openLagoon, openTown: openTown, openCaves: openCaves }[r.go];
     if(!fn) return;
     try { Speech.stop(); } catch(e){}
     ov.remove();
@@ -25424,6 +26082,65 @@ body.reef-calm .tw-dots i{ animation:none; opacity:.7; }
 .tw-actions .btn{ min-height:48px; display:inline-flex; align-items:center; gap:8px; padding:10px 18px; font-weight:800; }
 .tw-actions .btn .cc-ic{ width:22px; height:22px; }
 @media (min-width:700px){ .tw-opt{ font-size:1.4rem; } .tw-phr b{ font-size:1.35rem; } }
+
+/* ---------- Echo Caves (caves.js): sound pairs, shadowing and the sound rules ----------
+   The same panels and --lg-* tokens as Story Lagoon and Harbor Town. Added here: the pair answers with their
+   meanings, the "hear each" row, the pitch lanes (the voice in teal, her in amber, on one time scale), the kind
+   feedback lines and the sound-rule card. The microphone parts reuse Echo's (.echo-rec, .mic-ask). */
+.cv-page{ padding-bottom:96px; }   /* the last buttons scroll clear of the Ask Shelly button */
+.cv-q{ align-items:center; }
+.cv-play.listen-play{ width:64px; height:64px; flex:none; }
+.cv-play.listen-play .cc-ic{ width:2rem; height:2rem; }
+.cv-opts{ display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 140px), 1fr)); }
+.cv-opt{ text-align:center; font-size:1.7rem; }
+.cv-opt[aria-disabled="true"]{ cursor:default; }
+.cv-hear-each{ display:flex; flex-wrap:wrap; gap:8px; }
+.cv-hear-each .lg-mini{ font-size:1.1rem; }
+.cv-tip, .cv-note{ margin:0; display:flex; gap:8px; align-items:flex-start; font-weight:700; line-height:1.45; color:var(--lg-ink);
+  background:var(--lg-panel); border:2px dashed var(--lg-edge); border-radius:var(--r-md); padding:10px 12px; }
+.cv-tip .cc-ic, .cv-note .cc-ic{ flex:none; width:22px; height:22px; color:#e8a33d; }
+.cv-note .cc-ic{ color:var(--lg-teal); }
+.cv-tlist{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.cv-tlist li{ display:flex; flex-direction:column; gap:2px; padding-left:12px; border-left:3px solid #e8a33d; font-weight:700; line-height:1.4; }
+.cv-tlist b{ font-size:1.2rem; }
+.cv-from{ font-size:.8rem; text-transform:uppercase; letter-spacing:.04em; }
+.cv-stage{ display:flex; flex-direction:column; align-items:center; gap:10px; background:var(--lg-panel); border:2px solid var(--lg-edge); border-radius:var(--r-md); padding:14px 12px; }
+.cv-stage .echo-mic{ margin-top:0; }
+.cv-hint{ margin:0; text-align:center; font-weight:700; color:var(--lg-soft); max-width:460px; }
+.cv-nomic .cv-hint{ color:var(--lg-ink); }
+.cv-pitch{ width:100%; max-width:560px; display:flex; flex-direction:column; gap:8px; }
+.cv-pitch:empty{ display:none; }
+.cv-lane{ display:flex; flex-direction:column; gap:2px; }
+.cv-lane-label{ display:flex; align-items:center; gap:6px; font-weight:800; font-size:.9rem; color:var(--lg-soft); }
+.cv-lane-label .cc-ic{ width:18px; height:18px; }
+.cv-lane svg{ display:block; width:100%; height:64px; background:var(--lg-you); border-radius:12px; overflow:visible; }
+.cv-mid{ stroke:var(--lg-edge); stroke-width:1; stroke-dasharray:4 4; vector-effect:non-scaling-stroke; }
+.cv-len{ fill:var(--lg-edge); }
+.cv-pline{ fill:none; stroke-width:3.5; stroke-linecap:round; stroke-linejoin:round; vector-effect:non-scaling-stroke; }
+.cv-lane.voice .cv-pline{ stroke:var(--lg-teal); }
+.cv-lane.voice .cc-ic{ color:var(--lg-teal); }
+.cv-lane.me .cv-pline{ stroke:#e8a33d; }
+.cv-lane.me .cv-len{ fill:#e8a33d; opacity:.45; }
+.cv-lane.me .cc-ic{ color:#e8a33d; }
+.cv-fb{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; max-width:520px; }
+.cv-fb li{ display:flex; gap:8px; align-items:flex-start; font-weight:700; line-height:1.4; }
+.cv-fb .cc-ic{ flex:none; width:22px; height:22px; color:var(--lg-teal); }
+.cv-compare .btn, .cv-rate .btn{ min-height:48px; display:inline-flex; align-items:center; gap:8px; font-weight:800; }
+.cv-compare .btn .cc-ic{ width:20px; height:20px; }
+.cv-say h2{ font-size:1.7rem; word-break:keep-all; }
+.cv-rulecard{ background:var(--lg-panel); border:2px solid var(--lg-edge); border-radius:var(--r-md); padding:14px; display:flex; flex-direction:column; gap:10px; }
+.cv-rulecard p{ margin:0; font-weight:700; line-height:1.5; }
+.cv-big{ display:flex; gap:12px; align-items:center; }
+.cv-big > span{ display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 10px; }
+.cv-big b{ font-family:'Baloo 2',system-ui,sans-serif; font-size:1.9rem; line-height:1.1; }
+.cv-big small{ flex-basis:100%; color:var(--lg-soft); font-weight:700; }
+.cv-arrow{ color:var(--lg-soft); font-weight:800; font-size:1.3rem; }
+.cv-said{ color:var(--lg-teal); }
+.cv-more{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.cv-more li{ display:flex; gap:10px; align-items:center; }
+.cv-more b{ font-size:1.25rem; }
+.cv-more small{ display:block; color:var(--lg-soft); font-weight:700; }
+@media (min-width:700px){ .cv-opt{ font-size:2rem; } .cv-big b{ font-size:2.3rem; } .cv-say h2{ font-size:2rem; } }
 /* end of src/css/reef.css */
 /* from src/css/reef-3d.css */
 /* ---------- REEF 3D board ---------- */
