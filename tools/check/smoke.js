@@ -269,6 +269,53 @@ async function newPage(browser) {
   check('grown-up: the slip shows under Patterns to repair', await p.evaluate(() => !!document.querySelector('.pr-repair [data-pr-open="topic"]')));
   await p.click('[data-act="pr-home"]'); await p.waitForTimeout(6000);
   check('grown-up: leaving Pattern Reef goes back to the board', await p.evaluate(() => !!document.querySelector('.r3 canvas')));
+  // Bottle Beach: open from the sea chart, open a bottle, write a reply with a particle slip (사과을), check it and
+  // see what's right and exactly one fix, then send it and read 지수's answer, kept in the journal
+  await p.click('[data-r3-map]'); await p.waitForTimeout(1200);
+  await p.click('.r3-map-tab[data-sea-tab="sea"]'); await p.waitForTimeout(400);
+  await p.click('.r3-sea-isle[data-sea="beach"]'); await p.waitForTimeout(400);
+  const bbBtn = await p.$('[data-sea-go="beach"]');
+  check('grown-up: the sea chart has an Open Bottle Beach button', !!bbBtn && /Open Bottle Beach/.test(await bbBtn.textContent()));
+  if (bbBtn) { await bbBtn.click(); await p.waitForTimeout(2500); }
+  check('grown-up: Bottle Beach lists twelve bottles and the handwriting link', await p.evaluate(() =>
+    document.querySelectorAll('.bb-bottle').length === 12 && !!document.querySelector('[data-bb-hand]')));
+  await p.click('[data-bb-open="food"]'); await p.waitForTimeout(500);
+  await p.click('[data-bb-tile="저는"]'); await p.waitForTimeout(200);
+  const bbTyped = await p.evaluate(() => document.querySelector('#bbText').value);
+  check('grown-up: a starter tile goes into the reply', bbTyped === '저는', bbTyped);
+  await p.fill('#bbText', '저는 사과을 좋아해요.');
+  await p.click('[data-bb-check]'); await p.waitForTimeout(500);
+  check('grown-up: checking a reply says what is right first, then one fix with its pattern', await p.evaluate(() =>
+    document.querySelectorAll('.bb-good li').length >= 2 && document.querySelectorAll('.bb-fix li').length === 1 &&
+    /사과를/.test(document.querySelector('.bb-fix').textContent) && !!document.querySelector('[data-bb-pat="object"]')));
+  await p.click('[data-bb-send]'); await p.waitForTimeout(800);
+  check('grown-up: sending the bottle brings 지수\'s answer and keeps the letter', await p.evaluate(() =>
+    !!document.querySelector('.bb-reply .lg-ko') && (JSON.parse(localStorage.getItem('cc-bottles-wendy') || '{}').l || []).length === 1));
+  await p.click('[data-bb-letters]'); await p.waitForTimeout(300);
+  check('grown-up: the letter is in the journal', await p.evaluate(() => document.querySelectorAll('.bb-journal > li').length === 1));
+  await p.click('[data-act="bb-back"]'); await p.waitForTimeout(300);
+  await p.click('[data-act="bb-home"]'); await p.waitForTimeout(6000);
+  check('grown-up: leaving Bottle Beach goes back to the board', await p.evaluate(() => !!document.querySelector('.r3 canvas')));
+  // The Lighthouse: open from the sea chart, open a sign, tap a word for its meaning, answer a question right
+  await p.click('[data-r3-map]'); await p.waitForTimeout(1200);
+  await p.click('.r3-map-tab[data-sea-tab="sea"]'); await p.waitForTimeout(400);
+  await p.click('.r3-sea-isle[data-sea="light"]'); await p.waitForTimeout(400);
+  const lhBtn = await p.$('[data-sea-go="light"]');
+  check('grown-up: the sea chart has an Open the Lighthouse button', !!lhBtn && /Open the Lighthouse/.test(await lhBtn.textContent()));
+  if (lhBtn) { await lhBtn.click(); await p.waitForTimeout(2500); }
+  check('grown-up: the Lighthouse lists ten signs and eight manners notes', await p.evaluate(() =>
+    document.querySelectorAll('[data-lh-sign]').length === 10 && document.querySelectorAll('[data-lh-manner]').length === 8));
+  await p.click('[data-lh-sign="cafe"]'); await p.waitForTimeout(400);
+  await p.click('[data-lh-w="2:0"]'); await p.waitForTimeout(400);
+  check('grown-up: tapping a word on a sign shows its meaning', await p.evaluate(() => /americano/.test((document.querySelector('.lg-word') || {}).textContent || '')));
+  await p.click(await p.evaluate(() => window.__lhRight(0))); await p.waitForTimeout(400);
+  check('grown-up: answering a sign question right says so', await p.evaluate(() => !!document.querySelector('.lg-fb.ok')));
+  await p.click('[data-act="lh-back"]'); await p.waitForTimeout(300);
+  await p.click('[data-lh-manner="server"]'); await p.waitForTimeout(300);
+  check('grown-up: a manners note has its phrases and a tip', await p.evaluate(() => document.querySelectorAll('[data-lh-say]').length >= 2 && !!document.querySelector('.lh-tip')));
+  await p.click('[data-act="lh-back"]'); await p.waitForTimeout(300);
+  await p.click('[data-act="lh-home"]'); await p.waitForTimeout(6000);
+  check('grown-up: leaving the Lighthouse goes back to the board', await p.evaluate(() => !!document.querySelector('.r3 canvas')));
   await menuPick(p, 'Edit decks'); await p.waitForTimeout(1200);
   await p.click('[data-act="open-library"]', { force: true }); await p.waitForTimeout(800);
   check('grown-up: the Library opens on the Korean goal', await p.evaluate(() => [...document.querySelectorAll('.clib-tab')].map(t => t.dataset.tab).join(',') === 'korean'));

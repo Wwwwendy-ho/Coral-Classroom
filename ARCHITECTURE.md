@@ -121,6 +121,18 @@ the build item reuses Sentence Builder's `buildTokens` and look). Each answer re
 Harbor Town runs `patNote` on its mistake answers and typed answers, and its debrief links to the pattern. Mastery,
 rounds and slips live in localStorage (cc-patterns-<profile id>). `tools/check/test_patterns.js` checks the
 particle rules, the mistake rules on right and wrong sentences, the shape of every item, and the voice clips.
+Bottle Beach, the fifth region, is `src/js/beach-data.js` (지수's twelve letters, each with its words, sentence
+starters, model answers and pre-written replies picked by the words in an answer; and `bbCheck`, the writing feedback:
+what's right first, from the patterns used correctly (`bbGood`), polite endings and known words, then at most two
+fixes, Pattern Reef's `patFind` rules first and then a possible spelling slip, a word one letter (jamo) away from one
+in the dictionary) and `src/js/beach.js` (S.view 'beach': the bottles, writing by keyboard or tiles, the feedback,
+지수's answer and the journal; its dictionary is Ask Shelly's beginner words, every region's words and her cards).
+Sending records 'use' for each sentence the rules pass and counts slips in Pattern Reef. Letters live in
+localStorage (cc-bottles-<profile id>). Its handwriting link opens the Library's Hangul tracing worksheet.
+The Lighthouse, the sixth, is `src/js/light-data.js` (ten signs as rows of marked-up text, drawn by kind as styled
+cards, each with two questions; eight manners notes) and `src/js/light.js` (S.view 'light': the list, a sign with
+tap-a-word as in Story Lagoon and its questions, a note). Best scores and notes read live in localStorage
+(cc-light-<profile id>). `tools/check/test_beach.js` checks the feedback, the data's shape and the voice clips.
 
 ## Grown-up checks
 

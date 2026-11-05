@@ -1,5 +1,28 @@
 # Changelog
 
+## Bottle Beach and the Lighthouse open (November 5, 2026)
+
+- **The fifth and sixth new islands of the sea are open: Bottle Beach**, for writing, **and the Lighthouse**, for
+  Korean out in the world and the manners that go with it.
+- **Bottle Beach: letters from 지수.** Your new friend from Harbor Town sends twelve short letters in bottles about
+  your trip and your day ("오늘 뭐 했어요?", "한국 음식 중에 뭐가 제일 좋아요?"). Tap any word for its meaning, then
+  write back in one to three sentences: type with the Korean keyboard, or tap tiles of sentence starters and words
+  you know. Example answers are there when you want them.
+- **Kind feedback, on your device.** "Check my reply" says first what is right (the Pattern Reef patterns you used
+  correctly, polite endings, words you know), then at most two things to look at: a particle that doesn't fit
+  (사과을 for 사과를), -세요 about yourself, the wrong number before a counter, or a word that may be a spelling
+  slip. Each rule links to its pattern in Pattern Reef. Then 지수 writes back, and every letter is kept in Your
+  letters. Bottle Beach also links to Hangul handwriting in the Library.
+- **The Lighthouse: ten real-world signs,** drawn in the app: a cafe menu board, a restaurant menu, a subway sign
+  with its exits, a bus stop, a convenience store receipt, a pharmacy, a hotel key card, a taxi receipt, a push and
+  pull door, and restroom signs. Tap any word to hear it and see what it means, then answer two quick questions
+  ("How much is the americano?", "Which exit for Deoksugung Palace?").
+- **Eight notes on manners for the trip:** bowing and greetings, two hands to give and receive, shoes off indoors,
+  polite and casual speech, calling a server (여기요, 저기요), no tipping, chopsticks and spoon, and age and titles
+  (언니, 오빠, 형, 누나).
+- Open them from the treasure map (The sea) or from My course in the Library. Shelly points each out the first
+  time. 179 new Korean lines and words have the natural voice.
+
 ## Pattern Reef opens (November 5, 2026)
 
 - **The fourth new island of the sea is open: Pattern Reef**, for grammar, one sentence pattern at a time.
