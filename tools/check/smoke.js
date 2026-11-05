@@ -232,6 +232,43 @@ async function newPage(browser) {
   await p.click('[data-act="cv-back"]'); await p.waitForTimeout(300);
   await p.click('[data-act="cv-home"]'); await p.waitForTimeout(6000);
   check('grown-up: leaving Echo Caves goes back to the board', await p.evaluate(() => !!document.querySelector('.r3 canvas')));
+  // Pattern Reef: open from the sea chart, open the first pattern (its explanation and examples), answer the first
+  // practice item right, then miss the next one and see the slip counted for repair
+  await p.click('[data-r3-map]'); await p.waitForTimeout(1200);
+  await p.click('.r3-map-tab[data-sea-tab="sea"]'); await p.waitForTimeout(400);
+  await p.click('.r3-sea-isle[data-sea="reef"]'); await p.waitForTimeout(400);
+  const prBtn = await p.$('[data-sea-go="reef"]');
+  check('grown-up: the sea chart has an Open Pattern Reef button', !!prBtn && /Open Pattern Reef/.test(await prBtn.textContent()));
+  if (prBtn) { await prBtn.click(); await p.waitForTimeout(2500); }
+  check('grown-up: Pattern Reef lists its twelve patterns, the first suggested', await p.evaluate(() =>
+    document.querySelectorAll('.pr-pat').length === 12 && !!document.querySelector('.pr-pat.best[data-pr-open="topic"]')));
+  await p.click('[data-pr-open="topic"]'); await p.waitForTimeout(500);
+  check('grown-up: a pattern shows how it works and its examples', await p.evaluate(() =>
+    document.querySelectorAll('.pr-rule p').length >= 2 && document.querySelectorAll('.pr-ex li').length >= 3 && !!document.querySelector('[data-pr-start]')));
+  await p.click('[data-pr-start]'); await p.waitForTimeout(400);
+  const pa = await p.evaluate(() => window.__patAnswer());
+  if (pa && pa.pick != null) await p.click('[data-pr-pick="' + pa.pick + '"]');
+  await p.waitForTimeout(500);
+  check('grown-up: answering a practice item right says so, with why', await p.evaluate(() => !!document.querySelector('.lg-fb.ok') && !!document.querySelector('.pr-why') && !!document.querySelector('[data-pr-next]')), JSON.stringify(pa));
+  await p.click('[data-pr-next]'); await p.waitForTimeout(400);
+  const pb = await p.evaluate(() => window.__patAnswer());
+  check('grown-up: the next item is a word-tile build', !!pb && pb.k === 'build' && await p.evaluate(() => document.querySelectorAll('.build-bank .build-tile').length >= 3));
+  // build it wrong twice: each time a wrong tile first
+  for (let k = 0; k < 12 && !(await p.$('.lg-fb')); k++) {
+    const right = (await p.evaluate(() => window.__patAnswer()) || {}).tile;
+    const placed = await p.evaluate(() => document.querySelectorAll('.build-line .build-tile').length);
+    const pick = await p.evaluate(([r, first]) => { const t = [...document.querySelectorAll('.build-bank .build-tile')]; const b = first ? t.find(x => x.dataset.prTile !== r) : t[0]; return b && b.dataset.prTile; }, [right, placed === 0]);
+    if (!pick) break;
+    await p.click('[data-pr-tile="' + pick + '"]'); await p.waitForTimeout(150);
+  }
+  await p.waitForTimeout(400);
+  check('grown-up: a missed build shows the sentence and counts a slip to repair', await p.evaluate(() =>
+    !!document.querySelector('.lg-fb.no') && (JSON.parse(localStorage.getItem('cc-patterns-wendy') || '{}').s || {}).topic.open >= 1));
+  await p.click('[data-act="pr-back"]'); await p.waitForTimeout(300);
+  await p.click('[data-act="pr-back"]'); await p.waitForTimeout(300);
+  check('grown-up: the slip shows under Patterns to repair', await p.evaluate(() => !!document.querySelector('.pr-repair [data-pr-open="topic"]')));
+  await p.click('[data-act="pr-home"]'); await p.waitForTimeout(6000);
+  check('grown-up: leaving Pattern Reef goes back to the board', await p.evaluate(() => !!document.querySelector('.r3 canvas')));
   await menuPick(p, 'Edit decks'); await p.waitForTimeout(1200);
   await p.click('[data-act="open-library"]', { force: true }); await p.waitForTimeout(800);
   check('grown-up: the Library opens on the Korean goal', await p.evaluate(() => [...document.querySelectorAll('.clib-tab')].map(t => t.dataset.tab).join(',') === 'korean'));
