@@ -221,9 +221,9 @@
     try { Speech.speak(w.ko.replace(/[?!.]/g, '')); } catch(e){}
     bbKeep(B);
   }
-  // Re-render in place, keeping what she has typed and where the page was
+  // Re-render in place, keeping where the page was. What she types is already in B.text (the input listener in
+  // bbWire), so a tile, Undo or Clear that just changed B.text isn't overwritten by the box's old value.
   function bbKeep(B){
-    var inp = app.querySelector('#bbText'); if(inp) B.text = inp.value;
     var y = window.scrollY; renderBeach(); window.scrollTo(0, y);
   }
   function bbAddTile(B, t){
