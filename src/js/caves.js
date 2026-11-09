@@ -71,7 +71,7 @@
     var C = S.caves || (S.caves = {});
     if(cavesRec && !C.line) cavesRecReset();
     var title = C.sec === 'pairs' ? 'Sound pairs' : C.sec === 'shadow' ? 'Shadowing' : C.sec === 'rules' ? 'Sound rules' : 'Echo Caves';
-    var back = C.sec ? '<button class="back-btn" data-act="cv-back">⟵ Caves</button>' : '<button class="back-btn" data-act="cv-home">⟵ Lagoon</button>';
+    var back = C.sec ? '<button class="back-btn" data-act="cv-back">⟵ Caves</button>' : '<button class="back-btn" data-act="cv-home">⟵ Reef</button>';
     var body = C.sec === 'pairs' ? cavesPairsHTML(C) : C.sec === 'shadow' ? (C.line ? cavesShadowHTML(C) : cavesLinesHTML(C)) :
       C.sec === 'rules' ? (C.rule ? cavesRuleHTML(C) : cavesRulesHTML()) : cavesFrontHTML(C);
     app.innerHTML = '<div class="nav-row">' + back + '<span class="nav-title">' + ccIcon(C.sec ? CAVES_ICON[C.sec] : 'mic') + ' ' + title + '</span></div>' +

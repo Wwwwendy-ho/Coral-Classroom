@@ -98,7 +98,7 @@
         '<span class="lg-tag">' + (x.done ? ccIcon('check') + ' Read' : x === best ? 'Try this' : fit ? 'Good fit' : '') + '</span>' +
       '</button></li>';
     }).join('');
-    app.innerHTML = '<div class="nav-row"><button class="back-btn" data-act="lg-home">⟵ Lagoon</button><span class="nav-title">' + ccIcon('story') + ' Story Lagoon</span></div>' +
+    app.innerHTML = '<div class="nav-row"><button class="back-btn" data-act="lg-home">⟵ Reef</button><span class="nav-title">' + ccIcon('story') + ' Story Lagoon</span></div>' +
       '<div class="lg-page">' +
         '<div class="lg-intro"><h2>Listen first, then read</h2><p>Short conversations for your trip. The best fit for you is at the top: most of its words you know already, and a few are new.</p></div>' +
         '<ul class="lg-list">' + rows + '</ul>' +
@@ -146,7 +146,7 @@
   function renderLagoonRead(){
     var L = S.lagoon || {}, s = lagoonStory(L.id);
     if(!s){ S.view = 'lagoon'; return renderLagoon(); }
-    var head = '<div class="nav-row"><button class="back-btn" data-act="lg-back">⟵ Lagoon</button><span class="nav-title">' + ccIcon(LAGOON_ICON[s.id] || 'story') + ' ' + esc(s.en) + '</span></div>';
+    var head = '<div class="nav-row"><button class="back-btn" data-act="lg-back">⟵ Reef</button><span class="nav-title">' + ccIcon(LAGOON_ICON[s.id] || 'story') + ' ' + esc(s.en) + '</span></div>';
     var steps = [['listen', 'Listen'], ['read', 'Read'], ['quiz', 'Questions']];
     var at = L.phase === 'done' ? 3 : steps.map(function(x){ return x[0]; }).indexOf(L.phase);
     var stepsHTML = '<ol class="lg-steps" aria-label="Steps">' + steps.map(function(x, i){

@@ -4393,7 +4393,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     }).join('');
     app.innerHTML = '' +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="exit-manage-profiles">⟵ Lagoon</button>' +
+        '<button class="back-btn" data-act="exit-manage-profiles">⟵ Reef</button>' +
         '<span class="nav-title">🗂️ Manage Profiles</span>' +
       '</div>' +
       '<div class="stats-page">' +
@@ -6975,7 +6975,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
   function renderWordBank(){
     var wb = S.wb || { loading: true };
     var adult = !!(S.managingDecks || S.editMode || (S.profile && S.profile.mode === 'adult'));
-    var head = '<div class="nav-row"><button class="back-btn" data-act="wb-back">⟵ Lagoon</button><span class="nav-title">📒 Word Bank</span></div>';
+    var head = '<div class="nav-row"><button class="back-btn" data-act="wb-back">⟵ Reef</button><span class="nav-title">📒 Word Bank</span></div>';
     if(wb.loading){ app.innerHTML = head + '<div class="empty-filter-note">Counting your words…</div>'; wbWire(); return; }
     var list = wb.list || [];
     var n = { 'new': 0, learning: 0, known: 0 }; list.forEach(function(e){ n[e.status]++; });
@@ -7375,7 +7375,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
       '</div>') : '';
     app.innerHTML = '' +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="plan-home">⟵ Lagoon</button>' +
+        '<button class="back-btn" data-act="plan-home">⟵ Reef</button>' +
         '<span class="nav-title">📅 Daily Plan</span>' +
       '</div>' +
       '<div class="stats-page">' +
@@ -7491,7 +7491,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
         (topMissed.length ? '<div class="stats-section"><h3>📝 Most-missed words</h3><div class="plan-missed">'+topMissed.map(function(k){ return '<span class="plan-chip">'+esc(k)+(missCount[k] > 1 ? ' <b>×'+missCount[k]+'</b>' : '')+'</span>'; }).join('')+'</div></div>' : '');
     }
     app.innerHTML = '' +
-      '<div class="nav-row"><button class="back-btn" data-act="plan-home">⟵ Lagoon</button><span class="nav-title">🗓️ Monthly Summary</span></div>' +
+      '<div class="nav-row"><button class="back-btn" data-act="plan-home">⟵ Reef</button><span class="nav-title">🗓️ Monthly Summary</span></div>' +
       '<div class="stats-page">' +
         '<div class="plan-tabs"><button type="button" class="subject-tab" data-act="plan-day">Day</button><button type="button" class="subject-tab active">🗓️ Month</button></div>' +
         body +
@@ -9187,7 +9187,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
 
     app.innerHTML = '' +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="exit-study">⟵ Lagoon</button>' +
+        '<button class="back-btn" data-act="exit-study">⟵ Reef</button>' +
         '<span class="nav-title">'+deck.emoji+' '+esc(deck.name)+'</span>' +
         ctrlRowHTML() +
       '</div>' +
@@ -9852,7 +9852,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
 
     app.innerHTML = '' +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="exit-stats">⟵ Lagoon</button>' +
+        '<button class="back-btn" data-act="exit-stats">⟵ Reef</button>' +
         '<span class="nav-title">📊 '+(managing ? 'Progress Overview' : 'Your Progress')+'</span>' +
       '</div>' +
       '<div class="stats-page">' +
@@ -10141,7 +10141,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
 
     app.innerHTML = '' +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="exit-settings">⟵ Lagoon</button>' +
+        '<button class="back-btn" data-act="exit-settings">⟵ Reef</button>' +
         '<span class="nav-title">⚙️ Settings</span>' +
       '</div>' +
       '<div class="stats-page">' +
@@ -10449,7 +10449,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     app.innerHTML = '' +
       errorBannerHTML() +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="exit-editor">⟵ Lagoon</button>' +
+        '<button class="back-btn" data-act="exit-editor">⟵ Reef</button>' +
         ctrlRowHTML() +
       '</div>' +
       '<div class="editor-head">' +
@@ -11623,7 +11623,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     var who = (S.profile && S.profile.name) ? S.profile.name + '\'s' : 'My';
     app.innerHTML = '' +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="reef-back">⟵ Lagoon</button>' +
+        '<button class="back-btn" data-act="reef-back">⟵ Reef</button>' +
       '</div>' +
       '<section class="reef-aquarium' + (night ? ' night' : '') + (reefCalm() ? ' calm' : '') + '">' +
         '<div class="aq-head"><h2><button type="button" class="aq-title" data-aq-lib>' + esc(who) + ' Aquarium</button></h2><p>' + t.found + ' of ' + t.total + ' sea friends live here. Finish a deck to find another one.</p></div>' +
@@ -13630,7 +13630,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
         '<span class="lg-tag">' + (x.done ? ccIcon('check') + ' Read' : x === best ? 'Try this' : fit ? 'Good fit' : '') + '</span>' +
       '</button></li>';
     }).join('');
-    app.innerHTML = '<div class="nav-row"><button class="back-btn" data-act="lg-home">⟵ Lagoon</button><span class="nav-title">' + ccIcon('story') + ' Story Lagoon</span></div>' +
+    app.innerHTML = '<div class="nav-row"><button class="back-btn" data-act="lg-home">⟵ Reef</button><span class="nav-title">' + ccIcon('story') + ' Story Lagoon</span></div>' +
       '<div class="lg-page">' +
         '<div class="lg-intro"><h2>Listen first, then read</h2><p>Short conversations for your trip. The best fit for you is at the top: most of its words you know already, and a few are new.</p></div>' +
         '<ul class="lg-list">' + rows + '</ul>' +
@@ -13678,7 +13678,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   function renderLagoonRead(){
     var L = S.lagoon || {}, s = lagoonStory(L.id);
     if(!s){ S.view = 'lagoon'; return renderLagoon(); }
-    var head = '<div class="nav-row"><button class="back-btn" data-act="lg-back">⟵ Lagoon</button><span class="nav-title">' + ccIcon(LAGOON_ICON[s.id] || 'story') + ' ' + esc(s.en) + '</span></div>';
+    var head = '<div class="nav-row"><button class="back-btn" data-act="lg-back">⟵ Reef</button><span class="nav-title">' + ccIcon(LAGOON_ICON[s.id] || 'story') + ' ' + esc(s.en) + '</span></div>';
     var steps = [['listen', 'Listen'], ['read', 'Read'], ['quiz', 'Questions']];
     var at = L.phase === 'done' ? 3 : steps.map(function(x){ return x[0]; }).indexOf(L.phase);
     var stepsHTML = '<ol class="lg-steps" aria-label="Steps">' + steps.map(function(x, i){
@@ -14158,7 +14158,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
         '<span class="lg-tag">' + (x.done ? ccIcon('check') + ' Talked' : x === best ? 'Try this' : fit ? 'Good fit' : '') + '</span>' +
       '</button></li>';
     }).join('');
-    app.innerHTML = '<div class="nav-row"><button class="back-btn" data-act="tw-home">⟵ Lagoon</button><span class="nav-title">' + ccIcon('talk') + ' Harbor Town</span></div>' +
+    app.innerHTML = '<div class="nav-row"><button class="back-btn" data-act="tw-home">⟵ Reef</button><span class="nav-title">' + ccIcon('talk') + ' Harbor Town</span></div>' +
       '<div class="lg-page">' +
         '<div class="lg-intro"><h2>Talk with the townsfolk</h2><p>Real conversations for your trip, in Korean. Listen, then answer: tap a reply or type your own. The best one for you is at the top.</p></div>' +
         '<ul class="lg-list">' + rows + '</ul>' +
@@ -14676,7 +14676,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     var C = S.caves || (S.caves = {});
     if(cavesRec && !C.line) cavesRecReset();
     var title = C.sec === 'pairs' ? 'Sound pairs' : C.sec === 'shadow' ? 'Shadowing' : C.sec === 'rules' ? 'Sound rules' : 'Echo Caves';
-    var back = C.sec ? '<button class="back-btn" data-act="cv-back">⟵ Caves</button>' : '<button class="back-btn" data-act="cv-home">⟵ Lagoon</button>';
+    var back = C.sec ? '<button class="back-btn" data-act="cv-back">⟵ Caves</button>' : '<button class="back-btn" data-act="cv-home">⟵ Reef</button>';
     var body = C.sec === 'pairs' ? cavesPairsHTML(C) : C.sec === 'shadow' ? (C.line ? cavesShadowHTML(C) : cavesLinesHTML(C)) :
       C.sec === 'rules' ? (C.rule ? cavesRuleHTML(C) : cavesRulesHTML()) : cavesFrontHTML(C);
     app.innerHTML = '<div class="nav-row">' + back + '<span class="nav-title">' + ccIcon(C.sec ? CAVES_ICON[C.sec] : 'mic') + ' ' + title + '</span></div>' +
@@ -15512,7 +15512,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   function renderPatterns(){
     var P = S.patterns || (S.patterns = {}), p = patById(P.id);
     var R = P.round, title = p ? p.en : 'Pattern Reef';
-    var back = p ? '<button class="back-btn" data-act="pr-back">⟵ Reef</button>' : '<button class="back-btn" data-act="pr-home">⟵ Lagoon</button>';
+    var back = p ? '<button class="back-btn" data-act="pr-back">⟵ Reef</button>' : '<button class="back-btn" data-act="pr-home">⟵ Reef</button>';
     var body = !p ? patFrontHTML() : R ? (R.done ? patDoneHTML(p, R) : patItemHTML(p, R)) : patPageHTML(p);
     app.innerHTML = '<div class="nav-row">' + back + '<span class="nav-title">' + ccIcon('sentence') + ' ' + esc(title) + '</span></div>' +
       '<div class="lg-page pr-page">' + body + '</div>';
@@ -16063,7 +16063,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   function bbLex(B){ return B.lex || (B.lex = bbLexicon(B.deck)); }
   function renderBeach(){
     var B = S.beach || (S.beach = { view: 'list' }), b = bbById(B.id);
-    var back = B.view === 'list' ? '<button class="back-btn" data-act="bb-home">⟵ Lagoon</button>' : '<button class="back-btn" data-act="bb-back">⟵ Beach</button>';
+    var back = B.view === 'list' ? '<button class="back-btn" data-act="bb-home">⟵ Reef</button>' : '<button class="back-btn" data-act="bb-back">⟵ Beach</button>';
     var title = B.view === 'letters' ? 'Your letters' : b ? 'A bottle from 지수' : 'Bottle Beach';
     var body = B.view === 'letters' ? bbLettersHTML() : b ? (B.sent ? bbSentHTML(b, B) : bbBottleHTML(b, B)) : bbFrontHTML();
     app.innerHTML = '<div class="nav-row">' + back + '<span class="nav-title">' + ccIcon('bottle') + ' ' + esc(title) + '</span></div>' +
@@ -16450,7 +16450,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   function renderLight(){
     var L = S.light || (S.light = { view: 'list' });
     var sign = L.view === 'sign' && lhSign(L.id), note = L.view === 'manner' && lhManner(L.id);
-    var back = sign || note ? '<button class="back-btn" data-act="lh-back">⟵ Lighthouse</button>' : '<button class="back-btn" data-act="lh-home">⟵ Lagoon</button>';
+    var back = sign || note ? '<button class="back-btn" data-act="lh-back">⟵ Lighthouse</button>' : '<button class="back-btn" data-act="lh-home">⟵ Reef</button>';
     var title = sign ? sign.en : note ? note.en : 'The Lighthouse';
     var body = sign ? lhSignPageHTML(sign, L) : note ? lhMannerHTML(note) : lhFrontHTML();
     app.innerHTML = '<div class="nav-row">' + back + '<span class="nav-title">' + ccIcon('lighthouse') + ' ' + esc(title) + '</span></div>' +
@@ -16892,7 +16892,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     var C = S.captain || (S.captain = { tab: 'today' });
     var tabs = [['today', 'Today', 'compass'], ['course', 'Your course', 'map'], ['can', 'What you can do', 'trophy']];
     var body = C.cp ? deckCheckHTML(C) : C.tab === 'course' ? deckCourseHTML(C) : C.tab === 'can' ? deckCanHTML() : deckTodayHTML(C);
-    app.innerHTML = '<div class="nav-row"><button class="back-btn" data-act="cd-home">⟵ Lagoon</button><span class="nav-title">' + ccIcon('anchor') + ' Captain\'s Deck</span></div>' +
+    app.innerHTML = '<div class="nav-row"><button class="back-btn" data-act="cd-home">⟵ Reef</button><span class="nav-title">' + ccIcon('anchor') + ' Captain\'s Deck</span></div>' +
       '<div class="lg-page cd-page">' +
         (C.cp ? '' : '<div class="cd-tabs" role="tablist" aria-label="Captain\'s Deck">' + tabs.map(function(t){
           return '<button type="button" role="tab" class="cd-tab' + (C.tab === t[0] ? ' on' : '') + '" aria-selected="' + (C.tab === t[0]) + '" data-cd-tab="' + t[0] + '">' + ccIcon(t[2]) + '<span>' + t[1] + '</span></button>';
@@ -17086,10 +17086,13 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   function deckCheckFinish(C){
     var P = C.cp, score = P.right / P.items.length, co = window.CoralCove && window.CoralCove.course(), lib = window.CoralLibrary;
     var u = co && co.units[P.unit], msg;
-    if(co && u && lib && lib.courseAdjust){
+    // A checkpoint is only 4 or 5 questions, too few to slow the course down: a pass moves it on as the unit's own
+    // check does, and anything less just says to keep going and try it again later
+    if(co && u && lib && lib.courseAdjust && score >= .75){
       msg = lib.courseAdjust(co, u.review ? 'review' : 'unit', P.unit, score, [], {});
       window.CoralCove.setCourse(co);
-    } else msg = 'Checkpoint: ' + Math.round(score * 100) + '%. Open My course in the Library to see your plan.';
+    } else if(co && u) msg = u.title + ' checkpoint: ' + P.right + ' of ' + P.items.length + '. Not quite yet, and that is fine: keep sailing this unit and try the checkpoint again in a few days. Your plan stays as it is.';
+    else msg = 'Checkpoint: ' + Math.round(score * 100) + '%. Open My course in the Library to see your plan.';
     var d = deckData(); d.cp[u ? u.id : 'u' + P.unit] = { day: deckToday(), score: score }; deckSave(d);
     P.result = { score: score, msg: msg };
     try { reefWinSound(score >= 0.75); } catch(e){}

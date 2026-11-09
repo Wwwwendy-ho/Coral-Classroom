@@ -360,7 +360,7 @@
     var who = (S.profile && S.profile.name) ? S.profile.name + '\'s' : 'My';
     app.innerHTML = '' +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="reef-back">⟵ Lagoon</button>' +
+        '<button class="back-btn" data-act="reef-back">⟵ Reef</button>' +
       '</div>' +
       '<section class="reef-aquarium' + (night ? ' night' : '') + (reefCalm() ? ' calm' : '') + '">' +
         '<div class="aq-head"><h2><button type="button" class="aq-title" data-aq-lib>' + esc(who) + ' Aquarium</button></h2><p>' + t.found + ' of ' + t.total + ' sea friends live here. Finish a deck to find another one.</p></div>' +

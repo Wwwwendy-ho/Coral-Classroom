@@ -59,7 +59,7 @@
   function renderPatterns(){
     var P = S.patterns || (S.patterns = {}), p = patById(P.id);
     var R = P.round, title = p ? p.en : 'Pattern Reef';
-    var back = p ? '<button class="back-btn" data-act="pr-back">⟵ Reef</button>' : '<button class="back-btn" data-act="pr-home">⟵ Lagoon</button>';
+    var back = p ? '<button class="back-btn" data-act="pr-back">⟵ Reef</button>' : '<button class="back-btn" data-act="pr-home">⟵ Reef</button>';
     var body = !p ? patFrontHTML() : R ? (R.done ? patDoneHTML(p, R) : patItemHTML(p, R)) : patPageHTML(p);
     app.innerHTML = '<div class="nav-row">' + back + '<span class="nav-title">' + ccIcon('sentence') + ' ' + esc(title) + '</span></div>' +
       '<div class="lg-page pr-page">' + body + '</div>';

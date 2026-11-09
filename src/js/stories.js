@@ -731,7 +731,7 @@
   function renderWordBank(){
     var wb = S.wb || { loading: true };
     var adult = !!(S.managingDecks || S.editMode || (S.profile && S.profile.mode === 'adult'));
-    var head = '<div class="nav-row"><button class="back-btn" data-act="wb-back">⟵ Lagoon</button><span class="nav-title">📒 Word Bank</span></div>';
+    var head = '<div class="nav-row"><button class="back-btn" data-act="wb-back">⟵ Reef</button><span class="nav-title">📒 Word Bank</span></div>';
     if(wb.loading){ app.innerHTML = head + '<div class="empty-filter-note">Counting your words…</div>'; wbWire(); return; }
     var list = wb.list || [];
     var n = { 'new': 0, learning: 0, known: 0 }; list.forEach(function(e){ n[e.status]++; });

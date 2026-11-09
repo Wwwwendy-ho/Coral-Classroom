@@ -16,7 +16,7 @@ const { enter, solveGate } = require('./steps');
 const port = +process.argv[2] || 8820;
 const ARGS = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'];
 let failed = 0;
-// The Library always has "⟵ Lagoon" (closes it); pages inside it also have a "‹" back arrow
+// The Library always has "⟵ Reef" (closes it); pages inside it also have a "‹" back arrow
 async function closeLibrary(p) {
   if (await p.isVisible('.clib .clib-home')) { await p.click('.clib .clib-home'); await p.waitForTimeout(500); }
 }

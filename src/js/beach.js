@@ -67,7 +67,7 @@
   function bbLex(B){ return B.lex || (B.lex = bbLexicon(B.deck)); }
   function renderBeach(){
     var B = S.beach || (S.beach = { view: 'list' }), b = bbById(B.id);
-    var back = B.view === 'list' ? '<button class="back-btn" data-act="bb-home">⟵ Lagoon</button>' : '<button class="back-btn" data-act="bb-back">⟵ Beach</button>';
+    var back = B.view === 'list' ? '<button class="back-btn" data-act="bb-home">⟵ Reef</button>' : '<button class="back-btn" data-act="bb-back">⟵ Beach</button>';
     var title = B.view === 'letters' ? 'Your letters' : b ? 'A bottle from 지수' : 'Bottle Beach';
     var body = B.view === 'letters' ? bbLettersHTML() : b ? (B.sent ? bbSentHTML(b, B) : bbBottleHTML(b, B)) : bbFrontHTML();
     app.innerHTML = '<div class="nav-row">' + back + '<span class="nav-title">' + ccIcon('bottle') + ' ' + esc(title) + '</span></div>' +

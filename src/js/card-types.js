@@ -1068,7 +1068,7 @@
 
     app.innerHTML = '' +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="exit-study">⟵ Lagoon</button>' +
+        '<button class="back-btn" data-act="exit-study">⟵ Reef</button>' +
         '<span class="nav-title">'+deck.emoji+' '+esc(deck.name)+'</span>' +
         ctrlRowHTML() +
       '</div>' +

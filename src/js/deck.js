@@ -147,7 +147,7 @@
     var C = S.captain || (S.captain = { tab: 'today' });
     var tabs = [['today', 'Today', 'compass'], ['course', 'Your course', 'map'], ['can', 'What you can do', 'trophy']];
     var body = C.cp ? deckCheckHTML(C) : C.tab === 'course' ? deckCourseHTML(C) : C.tab === 'can' ? deckCanHTML() : deckTodayHTML(C);
-    app.innerHTML = '<div class="nav-row"><button class="back-btn" data-act="cd-home">⟵ Lagoon</button><span class="nav-title">' + ccIcon('anchor') + ' Captain\'s Deck</span></div>' +
+    app.innerHTML = '<div class="nav-row"><button class="back-btn" data-act="cd-home">⟵ Reef</button><span class="nav-title">' + ccIcon('anchor') + ' Captain\'s Deck</span></div>' +
       '<div class="lg-page cd-page">' +
         (C.cp ? '' : '<div class="cd-tabs" role="tablist" aria-label="Captain\'s Deck">' + tabs.map(function(t){
           return '<button type="button" role="tab" class="cd-tab' + (C.tab === t[0] ? ' on' : '') + '" aria-selected="' + (C.tab === t[0]) + '" data-cd-tab="' + t[0] + '">' + ccIcon(t[2]) + '<span>' + t[1] + '</span></button>';
@@ -341,10 +341,13 @@
   function deckCheckFinish(C){
     var P = C.cp, score = P.right / P.items.length, co = window.CoralCove && window.CoralCove.course(), lib = window.CoralLibrary;
     var u = co && co.units[P.unit], msg;
-    if(co && u && lib && lib.courseAdjust){
+    // A checkpoint is only 4 or 5 questions, too few to slow the course down: a pass moves it on as the unit's own
+    // check does, and anything less just says to keep going and try it again later
+    if(co && u && lib && lib.courseAdjust && score >= .75){
       msg = lib.courseAdjust(co, u.review ? 'review' : 'unit', P.unit, score, [], {});
       window.CoralCove.setCourse(co);
-    } else msg = 'Checkpoint: ' + Math.round(score * 100) + '%. Open My course in the Library to see your plan.';
+    } else if(co && u) msg = u.title + ' checkpoint: ' + P.right + ' of ' + P.items.length + '. Not quite yet, and that is fine: keep sailing this unit and try the checkpoint again in a few days. Your plan stays as it is.';
+    else msg = 'Checkpoint: ' + Math.round(score * 100) + '%. Open My course in the Library to see your plan.';
     var d = deckData(); d.cp[u ? u.id : 'u' + P.unit] = { day: deckToday(), score: score }; deckSave(d);
     P.result = { score: score, msg: msg };
     try { reefWinSound(score >= 0.75); } catch(e){}

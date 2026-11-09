@@ -288,7 +288,7 @@
       '</div>') : '';
     app.innerHTML = '' +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="plan-home">⟵ Lagoon</button>' +
+        '<button class="back-btn" data-act="plan-home">⟵ Reef</button>' +
         '<span class="nav-title">📅 Daily Plan</span>' +
       '</div>' +
       '<div class="stats-page">' +
@@ -404,7 +404,7 @@
         (topMissed.length ? '<div class="stats-section"><h3>📝 Most-missed words</h3><div class="plan-missed">'+topMissed.map(function(k){ return '<span class="plan-chip">'+esc(k)+(missCount[k] > 1 ? ' <b>×'+missCount[k]+'</b>' : '')+'</span>'; }).join('')+'</div></div>' : '');
     }
     app.innerHTML = '' +
-      '<div class="nav-row"><button class="back-btn" data-act="plan-home">⟵ Lagoon</button><span class="nav-title">🗓️ Monthly Summary</span></div>' +
+      '<div class="nav-row"><button class="back-btn" data-act="plan-home">⟵ Reef</button><span class="nav-title">🗓️ Monthly Summary</span></div>' +
       '<div class="stats-page">' +
         '<div class="plan-tabs"><button type="button" class="subject-tab" data-act="plan-day">Day</button><button type="button" class="subject-tab active">🗓️ Month</button></div>' +
         body +

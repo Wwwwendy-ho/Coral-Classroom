@@ -570,7 +570,7 @@
     }).join('');
     app.innerHTML = '' +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="exit-manage-profiles">⟵ Lagoon</button>' +
+        '<button class="back-btn" data-act="exit-manage-profiles">⟵ Reef</button>' +
         '<span class="nav-title">🗂️ Manage Profiles</span>' +
       '</div>' +
       '<div class="stats-page">' +

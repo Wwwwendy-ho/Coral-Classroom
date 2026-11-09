@@ -113,7 +113,7 @@
     if(root) return;
     var st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
     root = document.createElement('div'); root.className = 'clib'; root.hidden = true; root.setAttribute('role', 'dialog'); root.setAttribute('aria-label', 'Library');
-    root.innerHTML = '<header class="clib-head"><button type="button" class="clib-home">⟵ Lagoon</button><button type="button" class="clib-back" aria-label="Back" hidden>' + icon('back') + '</button><h1 class="clib-title">Library</h1><span class="clib-source"></span></header><main class="clib-body"></main>';
+    root.innerHTML = '<header class="clib-head"><button type="button" class="clib-home">⟵ Reef</button><button type="button" class="clib-back" aria-label="Back" hidden>' + icon('back') + '</button><h1 class="clib-title">Library</h1><span class="clib-source"></span></header><main class="clib-body"></main>';
     root.querySelector('.clib-back').addEventListener('click', back);
     root.querySelector('.clib-home').addEventListener('click', close);
     root.addEventListener('keydown', function(e){ if(e.key === 'Escape') back(); });

@@ -226,7 +226,7 @@
 
     app.innerHTML = '' +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="exit-stats">⟵ Lagoon</button>' +
+        '<button class="back-btn" data-act="exit-stats">⟵ Reef</button>' +
         '<span class="nav-title">📊 '+(managing ? 'Progress Overview' : 'Your Progress')+'</span>' +
       '</div>' +
       '<div class="stats-page">' +
@@ -515,7 +515,7 @@
 
     app.innerHTML = '' +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="exit-settings">⟵ Lagoon</button>' +
+        '<button class="back-btn" data-act="exit-settings">⟵ Reef</button>' +
         '<span class="nav-title">⚙️ Settings</span>' +
       '</div>' +
       '<div class="stats-page">' +
@@ -823,7 +823,7 @@
     app.innerHTML = '' +
       errorBannerHTML() +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="exit-editor">⟵ Lagoon</button>' +
+        '<button class="back-btn" data-act="exit-editor">⟵ Reef</button>' +
         ctrlRowHTML() +
       '</div>' +
       '<div class="editor-head">' +

@@ -73,7 +73,7 @@
         '<span class="lg-tag">' + (x.done ? ccIcon('check') + ' Talked' : x === best ? 'Try this' : fit ? 'Good fit' : '') + '</span>' +
       '</button></li>';
     }).join('');
-    app.innerHTML = '<div class="nav-row"><button class="back-btn" data-act="tw-home">⟵ Lagoon</button><span class="nav-title">' + ccIcon('talk') + ' Harbor Town</span></div>' +
+    app.innerHTML = '<div class="nav-row"><button class="back-btn" data-act="tw-home">⟵ Reef</button><span class="nav-title">' + ccIcon('talk') + ' Harbor Town</span></div>' +
       '<div class="lg-page">' +
         '<div class="lg-intro"><h2>Talk with the townsfolk</h2><p>Real conversations for your trip, in Korean. Listen, then answer: tap a reply or type your own. The best one for you is at the top.</p></div>' +
         '<ul class="lg-list">' + rows + '</ul>' +
