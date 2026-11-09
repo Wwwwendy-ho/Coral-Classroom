@@ -316,6 +316,30 @@ async function newPage(browser) {
   await p.click('[data-act="lh-back"]'); await p.waitForTimeout(300);
   await p.click('[data-act="lh-home"]'); await p.waitForTimeout(6000);
   check('grown-up: leaving the Lighthouse goes back to the board', await p.evaluate(() => !!document.querySelector('.r3 canvas')));
+  // Captain's Deck: open from the sea chart, see today's legs, open a leg into its region and come back to the deck,
+  // then open What you can do
+  await p.click('[data-r3-map]'); await p.waitForTimeout(1200);
+  await p.click('.r3-map-tab[data-sea-tab="sea"]'); await p.waitForTimeout(400);
+  await p.click('.r3-sea-isle[data-sea="deck"]'); await p.waitForTimeout(400);
+  const cdBtn = await p.$('[data-sea-go="deck"]');
+  check('grown-up: the sea chart has an Open Captain\'s Deck button', !!cdBtn && /Open Captain's Deck/.test(await cdBtn.textContent()));
+  if (cdBtn) { await cdBtn.click(); await p.waitForTimeout(2500); }
+  await p.waitForFunction(() => document.querySelectorAll('.cd-leg').length > 0, null, { timeout: 10000 }).catch(() => {});
+  const legs = await p.evaluate(() => [...document.querySelectorAll('.cd-leg b')].map(b => b.textContent));
+  check('grown-up: Captain\'s Deck shows today\'s three or four legs, kept for the day', legs.length >= 3 && legs.length <= 4 &&
+    await p.evaluate(n => (JSON.parse(localStorage.getItem('cc-deck-wendy') || '{}').legs || []).length === n, legs.length), legs.join(' | '));
+  const storyLeg = await p.evaluate(() => { const l = JSON.parse(localStorage.getItem('cc-deck-wendy')).legs; return l.findIndex(x => x.kind === 'story'); });
+  await p.click('[data-cd-leg="' + Math.max(0, storyLeg) + '"]'); await p.waitForTimeout(2500);
+  check('grown-up: a leg opens its region at its item (the story itself)', await p.evaluate(() =>
+    !document.querySelector('.cd-leg') && document.querySelectorAll('.lg-line').length >= 4 && !!document.querySelector('[data-lg-play]')));
+  if (await p.$('[data-act="lg-back"]')) { await p.click('[data-act="lg-back"]'); await p.waitForTimeout(400); }
+  if (await p.$('[data-act="lg-home"]')) { await p.click('[data-act="lg-home"]'); await p.waitForTimeout(2500); }
+  check('grown-up: leaving the region comes back to Captain\'s Deck', await p.evaluate(() => document.querySelectorAll('.cd-leg').length > 0));
+  await p.click('[data-cd-tab="can"]'); await p.waitForTimeout(500);
+  check('grown-up: What you can do shows five skill meters and trip readiness for ten situations', await p.evaluate(() =>
+    document.querySelectorAll('.cd-skills li').length === 5 && document.querySelectorAll('.cd-sits li').length === 10));
+  await p.click('[data-act="cd-home"]'); await p.waitForTimeout(6000);
+  check('grown-up: leaving Captain\'s Deck goes back to the board', await p.evaluate(() => !!document.querySelector('.r3 canvas')));
   await menuPick(p, 'Edit decks'); await p.waitForTimeout(1200);
   await p.click('[data-act="open-library"]', { force: true }); await p.waitForTimeout(800);
   check('grown-up: the Library opens on the Korean goal', await p.evaluate(() => [...document.querySelectorAll('.clib-tab')].map(t => t.dataset.tab).join(',') === 'korean'));

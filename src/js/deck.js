@@ -318,7 +318,7 @@
       '<div class="cd-sign" aria-hidden="true">' + lhSignHTML(lhSign(it.sign), {}) + '</div><div class="lg-q"><span class="pr-qic" aria-hidden="true">' + ccIcon('search') + '</span><div><b>' + esc(it.q) + '</b></div></div>';
     var ok = picked != null && (it.k === 'sound' ? picked === it.a : it.opts[picked] === it.right);
     var fb = picked == null ? '' : '<p class="lg-fb ' + (ok ? 'ok' : 'no') + '" role="status">' + ccIcon(ok ? 'check' : 'bulb') + '<span>' + (ok ? 'Yes! ' : 'Not quite: it was ' + right + '. ') +
-      esc(it.k === 'sound' ? it.set[it.a][1] : it.why || '') + '</span></p>';
+      esc(it.k === 'sound' ? right + ' means ' + it.set[it.a][1] + '.' : it.why || '') + '</span></p>';
     return '<div class="lg-title"><h2>Checkpoint</h2><span>' + esc(P.title) + ' · ' + (P.i + 1) + ' of ' + P.items.length + '</span></div>' +
       '<div class="lg-quiz">' + ask + '<ul class="lg-opts">' + opts + '</ul>' + fb + '</div>' +
       '<div class="lg-bar">' + (picked != null ? '<button type="button" class="btn btn-primary" data-cd-next>' + (P.i + 1 < P.items.length ? 'Next' : 'See how it went') + '</button>' : '') +
