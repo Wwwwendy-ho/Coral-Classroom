@@ -133,6 +133,15 @@ The Lighthouse, the sixth, is `src/js/light-data.js` (ten signs as rows of marke
 cards, each with two questions; eight manners notes) and `src/js/light.js` (S.view 'light': the list, a sign with
 tap-a-word as in Story Lagoon and its questions, a note). Best scores and notes read live in localStorage
 (cc-light-<profile id>). `tools/check/test_beach.js` checks the feedback, the data's shape and the voice clips.
+Captain's Deck, the last, is `src/js/deck-plan.js` (no screen code: `deckPlan`, today's legs from a summary of her
+progress, due review first, the course unit's deck, one input and one output leg, a skill leg only when something
+is weak, at most four; the ten trip situations with the regions' content tagged to each; the can-do statements and
+their tests; each course unit's checkpoint picks) and `src/js/deck.js` (S.view 'captain': `deckInput` reads the
+learner model, My words, the course and every region's localStorage; tabs for today, the course as islands with
+its checkpoint, and what you can do). Each region's finish point calls `deckTick(kind, id)`; a leg opens its region
+at its item and sets S.deckBack, so `goHome()` returns to the deck (`deckBackHome`). A checkpoint's score goes
+through the Library's own `courseAdjust` (exported on window.CoralLibrary). Today's voyage and checkpoint results
+live in localStorage (cc-deck-<profile id>). `tools/check/test_deck.js` checks the planner and the tables.
 
 ## Grown-up checks
 

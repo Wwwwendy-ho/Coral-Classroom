@@ -1,5 +1,26 @@
 # Changelog
 
+## Captain's Deck opens (November 9, 2026)
+
+- **The last island of the sea is open: Captain's Deck**, for your plan and progress. It ties every other region
+  together.
+- **Today's voyage.** Each day the app plans three or four short legs across the sea from what you know and what
+  each region says about you: the words due in My words or Coral Cove first, then the next deck of your course,
+  then a story to read in Story Lagoon (the best fit for your words) and a talk in Harbor Town or a bottle on Bottle
+  Beach. When something is shaky, one more leg: a tricky sound in Echo Caves or a pattern to repair in Pattern Reef.
+  Each leg shows its island, what it is and about how long it takes. Tap one and that region opens right at it;
+  finish it and the leg ticks itself off, and you come back to the deck. The plan is made on your device.
+- **Your course as islands,** with their dates, and what each unit says you will be able to do, ticked off as you
+  show it (ordering at a cafe counts once you have done the cafe talk well). At the end of a unit there is an
+  optional checkpoint with a few items from the regions: sound pairs, a Harbor Town exchange, a Pattern Reef
+  sentence and a sign. Its result moves the course the same way the Library's unit checks do.
+- **What you can do,** in plain words: the things you have shown you can do on the trip, your five skills (Hear it,
+  Read it, Recall it, Say it, Use it) as meters, stories read, conversations had, letters written, signs read,
+  patterns mastered and tricky sounds, and trip readiness: how much of each trip situation you have covered,
+  from arriving and the hotel to the subway, taxis and the pharmacy.
+- Open it from the treasure map (The sea), from My course in the Library, or from the small "legs today" button on
+  the board, shown while today's voyage has legs left. The treasure map's voyage strip lists today's legs too.
+
 ## Bottle Beach and the Lighthouse open (November 5, 2026)
 
 - **The fifth and sixth new islands of the sea are open: Bottle Beach**, for writing, **and the Lighthouse**, for
