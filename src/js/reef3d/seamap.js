@@ -8,7 +8,7 @@
   var REEF_REGIONS = [
     { id:'cove', say:'Coral Cove, for vocabulary and memory.', name:'Coral Cove', teaches:'Vocabulary and memory', x:150, y:198, open:true,
       about:'The flashcard reef. Every word you meet anywhere ends up here, reviewed just when you are about to forget it.' },
-    { id:'deck', say:'Captain\'s Deck, for your plan and progress.', name:'Captain\'s Deck', teaches:'Plan and progress', x:150, y:58,
+    { id:'deck', say:'Captain\'s Deck, for your plan and progress.', name:'Captain\'s Deck', teaches:'Plan and progress', x:150, y:58, open:true, go:'openCaptain', icon:'anchor',
       about:'Today\'s voyage, your course with its dates, checkpoints, and what you can now do.' },
     { id:'lagoon', say:'Story Lagoon, for listening and reading.', name:'Story Lagoon', teaches:'Listening and reading', x:62, y:124, open:true, go:'openLagoon', icon:'story',
       about:'Short stories and conversations made from words you know, to listen to first and then read.' },
@@ -67,7 +67,7 @@
   }
   // Leaves the board for an open region: the map closes and the water covers the change, as when diving into a deck
   function reefSeaGo(ov, id){
-    var r = REEF_REGIONS.find(function(x){ return x.id === id; }), fn = r && { openLagoon: openLagoon, openTown: openTown, openCaves: openCaves, openPatterns: openPatterns, openBeach: openBeach, openLight: openLight }[r.go];
+    var r = REEF_REGIONS.find(function(x){ return x.id === id; }), fn = r && { openLagoon: openLagoon, openTown: openTown, openCaves: openCaves, openPatterns: openPatterns, openBeach: openBeach, openLight: openLight, openCaptain: openCaptain }[r.go];
     if(!fn) return;
     try { Speech.stop(); } catch(e){}
     ov.remove();

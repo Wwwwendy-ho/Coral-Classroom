@@ -248,6 +248,7 @@
     d.r[p.id] = (d.r[p.id] || 0) + 1;
     if(p.items.length - R.right <= 1 && d.s[p.id]) d.s[p.id].open = 0;   // a good round puts her slips right
     patSave(d);
+    deckTick('pattern', p.id);   // a leg of Captain's Deck's voyage, if today's has this pattern
     R.done = true; R.mastery = d.m[p.id];
     try { reefWinSound(R.right === p.items.length); } catch(e){}
     try { if(!reefCalm()) Ocean.bubbles(10); } catch(e){}

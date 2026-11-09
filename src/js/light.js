@@ -137,6 +137,7 @@
     if(s.qs.every(function(x, i){ return L.ans[i] != null; })){
       var right = s.qs.filter(function(x, i){ return L.ans[i] === 0; }).length, d = lhData();
       d.s[s.id] = Math.max(d.s[s.id] || 0, right); lhSave(d);
+      deckTick('sign', s.id);   // a leg of Captain's Deck's voyage, if today's has this sign
       if(right === s.qs.length) try { if(!reefCalm()) Ocean.bubbles(8); } catch(e){}
     }
     lhKeep();

@@ -12,7 +12,7 @@
 <script src="seed-data.js?v=20261026"></script>
 <script src="audio-clips.js?v=20261026"></script>
 <script src="storage.js?v=20261026"></script>
-<script src="library.js?v=20261104" defer></script>
+<script src="library.js?v=20261109" defer></script>
 <script src="words.js?v=20261028" defer></script>
 <script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js?v=20261026').catch(function(){});});}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" media="print" id="coveperfFonts" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&family=Fredoka:wght@400;500;600;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&display=swap">
@@ -1997,6 +1997,8 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
      js/beach.js                BOTTLE BEACH: the bottles, writing a reply (typed or from tiles), the feedback, 지수's answer, her letters
      js/light-data.js           THE LIGHTHOUSE's ten signs (drawn as cards, with questions) and eight manners notes
      js/light.js                THE LIGHTHOUSE: the signs with tap-a-word and questions, and the manners notes
+     js/deck-plan.js            CAPTAIN'S DECK's voyage planner (today's legs), trip situations, can-do statements, unit checkpoints
+     js/deck.js                 CAPTAIN'S DECK: today's voyage, your course with its checkpoints, and what you can do
      js/ui-icons.js             drawn icons in place of emoji in every screen's titles, buttons and labels
      js/whats-new.js            What's new: Shelly points out new things after an update (one entry per release)
      js/vendor/three-gltfloader.js   THIRD-PARTY CODE: three.js GLTFLoader and BufferGeometryUtils (don't edit)
@@ -4117,6 +4119,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     if(S.view === 'patterns') return renderPatterns();
     if(S.view === 'beach') return renderBeach();
     if(S.view === 'light') return renderLight();
+    if(S.view === 'captain') return renderCaptain();
     if(S.view === 'plan') return renderPlan();
     if(S.view === 'planMonth') return renderPlanMonth();
     if(S.view === 'flashFeed') return renderFlashFeed();         // Flash Feed -- same reasoning again,
@@ -4796,6 +4799,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     S.planRun = null;
     S.feedSoundId = null;
     S.soundPickerOpen = false;
+    S.deckBack = false;   // a region opened from Captain's Deck's voyage has been left another way
     S.view = 'home';
     S.currentDeckId = null;
     if(S.unsubCards){ S.unsubCards(); S.unsubCards = null; }
@@ -9513,6 +9517,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     // without this guard a single round could be counted twice (double stars, double history).
     if(S.finishingRound) return;
     S.finishingRound = true;
+    deckTick('cards', S.currentDeckId);   // a leg of Captain's Deck's voyage, if today's has this deck (or My words)
     var t = S.roundTally || { again:0, hard:0, good:0, easy:0 };
     var total = S.sessionReviewed;
     var right = Math.max(0, total - t.again);
@@ -11481,10 +11486,12 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     setTimeout(function(){ ov.remove(); reefBusy = false; window.__reefTx = false; }, end);
   }
   function reefInDeck(){
-    return ['study','summary','feed','story','equationFeed','langFeed','readAlong','flashFeed','miniStory','wordBank','lagoon','lagoonRead','town','townTalk','caves','patterns','beach','light'].indexOf(S.view) !== -1;
+    return ['study','summary','feed','story','equationFeed','langFeed','readAlong','flashFeed','miniStory','wordBank','lagoon','lagoonRead','town','townTalk','caves','patterns','beach','light','captain'].indexOf(S.view) !== -1;
   }
   // Every way out of a deck goes through goHome(), so this is the one place that adds the pop-up.
+  // A region opened from a leg of Captain's Deck's voyage goes back there instead (deckBackHome, deck.js).
   function goHome(){
+    if(deckBackHome()) return;
     if(reefGame() && reefInDeck()) reefGo('surface', null, goHomeNow);
     else goHomeNow();
   }
@@ -12793,6 +12800,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     openPatterns: function(){ openPatterns(); },   // Pattern Reef (patterns.js), from My course
     openBeach: function(){ openBeach(); },     // Bottle Beach (beach.js), from My course
     openLight: function(){ openLight(); },     // the Lighthouse (light.js), from My course
+    openDeck: function(){ deckOpenFromBoard(); },   // Captain's Deck (deck.js), from My course
     night: function(){ try { return reefNight(); } catch(e){ return false; } },
     calm: function(){ try { return reefCalm(); } catch(e){ return false; } },
     // false in the Claude version and inside a grown-up profile, where the app asks no grown-up questions
@@ -13776,6 +13784,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   function lagoonFinish(s, L){
     L.phase = 'done';
     lagoonMarkDone(s.id, L.right);
+    deckTick('story', s.id);   // a leg of Captain's Deck's voyage, if today's has this story
     try { reefWinSound(true); } catch(e){}
     try { if(!reefCalm()) Ocean.bubbles(10); } catch(e){}
     renderLagoonRead(); window.scrollTo(0, 0);
@@ -14302,6 +14311,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     T.debrief = { well: well, fixes: fixes, need: need, turns: turns.length, pat: Object.keys(T.pat || {}) };
     T.phase = 'done';
     townMarkDone(f.id, well.length);
+    deckTick('talk', f.id);   // a leg of Captain's Deck's voyage, if today's has this talk
     try { reefWinSound(true); } catch(e){}
     try { if(!reefCalm()) Ocean.bubbles(10); } catch(e){}
     renderTownTalk(); window.scrollTo(0, 0);
@@ -14713,9 +14723,11 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     var due = R.again.findIndex(function(a){ return a.at <= R.i; });
     if(due >= 0){ id = R.again[due].id; R.again.splice(due, 1); }
     else {
-      var prev = R.q && R.q.c, pool = CAVES_PAIRS.filter(function(c){ return c.id !== prev; });
-      var total = pool.reduce(function(s, c){ return s + 0.2 + cavesWeak(d, c.id); }, 0), r = Math.random() * total;
-      for(var i = 0; i < pool.length; i++){ r -= 0.2 + cavesWeak(d, pool[i].id); if(r <= 0){ id = pool[i].id; break; } }
+      // a round opened from Captain's Deck for one tricky sound (S.caves.focus) brings that one up about half the time
+      var prev = R.q && R.q.c, pool = CAVES_PAIRS.filter(function(c){ return c.id !== prev; }), focus = S.caves.focus;
+      var weight = function(c){ return 0.2 + cavesWeak(d, c.id) + (c.id === focus ? 4 : 0); };
+      var total = pool.reduce(function(s, c){ return s + weight(c); }, 0), r = Math.random() * total;
+      for(var i = 0; i < pool.length; i++){ r -= weight(pool[i]); if(r <= 0){ id = pool[i].id; break; } }
       id = id || pool[pool.length - 1].id;
     }
     var c = cavesContrast(id), choices = c.sets.map(function(s, si){ return si; }).filter(function(si){ return c.sets.length < 2 || si !== R.last[id]; });
@@ -14741,6 +14753,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     R.i++;
     if(R.i >= CAVES_ROUND){
       R.done = true;
+      deckTick('sound', S.caves.focus || null);   // a leg of Captain's Deck's voyage: any round of sound pairs counts
       try { reefWinSound(R.right === CAVES_ROUND); } catch(e){}
       try { if(!reefCalm()) Ocean.bubbles(10); } catch(e){}
     } else cavesNextQ();
@@ -15688,6 +15701,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     d.r[p.id] = (d.r[p.id] || 0) + 1;
     if(p.items.length - R.right <= 1 && d.s[p.id]) d.s[p.id].open = 0;   // a good round puts her slips right
     patSave(d);
+    deckTick('pattern', p.id);   // a leg of Captain's Deck's voyage, if today's has this pattern
     R.done = true; R.mastery = d.m[p.id];
     try { reefWinSound(R.right === p.items.length); } catch(e){}
     try { if(!reefCalm()) Ocean.bubbles(10); } catch(e){}
@@ -16155,6 +16169,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     var r = bbReply(b, B.text), d = bbData();
     d.l.unshift({ id: b.id, at: Date.now(), text: B.text.trim().slice(0, 400), r: b.replies.indexOf(r) });
     d.l = d.l.slice(0, BB_KEEP); bbSave(d);
+    deckTick('letter', b.id);   // a leg of Captain's Deck's voyage, if today's has this bottle
     B.sent = { r: r, showEn: false };
     try { reefWinSound(true); } catch(e){}
     try { if(!reefCalm()) Ocean.bubbles(10); } catch(e){}
@@ -16538,6 +16553,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     if(s.qs.every(function(x, i){ return L.ans[i] != null; })){
       var right = s.qs.filter(function(x, i){ return L.ans[i] === 0; }).length, d = lhData();
       d.s[s.id] = Math.max(d.s[s.id] || 0, right); lhSave(d);
+      deckTick('sign', s.id);   // a leg of Captain's Deck's voyage, if today's has this sign
       if(right === s.qs.length) try { if(!reefCalm()) Ocean.bubbles(8); } catch(e){}
     }
     lhKeep();
@@ -16579,6 +16595,548 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   // Test helper: the right answer's button for a question on screen
   window.__lhRight = function(qi){ return '[data-lh-q="' + qi + ':0"]'; };
 /* end of src/js/light.js */
+/* from src/js/deck-plan.js */
+  /* ---------- CAPTAIN'S DECK: the voyage planner and the tables that tie the regions together ----------
+     Kept apart from deck.js and free of screen code, so tools/check/test_deck.js can run deckPlan() on made-up
+     progress. deck.js gathers the real progress (the learner model, My words, the course and each region's
+     localStorage) into the shape deckPlan() reads, then draws the screens. */
+
+  // Each region as a leg shows it: its name and its drawn icon (the same as the sea chart's, seamap.js)
+  var DECK_REGION = {
+    cove: ['Coral Cove', 'map'], lagoon: ['Story Lagoon', 'story'], town: ['Harbor Town', 'talk'], caves: ['Echo Caves', 'mic'],
+    reef: ['Pattern Reef', 'sentence'], beach: ['Bottle Beach', 'bottle'], light: ['The Lighthouse', 'lighthouse']
+  };
+  var DECK_MAX_LEGS = 4;
+
+  /* Today's voyage, from what the regions say about her:
+       review   { mw: true, n, deckId, name }   words due in My words, or the Coral Cove deck with the most cards due
+       unit     { deckId, name, n, unit }       the deck the course's current unit is teaching, if it has cards to do
+       story    { id, en }                      Story Lagoon's best fit (input)
+       talk     { id, en } / letter { id, en }  the next Harbor Town talk and the next bottle (output: one of them)
+       sound    { id, label }                   her shakiest tricky sound in Echo Caves, only when there is one
+       repair   { id, en }                      the Pattern Reef pattern with the most slips to repair, only then
+       sign     { id, en }                      a Lighthouse sign not read yet, a short extra leg on light days
+       day      the day number (days since 1970), which turns the output leg and the skill leg between their two kinds
+     Order: what's due first (forgetting is the one thing that can't wait), then the course's new words, then one
+     input leg and one output leg, then a skill leg only when something is weak. Never more than four legs: when all
+     five would fit, the unit's deck gives way, since the review leg already draws on the unit's decks (Daily Plan).
+     A day with fewer than three legs gets a sign to read, so a voyage is never just one stop. */
+  function deckPlan(p){
+    p = p || {};
+    var day = p.day || 0, legs = [];
+    function leg(kind, region, item, title, min, why, any){
+      return { key: kind + ':' + (item || 'any'), kind: kind, region: region, item: item || null, any: !!any,
+        title: title, min: min, why: why, icon: DECK_REGION[region][1], place: DECK_REGION[region][0] };
+    }
+    var r = p.review, u = p.unit;
+    if(r && r.n > 0){
+      var min = Math.max(2, Math.min(10, Math.ceil(r.n * 0.4)));
+      legs.push(r.mw ? leg('cards', 'cove', r.deckId, 'Review ' + r.n + ' of my words', min, 'Due today, before they fade')
+        : leg('cards', 'cove', r.deckId, 'Review ' + r.name, min, r.n + ' card' + (r.n === 1 ? '' : 's') + ' due today'));
+    }
+    if(u && u.n > 0 && !(r && r.deckId === u.deckId))
+      legs.push(leg('cards', 'cove', u.deckId, 'Learn ' + u.name, 5, 'New words for ' + (u.unit || 'this unit')));
+    if(p.story) legs.push(leg('story', 'lagoon', p.story.id, 'Read "' + p.story.en + '"', 5, 'The best fit for the words you know'));
+    var out = p.talk && p.letter ? (day % 2 ? 'letter' : 'talk') : p.talk ? 'talk' : p.letter ? 'letter' : null;
+    if(out === 'talk') legs.push(leg('talk', 'town', p.talk.id, 'Talk with ' + (/^a /i.test(p.talk.en) ? '' : 'the ') + p.talk.en.toLowerCase(), 5, 'Say it in a real conversation'));
+    if(out === 'letter') legs.push(leg('letter', 'beach', p.letter.id, 'Answer 지수\'s bottle', 5, '"' + p.letter.en + '"'));
+    var skill = p.sound && p.repair ? (day % 2 ? 'repair' : 'sound') : p.sound ? 'sound' : p.repair ? 'repair' : null;
+    if(skill === 'sound') legs.push(leg('sound', 'caves', p.sound.id, 'Hear ' + p.sound.label + ' apart', 3, 'A sound you have been mixing up', true));
+    if(skill === 'repair') legs.push(leg('pattern', 'reef', p.repair.id, 'Repair "' + p.repair.en + '"', 5, 'A pattern your slips point to'));
+    if(legs.length > DECK_MAX_LEGS){
+      var ui = legs.findIndex(function(l){ return u && l.kind === 'cards' && l.item === u.deckId; });
+      legs.splice(ui >= 0 ? ui : DECK_MAX_LEGS, 1);
+    }
+    if(legs.length < 3 && p.sign) legs.push(leg('sign', 'light', p.sign.id, 'Read the ' + p.sign.en.toLowerCase(), 3, 'Korean as you will see it on your trip'));
+    return legs.slice(0, DECK_MAX_LEGS);
+  }
+  // The leg a finished activity ticks off: the same kind and item, or a leg that takes any item of its kind (a round
+  // of sound pairs counts whatever came up). An exact match goes first, so a round of the unit's deck ticks the
+  // unit's leg rather than the review.
+  function deckLegFor(legs, done, kind, item){
+    var open = legs.filter(function(l){ return l.kind === kind && !done[l.key]; });
+    return open.find(function(l){ return l.item === item; }) || open.find(function(l){ return l.any || l.item == null; }) || null;
+  }
+
+  /* Trip readiness: the ten situations of the trip, and the content in each region tagged with them. A situation is
+     as ready as the share of its pieces she has done: a story read, a talk had, a sign read, a manners note read. */
+  var DECK_SITS = [
+    { id:'arrive', en:'Arriving', icon:'globe', lagoon:['arrive'], town:[], sign:[], note:['bow'] },
+    { id:'hotel', en:'The hotel', icon:'bed', lagoon:['hotel'], town:['hotel'], sign:['hotel'], note:['shoes'] },
+    { id:'cafe', en:'Cafes', icon:'cup', lagoon:['cafe'], town:['cafe'], sign:['cafe'], note:[] },
+    { id:'restaurant', en:'Restaurants', icon:'bowl', lagoon:['restaurant'], town:['restaurant'], sign:['restaurant'], note:['server', 'tips', 'table'] },
+    { id:'shopping', en:'Shopping', icon:'bag', lagoon:['shopping', 'market'], town:['shop'], sign:['store'], note:['hands'] },
+    { id:'subway', en:'The subway', icon:'train', lagoon:['subway'], town:['subway'], sign:['subway'], note:[] },
+    { id:'taxi', en:'Taxis', icon:'car', lagoon:['taxi'], town:['taxi'], sign:['taxi'], note:[] },
+    { id:'way', en:'Directions', icon:'compass', lagoon:['way'], town:[], sign:['bus', 'toilet', 'door'], note:[] },
+    { id:'meet', en:'Meeting people', icon:'wave', lagoon:['meet', 'weather', 'goodbye'], town:['friend'], sign:[], note:['polite', 'titles'] },
+    { id:'pharmacy', en:'The pharmacy', icon:'plus', lagoon:[], town:['pharmacy'], sign:['pharmacy'], note:[] }
+  ];
+  // done: { lagoon: {id:1}, town: {...}, sign: {...}, note: {...} } -> [{ sit, got, all, share }] and the overall share
+  function deckReadiness(done){
+    var rows = DECK_SITS.map(function(s){
+      var got = 0, all = 0;
+      ['lagoon', 'town', 'sign', 'note'].forEach(function(k){ s[k].forEach(function(id){ all++; if(done[k] && done[k][id]) got++; }); });
+      return { sit: s, got: got, all: all, share: all ? got / all : 0 };
+    });
+    return { rows: rows, share: rows.reduce(function(t, r){ return t + r.share; }, 0) / rows.length };
+  }
+
+  /* What you can do: plain statements, each met by something done in a region. `test` names the check deck.js runs
+     (deckCanMet): talk:<id> a Harbor Town talk done well (two answers or more right the first time), story:<id> a
+     Story Lagoon story read, sign:<id> a sign with both questions right, sound:<id> a sound contrast heard right lately,
+     pattern:<id> a pattern mastered, letters:<n> that many bottles answered. */
+  var DECK_CAN = [
+    { say:'Greet someone and introduce yourself', test:'talk:friend' },
+    { say:'Order at a cafe', test:'talk:cafe' },
+    { say:'Order a meal and ask for the bill', test:'talk:restaurant' },
+    { say:'Shop for clothes and ask the price', test:'talk:shop' },
+    { say:'Tell a taxi where to go', test:'talk:taxi' },
+    { say:'Find your train on the subway', test:'talk:subway' },
+    { say:'Check in at a hotel', test:'talk:hotel' },
+    { say:'Ask a pharmacist for help', test:'talk:pharmacy' },
+    { say:'Follow a conversation at the airport', test:'story:arrive' },
+    { say:'Ask the way and follow the answer', test:'story:way' },
+    { say:'Read a cafe menu board', test:'sign:cafe' },
+    { say:'Read a subway sign', test:'sign:subway' },
+    { say:'Find the restroom', test:'sign:toilet' },
+    { say:'Hear 달, 탈 and 딸 apart', test:'sound:t' },
+    { say:'Count things with the right counter', test:'pattern:count' },
+    { say:'Say what you did yesterday', test:'pattern:past' },
+    { say:'Write a short letter in Korean', test:'letters:1' },
+    { say:'Write about your day, five letters in', test:'letters:5' }
+  ];
+  // The course's own can-do statements (library.js), matched to the same tests by their words, so a statement can be
+  // met before its unit is finished. A statement no rule matches is met when its unit is done.
+  var DECK_CANDO_RULES = [
+    [/달, 탈|hear the difference/i, 'sound:t'], [/read any hangul/i, 'sign:subway'], [/write my name/i, 'letters:1'],
+    [/greet|introduce myself/i, 'talk:friend'], [/thank you, sorry/i, 'talk:friend'],
+    [/order food|hot or cold|for here or to go/i, 'talk:cafe'], [/water, the menu or the bill/i, 'talk:restaurant'],
+    [/prices|shop purchase|pay by card/i, 'talk:shop'], [/count things/i, 'pattern:count'], [/café order/i, 'talk:cafe'],
+    [/where a place is|left, right/i, 'story:way'], [/taxi/i, 'talk:taxi'], [/family|what i like|weather|question back/i, 'letters:3'],
+    [/check in at a hotel/i, 'talk:hotel'], [/restroom/i, 'sign:toilet'], [/ask for help/i, 'talk:pharmacy'],
+    [/five sentences|in writing/i, 'letters:5']
+  ];
+  function deckCandoTest(text){
+    var r = DECK_CANDO_RULES.find(function(x){ return x[0].test(String(text || '')); });
+    return r ? r[1] : null;
+  }
+
+  /* A unit's checkpoint: a few items from the regions, picked by the unit (its key in library.js's Korean course).
+     sounds: contrast ids in Echo Caves (one pair each); talk: a Harbor Town talk (its first exchange); pattern: a
+     Pattern Reef pattern (its first "notice it" item); sign: a Lighthouse sign (its first question). A unit not listed
+     (a course planned for other subjects, or a catch-up week) uses its place in the course to pick from the list. */
+  var DECK_UNITS = {
+    hangul: { sounds:['k', 't', 'p'], talk:null, pattern:null, sign:'toilet' },
+    hello: { sounds:['eo', 's'], talk:'friend', pattern:'topic', sign:'door' },
+    food: { sounds:['c', 'eu'], talk:'cafe', pattern:'request', sign:'cafe' },
+    numbers: { sounds:['p', 'k'], talk:'shop', pattern:'count', sign:'store' },
+    review1: { sounds:['t', 'stop'], talk:'restaurant', pattern:'object', sign:'restaurant' },
+    around: { sounds:['nasal', 's'], talk:'taxi', pattern:'place', sign:'subway' },
+    you: { sounds:['eo', 'eu'], talk:'friend', pattern:'want', sign:'bus' },
+    stay: { sounds:['c', 'nasal'], talk:'hotel', pattern:'have', sign:'hotel' },
+    final: { sounds:['k', 't'], talk:'pharmacy', pattern:'past', sign:'taxi' }
+  };
+  var DECK_UNIT_ORDER = ['hangul', 'hello', 'food', 'numbers', 'review1', 'around', 'you', 'stay', 'final'];
+  function deckUnitPicks(unit, i){
+    return DECK_UNITS[unit && unit.key] || DECK_UNITS[DECK_UNIT_ORDER[Math.min(DECK_UNIT_ORDER.length - 1, Math.max(0, i || 0))]];
+  }
+/* end of src/js/deck-plan.js */
+/* from src/js/deck.js */
+  /* ---------- CAPTAIN'S DECK: today's voyage, your course, and what you can do ----------
+     The last region of the sea chart (seamap.js), for plan and progress: the one place that reads every other
+     region's progress and ties it together. One screen (S.view 'captain', state in S.captain) with three tabs:
+       today    today's voyage: three or four short legs across the regions (deckPlan in deck-plan.js), each with its
+                region's icon, what it is and about how long. Tapping a leg opens that region right at that item; a
+                leg ticks itself off when its region's own finish point says so (deckTick, called from each region),
+                and leaving the region comes back here.
+       course   the course units as islands with their dates (the treasure map's voyage strip, bigger), the picked
+                unit's can-do statements, ticked when met, and an optional checkpoint at the end of the current unit:
+                a few items from the regions (sound pairs, a Harbor Town exchange, a Pattern Reef item, a sign). Its
+                result re-plans the course through the Library's own check code (CoralLibrary.courseAdjust).
+       can      what you can do, in plain words: can-do statements met, the five skills of the learner model as
+                meters, the counts from each region, and trip readiness across the ten trip situations.
+     Per profile in localStorage (cc-deck-<profile id>): day, the date of the voyage in legs; done, the legs ticked
+     off (by key); cp, each unit's last checkpoint ({ at, score }). A new day plans a new voyage; losing it only
+     re-plans today. */
+  var DECK_ALL_DONE_SAY = 'Every leg of today\'s voyage is done. Well sailed!';
+  var DECK_SKILLS = [['hear', 'Hear it', 'ear'], ['read', 'Read it', 'search'], ['recall', 'Recall it', 'bulb'], ['say', 'Say it', 'mic'], ['use', 'Use it', 'talk']];
+  function deckStoreKey(){ return 'cc-deck-' + (S.profile && S.profile.id || 'guest'); }
+  function deckToday(){ var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function deckDayNum(){ var d = new Date(); return Math.floor((d.getTime() - d.getTimezoneOffset() * 6e4) / 864e5); }
+  function deckData(){
+    var d = null; try { d = JSON.parse(localStorage.getItem(deckStoreKey()) || 'null'); } catch(e){}
+    d = d && typeof d === 'object' ? d : {};
+    d.legs = Array.isArray(d.legs) ? d.legs : []; d.done = d.done || {}; d.cp = d.cp || {};
+    return d;
+  }
+  function deckSave(d){ try { localStorage.setItem(deckStoreKey(), JSON.stringify(d)); } catch(e){} }
+  // Today's legs if they are planned already (the board and the treasure map read this, without waiting)
+  function deckTodayPlan(){ var d = deckData(); return d.day === deckToday() && d.legs.length ? d : null; }
+  function deckLeft(d){ return d ? d.legs.filter(function(l){ return !d.done[l.key]; }).length : 0; }
+
+  /* ---------- Planning ---------- */
+  // What the regions say about her today, in the shape deckPlan() reads. words: the Korean on her cards.
+  function deckInput(words){
+    var mw = myWordsDue(), review = null, live = (S.decks || []).filter(function(d){ return !d.archived; });
+    if(mw.length) review = { mw: true, n: mw.length, deckId: MW_ID };
+    else {
+      var cd = reefCourseDecks(), pool = cd ? live.filter(function(d){ return cd.indexOf(d.id) >= 0; }) : live;
+      var top = pool.map(function(d){ return { d: d, n: (S.dueCounts[d.id] || {}).due || 0 }; }).sort(function(a, b){ return b.n - a.n; })[0];
+      if(top && top.n) review = { n: top.n, deckId: top.d.id, name: top.d.name };
+    }
+    var now = reefCourseNow(), unit = null;
+    if(now && now.unit){
+      var dk = (now.unit.decks || []).find(function(x){ return x.role === 'learn' && live.some(function(d){ return d.id === x.id; }); });
+      if(dk) unit = { deckId: dk.id, name: dk.name, n: (S.dueCounts[dk.id] || {}).due || 0, unit: now.unit.title };
+    }
+    var story = lagoonRanked(words).find(function(x){ return !x.done; });
+    var talks = townRanked(words), talk = talks.find(function(x){ return !x.done; }) || talks[0];
+    var answered = bbAnswered(bbData()), letter = BB_BOTTLES.find(function(b){ return !answered[b.id]; });
+    var tricky = cavesTricky(cavesData())[0], fix = patRepairs(patData())[0], lh = lhData();
+    var sign = LH_SIGNS.find(function(s){ return lh.s[s.id] == null; });
+    return {
+      day: deckDayNum(), review: review, unit: unit,
+      story: story && { id: story.s.id, en: story.s.en }, talk: talk && { id: talk.f.id, en: talk.f.en },
+      letter: letter && { id: letter.id, en: letter.en }, sound: tricky && { id: tricky.id, label: tricky.label },
+      repair: fix && { id: fix.id, en: fix.en }, sign: sign && { id: sign.id, en: sign.en }
+    };
+  }
+  // Today's voyage: the stored one, or a new one planned from her cards, My words and every region's progress
+  var deckPlanning = null;
+  function deckEnsure(){
+    var have = deckTodayPlan(); if(have) return Promise.resolve(have);
+    var key = deckStoreKey() + deckToday();
+    if(deckPlanning && deckPlanning.key === key) return deckPlanning.p;
+    var live = (S.decks || []).filter(function(d){ return !d.archived; });
+    var p = Promise.all([
+      myWordsLoad().catch(function(){}),
+      Promise.all(live.map(function(d){ return S.store.getCardsOnce(d.id).catch(function(){ return []; }); }))
+    ]).then(function(r){
+      if(deckStoreKey() + deckToday() !== key) return deckData();   // she changed profile while it was planning
+      var d = deckData();
+      d.day = deckToday(); d.done = {};
+      d.legs = deckPlan(deckInput(lagoonDeckWords([].concat.apply([], r[1]))));
+      deckSave(d);
+      return d;
+    }).catch(function(e){ console.error('[Coral Classroom] planning the voyage', e); return deckData(); });
+    deckPlanning = { key: key, p: p };
+    return p;
+  }
+  // Called from each region's finish point: ticks off today's matching leg, if there is one
+  function deckTick(kind, item){
+    try {
+      var d = deckData(); if(d.day !== deckToday()) return;
+      var l = deckLegFor(d.legs, d.done, kind, item == null ? null : item); if(!l) return;
+      d.done[l.key] = Date.now(); deckSave(d);
+      if(!deckLeft(d)) S.deckCheer = true;   // said when Captain's Deck next shows
+    } catch(e){}
+  }
+
+  /* ---------- Opening it, and coming back ---------- */
+  function openCaptain(tab){
+    try { Speech.stop(); } catch(e){}
+    S.deckBack = false;
+    S.currentDeckId = null;
+    var C = S.captain && S.captain.pid === (S.profile && S.profile.id) ? S.captain : {};
+    S.captain = { pid: S.profile && S.profile.id, tab: tab || C.tab || 'today', pick: C.pick, cp: null, plan: deckTodayPlan() };
+    S.view = 'captain';
+    render(); window.scrollTo(0, 0);
+    var me = S.captain;
+    deckEnsure().then(function(d){
+      if(S.captain !== me) return;
+      me.plan = d;
+      if(S.view === 'captain' && me.tab === 'today' && !me.cp) deckKeep();
+      deckCheerNow();
+    });
+  }
+  function deckCheerNow(){
+    if(!S.deckCheer || S.view !== 'captain') return;
+    S.deckCheer = false;
+    setTimeout(function(){ try { Speech.speak(DECK_ALL_DONE_SAY); } catch(e){} }, 500);
+    try { if(!reefCalm()) Ocean.bubbles(10); } catch(e){}
+  }
+  // A leg opens its region right at its item; leaving the region (its own way out, goHome) comes back here
+  function deckOpenLeg(l){
+    var go = {
+      cards: function(){ reefStartDeck(l.item); },
+      story: function(){ openLagoon(); lagoonOpenStory(l.item); },
+      talk: function(){ openTown(); townOpenTalk(l.item); },
+      letter: function(){ openBeach(); var b = bbById(l.item); if(b){ bbStart(b); renderBeach(); window.scrollTo(0, 0); } },
+      sound: function(){ openCaves(); S.caves.focus = l.item; cavesGo('pairs'); setTimeout(function(){ if(S.view === 'caves') cavesPlayQ(); }, 400); },
+      pattern: function(){ openPatterns(l.item); },
+      sign: function(){ openLight(); lhOpenSign(S.light, l.item); renderLight(); }
+    }[l.kind];
+    if(!go) return;
+    try { Speech.stop(); } catch(e){}
+    try { Sound.bloop(520); } catch(e){}
+    function open(){ go(); S.deckBack = true; }
+    if(reefGame()) reefGo('dive', null, open); else open();
+  }
+  // goHome() asks this first: a region opened from a leg goes back to Captain's Deck instead of the board
+  function deckBackHome(){
+    if(!S.deckBack || S.view === 'captain') return false;
+    S.deckBack = false;
+    if(reefGame()) reefGo('dive', null, function(){ openCaptain('today'); }); else openCaptain('today');
+    return true;
+  }
+  // From the board, the treasure map or the Library
+  function deckOpenFromBoard(el){
+    try { Sound.bloop(560); } catch(e){}
+    S.reefReturnY = window.scrollY;
+    if(reefGame()) reefGo('dive', el || null, function(){ openCaptain(); }); else openCaptain();
+  }
+
+  /* ---------- The screen ---------- */
+  function renderCaptain(){
+    var C = S.captain || (S.captain = { tab: 'today' });
+    var tabs = [['today', 'Today', 'compass'], ['course', 'Your course', 'map'], ['can', 'What you can do', 'trophy']];
+    var body = C.cp ? deckCheckHTML(C) : C.tab === 'course' ? deckCourseHTML(C) : C.tab === 'can' ? deckCanHTML() : deckTodayHTML(C);
+    app.innerHTML = '<div class="nav-row"><button class="back-btn" data-act="cd-home">⟵ Lagoon</button><span class="nav-title">' + ccIcon('anchor') + ' Captain\'s Deck</span></div>' +
+      '<div class="lg-page cd-page">' +
+        (C.cp ? '' : '<div class="cd-tabs" role="tablist" aria-label="Captain\'s Deck">' + tabs.map(function(t){
+          return '<button type="button" role="tab" class="cd-tab' + (C.tab === t[0] ? ' on' : '') + '" aria-selected="' + (C.tab === t[0]) + '" data-cd-tab="' + t[0] + '">' + ccIcon(t[2]) + '<span>' + t[1] + '</span></button>';
+        }).join('') + '</div>') +
+        body + '</div>';
+    deckWire(C);
+  }
+  function deckKeep(){ var y = window.scrollY; renderCaptain(); window.scrollTo(0, y); }
+  function deckNiceDate(iso){ var p = String(iso || '').split('-'); try { return new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); } catch(e){ return iso; } }
+
+  // Today's voyage
+  function deckTodayHTML(C){
+    var d = C.plan;
+    if(!d) return '<div class="lg-intro"><h2>Today\'s voyage</h2><p>Charting today\'s course across the sea…</p></div>';
+    var n = d.legs.length, left = deckLeft(d), pct = n ? Math.round((n - left) / n * 100) : 0;
+    var when = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+    var next = d.legs.find(function(l){ return !d.done[l.key]; });
+    var rows = d.legs.map(function(l, i){
+      var done = !!d.done[l.key];
+      return '<li><button type="button" class="lg-story cd-leg' + (done ? ' done' : '') + (l === next ? ' best' : '') + '" data-cd-leg="' + i + '">' +
+        '<span class="lg-ic" aria-hidden="true">' + ccIcon(l.icon) + '</span>' +
+        '<span class="lg-st"><b>' + esc(l.title) + '</b><small>' + esc(l.place) + ' · about ' + l.min + ' min</small><small class="cd-why">' + esc(l.why) + '</small></span>' +
+        '<span class="lg-tag">' + (done ? ccIcon('check') + ' Done' : l === next ? 'Start' : '') + '</span></button></li>';
+    }).join('');
+    return '<div class="lg-intro cd-intro"><h2>Today\'s voyage</h2><p>' + esc(when) + '. ' + (n ? (left ? n + ' short legs across the sea, about ' + d.legs.reduce(function(t, l){ return t + l.min; }, 0) + ' minutes in all.' : 'Every leg is done. Well sailed!') : 'Nothing to plan yet: add some Korean cards first.') + '</p>' +
+        (n ? '<span class="lg-meter cd-meter" role="img" aria-label="' + (n - left) + ' of ' + n + ' legs done"><i style="width:' + pct + '%"></i></span><small class="cd-count">' + (n - left) + ' of ' + n + ' legs done</small>' : '') + '</div>' +
+      '<ol class="lg-list cd-legs">' + rows + '</ol>' +
+      (n && !left ? '<p class="cd-cheer">' + ccIcon('star') + '<span>' + esc(DECK_ALL_DONE_SAY) + ' A new voyage is charted tomorrow.</span></p>' : '');
+  }
+
+  // Your course: the units as islands, the picked one's can-do statements and its checkpoint
+  function deckCourseHTML(C){
+    var now = reefCourseNow();
+    if(!now || !now.co.units.length) return '<div class="lg-intro"><h2>Your course</h2><p>Plan a course in the Library: a few questions, then units with goals and dates. Your voyage follows it.</p></div>' +
+      '<div class="lg-bar"><button type="button" class="btn btn-primary" data-cd-library>' + ccIcon('school') + ' Plan my course</button></div>';
+    var co = now.co, pick = C.pick != null && co.units[C.pick] ? C.pick : Math.min(now.i, co.units.length - 1), u = co.units[pick];
+    var isles = co.units.map(function(x, i){
+      var st = x.done ? 'done' : i === now.i ? 'now' : 'later';
+      return '<li><button type="button" class="cd-isle ' + st + (x.review ? ' review' : '') + (i === pick ? ' picked' : '') + '" data-cd-unit="' + i + '" aria-label="Unit ' + (i + 1) + ': ' + esc(x.title) + (x.done ? ', done' : i === now.i ? ', now' : '') + '">' +
+        '<span class="cd-isle-i" aria-hidden="true">' + (x.done ? ccIcon('flag') : i === now.i ? reefGuideMini(reefNight()) : x.review ? ccIcon('star') : ccIcon('island')) + '</span>' +
+        '<span class="cd-isle-t">' + esc(x.title) + '</span><small>' + deckNiceDate(x.start) + '</small></button></li>';
+    }).join('');
+    var st = deckProgress(), cp = deckData().cp[u.id];
+    var cando = (u.cando || []).map(function(t){
+      var test = deckCandoTest(t), met = u.done || !!(test && deckCanMet(test, st));
+      return '<li class="' + (met ? 'met' : '') + '">' + ccIcon(met ? 'check' : 'target') + '<span>' + esc(t) + '</span></li>';
+    }).join('');
+    var isNow = pick === now.i && !u.done;
+    return '<div class="lg-intro"><h2>Your course</h2><p>' + esc(co.goal || 'My course') + (co.target ? ' · trip ' + deckNiceDate(co.target) : '') + '</p></div>' +
+      '<div class="cd-voyage"><ol class="cd-isles">' + isles + '</ol></div>' +
+      '<section class="tw-sec cd-unit"><span class="cd-utag">Unit ' + (pick + 1) + ' of ' + co.units.length + ' · ' + deckNiceDate(u.start) + ' to ' + deckNiceDate(u.end) + (u.done ? ' · done' : isNow ? ' · now' : '') + '</span>' +
+        '<h3>' + esc(u.title) + '</h3>' + (u.focus ? '<p class="cd-focus">' + esc(u.focus) + '</p>' : '') +
+        '<h4>By the end I can…</h4><ul class="cd-cando">' + cando + '</ul></section>' +
+      (isNow ? '<section class="tw-sec cd-cp"><h3>' + ccIcon('flag') + ' Checkpoint (optional)</h3>' +
+        '<p>A few quick items from the regions: sound pairs, a Harbor Town exchange, a pattern and a sign. A strong result moves the course along; a hard one gives this unit more time. Your dates follow.</p>' +
+        (cp ? '<p class="cd-last">' + ccIcon('check') + ' Last time: ' + Math.round(cp.score * 100) + '%, ' + deckNiceDate(cp.day) + '</p>' : '') +
+        '<div class="lg-bar"><button type="button" class="btn btn-primary" data-cd-check>' + ccIcon('flag') + ' Take the checkpoint</button>' +
+        '<button type="button" class="btn btn-ghost" data-cd-library>' + ccIcon('school') + ' My course in the Library</button></div></section>' :
+        '<div class="lg-bar"><button type="button" class="btn btn-ghost" data-cd-library>' + ccIcon('school') + ' My course in the Library</button></div>');
+  }
+
+  /* ---------- What you can do ---------- */
+  // Every region's progress at once, read from localStorage
+  function deckProgress(){ return { lagoon: lagoonDone(), town: townDone(), light: lhData(), caves: cavesData(), pat: patData(), bb: bbData() }; }
+  function deckCanMet(test, st){
+    var p = String(test).split(':'), k = p[0], id = p[1];
+    if(k === 'talk') return !!(st.town[id] && st.town[id].good >= 2);
+    if(k === 'story') return !!st.lagoon[id];
+    if(k === 'sign'){ var s = lhSign(id); return !!s && (st.light.s[id] || 0) >= s.qs.length; }
+    if(k === 'sound'){ var c = st.caves.c[id]; return !!c && c.n >= 3 && c.w < 0.35; }
+    if(k === 'pattern') return (st.pat.m[id] || 0) >= PAT_MASTERED;
+    if(k === 'letters') return Object.keys(bbAnswered(st.bb)).length >= +id;
+    return false;
+  }
+  function deckCanHTML(){
+    var st = deckProgress();
+    var met = DECK_CAN.filter(function(c){ return deckCanMet(c.test, st); }), todo = DECK_CAN.filter(function(c){ return !deckCanMet(c.test, st); });
+    var now = reefCourseNow(), units = now ? now.co.units : [], done = units.filter(function(u){ return u.done; });
+    var cando = [].concat.apply([], units.map(function(u){ return (u.cando || []).map(function(t){ var x = deckCandoTest(t); return u.done || !!(x && deckCanMet(x, st)); }); }));
+    var cmet = cando.filter(Boolean).length;
+    // the five skills: a word known (lasting three weeks or more) counts whole, one being learned counts half
+    var sum = Learner.summary(), skills = DECK_SKILLS.map(function(s){
+      var c = sum[s[0]] || { known: 0, learning: 0 }, pct = sum.items ? Math.round((c.known + c.learning / 2) / sum.items * 100) : 0;
+      return '<li><span class="cd-sk-i" aria-hidden="true">' + ccIcon(s[2]) + '</span><span class="cd-sk-t"><b>' + s[1] + '</b><small>' + c.known + ' known · ' + c.learning + ' learning</small>' +
+        '<span class="lg-meter" role="img" aria-label="' + s[1] + ': ' + pct + '%"><i style="width:' + pct + '%"></i></span></span></li>';
+    }).join('');
+    var tricky = cavesTricky(st.caves), signs = LH_SIGNS.filter(function(s){ return st.light.s[s.id] != null; }).length;
+    var mastered = PAT_LIST.filter(function(p){ return (st.pat.m[p.id] || 0) >= PAT_MASTERED; }).length;
+    var counts = [
+      ['story', Object.keys(st.lagoon).length, 'of ' + LAGOON_STORIES.length + ' stories read'],
+      ['talk', Object.keys(st.town).length, 'of ' + TOWN_FOLK.length + ' conversations had'],
+      ['bottle', st.bb.l.length, st.bb.l.length === 1 ? 'letter written' : 'letters written'],
+      ['lighthouse', signs, 'of ' + LH_SIGNS.length + ' signs read'],
+      ['sentence', mastered, 'of ' + PAT_LIST.length + ' patterns mastered'],
+      ['mic', tricky.length, tricky.length === 1 ? 'tricky sound: ' + tricky[0].label : tricky.length ? 'tricky sounds: ' + tricky.map(function(c){ return c.label; }).join(', ') : 'tricky sounds']
+    ].map(function(c){ return '<li><span class="lg-ic" aria-hidden="true">' + ccIcon(c[0]) + '</span><span><b>' + c[1] + '</b><small>' + esc(c[2]) + '</small></span></li>'; }).join('');
+    var rd = deckReadiness({
+      lagoon: st.lagoon, town: st.town, note: st.light.m,
+      sign: LH_SIGNS.reduce(function(o, s){ if(st.light.s[s.id] != null) o[s.id] = 1; return o; }, {})
+    });
+    var sits = rd.rows.map(function(r){
+      var pct = Math.round(r.share * 100);
+      return '<li class="' + (r.share >= 1 ? 'ready' : '') + '"><span class="cd-sit-i" aria-hidden="true">' + ccIcon(r.sit.icon) + '</span><span class="cd-sit-t"><b>' + esc(r.sit.en) + '</b>' +
+        '<span class="lg-meter" role="img" aria-label="' + esc(r.sit.en) + ': ' + r.got + ' of ' + r.all + '"><i style="width:' + pct + '%"></i></span></span><small>' + r.got + ' of ' + r.all + '</small></li>';
+    }).join('');
+    return '<div class="lg-intro"><h2>What you can do</h2><p>In plain words: what you have shown you can do for your trip so far.' +
+        (units.length ? ' ' + cmet + ' of the ' + cando.length + ' things your course aims for are done, and ' + done.length + ' of ' + units.length + ' units.' : '') + '</p></div>' +
+      '<section class="tw-sec cd-can"><h3>' + ccIcon('check') + ' You can</h3>' +
+        (met.length ? '<ul class="cd-cando">' + met.map(function(c){ return '<li class="met">' + ccIcon('check') + '<span>' + esc(c.say) + '</span></li>'; }).join('') + '</ul>' : '<p>Nothing yet: each leg of your voyage adds to this list.</p>') +
+        (todo.length ? '<h4>Coming up</h4><ul class="cd-cando">' + todo.slice(0, 3).map(function(c){ return '<li>' + ccIcon('target') + '<span>' + esc(c.say) + '</span></li>'; }).join('') + '</ul>' : '') + '</section>' +
+      '<section class="tw-sec"><h3>' + ccIcon('progress') + ' Your five skills</h3><ul class="cd-skills">' + skills + '</ul>' +
+        (sum.items ? '<p class="cd-note">Across the ' + sum.items + ' Korean words and phrases you have met.</p>' : '<p class="cd-note">Answer some Korean cards and these fill in.</p>') + '</section>' +
+      '<section class="tw-sec"><h3>' + ccIcon('compass') + ' Along the way</h3><ul class="cd-counts">' + counts + '</ul></section>' +
+      '<section class="tw-sec cd-ready"><h3>' + ccIcon('globe') + ' Trip readiness</h3>' +
+        '<p class="cd-big"><b>' + Math.round(rd.share * 100) + '%</b> of the trip\'s situations covered</p>' +
+        '<span class="lg-meter cd-meter" role="img" aria-label="Trip readiness ' + Math.round(rd.share * 100) + '%"><i style="width:' + Math.round(rd.share * 100) + '%"></i></span>' +
+        '<ul class="cd-sits">' + sits + '</ul><p class="cd-note">Each situation counts its stories, talks, signs and manners notes done.</p></section>';
+  }
+
+  /* ---------- The checkpoint ---------- */
+  function deckCheckItems(u, i){
+    var pk = deckUnitPicks(u, i), items = [];
+    pk.sounds.slice(0, pk.talk && pk.pattern ? 2 : 3).forEach(function(id){
+      var c = cavesContrast(id); if(!c) return;
+      var set = c.sets[Math.floor(Math.random() * c.sets.length)];
+      items.push({ k: 'sound', label: c.label, set: set, a: Math.floor(Math.random() * set.length) });
+    });
+    var f = pk.talk && townFolk(pk.talk);
+    if(f){
+      // the first exchange that has a gentle mistake among its answers, so there is something to tell apart
+      var ids = [f.start].concat(Object.keys(f.nodes)), node = null;
+      for(var j = 0; j < ids.length && !node; j++){ var nd = f.nodes[ids[j]]; if(nd && nd.c && nd.c.some(function(x){ return x.g === 'oops'; }) && nd.c.some(function(x){ return x.g === 'best'; })) node = nd; }
+      if(node){
+        var best = node.c.find(function(x){ return x.g === 'best'; }), oops = node.c.filter(function(x){ return x.g === 'oops'; });
+        items.push({ k: 'talk', who: f.en, line: node.t[0], en: node.t[1], opts: shuffle([best].concat(oops)).map(function(x){ return x.ko; }), right: best.ko, why: best.en });
+      }
+    }
+    var p = pk.pattern && patById(pk.pattern), it = p && p.items.find(function(x){ return x.k === 'notice'; });
+    if(it) items.push({ k: 'pattern', pat: p.en, en: it.en, opts: shuffle([it.ko].concat(it.wrong)), right: it.ko, why: it.why });
+    var s = lhSign(pk.sign), q = s && s.qs[0];
+    if(q) items.push({ k: 'sign', sign: s.id, q: q.q, opts: shuffle(q.opts), right: q.opts[0], why: q.why, key: q.key });
+    return items;
+  }
+  function deckCheckStart(C){
+    var now = reefCourseNow(); if(!now || !now.unit) return;
+    var items = deckCheckItems(now.unit, now.i); if(!items.length) return;
+    C.cp = { unit: now.i, title: now.unit.title, items: items, i: 0, right: 0, picked: null, result: null };
+    renderCaptain(); window.scrollTo(0, 0);
+    setTimeout(deckCheckSay, 350);
+  }
+  function deckCheckSay(){
+    var C = S.captain, it = C && C.cp && C.cp.items[C.cp.i]; if(!it || S.view !== 'captain') return;
+    try { if(it.k === 'sound') Speech.speak(it.set[it.a][0]); else if(it.k === 'talk') Speech.speak(it.line); } catch(e){}
+  }
+  function deckCheckHTML(C){
+    var P = C.cp;
+    if(P.result) return '<div class="summary-card reef-sum-card lg-done cd-done"><span class="lg-done-ic" aria-hidden="true">' + ccIcon(P.result.score >= 0.75 ? 'trophy' : 'seedling') + '</span>' +
+      '<h2>' + P.right + ' of ' + P.items.length + '</h2><p>' + esc(P.result.msg) + '</p>' +
+      '<div class="reef-sum-actions"><button type="button" class="btn btn-primary" data-cd-cpdone>' + ccIcon('map') + ' See my course</button></div></div>';
+    var it = P.items[P.i], picked = P.picked, right = it.k === 'sound' ? it.set[it.a][0] : it.right;
+    var opts = (it.k === 'sound' ? it.set.map(function(w){ return w[0]; }) : it.opts).map(function(o, oi){
+      var cls = picked == null ? '' : o === right ? ' right' : oi === picked ? ' wrong' : ' dim';
+      return '<li><button type="button" class="lg-opt' + cls + '" data-cd-opt="' + oi + '"' + (picked != null ? ' aria-disabled="true"' : '') + '><span' + (/[가-힣]/.test(o) ? ' lang="ko"' : '') + '>' + esc(o) + '</span></button></li>';
+    }).join('');
+    var ask = it.k === 'sound' ? '<div class="lg-q"><button type="button" class="lg-mini" data-cd-hear aria-label="Hear it again">' + ccIcon('sound') + '</button><div><b>Which word did you hear?</b><span>' + esc(it.label) + '</span></div></div>' :
+      it.k === 'talk' ? '<div class="lg-q"><button type="button" class="lg-mini" data-cd-hear aria-label="Hear it again">' + ccIcon('sound') + '</button><div><span>' + esc(it.who) + ' says</span><b lang="ko">' + esc(it.line) + '</b><span>' + esc(it.en) + '</span><span>What do you answer?</span></div></div>' :
+      it.k === 'pattern' ? '<div class="lg-q"><span class="pr-qic" aria-hidden="true">' + ccIcon('sentence') + '</span><div><b>Which one says "' + esc(it.en) + '"?</b><span>' + esc(it.pat) + '</span></div></div>' :
+      '<div class="cd-sign" aria-hidden="true">' + lhSignHTML(lhSign(it.sign), {}) + '</div><div class="lg-q"><span class="pr-qic" aria-hidden="true">' + ccIcon('search') + '</span><div><b>' + esc(it.q) + '</b></div></div>';
+    var ok = picked != null && (it.k === 'sound' ? picked === it.a : it.opts[picked] === it.right);
+    var fb = picked == null ? '' : '<p class="lg-fb ' + (ok ? 'ok' : 'no') + '" role="status">' + ccIcon(ok ? 'check' : 'bulb') + '<span>' + (ok ? 'Yes! ' : 'Not quite: it was ' + right + '. ') +
+      esc(it.k === 'sound' ? it.set[it.a][1] : it.why || '') + '</span></p>';
+    return '<div class="lg-title"><h2>Checkpoint</h2><span>' + esc(P.title) + ' · ' + (P.i + 1) + ' of ' + P.items.length + '</span></div>' +
+      '<div class="lg-quiz">' + ask + '<ul class="lg-opts">' + opts + '</ul>' + fb + '</div>' +
+      '<div class="lg-bar">' + (picked != null ? '<button type="button" class="btn btn-primary" data-cd-next>' + (P.i + 1 < P.items.length ? 'Next' : 'See how it went') + '</button>' : '') +
+        '<button type="button" class="btn btn-ghost" data-cd-quit>Stop the checkpoint</button></div>';
+  }
+  function deckCheckAnswer(C, oi){
+    var P = C.cp, it = P.items[P.i]; if(P.picked != null) return;
+    P.picked = oi;
+    var ok = it.k === 'sound' ? oi === it.a : it.opts[oi] === it.right;
+    if(ok) P.right++;
+    try {
+      if(it.k === 'sound') Learner.record(it.set[it.a][0], 'hear', ok ? 'good' : 'again');
+      else if(it.k === 'sign') Learner.record(it.key, 'read', ok ? 'good' : 'again');
+      else Learner.record(it.right, 'use', ok ? 'good' : 'again');
+    } catch(e){}
+    try { if(ok) Sound.correct(); else Sound.wrong(); } catch(e){}
+    deckKeep();
+  }
+  // The result goes through the Library's own check code, so a checkpoint moves the course exactly as its unit check does
+  function deckCheckFinish(C){
+    var P = C.cp, score = P.right / P.items.length, co = window.CoralCove && window.CoralCove.course(), lib = window.CoralLibrary;
+    var u = co && co.units[P.unit], msg;
+    if(co && u && lib && lib.courseAdjust){
+      msg = lib.courseAdjust(co, u.review ? 'review' : 'unit', P.unit, score, [], {});
+      window.CoralCove.setCourse(co);
+    } else msg = 'Checkpoint: ' + Math.round(score * 100) + '%. Open My course in the Library to see your plan.';
+    var d = deckData(); d.cp[u ? u.id : 'u' + P.unit] = { day: deckToday(), score: score }; deckSave(d);
+    P.result = { score: score, msg: msg };
+    try { reefWinSound(score >= 0.75); } catch(e){}
+    try { if(score >= 0.75 && !reefCalm()) Ocean.bubbles(10); } catch(e){}
+    renderCaptain(); window.scrollTo(0, 0);
+  }
+
+  function deckWire(C){
+    function on(sel, fn){ app.querySelectorAll(sel).forEach(function(x){ x.addEventListener('click', function(e){ fn(x, e); }); }); }
+    on('[data-act="cd-home"]', function(){ try { Speech.stop(); } catch(e){} C.cp = null; goHome(); });
+    on('[data-cd-tab]', function(x){ try { Speech.stop(); } catch(e){} C.tab = x.dataset.cdTab; renderCaptain(); window.scrollTo(0, 0); });
+    on('[data-cd-leg]', function(x){ var l = C.plan && C.plan.legs[+x.dataset.cdLeg]; if(l) deckOpenLeg(l); });
+    on('[data-cd-unit]', function(x){ C.pick = +x.dataset.cdUnit; deckKeep(); });
+    on('[data-cd-library]', function(){ if(window.CoralLibrary){ window.CoralLibrary.open(); window.CoralLibrary.go('classroom'); } });
+    on('[data-cd-check]', function(){ deckCheckStart(C); });
+    on('[data-cd-hear]', deckCheckSay);
+    on('[data-cd-opt]', function(x){ deckCheckAnswer(C, +x.dataset.cdOpt); });
+    on('[data-cd-next]', function(){ var P = C.cp; P.i++; P.picked = null; if(P.i >= P.items.length) return deckCheckFinish(C); renderCaptain(); window.scrollTo(0, 0); setTimeout(deckCheckSay, 300); });
+    on('[data-cd-quit]', function(){ try { Speech.stop(); } catch(e){} C.cp = null; renderCaptain(); window.scrollTo(0, 0); });
+    on('[data-cd-cpdone]', function(){ C.cp = null; C.tab = 'course'; C.pick = null; renderCaptain(); window.scrollTo(0, 0); });
+    var cur = app.querySelector('.cd-isle.picked'); if(cur && cur.scrollIntoView) cur.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }
+
+  /* ---------- On the board and the treasure map ---------- */
+  // The board's small way in: shown for a profile with a course while today's voyage has legs left
+  function deckBoardButton(wrap){
+    var b = wrap && wrap.querySelector('[data-r3-voy]'); if(!b) return;
+    if(!reefCourseOn()) return;
+    b.addEventListener('click', function(e){ e.stopPropagation(); deckOpenFromBoard(b); });
+    var pid = S.profile && S.profile.id;
+    deckEnsure().then(function(d){
+      if(!b.isConnected || (S.profile && S.profile.id) !== pid) return;
+      var left = deckLeft(d);
+      b.hidden = !left;
+      b.querySelector('span').textContent = left + ' leg' + (left === 1 ? '' : 's') + ' today';
+      b.setAttribute('aria-label', 'Captain\'s Deck: ' + left + ' leg' + (left === 1 ? '' : 's') + ' of today\'s voyage left');
+    });
+  }
+  // Today's legs under the voyage strip in the treasure map
+  function deckMapTodayHTML(){
+    var d = deckTodayPlan(); if(!d) return '';
+    return '<div class="r3-voy-today"><b class="r3-voy-h">Today\'s voyage: ' + (d.legs.length - deckLeft(d)) + ' of ' + d.legs.length + ' done</b><ul>' + d.legs.map(function(l){
+      var done = !!d.done[l.key];
+      return '<li class="' + (done ? 'done' : '') + '"><span class="r3-voy-li" aria-hidden="true">' + ccIcon(done ? 'check' : l.icon) + '</span><span>' + esc(l.title) + '</span></li>';
+    }).join('') + '</ul><button type="button" class="r3-btn" data-r3-deck>' + ccIcon('anchor') + ' Open Captain\'s Deck</button></div>';
+  }
+/* end of src/js/deck.js */
 /* from src/js/ui-icons.js */
   /* ---------- One look for every screen: drawn icons, never emoji, in the app's own chrome ----------
      Titles, buttons, labels, badges and chips across the app (and the Library) were written over years with
@@ -16696,6 +17254,9 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     ] },
     { id:'lighthouse', date:'2026-11-05', need:'course', steps:[
       { at:'.r3-mapbtn', say:'The Lighthouse is open on the treasure map. Read real Korean signs and menus, and learn the manners.' }
+    ] },
+    { id:'captains-deck', date:'2026-11-09', need:'course', steps:[
+      { at:'.r3-mapbtn', say:'Captain\'s Deck is open on the treasure map, with today\'s voyage and what you can now do.' }
     ] }
   ];
   var WN_RECENT_DAYS = 14;   // a brand-new profile is shown only what's new in the last two weeks, not the whole history
@@ -22844,6 +23405,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       '<div class="r3-bubble" aria-live="polite" hidden></div>' +
       '<div class="r3-hud" aria-live="polite"><span class="r3-hud-shells" title="Shells">🐚 <b>0</b></span><span class="r3-hud-pearls" title="Golden pearls">🫧 <b>0</b></span></div>' +
       '<button type="button" class="r3-modebtn" data-r3-mode hidden></button>' +
+      '<button type="button" class="r3-voybtn" data-r3-voy hidden>' + ccIcon('anchor') + '<span></span></button>' +   // Captain's Deck, while today's voyage has legs left (deck.js)
       '<button type="button" class="r3-gamesbtn" data-r3-games aria-label="Minigame corner">'+ccIcon('games')+'</button>';
     var canvas = wrap.querySelector('canvas');
     var big = innerWidth * innerHeight > 700000;   // tablets and larger: skip edge smoothing, the costliest per-pixel step
@@ -24941,13 +25503,15 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
 
   // Coral Classroom on the map: the course as a voyage. Each unit is an island with its dates; finished ones fly a
   // flag, Shelly (Lumi at night) sits on today's, and the ones still to come wait further along the route.
+  // Under it, today's legs from Captain's Deck (deck.js), with a way in.
   function reef3dVoyageHTML(view){
-    var n = reefCourseNow(); if(!n || !n.co.units.length) return '';
+    var n = reefCourseNow(), today = reefCourseOn() ? deckMapTodayHTML() : '';
+    if(!n || !n.co.units.length) return today ? '<div class="r3-voyage" aria-label="Today\'s voyage">' + today + '</div>' : '';
     var nice = function(iso){ var p = String(iso || '').split('-'); try { return new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); } catch(e){ return iso; } };
     return '<div class="r3-voyage" aria-label="Your course"><b class="r3-voy-h">Your voyage: ' + esc(n.co.goal || 'my course') + '</b><ol>' + n.co.units.map(function(u, i){
       var st = u.done ? 'done' : i === n.i ? 'now' : 'later';
       return '<li class="r3-isle ' + st + (u.review ? ' review' : '') + '"><span class="r3-isle-i" aria-hidden="true">' + (u.done ? ccIcon('flag') : i === n.i ? reefGuideMini(view.night) : u.review ? ccIcon('star') : ccIcon('island')) + '</span>' +
-        '<span class="r3-isle-t">' + esc(u.title) + '</span><small>' + nice(u.start) + '</small></li>'; }).join('') + '</ol></div>';
+        '<span class="r3-isle-t">' + esc(u.title) + '</span><small>' + nice(u.start) + '</small></li>'; }).join('') + '</ol>' + today + '</div>';
   }
   // A place tapped on the map: she is already standing there, and the camera comes down from the map onto her.
   // (From a map opened with the button, the camera rises first, so it's the same swoop either way.)
@@ -25062,6 +25626,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       if(go) return reef3dMapJump(view, ov, +go.dataset.r3Go);
       var tb = e.target.closest('[data-sea-tab]'); if(tb) return tab(tb.dataset.seaTab);
       var sg = e.target.closest('[data-sea-go]'); if(sg) return reefSeaGo(ov, sg.dataset.seaGo);
+      if(e.target.closest('[data-r3-deck]')) return reefSeaGo(ov, 'deck');
       var isle = e.target.closest('[data-sea]'); if(isle) return reefSeaInfo(ov, isle.dataset.sea);
       if(e.target.closest('[data-r3-close]') || e.target === ov) close();
     });
@@ -25232,6 +25797,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       var b = e.target.closest('[data-space]'); if(b) reef3dGoTo(view, +b.dataset.space);
     });
     view.wrap.querySelector('[data-r3-map]').addEventListener('click', function(){ reef3dMap(view); });
+    deckBoardButton(view.wrap);
     view.wrap.querySelector('[data-r3-games]').addEventListener('click', function(e){ e.stopPropagation(); if(!view.moving && !(view.dice && !view.dice.rolling)) reef3dGames(view); });   // the dice can still be waiting for a tap
     view.wrap.querySelector('[data-r3-mode]').addEventListener('click', function(e){
       e.stopPropagation(); var b = reefBoard(); b.mode = reef3dStoryOn() ? 'free' : 'story'; reefBoardSave(); reef3dHud(view);
@@ -25254,7 +25820,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   var REEF_REGIONS = [
     { id:'cove', say:'Coral Cove, for vocabulary and memory.', name:'Coral Cove', teaches:'Vocabulary and memory', x:150, y:198, open:true,
       about:'The flashcard reef. Every word you meet anywhere ends up here, reviewed just when you are about to forget it.' },
-    { id:'deck', say:'Captain\'s Deck, for your plan and progress.', name:'Captain\'s Deck', teaches:'Plan and progress', x:150, y:58,
+    { id:'deck', say:'Captain\'s Deck, for your plan and progress.', name:'Captain\'s Deck', teaches:'Plan and progress', x:150, y:58, open:true, go:'openCaptain', icon:'anchor',
       about:'Today\'s voyage, your course with its dates, checkpoints, and what you can now do.' },
     { id:'lagoon', say:'Story Lagoon, for listening and reading.', name:'Story Lagoon', teaches:'Listening and reading', x:62, y:124, open:true, go:'openLagoon', icon:'story',
       about:'Short stories and conversations made from words you know, to listen to first and then read.' },
@@ -25313,7 +25879,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   }
   // Leaves the board for an open region: the map closes and the water covers the change, as when diving into a deck
   function reefSeaGo(ov, id){
-    var r = REEF_REGIONS.find(function(x){ return x.id === id; }), fn = r && { openLagoon: openLagoon, openTown: openTown, openCaves: openCaves, openPatterns: openPatterns, openBeach: openBeach, openLight: openLight }[r.go];
+    var r = REEF_REGIONS.find(function(x){ return x.id === id; }), fn = r && { openLagoon: openLagoon, openTown: openTown, openCaves: openCaves, openPatterns: openPatterns, openBeach: openBeach, openLight: openLight, openCaptain: openCaptain }[r.go];
     if(!fn) return;
     try { Speech.stop(); } catch(e){}
     ov.remove();
@@ -27877,6 +28443,83 @@ body.reef-calm .bb-reply.wash{ animation:none; }
 .lh-tip b{ margin-right:4px; }
 @media (max-width:420px){ .lh-big{ font-size:2.2rem; } .lh-station{ font-size:1.7rem; } }
 @media (min-width:700px){ .lh-sign{ font-size:1.1rem; } .bb-letter .lg-ko{ font-size:1.6rem; } }
+
+/* ---------- Captain's Deck (deck.js): today's voyage, your course, what you can do ---------- */
+.cd-tabs{ display:flex; gap:6px; padding:4px; border-radius:99px; background:var(--lg-panel); border:2px solid var(--lg-edge); }
+.cd-tab{ flex:1; min-height:44px; display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; border-radius:99px; background:none; color:var(--lg-soft); font:800 .95rem 'Nunito',sans-serif; cursor:pointer; padding:4px 8px; }
+.cd-tab .cc-ic{ width:20px; height:20px; flex:none; }
+.cd-tab.on{ background:var(--lg-teal); color:#fff; }
+:root[data-theme="dark"] .cd-tab.on{ color:#06232a; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .cd-tab.on{ color:#06232a; } }
+.cd-intro .cd-meter, .cd-ready .cd-meter{ max-width:none; height:10px; margin-top:10px; }
+.cd-count{ display:block; margin-top:4px; color:var(--lg-soft); font-weight:800; }
+.cd-legs{ grid-template-columns:1fr; }
+.cd-leg .lg-st .cd-why{ font-weight:600; }
+.cd-leg.done b{ text-decoration:line-through; text-decoration-thickness:2px; text-decoration-color:var(--lg-teal); }
+.cd-leg.done .lg-tag{ color:var(--lg-ok); }
+.cd-cheer{ margin:0; display:flex; gap:10px; align-items:center; font-weight:800; color:var(--lg-ink); background:var(--lg-glow); border-radius:var(--r-md); padding:12px 14px; }
+.cd-cheer .cc-ic{ flex:none; width:28px; height:28px; color:#e8a33d; }
+/* the course as islands: the treasure map's voyage strip, bigger and tappable */
+.cd-voyage{ background:var(--lg-panel); border:2px solid var(--lg-edge); border-radius:var(--r-md); padding:8px 6px; }
+.cd-isles{ list-style:none; margin:0; padding:6px 4px 10px; display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x proximity; }
+.cd-isles li{ flex:none; position:relative; }
+.cd-isles li:not(:last-child)::after{ content:""; position:absolute; right:-10px; top:34px; width:10px; border-top:3px dashed #b5452f; }
+.cd-isle{ width:104px; min-height:112px; scroll-snap-align:center; display:flex; flex-direction:column; align-items:center; text-align:center; gap:3px; padding:8px 4px; cursor:pointer;
+  border:2px solid transparent; border-radius:16px; background:#fff8e6; color:#3f2c1b; box-shadow:0 3px 0 #c9a46a; font:inherit; }
+.cd-isle-i{ height:36px; display:grid; place-items:center; }
+.cd-isle-i .cc-ic{ width:30px; height:30px; color:#a8814f; }
+.cd-isle-i .cc-guide-mini{ width:38px; }
+.cd-isle.done .cd-isle-i .cc-ic{ color:#b5452f; }
+.cd-isle.review .cd-isle-i .cc-ic{ color:#e8a33d; }
+.cd-isle-t{ font-weight:800; font-size:.8rem; line-height:1.15; }
+.cd-isle small{ font-weight:700; font-size:.74rem; opacity:.75; }
+.cd-isle.now{ background:#fff1c2; box-shadow:0 0 0 3px #f2b544, 0 3px 0 #c9a46a; }
+.cd-isle.later{ opacity:.7; }
+.cd-isle.done{ background:#e3f1e7; }
+.cd-isle.picked{ border-color:var(--lg-teal); opacity:1; }
+:root[data-theme="dark"] .cd-isle{ background:#1d4a52; color:#f6e9c8; box-shadow:0 3px 0 #0c2a30; }
+:root[data-theme="dark"] .cd-isle.now{ background:#4a4526; }
+:root[data-theme="dark"] .cd-isle.done{ background:#1f4d3c; }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .cd-isle{ background:#1d4a52; color:#f6e9c8; box-shadow:0 3px 0 #0c2a30; }
+  :root:not([data-theme="light"]) .cd-isle.now{ background:#4a4526; }
+  :root:not([data-theme="light"]) .cd-isle.done{ background:#1f4d3c; }
+}
+.cd-utag{ display:block; font-weight:800; font-size:.85rem; color:var(--lg-teal); }
+.cd-unit h3{ margin:2px 0; font-size:1.3rem; }
+.cd-unit h4, .cd-can h4{ margin:10px 0 4px; font:800 1rem 'Baloo 2',system-ui,sans-serif; color:var(--lg-ink); }
+.cd-focus{ margin:0; }
+.cd-cando{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.cd-cando li{ display:flex; gap:8px; align-items:flex-start; font-weight:700; color:var(--lg-soft); line-height:1.35; }
+.cd-cando li .cc-ic{ flex:none; width:22px; height:22px; color:var(--lg-soft); opacity:.7; }
+.cd-cando li.met{ color:var(--lg-ink); }
+.cd-cando li.met .cc-ic{ color:var(--lg-ok); opacity:1; }
+.cd-cp .lg-bar{ justify-content:flex-start; margin-top:6px; }
+.cd-last{ display:flex; gap:6px; align-items:center; }
+.cd-last .cc-ic{ width:20px; height:20px; color:var(--lg-ok); }
+.cd-sign{ pointer-events:none; }
+/* what you can do */
+.cd-skills, .cd-counts, .cd-sits{ list-style:none; margin:0; padding:0; display:grid; gap:10px; }
+.cd-skills{ grid-template-columns:repeat(auto-fill, minmax(min(100%, 220px), 1fr)); }
+.cd-skills li, .cd-counts li, .cd-sits li{ display:flex; gap:10px; align-items:center; }
+.cd-sk-i, .cd-sit-i{ flex:none; width:40px; height:40px; border-radius:50%; display:grid; place-items:center; background:var(--lg-you); }
+.cd-sk-i .cc-ic, .cd-sit-i .cc-ic{ width:22px; height:22px; color:var(--lg-teal); }
+.cd-sk-t, .cd-sit-t{ display:flex; flex-direction:column; min-width:0; flex:1; }
+.cd-sk-t small{ color:var(--lg-soft); font-weight:700; }
+.cd-sk-t .lg-meter, .cd-sit-t .lg-meter{ max-width:none; }
+.cd-counts{ grid-template-columns:repeat(auto-fill, minmax(min(100%, 200px), 1fr)); }
+.cd-counts li > span:last-child{ display:flex; flex-direction:column; min-width:0; }
+.cd-counts b{ font:800 1.5rem 'Baloo 2',system-ui,sans-serif; line-height:1; }
+.cd-counts small{ color:var(--lg-soft); font-weight:700; }
+.cd-big{ margin:0; }
+.cd-big b{ font:800 2rem 'Baloo 2',system-ui,sans-serif; color:var(--lg-teal); margin-right:4px; }
+.cd-sits{ grid-template-columns:repeat(auto-fill, minmax(min(100%, 240px), 1fr)); margin-top:12px; }
+.cd-sits li small{ flex:none; color:var(--lg-soft); font-weight:800; }
+.cd-sits li.ready .cd-sit-i{ background:var(--lg-glow); }
+.cd-sits li.ready .cd-sit-i .cc-ic{ color:var(--lg-ok); }
+.tw-sec .cd-note{ margin:8px 0 0; font-size:.9rem; }
+@media (max-width:420px){ .cd-tab{ font-size:.82rem; gap:4px; padding:4px; } .cd-tab .cc-ic{ width:18px; height:18px; } }
+@media (max-width:360px){ .cd-tab .cc-ic{ display:none; } }
 /* end of src/css/reef.css */
 /* from src/css/reef-3d.css */
 /* ---------- REEF 3D board ---------- */
@@ -28042,6 +28685,12 @@ body.reef-calm .r3-dice-tip, body.reef-calm .r3-dice-num{ animation:none !import
 .r3-gamesbtn{ position:absolute; z-index:3; left:max(16px, env(safe-area-inset-left, 0px)); bottom:calc(max(16px, env(safe-area-inset-bottom, 0px)) + 66px); width:52px; height:52px; border:none; cursor:pointer; border-radius:50%; font-size:1.45rem;
   background:linear-gradient(180deg, #f6e7c4, #e8d2a0); box-shadow:0 4px 0 #b08d5a, 0 8px 16px rgba(60,50,30,.2); }
 .r3-gamesbtn:active, .r3-modebtn:active{ transform:translateY(3px); box-shadow:0 1px 0 #b08d5a; }
+/* Captain's Deck's small way in (deck.js): above the minigame corner, only while today's voyage has legs left */
+.r3-voybtn{ position:absolute; z-index:3; left:max(16px, env(safe-area-inset-left, 0px)); bottom:calc(max(16px, env(safe-area-inset-bottom, 0px)) + 128px); min-height:44px; display:inline-flex; align-items:center; gap:6px;
+  border:none; cursor:pointer; padding:6px 14px 6px 10px; border-radius:999px; font:800 .92rem 'Baloo 2',sans-serif; background:linear-gradient(180deg, #f6e7c4, #e8d2a0); color:#5a3d1d; box-shadow:0 3px 0 #b08d5a, 0 8px 16px rgba(60,50,30,.18); }
+.r3-voybtn .cc-ic{ width:1.4rem; height:1.4rem; color:#b5532f; }
+.r3-voybtn:active{ transform:translateY(3px); box-shadow:0 1px 0 #b08d5a; }
+.r3-voybtn[hidden]{ display:none; }
 .r3-shellpop{ position:absolute; z-index:6; left:50%; top:24%; transform:translateX(-50%); pointer-events:none; font:900 2.2rem 'Baloo 2',sans-serif; color:#ffd24a; -webkit-text-stroke:3px #8a4b12; paint-order:stroke fill; animation:r3ShellPop 1.5s ease-out forwards; }
 .r3-shellpop.minus{ color:#fff; -webkit-text-stroke-color:#7a5aa0; }
 @keyframes r3ShellPop{ 0%{ opacity:0; transform:translate(-50%, 10px) scale(.6); } 20%{ opacity:1; transform:translate(-50%, 0) scale(1.15); } 70%{ opacity:1; transform:translate(-50%, -20px) scale(1); } 100%{ opacity:0; transform:translate(-50%, -50px); } }
@@ -28449,6 +29098,17 @@ body.reef-calm .cv3-hero .topbar :is(.icon-btn, .btn){ animation:none !important
 .r3-isle.now{ background:#fff1c2; box-shadow:0 0 0 3px #f2b544, 0 2px 0 #c9a46a; }
 .r3-isle.later{ opacity:.65; } .r3-isle.done{ background:#e3f1e7; }
 .r3-isle-i .cc-ic{ width:28px; height:28px; color:#2a8f8a; } .r3-isle.done .r3-isle-i .cc-ic{ color:#b5452f; } .r3-isle.review .r3-isle-i .cc-ic{ color:#d9a020; }
+/* today's legs from Captain's Deck, under the islands */
+.r3-voy-today{ border-top:2px dashed rgba(120,80,30,.25); padding-top:8px; margin-top:2px; }
+.r3-voyage > .r3-voy-today:first-child{ border-top:none; padding-top:0; margin-top:0; }
+.r3-voy-today ul{ list-style:none; margin:0 0 8px; padding:0; display:flex; flex-direction:column; gap:4px; }
+.r3-voy-today li{ display:flex; align-items:center; gap:8px; font-weight:700; font-size:.9rem; line-height:1.2; }
+.r3-voy-li{ flex:none; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; background:#fff8e6; box-shadow:0 2px 0 #c9a46a; }
+.r3-voy-li .cc-ic{ width:18px; height:18px; color:#2a8f8a; }
+.r3-voy-today li.done{ opacity:.7; } .r3-voy-today li.done > span:last-child{ text-decoration:line-through; }
+.r3-voy-today li.done .r3-voy-li .cc-ic{ color:#2f8f5e; }
+.r3-voy-today .r3-btn{ display:inline-flex; align-items:center; gap:6px; min-height:44px; }
+.r3-voy-today .r3-btn .cc-ic{ width:20px; height:20px; }
 @media (max-width:520px){ .r3-map-name{ white-space:normal; max-width:8.6em; font-size:.8rem; line-height:1.15; padding:2px 7px; } }   /* phone: long names wrap so they fit beside their picture */
 .r3-kline{ display:flex; flex-wrap:wrap; gap:6px; justify-content:center; align-items:center; }
 .r3-kpiece{ border:none; cursor:pointer; border-radius:12px; padding:8px 12px; font:700 1.3rem/1.2 'Noto Sans KR','Apple SD Gothic Neo',sans-serif; color:#0b3a44; background:#fff; box-shadow:0 3px 0 #9cc9c9; }

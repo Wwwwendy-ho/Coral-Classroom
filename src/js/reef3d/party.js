@@ -610,13 +610,15 @@
 
   // Coral Classroom on the map: the course as a voyage. Each unit is an island with its dates; finished ones fly a
   // flag, Shelly (Lumi at night) sits on today's, and the ones still to come wait further along the route.
+  // Under it, today's legs from Captain's Deck (deck.js), with a way in.
   function reef3dVoyageHTML(view){
-    var n = reefCourseNow(); if(!n || !n.co.units.length) return '';
+    var n = reefCourseNow(), today = reefCourseOn() ? deckMapTodayHTML() : '';
+    if(!n || !n.co.units.length) return today ? '<div class="r3-voyage" aria-label="Today\'s voyage">' + today + '</div>' : '';
     var nice = function(iso){ var p = String(iso || '').split('-'); try { return new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); } catch(e){ return iso; } };
     return '<div class="r3-voyage" aria-label="Your course"><b class="r3-voy-h">Your voyage: ' + esc(n.co.goal || 'my course') + '</b><ol>' + n.co.units.map(function(u, i){
       var st = u.done ? 'done' : i === n.i ? 'now' : 'later';
       return '<li class="r3-isle ' + st + (u.review ? ' review' : '') + '"><span class="r3-isle-i" aria-hidden="true">' + (u.done ? ccIcon('flag') : i === n.i ? reefGuideMini(view.night) : u.review ? ccIcon('star') : ccIcon('island')) + '</span>' +
-        '<span class="r3-isle-t">' + esc(u.title) + '</span><small>' + nice(u.start) + '</small></li>'; }).join('') + '</ol></div>';
+        '<span class="r3-isle-t">' + esc(u.title) + '</span><small>' + nice(u.start) + '</small></li>'; }).join('') + '</ol>' + today + '</div>';
   }
   // A place tapped on the map: she is already standing there, and the camera comes down from the map onto her.
   // (From a map opened with the button, the camera rises first, so it's the same swoop either way.)
@@ -731,6 +733,7 @@
       if(go) return reef3dMapJump(view, ov, +go.dataset.r3Go);
       var tb = e.target.closest('[data-sea-tab]'); if(tb) return tab(tb.dataset.seaTab);
       var sg = e.target.closest('[data-sea-go]'); if(sg) return reefSeaGo(ov, sg.dataset.seaGo);
+      if(e.target.closest('[data-r3-deck]')) return reefSeaGo(ov, 'deck');
       var isle = e.target.closest('[data-sea]'); if(isle) return reefSeaInfo(ov, isle.dataset.sea);
       if(e.target.closest('[data-r3-close]') || e.target === ov) close();
     });
@@ -901,6 +904,7 @@
       var b = e.target.closest('[data-space]'); if(b) reef3dGoTo(view, +b.dataset.space);
     });
     view.wrap.querySelector('[data-r3-map]').addEventListener('click', function(){ reef3dMap(view); });
+    deckBoardButton(view.wrap);
     view.wrap.querySelector('[data-r3-games]').addEventListener('click', function(e){ e.stopPropagation(); if(!view.moving && !(view.dice && !view.dice.rolling)) reef3dGames(view); });   // the dice can still be waiting for a tap
     view.wrap.querySelector('[data-r3-mode]').addEventListener('click', function(e){
       e.stopPropagation(); var b = reefBoard(); b.mode = reef3dStoryOn() ? 'free' : 'story'; reefBoardSave(); reef3dHud(view);

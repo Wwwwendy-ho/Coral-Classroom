@@ -252,6 +252,7 @@
   function lagoonFinish(s, L){
     L.phase = 'done';
     lagoonMarkDone(s.id, L.right);
+    deckTick('story', s.id);   // a leg of Captain's Deck's voyage, if today's has this story
     try { reefWinSound(true); } catch(e){}
     try { if(!reefCalm()) Ocean.bubbles(10); } catch(e){}
     renderLagoonRead(); window.scrollTo(0, 0);

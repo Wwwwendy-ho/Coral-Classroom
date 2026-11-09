@@ -1398,6 +1398,7 @@
     // without this guard a single round could be counted twice (double stars, double history).
     if(S.finishingRound) return;
     S.finishingRound = true;
+    deckTick('cards', S.currentDeckId);   // a leg of Captain's Deck's voyage, if today's has this deck (or My words)
     var t = S.roundTally || { again:0, hard:0, good:0, easy:0 };
     var total = S.sessionReviewed;
     var right = Math.max(0, total - t.again);

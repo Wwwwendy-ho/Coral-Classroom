@@ -826,3 +826,80 @@ body.reef-calm .bb-reply.wash{ animation:none; }
 .lh-tip b{ margin-right:4px; }
 @media (max-width:420px){ .lh-big{ font-size:2.2rem; } .lh-station{ font-size:1.7rem; } }
 @media (min-width:700px){ .lh-sign{ font-size:1.1rem; } .bb-letter .lg-ko{ font-size:1.6rem; } }
+
+/* ---------- Captain's Deck (deck.js): today's voyage, your course, what you can do ---------- */
+.cd-tabs{ display:flex; gap:6px; padding:4px; border-radius:99px; background:var(--lg-panel); border:2px solid var(--lg-edge); }
+.cd-tab{ flex:1; min-height:44px; display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; border-radius:99px; background:none; color:var(--lg-soft); font:800 .95rem 'Nunito',sans-serif; cursor:pointer; padding:4px 8px; }
+.cd-tab .cc-ic{ width:20px; height:20px; flex:none; }
+.cd-tab.on{ background:var(--lg-teal); color:#fff; }
+:root[data-theme="dark"] .cd-tab.on{ color:#06232a; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .cd-tab.on{ color:#06232a; } }
+.cd-intro .cd-meter, .cd-ready .cd-meter{ max-width:none; height:10px; margin-top:10px; }
+.cd-count{ display:block; margin-top:4px; color:var(--lg-soft); font-weight:800; }
+.cd-legs{ grid-template-columns:1fr; }
+.cd-leg .lg-st .cd-why{ font-weight:600; }
+.cd-leg.done b{ text-decoration:line-through; text-decoration-thickness:2px; text-decoration-color:var(--lg-teal); }
+.cd-leg.done .lg-tag{ color:var(--lg-ok); }
+.cd-cheer{ margin:0; display:flex; gap:10px; align-items:center; font-weight:800; color:var(--lg-ink); background:var(--lg-glow); border-radius:var(--r-md); padding:12px 14px; }
+.cd-cheer .cc-ic{ flex:none; width:28px; height:28px; color:#e8a33d; }
+/* the course as islands: the treasure map's voyage strip, bigger and tappable */
+.cd-voyage{ background:var(--lg-panel); border:2px solid var(--lg-edge); border-radius:var(--r-md); padding:8px 6px; }
+.cd-isles{ list-style:none; margin:0; padding:6px 4px 10px; display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x proximity; }
+.cd-isles li{ flex:none; position:relative; }
+.cd-isles li:not(:last-child)::after{ content:""; position:absolute; right:-10px; top:34px; width:10px; border-top:3px dashed #b5452f; }
+.cd-isle{ width:104px; min-height:112px; scroll-snap-align:center; display:flex; flex-direction:column; align-items:center; text-align:center; gap:3px; padding:8px 4px; cursor:pointer;
+  border:2px solid transparent; border-radius:16px; background:#fff8e6; color:#3f2c1b; box-shadow:0 3px 0 #c9a46a; font:inherit; }
+.cd-isle-i{ height:36px; display:grid; place-items:center; }
+.cd-isle-i .cc-ic{ width:30px; height:30px; color:#a8814f; }
+.cd-isle-i .cc-guide-mini{ width:38px; }
+.cd-isle.done .cd-isle-i .cc-ic{ color:#b5452f; }
+.cd-isle.review .cd-isle-i .cc-ic{ color:#e8a33d; }
+.cd-isle-t{ font-weight:800; font-size:.8rem; line-height:1.15; }
+.cd-isle small{ font-weight:700; font-size:.74rem; opacity:.75; }
+.cd-isle.now{ background:#fff1c2; box-shadow:0 0 0 3px #f2b544, 0 3px 0 #c9a46a; }
+.cd-isle.later{ opacity:.7; }
+.cd-isle.done{ background:#e3f1e7; }
+.cd-isle.picked{ border-color:var(--lg-teal); opacity:1; }
+:root[data-theme="dark"] .cd-isle{ background:#1d4a52; color:#f6e9c8; box-shadow:0 3px 0 #0c2a30; }
+:root[data-theme="dark"] .cd-isle.now{ background:#4a4526; }
+:root[data-theme="dark"] .cd-isle.done{ background:#1f4d3c; }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .cd-isle{ background:#1d4a52; color:#f6e9c8; box-shadow:0 3px 0 #0c2a30; }
+  :root:not([data-theme="light"]) .cd-isle.now{ background:#4a4526; }
+  :root:not([data-theme="light"]) .cd-isle.done{ background:#1f4d3c; }
+}
+.cd-utag{ display:block; font-weight:800; font-size:.85rem; color:var(--lg-teal); }
+.cd-unit h3{ margin:2px 0; font-size:1.3rem; }
+.cd-unit h4, .cd-can h4{ margin:10px 0 4px; font:800 1rem 'Baloo 2',system-ui,sans-serif; color:var(--lg-ink); }
+.cd-focus{ margin:0; }
+.cd-cando{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.cd-cando li{ display:flex; gap:8px; align-items:flex-start; font-weight:700; color:var(--lg-soft); line-height:1.35; }
+.cd-cando li .cc-ic{ flex:none; width:22px; height:22px; color:var(--lg-soft); opacity:.7; }
+.cd-cando li.met{ color:var(--lg-ink); }
+.cd-cando li.met .cc-ic{ color:var(--lg-ok); opacity:1; }
+.cd-cp .lg-bar{ justify-content:flex-start; margin-top:6px; }
+.cd-last{ display:flex; gap:6px; align-items:center; }
+.cd-last .cc-ic{ width:20px; height:20px; color:var(--lg-ok); }
+.cd-sign{ pointer-events:none; }
+/* what you can do */
+.cd-skills, .cd-counts, .cd-sits{ list-style:none; margin:0; padding:0; display:grid; gap:10px; }
+.cd-skills{ grid-template-columns:repeat(auto-fill, minmax(min(100%, 220px), 1fr)); }
+.cd-skills li, .cd-counts li, .cd-sits li{ display:flex; gap:10px; align-items:center; }
+.cd-sk-i, .cd-sit-i{ flex:none; width:40px; height:40px; border-radius:50%; display:grid; place-items:center; background:var(--lg-you); }
+.cd-sk-i .cc-ic, .cd-sit-i .cc-ic{ width:22px; height:22px; color:var(--lg-teal); }
+.cd-sk-t, .cd-sit-t{ display:flex; flex-direction:column; min-width:0; flex:1; }
+.cd-sk-t small{ color:var(--lg-soft); font-weight:700; }
+.cd-sk-t .lg-meter, .cd-sit-t .lg-meter{ max-width:none; }
+.cd-counts{ grid-template-columns:repeat(auto-fill, minmax(min(100%, 200px), 1fr)); }
+.cd-counts li > span:last-child{ display:flex; flex-direction:column; min-width:0; }
+.cd-counts b{ font:800 1.5rem 'Baloo 2',system-ui,sans-serif; line-height:1; }
+.cd-counts small{ color:var(--lg-soft); font-weight:700; }
+.cd-big{ margin:0; }
+.cd-big b{ font:800 2rem 'Baloo 2',system-ui,sans-serif; color:var(--lg-teal); margin-right:4px; }
+.cd-sits{ grid-template-columns:repeat(auto-fill, minmax(min(100%, 240px), 1fr)); margin-top:12px; }
+.cd-sits li small{ flex:none; color:var(--lg-soft); font-weight:800; }
+.cd-sits li.ready .cd-sit-i{ background:var(--lg-glow); }
+.cd-sits li.ready .cd-sit-i .cc-ic{ color:var(--lg-ok); }
+.tw-sec .cd-note{ margin:8px 0 0; font-size:.9rem; }
+@media (max-width:420px){ .cd-tab{ font-size:.82rem; gap:4px; padding:4px; } .cd-tab .cc-ic{ width:18px; height:18px; } }
+@media (max-width:360px){ .cd-tab .cc-ic{ display:none; } }

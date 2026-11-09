@@ -45,6 +45,9 @@
     ] },
     { id:'lighthouse', date:'2026-11-05', need:'course', steps:[
       { at:'.r3-mapbtn', say:'The Lighthouse is open on the treasure map. Read real Korean signs and menus, and learn the manners.' }
+    ] },
+    { id:'captains-deck', date:'2026-11-09', need:'course', steps:[
+      { at:'.r3-mapbtn', say:'Captain\'s Deck is open on the treasure map, with today\'s voyage and what you can now do.' }
     ] }
   ];
   var WN_RECENT_DAYS = 14;   // a brand-new profile is shown only what's new in the last two weeks, not the whole history

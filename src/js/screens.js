@@ -296,6 +296,7 @@
     if(S.view === 'patterns') return renderPatterns();
     if(S.view === 'beach') return renderBeach();
     if(S.view === 'light') return renderLight();
+    if(S.view === 'captain') return renderCaptain();
     if(S.view === 'plan') return renderPlan();
     if(S.view === 'planMonth') return renderPlanMonth();
     if(S.view === 'flashFeed') return renderFlashFeed();         // Flash Feed -- same reasoning again,
@@ -975,6 +976,7 @@
     S.planRun = null;
     S.feedSoundId = null;
     S.soundPickerOpen = false;
+    S.deckBack = false;   // a region opened from Captain's Deck's voyage has been left another way
     S.view = 'home';
     S.currentDeckId = null;
     if(S.unsubCards){ S.unsubCards(); S.unsubCards = null; }

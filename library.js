@@ -91,7 +91,8 @@
     close: close, go: go, back: back, ask: ask, jsonFrom: jsonFrom, settings: settings, rec: rec, saveRec: saveRec, log: log,
     claudeReady: claudeReady, decks: decks, cards: cards, allCards: allCards, cardStateOf: cardStateOf,
     esc: esc, $: $, $$: $$, rnd: rnd, pick: pick, shuffle: shuffle, plain: plain, speak: speak, sound: sound, today: today,
-    views: {}, lastSource: 'offline'
+    views: {}, lastSource: 'offline',
+    courseAdjust: courseAdjust   // the app's Captain's Deck checkpoints move the course exactly as the checks here do
   };
   function close(){ if(root){ root.hidden = true; root.querySelector('.clib-body').innerHTML = ''; } document.body.classList.remove('clib-open'); var c = CC(); if(c) c.stopSpeaking(); }
   function go(name, arg, replace){
@@ -530,6 +531,9 @@
     // the Lighthouse (the app's light.js) is its real-world reading and manners
     if(CC() && CC().openLight) html += '<section class="clib-card co-light"><h2>' + icon('lighthouse', '') + ' The Lighthouse</h2><p>Menus, signs and receipts as you will meet them in Korea, and short notes on manners for the trip.</p>' +
       '<div class="clib-row"><button type="button" class="clib-btn main" data-co-light>Open the Lighthouse</button></div></section>';
+    // Captain's Deck (the app's deck.js) plans each day across the regions and shows what she can now do
+    if(CC() && CC().openDeck) html += '<section class="clib-card co-deck"><h2>' + icon('anchor', '') + ' Captain\'s Deck</h2><p>Today\'s voyage across every region, your course as islands with checkpoints, and what you can now do.</p>' +
+      '<div class="clib-row"><button type="button" class="clib-btn main" data-co-deck>Open Captain\'s Deck</button></div></section>';
     html += '<h3 class="clib-more-h">The course</h3><ol class="co-line">' + co.units.map(function(u, i){
       var st = u.done ? 'done' : u === now ? 'now' : u.start > t ? 'later' : 'open';
       return '<li class="co-u ' + st + (u.review ? ' review' : '') + '"><details' + (u === now ? ' open' : '') + '><summary><span class="co-dot" aria-hidden="true">' + (u.done ? '✓' : i + 1) + '</span><span class="co-ut"><b>' + esc(u.title) + '</b><small>' + niceDate(u.start) + ' – ' + niceDate(u.end) + ' · ' + u.weeks + ' week' + (u.weeks === 1 ? '' : 's') + (u.testedOut ? ' · quick review' : '') + (u.done ? ' · done' : '') + '</small></span></summary>' +
@@ -553,6 +557,7 @@
     $$('[data-co-patterns]', el).forEach(function(b){ b.addEventListener('click', function(){ sound('tap'); close(); CC().openPatterns(); }); });
     $$('[data-co-beach]', el).forEach(function(b){ b.addEventListener('click', function(){ sound('tap'); close(); CC().openBeach(); }); });
     $$('[data-co-light]', el).forEach(function(b){ b.addEventListener('click', function(){ sound('tap'); close(); CC().openLight(); }); });
+    $$('[data-co-deck]', el).forEach(function(b){ b.addEventListener('click', function(){ sound('tap'); close(); CC().openDeck(); }); });
     $$('[data-co-skip]', el).forEach(function(b){ b.addEventListener('click', function(){ var u = co.units[+b.dataset.coSkip]; u.done = true; u.doneOn = today(); co.log.push({ date: today(), text: u.title + ' marked done without a check.' }); courseSchedule(co); saveCourse(co).then(function(){ go('classroom', null, true); }); }); });
     $('[data-co-off]', el).addEventListener('click', function(){ var c = CC(); if(c && c.setCourseOn) Promise.resolve(c.setCourseOn(false)).then(function(){ go('home', null, true); }); });
   } };

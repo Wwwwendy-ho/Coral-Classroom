@@ -30,6 +30,7 @@
     openPatterns: function(){ openPatterns(); },   // Pattern Reef (patterns.js), from My course
     openBeach: function(){ openBeach(); },     // Bottle Beach (beach.js), from My course
     openLight: function(){ openLight(); },     // the Lighthouse (light.js), from My course
+    openDeck: function(){ deckOpenFromBoard(); },   // Captain's Deck (deck.js), from My course
     night: function(){ try { return reefNight(); } catch(e){ return false; } },
     calm: function(){ try { return reefCalm(); } catch(e){ return false; } },
     // false in the Claude version and inside a grown-up profile, where the app asks no grown-up questions

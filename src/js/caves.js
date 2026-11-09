@@ -118,9 +118,11 @@
     var due = R.again.findIndex(function(a){ return a.at <= R.i; });
     if(due >= 0){ id = R.again[due].id; R.again.splice(due, 1); }
     else {
-      var prev = R.q && R.q.c, pool = CAVES_PAIRS.filter(function(c){ return c.id !== prev; });
-      var total = pool.reduce(function(s, c){ return s + 0.2 + cavesWeak(d, c.id); }, 0), r = Math.random() * total;
-      for(var i = 0; i < pool.length; i++){ r -= 0.2 + cavesWeak(d, pool[i].id); if(r <= 0){ id = pool[i].id; break; } }
+      // a round opened from Captain's Deck for one tricky sound (S.caves.focus) brings that one up about half the time
+      var prev = R.q && R.q.c, pool = CAVES_PAIRS.filter(function(c){ return c.id !== prev; }), focus = S.caves.focus;
+      var weight = function(c){ return 0.2 + cavesWeak(d, c.id) + (c.id === focus ? 4 : 0); };
+      var total = pool.reduce(function(s, c){ return s + weight(c); }, 0), r = Math.random() * total;
+      for(var i = 0; i < pool.length; i++){ r -= weight(pool[i]); if(r <= 0){ id = pool[i].id; break; } }
       id = id || pool[pool.length - 1].id;
     }
     var c = cavesContrast(id), choices = c.sets.map(function(s, si){ return si; }).filter(function(si){ return c.sets.length < 2 || si !== R.last[id]; });
@@ -146,6 +148,7 @@
     R.i++;
     if(R.i >= CAVES_ROUND){
       R.done = true;
+      deckTick('sound', S.caves.focus || null);   // a leg of Captain's Deck's voyage: any round of sound pairs counts
       try { reefWinSound(R.right === CAVES_ROUND); } catch(e){}
       try { if(!reefCalm()) Ocean.bubbles(10); } catch(e){}
     } else cavesNextQ();

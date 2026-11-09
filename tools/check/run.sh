@@ -1,6 +1,6 @@
 #!/bin/sh
 # Runs every check on the GitHub copy: index.html built from src/, lint and dead code, the style audit,
-# the word-help and FSRS (learner model) unit tests, Harbor Town's conversation check, Echo Caves' pitch and sound check, Pattern Reef's particle and mistake rules, Bottle Beach's writing feedback and the Lighthouse's signs, and the browser smoke test. Serves the site itself on a spare port while the smoke test runs.
+# the word-help and FSRS (learner model) unit tests, Harbor Town's conversation check, Echo Caves' pitch and sound check, Pattern Reef's particle and mistake rules, Bottle Beach's writing feedback and the Lighthouse's signs, Captain's Deck's voyage planner, and the browser smoke test. Serves the site itself on a spare port while the smoke test runs.
 # Usage (from the repository):  sh tools/check/run.sh
 # First time: (cd tools/check && npm install && npx playwright install chromium) and pip install tinycss2
 cd "$(dirname "$0")" || exit 1
@@ -16,6 +16,7 @@ echo "== town";        out=$(node test_town.js) || { echo "$out"; fail=1; }; ech
 echo "== caves";       out=$(node test_caves.js) || { echo "$out"; fail=1; }; echo "$out" | tail -1
 echo "== patterns";    out=$(node test_patterns.js) || { echo "$out"; fail=1; }; echo "$out" | tail -1
 echo "== beach";       out=$(node test_beach.js) || { echo "$out"; fail=1; }; echo "$out" | tail -1
+echo "== deck";        out=$(node test_deck.js) || { echo "$out"; fail=1; }; echo "$out" | tail -1
 echo "== browser";
 ( cd "$ROOT" && exec python3 -m http.server "$PORT" >/dev/null 2>&1 ) & SERVER=$!
 sleep 1

@@ -731,6 +731,7 @@
       '<div class="r3-bubble" aria-live="polite" hidden></div>' +
       '<div class="r3-hud" aria-live="polite"><span class="r3-hud-shells" title="Shells">🐚 <b>0</b></span><span class="r3-hud-pearls" title="Golden pearls">🫧 <b>0</b></span></div>' +
       '<button type="button" class="r3-modebtn" data-r3-mode hidden></button>' +
+      '<button type="button" class="r3-voybtn" data-r3-voy hidden>' + ccIcon('anchor') + '<span></span></button>' +   // Captain's Deck, while today's voyage has legs left (deck.js)
       '<button type="button" class="r3-gamesbtn" data-r3-games aria-label="Minigame corner">'+ccIcon('games')+'</button>';
     var canvas = wrap.querySelector('canvas');
     var big = innerWidth * innerHeight > 700000;   // tablets and larger: skip edge smoothing, the costliest per-pixel step

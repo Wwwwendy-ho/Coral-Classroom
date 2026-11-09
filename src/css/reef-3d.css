@@ -161,6 +161,12 @@ body.reef-calm .r3-dice-tip, body.reef-calm .r3-dice-num{ animation:none !import
 .r3-gamesbtn{ position:absolute; z-index:3; left:max(16px, env(safe-area-inset-left, 0px)); bottom:calc(max(16px, env(safe-area-inset-bottom, 0px)) + 66px); width:52px; height:52px; border:none; cursor:pointer; border-radius:50%; font-size:1.45rem;
   background:linear-gradient(180deg, #f6e7c4, #e8d2a0); box-shadow:0 4px 0 #b08d5a, 0 8px 16px rgba(60,50,30,.2); }
 .r3-gamesbtn:active, .r3-modebtn:active{ transform:translateY(3px); box-shadow:0 1px 0 #b08d5a; }
+/* Captain's Deck's small way in (deck.js): above the minigame corner, only while today's voyage has legs left */
+.r3-voybtn{ position:absolute; z-index:3; left:max(16px, env(safe-area-inset-left, 0px)); bottom:calc(max(16px, env(safe-area-inset-bottom, 0px)) + 128px); min-height:44px; display:inline-flex; align-items:center; gap:6px;
+  border:none; cursor:pointer; padding:6px 14px 6px 10px; border-radius:999px; font:800 .92rem 'Baloo 2',sans-serif; background:linear-gradient(180deg, #f6e7c4, #e8d2a0); color:#5a3d1d; box-shadow:0 3px 0 #b08d5a, 0 8px 16px rgba(60,50,30,.18); }
+.r3-voybtn .cc-ic{ width:1.4rem; height:1.4rem; color:#b5532f; }
+.r3-voybtn:active{ transform:translateY(3px); box-shadow:0 1px 0 #b08d5a; }
+.r3-voybtn[hidden]{ display:none; }
 .r3-shellpop{ position:absolute; z-index:6; left:50%; top:24%; transform:translateX(-50%); pointer-events:none; font:900 2.2rem 'Baloo 2',sans-serif; color:#ffd24a; -webkit-text-stroke:3px #8a4b12; paint-order:stroke fill; animation:r3ShellPop 1.5s ease-out forwards; }
 .r3-shellpop.minus{ color:#fff; -webkit-text-stroke-color:#7a5aa0; }
 @keyframes r3ShellPop{ 0%{ opacity:0; transform:translate(-50%, 10px) scale(.6); } 20%{ opacity:1; transform:translate(-50%, 0) scale(1.15); } 70%{ opacity:1; transform:translate(-50%, -20px) scale(1); } 100%{ opacity:0; transform:translate(-50%, -50px); } }
@@ -568,6 +574,17 @@ body.reef-calm .cv3-hero .topbar :is(.icon-btn, .btn){ animation:none !important
 .r3-isle.now{ background:#fff1c2; box-shadow:0 0 0 3px #f2b544, 0 2px 0 #c9a46a; }
 .r3-isle.later{ opacity:.65; } .r3-isle.done{ background:#e3f1e7; }
 .r3-isle-i .cc-ic{ width:28px; height:28px; color:#2a8f8a; } .r3-isle.done .r3-isle-i .cc-ic{ color:#b5452f; } .r3-isle.review .r3-isle-i .cc-ic{ color:#d9a020; }
+/* today's legs from Captain's Deck, under the islands */
+.r3-voy-today{ border-top:2px dashed rgba(120,80,30,.25); padding-top:8px; margin-top:2px; }
+.r3-voyage > .r3-voy-today:first-child{ border-top:none; padding-top:0; margin-top:0; }
+.r3-voy-today ul{ list-style:none; margin:0 0 8px; padding:0; display:flex; flex-direction:column; gap:4px; }
+.r3-voy-today li{ display:flex; align-items:center; gap:8px; font-weight:700; font-size:.9rem; line-height:1.2; }
+.r3-voy-li{ flex:none; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; background:#fff8e6; box-shadow:0 2px 0 #c9a46a; }
+.r3-voy-li .cc-ic{ width:18px; height:18px; color:#2a8f8a; }
+.r3-voy-today li.done{ opacity:.7; } .r3-voy-today li.done > span:last-child{ text-decoration:line-through; }
+.r3-voy-today li.done .r3-voy-li .cc-ic{ color:#2f8f5e; }
+.r3-voy-today .r3-btn{ display:inline-flex; align-items:center; gap:6px; min-height:44px; }
+.r3-voy-today .r3-btn .cc-ic{ width:20px; height:20px; }
 @media (max-width:520px){ .r3-map-name{ white-space:normal; max-width:8.6em; font-size:.8rem; line-height:1.15; padding:2px 7px; } }   /* phone: long names wrap so they fit beside their picture */
 .r3-kline{ display:flex; flex-wrap:wrap; gap:6px; justify-content:center; align-items:center; }
 .r3-kpiece{ border:none; cursor:pointer; border-radius:12px; padding:8px 12px; font:700 1.3rem/1.2 'Noto Sans KR','Apple SD Gothic Neo',sans-serif; color:#0b3a44; background:#fff; box-shadow:0 3px 0 #9cc9c9; }
