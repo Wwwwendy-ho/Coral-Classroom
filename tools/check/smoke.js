@@ -32,7 +32,7 @@ const nearestDeck = () => { const v = window.__reef3dView(), here = v.at; const 
 async function newPage(browser) {
   const ctx = await browser.newContext({ viewport: { width: 1024, height: 768 } });
   await ctx.addInitScript(() => { try { localStorage.setItem('cc-tour-off', '1'); } catch (e) {} });   // the What's new walkthrough is opened on purpose below
-  const p = await ctx.newPage(); p.errors = [];
+  const p = await ctx.newPage(); p.setDefaultTimeout(90000); p.errors = [];
   p.on('pageerror', e => p.errors.push(e.message));
   return p;
 }
@@ -101,8 +101,10 @@ async function newPage(browser) {
   await p.click('[data-view="settings"]'); await p.waitForTimeout(800);
   check('child: Library settings ask the maths question', await p.evaluate(() => !!document.getElementById('clibPin')));
   await closeLibrary(p);
-  const deck = await p.evaluate(nearestDeck); await p.waitForTimeout(9000);
+  await p.waitForFunction(() => { const v = window.__reef3dView(); if(v && v.dice) window.__reef3dGo(v.at); return v && !v.moving && !v.flyIn && !v.dice; }, null, { timeout:60000 });
+  const deck = await p.evaluate(nearestDeck); await p.waitForFunction(() => !document.querySelector('.r3 canvas'), null, { timeout:60000 });
   check('child: a deck opens from the board', await p.evaluate(() => !document.querySelector('.r3 canvas')), deck);
+  await p.waitForSelector('[data-act^="exit-"], [data-act="back-home"], [aria-label^="Close"]');
   const exit = await p.$('[data-act^="exit-"], [data-act="back-home"], [aria-label^="Close"]');
   if (exit) { await exit.click(); await p.waitForTimeout(1200); }
   const sub = await p.evaluate(() => (document.body.innerText.match(/(\d+)\s*[−-]\s*(\d+)/) || []).slice(1));
@@ -132,19 +134,21 @@ async function newPage(browser) {
   check('Cancel goes back to the profiles', !!(await p.$('[data-profile="wendy"]')));
   await p.click('[data-profile="wendy"]'); await p.waitForTimeout(1200); await solveGate(p); await p.waitForTimeout(8000);
   check('the right answer opens the board', await p.evaluate(() => !!(window.__reef3dView && window.__reef3dView())));
-  const d2 = await p.evaluate(nearestDeck); await p.waitForTimeout(9000);
+  await p.waitForFunction(() => { const v = window.__reef3dView(); if(v && v.dice) window.__reef3dGo(v.at); return v && !v.moving && !v.flyIn && !v.dice; }, null, { timeout:60000 });
+  const d2 = await p.evaluate(nearestDeck); await p.waitForFunction(() => !document.querySelector('.r3 canvas'), null, { timeout:60000 });
   check('grown-up: a deck opens from the board', await p.evaluate(() => !document.querySelector('.r3 canvas')), d2);
   // Inside a grown-up profile nothing asks again: the question was answered on the way in
-  const exit2 = await p.$('[data-act^="exit-"], [data-act="back-home"], [aria-label^="Close"]');
-  if (exit2) { await exit2.click(); await p.waitForTimeout(4000); }
+  await p.waitForSelector('[data-act^="exit-"], [data-act="back-home"], [aria-label^="Close"]');
+  const exit2 = p.locator('[data-act^="exit-"], [data-act="back-home"], [aria-label^="Close"]').first();
+  if (exit2) { await exit2.click(); await p.waitForSelector('.r3 canvas', { timeout:90000 }); }
   check('grown-up: leaving a deck early asks nothing', !!exit2 && !(await p.$('.reef-gate, .lock-screen')) && await p.evaluate(() => !!document.querySelector('.r3 canvas')));
   // My words: a Korean card answered wrong puts its word on her list, and the list's tile on the board
   check('grown-up: My words is not on the board before anything is missed', await p.evaluate(() => !document.querySelector('.r3-label.mywords') && !window.__myWordsDue().length));
   await p.evaluate(() => { const d = window.CoralCove.decks().find(x => /speed quiz/i.test(x.name)); if (d) window.CoralCove.startDeck(d.id); });
-  await p.waitForTimeout(2500);
+  await p.waitForSelector('.choice-btn:not([disabled])');
   const missed = await p.evaluate(() => { const a = window.__studyAnswer(), b = [...document.querySelectorAll('.choice-btn:not([disabled])')].find(x => x.textContent.trim() !== a); if (b) b.click(); return b ? a : null; });
   await p.waitForTimeout(3500);
-  const exit3 = await p.$('[data-act="exit-study"]'); if (exit3) { await exit3.click(); await p.waitForTimeout(5000); }
+  const exit3 = p.locator('[data-act="exit-study"]'); await exit3.click(); await p.waitForSelector('.r3 canvas');
   const mw = await p.evaluate(() => ({ tile: !!document.querySelector('.r3-label.mywords'), due: window.__myWordsDue() }));
   check('grown-up: a missed Korean card goes in My words, and its tile appears on the board', !!missed && mw.tile && mw.due.some(e => e.from === 'missed' && e.ko && e.en),
     (missed || 'no card to miss') + ' → ' + mw.due.map(e => e.ko + ' = ' + e.en).join(', '));

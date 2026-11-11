@@ -61,6 +61,7 @@
     }).catch(function(){});
   }
   function renderTown(){
+    townBoardStop();
     var T = S.town || (S.town = {}), list = townRanked(T.deck);
     var best = list.find(function(x){ return !x.done; });
     var rows = list.map(function(x){
@@ -74,16 +75,18 @@
       '</button></li>';
     }).join('');
     app.innerHTML = '<div class="nav-row"><button class="back-btn" data-act="tw-home">⟵ Reef</button><span class="nav-title">' + ccIcon('talk') + ' Harbor Town</span></div>' +
-      '<div class="lg-page">' +
-        '<div class="lg-intro"><h2>Talk with the townsfolk</h2><p>Real conversations for your trip, in Korean. Listen, then answer: tap a reply or type your own. The best one for you is at the top.</p></div>' +
+      townBoardHTML() + '<div class="lg-page">' +
+        '<div class="lg-intro"><h2>Talk with the townsfolk</h2><p>Jump straight into a conversation whenever you like. Your next suggested conversation is at the top.</p></div>' +
         '<ul class="lg-list">' + rows + '</ul>' +
       '</div>';
+    townBoardMount();
     app.querySelector('[data-act="tw-home"]').addEventListener('click', function(){ goHome(); });
     app.querySelectorAll('[data-tw-open]').forEach(function(b){ b.addEventListener('click', function(){ townOpenTalk(b.dataset.twOpen); }); });
   }
 
   function townOpenTalk(id){
     var f = townFolk(id); if(!f) return;
+    townBoardStop();
     try { Speech.stop(); } catch(e){}
     var T = S.town || (S.town = {});
     T.id = id; T.node = f.start; T.log = []; T.tried = {}; T.turns = {}; T.showEn = {}; T.word = null; T.typed = ''; T.typeMsg = '';
@@ -366,3 +369,5 @@
     var inp = app.querySelector('#twType');
     if(inp) inp.addEventListener('input', function(){ T.typed = inp.value; });
   }
+
+  afterRender('town-board-lifecycle', function(){ if(S.view !== 'town') townBoardStop(); });

@@ -48,6 +48,10 @@
     ] },
     { id:'captains-deck', date:'2026-11-09', need:'course', steps:[
       { at:'.r3-mapbtn', say:'Captain\'s Deck is open on the treasure map, with today\'s voyage and what you can now do.' }
+    ] },
+    { id:'harbor-town-board', date:'2026-11-11', need:'course', steps:[
+      { at:'.r3-mapbtn', say:'Harbor Town is open on the treasure map. Talk with the townsfolk of your trip, in Korean.' },
+      { text:'Harbor Town now has streets to explore. Roll the dice, choose a route, and meet the townsfolk. Switch between day and night, or jump straight into any conversation below the board.' }
     ] }
   ];
   var WN_RECENT_DAYS = 14;   // a brand-new profile is shown only what's new in the last two weeks, not the whole history
@@ -110,11 +114,11 @@
     }
     function show(){
       var st = steps.at(i);
-      say.textContent = st.say;
+      say.textContent = st.text || st.say;
       tour.querySelector('.cc-tour-n').textContent = steps.length > 1 ? (i + 1) + ' of ' + steps.length : '';
       next.textContent = i === steps.length - 1 ? 'Got it' : 'Next';
       place(); requestAnimationFrame(place);   // once the text is in, the card's height is known
-      try { Speech.speak(st.say); } catch(e){}
+      try { if(st.say) Speech.speak(st.say); } catch(e){}
       try { next.focus({ preventScroll:true }); } catch(e){}
     }
     function close(){

@@ -14146,6 +14146,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     }).catch(function(){});
   }
   function renderTown(){
+    townBoardStop();
     var T = S.town || (S.town = {}), list = townRanked(T.deck);
     var best = list.find(function(x){ return !x.done; });
     var rows = list.map(function(x){
@@ -14159,16 +14160,18 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       '</button></li>';
     }).join('');
     app.innerHTML = '<div class="nav-row"><button class="back-btn" data-act="tw-home">⟵ Reef</button><span class="nav-title">' + ccIcon('talk') + ' Harbor Town</span></div>' +
-      '<div class="lg-page">' +
-        '<div class="lg-intro"><h2>Talk with the townsfolk</h2><p>Real conversations for your trip, in Korean. Listen, then answer: tap a reply or type your own. The best one for you is at the top.</p></div>' +
+      townBoardHTML() + '<div class="lg-page">' +
+        '<div class="lg-intro"><h2>Talk with the townsfolk</h2><p>Jump straight into a conversation whenever you like. Your next suggested conversation is at the top.</p></div>' +
         '<ul class="lg-list">' + rows + '</ul>' +
       '</div>';
+    townBoardMount();
     app.querySelector('[data-act="tw-home"]').addEventListener('click', function(){ goHome(); });
     app.querySelectorAll('[data-tw-open]').forEach(function(b){ b.addEventListener('click', function(){ townOpenTalk(b.dataset.twOpen); }); });
   }
 
   function townOpenTalk(id){
     var f = townFolk(id); if(!f) return;
+    townBoardStop();
     try { Speech.stop(); } catch(e){}
     var T = S.town || (S.town = {});
     T.id = id; T.node = f.start; T.log = []; T.tried = {}; T.turns = {}; T.showEn = {}; T.word = null; T.typed = ''; T.typeMsg = '';
@@ -14451,7 +14454,387 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     var inp = app.querySelector('#twType');
     if(inp) inp.addEventListener('input', function(){ T.typed = inp.value; });
   }
+
+  afterRender('town-board-lifecycle', function(){ if(S.view !== 'town') townBoardStop(); });
 /* end of src/js/town.js */
+/* from src/js/town-board.js */
+  /* Harbor Town pilot board. Kept in a closure so its scene and game state do not add to the shared app scope.
+     The three functions at the end are the only integration points for town.js. */
+  var TownBoard = (function(){
+    var N = 36, current = null, rollToken = 0;
+    var kinds = [
+      'talk','blue','blue','question','red','talk','blue','shop','blue','chance','talk','red',
+      'blue','minigame','talk','blue','question','star','talk','blue','red','chance','talk','blue',
+      'shop','blue','talk','question','red','minigame','talk','blue','chance','blue','talk','star'
+    ];
+    // The talk IDs are taken from TOWN_FOLK by index below, so additions to that data remain usable.
+    var talkAt = { 0:0, 5:1, 10:2, 14:3, 18:4, 22:5, 26:6, 30:7, 34:0 };
+    var names = { blue:'Blue space', red:'Red space', question:'Mystery space', chance:'Chance Time',
+      shop:'Bok’s shop', minigame:'Lantern game', star:'Star space', talk:'Town conversation' };
+    var colors = { blue:'#4e9ddd', red:'#ec7373', question:'#a77ad4', chance:'#ec9dca',
+      shop:'#e9b85c', minigame:'#58bdad', star:'#f5d371', talk:'#68afae' };
+    var pos = [];
+    for(var i = 0; i < N; i++){
+      var t = i * Math.PI * 2 / N;
+      pos.push({ x: 4.2 * Math.sin(2 * t) + (i === 0 ? .48 : i === 18 ? -.48 : 0),
+        z: 6.75 * Math.sin(t) + (i === 0 ? -.48 : i === 18 ? .48 : 0) });
+    }
+    var edges = [];
+    for(i = 0; i < N; i++) edges.push([i, (i + 1) % N]);
+    edges.push([8, 13], [26, 31]);
+
+    function key(){ return 'cc-town-board-' + (S.profile && S.profile.id || 'guest'); }
+    function read(){
+      var v = null;
+      try { v = JSON.parse(localStorage.getItem(key()) || 'null'); } catch(e){}
+      v = v && typeof v === 'object' ? v : {};
+      return { position: Number.isInteger(v.position) && v.position >= 0 && v.position < N ? v.position : 0,
+        shells: Number.isInteger(v.shells) && v.shells >= 0 ? Math.min(v.shells, 999) : 8,
+        stars: Number.isInteger(v.stars) && v.stars >= 0 ? Math.min(v.stars, 999) : 0,
+        turns: Number.isInteger(v.turns) && v.turns >= 0 ? v.turns : 0,
+        pass: !!v.pass, double: !!v.double, night: typeof v.night === 'boolean' ? v.night : reefNight() };
+    }
+    function save(){
+      if(!current) return;
+      var a = current.state;
+      try { localStorage.setItem(key(), JSON.stringify({ position:a.position, shells:a.shells, stars:a.stars,
+        turns:a.turns, pass:a.pass, double:a.double, night:a.night })); } catch(e){}
+    }
+    function icon(kind){
+      return ccIcon({blue:'sparkle',red:'heart',question:'bulb',chance:'sparkle',shop:'bag',
+        minigame:'games',star:'star',talk:'talk'}[kind] || 'map');
+    }
+    function folkAt(n){ return TOWN_FOLK[talkAt[n] || 0] || TOWN_FOLK[0]; }
+    function tileDescription(n){
+      var kind = kinds[n];
+      return kind === 'talk' ? folkAt(n).en + ' · ' + folkAt(n).place : names[kind];
+    }
+    function html(){
+      var a = read();
+      var roads = edges.map(function(e){ var p=pos[e[0]], q=pos[e[1]];
+        return '<path d="M' + (180+p.x*16).toFixed(1) + ' ' + (180+p.z*16).toFixed(1) + 'L' + (180+q.x*16).toFixed(1) + ' ' + (180+q.z*16).toFixed(1) + '"/>';
+      }).join('');
+      var mapTiles = pos.map(function(p,n){ return '<circle cx="' + (180+p.x*16).toFixed(1) + '" cy="' +
+        (180+p.z*16).toFixed(1) + '" r="6" fill="' + colors[kinds[n]] + '"/>'; }).join('');
+      var fallback = '<svg viewBox="0 0 360 360" role="img" aria-label="Figure eight town map with 36 colored spaces">' +
+        '<ellipse cx="180" cy="180" rx="100" ry="149" fill="' + (a.night ? '#536f6e' : '#e5d5ab') + '"/>' +
+        '<g fill="none" stroke="' + (a.night ? '#ad987e' : '#fdf2cc') + '" stroke-width="9" stroke-linecap="round">' + roads + '</g>' +
+        '<g stroke="#fff8e7" stroke-width="2">' + mapTiles + '</g></svg>';
+      var guide = kinds.map(function(kind, n){
+        return '<button type="button" class="tb-guide-space" data-tb-preview="' + n + '"><span class="tb-dot tb-' + kind + '"></span><b>' +
+          (n + 1) + '</b><span>' + esc(tileDescription(n)) + '</span></button>';
+      }).join('');
+      return '<section class="tb-root' + (a.night ? ' tb-night' : '') + '" aria-label="Harbor Town board">' +
+        '<div class="tb-top"><div><span class="tb-kicker">STREETS BY THE SEA</span><h2>Take a walk through town</h2></div>' +
+          '<button type="button" class="tb-theme" data-tb-night aria-label="Switch to ' + (a.night ? 'day' : 'night') + ' view">' + ccIcon(a.night ? 'sun' : 'moon') + '</button></div>' +
+        '<div class="tb-stage"><div class="tb-canvas" aria-hidden="true">' + fallback + '</div><div class="tb-stage-label">Two streets, two shortcuts, a town full of conversations</div></div>' +
+        '<div class="tb-legend" aria-label="Board space colors"><span><i class="tb-blue"></i>+3 shells</span><span><i class="tb-red"></i>−2 shells</span>' +
+          '<span><i class="tb-question"></i>surprise</span><span><i class="tb-talk"></i>conversation</span><span><i class="tb-star"></i>star</span></div>' +
+        '<div class="tb-dashboard"><div class="tb-score"><span>' + ccIcon('shell') + ' Shells <b data-tb-shells>' + a.shells + '</b></span>' +
+          '<span>' + ccIcon('star') + ' Stars <b data-tb-stars>' + a.stars + '</b></span>' +
+          '<span>Walks <b data-tb-turns>' + a.turns + '</b></span></div>' +
+          '<div class="tb-actions"><button type="button" class="tb-roll" data-tb-roll>' + ccIcon('dice') + ' Roll the die</button>' +
+          '<button type="button" class="tb-visit" data-tb-visit>Talk here</button></div></div>' +
+        '<div class="tb-place" data-tb-place role="status"></div>' +
+        '<div class="tb-event" data-tb-event aria-live="polite" hidden></div>' +
+        '<nav class="tb-sail" aria-label="Nearby places"><button type="button" data-tb-go="lagoon">' + ccIcon('bottle') + ' Story Lagoon</button>' +
+          '<button type="button" data-tb-go="captain">' + ccIcon('anchor') + ' Captain’s Deck</button>' +
+          '<button type="button" data-tb-go="caves">' + ccIcon('sound') + ' Echo Caves</button></nav>' +
+        '<details class="tb-guide"><summary>Street guide · all 36 spaces</summary><div class="tb-guide-grid">' + guide + '</div></details>' +
+      '</section>';
+    }
+    function sound(note){ try { Sound.bloop(note); } catch(e){} }
+    function status(message){
+      if(!current) return;
+      var c = current, a = c.state, root = c.root, n = a.position;
+      root.querySelector('[data-tb-shells]').textContent = a.shells;
+      root.querySelector('[data-tb-stars]').textContent = a.stars;
+      root.querySelector('[data-tb-turns]').textContent = a.turns;
+      root.querySelector('[data-tb-place]').innerHTML = '<span class="tb-place-mark tb-' + kinds[n] + '">' + icon(kinds[n]) + '</span>' +
+        '<span><b>Space ' + (n + 1) + ' · ' + esc(tileDescription(n)) + '</b><small>' + esc(message || 'Roll to explore, or choose a conversation here.') + '</small></span>';
+      root.querySelector('[data-tb-visit]').hidden = kinds[n] !== 'talk';
+      root.querySelector('[data-tb-roll]').disabled = !!c.busy;
+      root.querySelector('[data-tb-roll]').innerHTML = c.busy ? 'Walking…' : ccIcon('dice') + ' Roll the die';
+      root.querySelector('[data-tb-night]').disabled = !!c.busy;
+      if(c.tokenMesh){ c.tokenMesh.position.set(pos[n].x, .72, pos[n].z); render3d(c); }
+      root.querySelectorAll('[data-tb-preview]').forEach(function(b){ b.classList.toggle('is-here', +b.dataset.tbPreview === n); });
+    }
+    function event(title, body, options){
+      if(!current) return;
+      var el = current.root.querySelector('[data-tb-event]');
+      el.hidden = false;
+      el.innerHTML = '<div class="tb-event-heading"><b>' + esc(title) + '</b><button type="button" data-tb-close aria-label="Close">' + ccIcon('close') + '</button></div>' +
+        '<p>' + esc(body) + '</p><div class="tb-event-buttons">' + (options || []).map(function(o,j){
+          return '<button type="button" data-tb-choice="' + j + '"' + (o.disabled ? ' disabled' : '') + '>' + esc(o.label) + '</button>';
+        }).join('') + '</div>';
+      current.options = options || [];
+      el.scrollIntoView({ block:'nearest', behavior: reefCalm() ? 'auto' : 'smooth' });
+    }
+    function closeEvent(){
+      if(!current) return;
+      current.root.querySelector('[data-tb-event]').hidden = true;
+      current.options = [];
+    }
+    function effect(kind){
+      if(!current) return;
+      var a = current.state, n = a.position, who, reward;
+      if(kind === 'talk'){
+        who = folkAt(n);
+        event('A conversation awaits', who.en + ' is here. Practice a real exchange and add useful phrases to My words.',
+          [{label:'Talk with ' + who.en, action:function(){ openTalk(who.id); }}, {label:'Keep walking', action:closeEvent}]);
+      } else if(kind === 'blue'){
+        a.shells += 3; save(); status('You found 3 shells.'); event('Blue space', 'You found 3 shells for the town shop.', [{label:'Continue',action:closeEvent}]); sound(650);
+      } else if(kind === 'red'){
+        if(a.pass){ a.pass = false; status('Your Lucky Pass protected your shells.'); event('Lucky Pass!', 'Your pass protected you from this red space.', [{label:'Continue',action:closeEvent}]); }
+        else { a.shells = Math.max(0, a.shells - 2); status('You lost 2 shells.'); event('Red space', 'A gust carried away 2 shells.', [{label:'Continue',action:closeEvent}]); }
+        save(); sound(320);
+      } else if(kind === 'question'){
+        reward = (a.turns + n) % 3;
+        if(reward === 0){ a.shells += 5; status('A mystery crate held 5 shells.'); event('Mystery crate', 'Five shells were tucked inside.', [{label:'Continue',action:closeEvent}]); }
+        else if(reward === 1){ a.pass = true; status('You found a Lucky Pass for a red space.'); event('Mystery crate', 'A Lucky Pass will protect you from your next red space.', [{label:'Continue',action:closeEvent}]); }
+        else { a.double = true; status('Your next die roll will double.'); event('Mystery crate', 'Your next die roll will double.', [{label:'Continue',action:closeEvent}]); }
+        save(); sound(720);
+      } else if(kind === 'chance'){
+        var cards = [
+          {label:'Shell shower', body:'You gained 6 shells.', apply:function(){ a.shells += 6; }},
+          {label:'Windfall', body:'You lost 3 shells.', apply:function(){ a.shells = Math.max(0, a.shells - 3); }},
+          {label:'Second wind', body:'Your next die roll will double.', apply:function(){ a.double = true; }}
+        ];
+        var card = cards[Math.floor(Math.random() * cards.length)]; card.apply(); save(); status(card.body);
+        event('Chance Time · ' + card.label, card.body, [{label:'Continue',action:closeEvent}]); sound(800);
+      } else if(kind === 'shop'){
+        event('Bok’s shop', 'Spend shells on something useful for the next walk.', [
+          {label:'Lucky Pass · 5 shells',disabled:a.shells < 5,action:function(){ a.shells -= 5; a.pass = true; save(); status('Lucky Pass ready.'); event('Lucky Pass ready', 'Your next red space will cost no shells.', [{label:'Continue',action:closeEvent}]); }},
+          {label:'Double die · 7 shells',disabled:a.shells < 7,action:function(){ a.shells -= 7; a.double = true; save(); status('Your next die roll will double.'); event('Double die ready', 'Your next die roll will double.', [{label:'Continue',action:closeEvent}]); }},
+          {label:'Leave shop',action:closeEvent}
+        ]);
+      } else if(kind === 'minigame'){
+        lanternQuiz(0);
+      } else if(kind === 'star'){
+        event('Star space', 'Trade 12 shells for a star. Stars mark your town adventures.', [
+          {label:'Take a star · 12 shells',disabled:a.shells < 12,action:function(){ a.shells -= 12; a.stars++; save(); status('You earned a star!'); event('A new star!', 'Your Harbor Town collection grew by one star.', [{label:'Continue',action:closeEvent}]); sound(950); }},
+          {label:'Save your shells',action:closeEvent}
+        ]);
+      }
+    }
+    function lanternQuiz(attempt){
+      if(!current) return;
+      var a = current.state, idx = (a.turns + a.position + attempt) % TOWN_FOLK.length;
+      var f = TOWN_FOLK[idx], phrase = f.nodes[f.start].t, candidates = [idx,(idx + 3) % TOWN_FOLK.length,(idx + 5) % TOWN_FOLK.length];
+      candidates.sort(function(){ return Math.random() - .5; });
+      event('Lantern game · read and choose', 'What does “' + phrase[0] + '” mean?', candidates.map(function(k){
+        return {label:TOWN_FOLK[k].nodes[TOWN_FOLK[k].start].t[1],action:function(){
+          if(k === idx){
+            var prize = attempt ? 3 : 6; a.shells += prize; save(); status('You earned ' + prize + ' shells.');
+            event('You got it!', 'That phrase means “' + phrase[1] + '” You earned ' + prize + ' shells.', [{label:'Continue',action:closeEvent}]); sound(850);
+          } else if(!attempt){
+            event('Try another lantern', '“' + phrase[0] + '” means “' + phrase[1] + '” Try one more phrase for 3 shells.',
+              [{label:'Try again',action:function(){ lanternQuiz(1); }},{label:'Keep walking',action:closeEvent}]); sound(430);
+          } else {
+            a.shells++; save(); status('You found 1 shell.');
+            event('A little light', '“' + phrase[0] + '” means “' + phrase[1] + '” You found 1 shell.', [{label:'Continue',action:closeEvent}]); sound(430);
+          }
+        }};
+      }));
+    }
+    function openTalk(id){ stop(); townOpenTalk(id); }
+    function nextChoices(n){ return n === 8 ? [9,13] : n === 26 ? [27,31] : [(n + 1) % N]; }
+    function moveOne(to, token){
+      return new Promise(function(resolve){
+        var c = current, from = c.state.position, start = performance.now(), duration = reefCalm() ? 90 : 300;
+        function frame(now){
+          if(!current || current !== c || token !== rollToken){ resolve(false); return; }
+          var p = Math.min(1, (now - start) / duration), lift = Math.sin(p * Math.PI) * .68;
+          if(c.tokenMesh){ c.tokenMesh.position.set(pos[from].x + (pos[to].x - pos[from].x) * p,
+            .72 + lift, pos[from].z + (pos[to].z - pos[from].z) * p); render3d(c); }
+          if(p < 1){ c.raf = requestAnimationFrame(frame); }
+          else { c.state.position = to; save(); status(); sound(480 + (to % 5) * 40); resolve(true); }
+        }
+        c.raf = requestAnimationFrame(frame);
+      });
+    }
+    async function advance(token){
+      var c = current;
+      while(current === c && token === rollToken && c.remaining > 0){
+        var choices = nextChoices(c.state.position);
+        if(choices.length > 1){
+          event('Choose a street', 'The harbor path splits here. Pick the market street or the quay shortcut.', [
+            {label:'Market street · space ' + (choices[0] + 1),action:function(){ closeEvent(); resume(choices[0], token); }},
+            {label:'Quay shortcut · space ' + (choices[1] + 1),action:function(){ closeEvent(); resume(choices[1], token); }}
+          ]);
+          return;
+        }
+        if(!await moveOne(choices[0], token)) return;
+        c.remaining--;
+      }
+      if(current === c && token === rollToken){ c.busy = false; status(); effect(kinds[c.state.position]); }
+    }
+    async function resume(to, token){
+      var c = current;
+      if(!c || token !== rollToken || !c.busy) return;
+      if(!await moveOne(to, token)) return;
+      c.remaining--; advance(token);
+    }
+    function roll(){
+      var c = current;
+      if(!c || c.busy) return;
+      closeEvent(); c.busy = true; c.state.turns++;
+      var die = 1 + Math.floor(Math.random() * 6), doubled = c.state.double;
+      c.state.double = false; c.remaining = doubled ? die * 2 : die; save();
+      status('You rolled ' + die + (doubled ? ' × 2' : '') + '. Walking ' + c.remaining + ' spaces…');
+      sound(700); advance(++rollToken);
+    }
+    function preview(n){
+      var c = current;
+      if(!c || c.busy) return;
+      event('Space ' + (n + 1) + ' · ' + tileDescription(n),
+        kinds[n] === 'talk' ? 'Talk with ' + folkAt(n).en + ' here.' : 'Land here to use this ' + names[kinds[n]].toLowerCase() + '.',
+        [{label:'Close',action:closeEvent}]);
+    }
+    function go(where){
+      stop();
+      if(where === 'lagoon') openLagoon();
+      if(where === 'caves') openCaves();
+      if(where === 'captain') openCaptain();
+    }
+    function mount(){
+      var root = app.querySelector('.tb-root');
+      if(!root) return;
+      stop();
+      var c = current = { root:root, state:read(), options:[], busy:false, raf:0, renderer:null, tokenMesh:null };
+      root.addEventListener('click', function(e){
+        var b = e.target.closest('button'); if(!b || !root.contains(b)) return;
+        if(b.hasAttribute('data-tb-roll')) roll();
+        else if(b.hasAttribute('data-tb-night') && !c.busy){ c.state.night = !c.state.night; save(); root.classList.toggle('tb-night', c.state.night);
+          b.innerHTML = ccIcon(c.state.night ? 'sun' : 'moon'); b.setAttribute('aria-label', 'Switch to ' + (c.state.night ? 'day' : 'night') + ' view'); build3d(c); }
+        else if(b.hasAttribute('data-tb-visit')) openTalk(folkAt(c.state.position).id);
+        else if(b.hasAttribute('data-tb-choice')){ var o = c.options[+b.dataset.tbChoice]; if(o && !o.disabled) o.action(); }
+        else if(b.hasAttribute('data-tb-close')){ if(c.busy && c.remaining > 0) return; closeEvent(); }
+        else if(b.hasAttribute('data-tb-preview')) preview(+b.dataset.tbPreview);
+        else if(b.hasAttribute('data-tb-go')) go(b.dataset.tbGo);
+      });
+      status(); build3d(c);
+    }
+    function render3d(c){ if(c.renderer) c.renderer.render(c.scene, c.camera); }
+    function dispose3d(c){
+      if(c.raf) cancelAnimationFrame(c.raf);
+      if(c.resizeObserver){ c.resizeObserver.disconnect(); c.resizeObserver = null; }
+      if(c.resizeHandler){ window.removeEventListener('resize', c.resizeHandler); c.resizeHandler = null; }
+      if(c.scene){
+        var seen = [];
+        c.scene.traverse(function(o){
+          if(o.geometry && seen.indexOf(o.geometry) < 0){ seen.push(o.geometry); o.geometry.dispose(); }
+          var mats = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : [];
+          mats.forEach(function(m){ if(seen.indexOf(m) >= 0) return; seen.push(m); if(m.map && seen.indexOf(m.map) < 0){ seen.push(m.map); m.map.dispose(); } m.dispose(); });
+        });
+      }
+      if(c.renderer){ c.renderer.dispose(); try { c.renderer.forceContextLoss(); } catch(e){} c.renderer.domElement.remove(); }
+      var host = c.root && c.root.querySelector('.tb-canvas'); if(host) host.classList.remove('tb-webgl');
+      c.scene = null; c.renderer = null; c.tokenMesh = null;
+    }
+    function stop(){
+      rollToken++;
+      if(!current) return;
+      dispose3d(current);
+      current = null;
+    }
+
+    function build3d(c){
+      dispose3d(c);
+      var host = c.root.querySelector('.tb-canvas');
+      if(!host || !window.THREE) return;
+      var T = window.THREE, night = c.state.night;
+      try {
+        var renderer = new T.WebGLRenderer({ antialias:false, alpha:true, powerPreference:'low-power' });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+        renderer.outputEncoding = T.sRGBEncoding;
+        renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = .85;
+        renderer.setClearColor(night ? 0x163948 : 0x79c8d5, 1);
+        host.appendChild(renderer.domElement); c.renderer = renderer;
+        var scene = c.scene = new T.Scene();
+        scene.fog = new T.Fog(night ? 0x163948 : 0x79c8d5, 32, 55);
+        scene.add(new T.HemisphereLight(night ? 0xa8d5ed : 0xfff6df, night ? 0x18394a : 0x5e887e, .75));
+        var sun = new T.DirectionalLight(night ? 0xb7dafa : 0xffe6ac, night ? .55 : .65);
+        sun.position.set(-6, 11, 6); scene.add(sun);
+        var camera = c.camera = new T.OrthographicCamera(-10, 10, 8, -8, .1, 100);
+        camera.position.set(0, 17, 13); camera.lookAt(0, 0, 0);
+        var mat = function(col, opt){ return new T.MeshLambertMaterial(Object.assign({color:col}, opt || {})); };
+        var mesh = function(geo, material, x, y, z){ var o = new T.Mesh(geo, material); o.position.set(x || 0,y || 0,z || 0); scene.add(o); return o; };
+        var water = mesh(new T.PlaneGeometry(48, 32), new T.MeshBasicMaterial({color:night ? 0x17485b : 0x6bbacd}));
+        water.rotation.x = -Math.PI / 2; water.position.y = -.25;
+        var island = mesh(new T.CylinderGeometry(10.1, 10.4, .22, 48), mat(night ? 0x58716b : 0xdccda1));
+        island.scale.x = .63; island.position.y = -.2;
+        var roadMat = mat(night ? 0x9a8b78 : 0xf9e5ba), railMat = mat(night ? 0x5d594a : 0x9e8067);
+        edges.forEach(function(edge){
+          var p = pos[edge[0]], q = pos[edge[1]], v1 = new T.Vector3(p.x,.04,p.z), v2 = new T.Vector3(q.x,.04,q.z);
+          var curve = new T.LineCurve3(v1,v2), path = mesh(new T.TubeGeometry(curve, 1, .26, 6, false), roadMat);
+          path.name = 'street';
+        });
+        var tileGeo = new T.CylinderGeometry(.36,.43,.18,12), trimGeo = new T.CylinderGeometry(.44,.47,.07,12);
+        var trim = mat(night ? 0x2e4650 : 0x9b886f);
+        var faces = {};
+        kinds.forEach(function(kind){ if(faces[kind]) return;
+          var cv = document.createElement('canvas'); cv.width = cv.height = 128;
+          var g = cv.getContext('2d'); g.fillStyle = colors[kind]; g.fillRect(0,0,128,128);
+          g.strokeStyle = 'rgba(255,255,255,.8)'; g.lineWidth = 7; g.beginPath(); g.arc(64,64,49,0,Math.PI*2); g.stroke();
+          g.fillStyle = '#fffdf6'; g.font = '900 76px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText({blue:'+',red:'−',question:'?',chance:'!',shop:'$',minigame:'M',star:'★',talk:'T'}[kind],64,69);
+          var tex = new T.CanvasTexture(cv); tex.minFilter = T.LinearFilter; tex.magFilter = T.LinearFilter;
+          faces[kind] = [mat(colors[kind]), new T.MeshBasicMaterial({map:tex}), mat(colors[kind])];
+        });
+        pos.forEach(function(p,n){
+          mesh(trimGeo,trim,p.x,.16,p.z);
+          mesh(tileGeo,faces[kinds[n]],p.x,.29,p.z);
+        });
+        // Simple shopfronts, rooflines and piers give the town a silhouette without model downloads.
+        var house = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
+        house.forEach(function(h){
+          var angle = h * Math.PI * 2 / house.length, x = Math.cos(angle) * 5.9, z = Math.sin(angle) * 8.45;
+          var height = .65 + (h % 3) * .19;
+          mesh(new T.BoxGeometry(.95,height,.7),mat(night ? 0x728c86 : [0xf2ddba,0xf0c9a6,0xc4d7c4][h%3]),x,height/2-.05,z);
+          var roof = mesh(new T.ConeGeometry(.76,.42,4),mat(night ? 0x9b6881 : [0xc66c68,0x6d9995,0xa8829d][h%3]),x,height+.1,z);
+          roof.rotation.y = Math.PI/4;
+          if(night){ var lamp = mesh(new T.PlaneGeometry(.25,.3),new T.MeshBasicMaterial({color:0xffd58a,side:T.DoubleSide}),x,height*.58,z+(z>0?.37:-.37)); lamp.rotation.y = z>0 ? 0 : Math.PI; }
+        });
+        for(var d = 0; d < 4; d++){
+          var dx = -4.8 + d * 3.2, dz = d % 2 ? 8.9 : -8.9;
+          mesh(new T.BoxGeometry(1.45,.13,1.2),railMat,dx,-.08,dz);
+          mesh(new T.CylinderGeometry(.07,.07,.5,6),railMat,dx-.6,.1,dz);
+          mesh(new T.CylinderGeometry(.07,.07,.5,6),railMat,dx+.6,.1,dz);
+        }
+        var pawn = new T.Group();
+        pawn.add(new T.Mesh(new T.SphereGeometry(.37,12,9),mat(night ? 0xffdc8f : 0xffd97f)));
+        var cap = new T.Mesh(new T.ConeGeometry(.31,.34,10),mat(0x397d99)); cap.position.y = .39; pawn.add(cap);
+        scene.add(pawn); c.tokenMesh = pawn;
+        pawn.position.set(pos[c.state.position].x,.72,pos[c.state.position].z);
+        function resize(){ if(!current || current !== c || !c.renderer) return;
+          var w = Math.max(1,host.clientWidth), h = Math.max(1,host.clientHeight), aspect = w/h;
+          camera.left=-9.6*aspect; camera.right=9.6*aspect; camera.top=9.6; camera.bottom=-9.6; camera.updateProjectionMatrix();
+          renderer.setSize(w,h,false); render3d(c);
+        }
+        host.classList.add('tb-webgl');
+        if(window.ResizeObserver){ c.resizeObserver = new ResizeObserver(resize); c.resizeObserver.observe(host); }
+        else { c.resizeHandler = resize; window.addEventListener('resize', resize); }
+        resize();
+      } catch(e){ dispose3d(c); host.classList.add('tb-no-webgl'); }
+    }
+    function inspect(){
+      if(!current) return null;
+      return { tiles:N, forks:[8,26], position:current.state.position, state:Object.assign({},current.state),
+        webgl:!!current.renderer, renderer:current.renderer ? {
+          calls:current.renderer.info.render.calls, triangles:current.renderer.info.render.triangles,
+          geometries:current.renderer.info.memory.geometries, textures:current.renderer.info.memory.textures,
+          pixelRatio:current.renderer.getPixelRatio()
+        } : null };
+    }
+    return { html:html, mount:mount, stop:stop, inspect:inspect };
+  })();
+  function townBoardHTML(){ return TownBoard.html(); }
+  function townBoardMount(){ TownBoard.mount(); }
+  function townBoardStop(){ TownBoard.stop(); }
+  // Read-only diagnostics for the pilot's phone and tablet performance checks.
+  window.__townBoardView = function(){ return TownBoard.inspect(); };
+/* end of src/js/town-board.js */
 /* from src/js/caves-sounds.js */
   /* ---------- ECHO CAVES: the sounds, the sound rules and the pitch measure ----------
      The data for Echo Caves (caves.js), and its one piece of signal work, kept apart from the screens so the unit
@@ -17260,6 +17643,10 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     ] },
     { id:'captains-deck', date:'2026-11-09', need:'course', steps:[
       { at:'.r3-mapbtn', say:'Captain\'s Deck is open on the treasure map, with today\'s voyage and what you can now do.' }
+    ] },
+    { id:'harbor-town-board', date:'2026-11-11', need:'course', steps:[
+      { at:'.r3-mapbtn', say:'Harbor Town is open on the treasure map. Talk with the townsfolk of your trip, in Korean.' },
+      { text:'Harbor Town now has streets to explore. Roll the dice, choose a route, and meet the townsfolk. Switch between day and night, or jump straight into any conversation below the board.' }
     ] }
   ];
   var WN_RECENT_DAYS = 14;   // a brand-new profile is shown only what's new in the last two weeks, not the whole history
@@ -17322,11 +17709,11 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     }
     function show(){
       var st = steps.at(i);
-      say.textContent = st.say;
+      say.textContent = st.text || st.say;
       tour.querySelector('.cc-tour-n').textContent = steps.length > 1 ? (i + 1) + ' of ' + steps.length : '';
       next.textContent = i === steps.length - 1 ? 'Got it' : 'Next';
       place(); requestAnimationFrame(place);   // once the text is in, the card's height is known
-      try { Speech.speak(st.say); } catch(e){}
+      try { if(st.say) Speech.speak(st.say); } catch(e){}
       try { next.focus({ preventScroll:true }); } catch(e){}
     }
     function close(){
@@ -29208,6 +29595,91 @@ body.r3-full .r3-musicbtn, body.r3-full .r3-themebtn, body.r3-full .r3-gamesbtn{
 .r3-sea-info .r3-btn{ display:inline-flex; align-items:center; gap:6px; }
 body.reef-calm .r3-map.sea-on .r3-sea, body.reef-calm .r3-sea-me{ animation:none; }
 /* end of src/css/reef-3d.css */
+/* from src/css/town-board.css */
+/* Harbor Town pilot board: a compact game layer above the existing conversation list. */
+.tb-root{--tb-ink:#234052;--tb-sub:#567586;--tb-paper:#fff9e9;--tb-edge:#e4d6b7;--tb-sea:#75c4d3;position:relative;max-width:780px;margin:12px auto 22px;padding:0 12px;color:var(--tb-ink);font-family:var(--font-body,"Nunito Sans",sans-serif)}
+.tb-root *{box-sizing:border-box}
+.tb-root button{font:inherit;cursor:pointer}
+.tb-root button:disabled{cursor:default;opacity:.53}
+.tb-root button:focus-visible,.tb-root summary:focus-visible{outline:3px solid #147da8;outline-offset:3px}
+.tb-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:2px 3px 10px}
+.tb-top h2{margin:2px 0 0;font:800 clamp(20px,4vw,28px)/1.15 var(--font-display,"Fredoka",sans-serif);letter-spacing:-.02em}
+.tb-kicker{font-size:10px;font-weight:900;letter-spacing:.16em;color:#147d91}
+.tb-theme{width:42px;height:42px;border:1px solid var(--tb-edge);border-radius:14px;background:#fff7d9;color:#8b5e30;display:grid;place-items:center;box-shadow:0 3px 0 #d6cda9}
+.tb-theme .cc-ic{width:23px;height:23px}
+.tb-stage{position:relative;height:clamp(285px,42vw,400px);overflow:hidden;border-radius:24px 24px 11px 11px;background:radial-gradient(ellipse at 50% 80%,#b8d8c5 0 28%,transparent 29%),linear-gradient(175deg,#a1dde4,#69b9cd);border:1px solid #b7d0c9;box-shadow:inset 0 0 0 5px #ffffff55,0 9px 24px #2f71802b}
+.tb-canvas{position:absolute;inset:0;overflow:hidden}
+.tb-canvas canvas{display:block;width:100%;height:100%;touch-action:pan-y}
+.tb-canvas svg{position:absolute;inset:8% 3%;width:94%;height:84%;filter:drop-shadow(0 5px 6px #1f667043)}
+.tb-night .tb-canvas svg ellipse{fill:#536f6e}
+.tb-night .tb-canvas svg path{stroke:#ad987e}
+.tb-canvas.tb-webgl svg{display:none}
+.tb-stage-label{position:absolute;left:10px;right:10px;bottom:9px;width:max-content;max-width:calc(100% - 20px);margin:auto;padding:5px 10px;border-radius:999px;background:#163e50bd;color:#fff;font-size:11px;font-weight:800;letter-spacing:.01em;text-align:center;pointer-events:none}
+.tb-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:4px 10px;padding:6px 3px 0;color:#537283;font-size:10px;font-weight:900}
+.tb-legend span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.tb-legend i{display:inline-block;width:10px;height:10px;border-radius:50%;border:1px solid #fff8;box-shadow:0 1px 2px #244a5555}
+.tb-legend .tb-blue{background:#4e9ddd}.tb-legend .tb-red{background:#ec7373}.tb-legend .tb-question{background:#a77ad4}.tb-legend .tb-talk{background:#68afae}.tb-legend .tb-star{background:#d6a73e}
+.tb-dashboard{position:relative;z-index:1;background:var(--tb-paper);border:1px solid var(--tb-edge);border-top:0;border-radius:0 0 22px 22px;padding:12px 14px 14px;box-shadow:0 8px 17px #46605a15}
+.tb-score{display:flex;align-items:center;justify-content:space-between;gap:7px;color:var(--tb-sub);font-size:12px;font-weight:800}
+.tb-score span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.tb-score .cc-ic{width:17px;height:17px;color:#b4863b}
+.tb-score b{color:var(--tb-ink);font-size:15px;font-variant-numeric:tabular-nums}
+.tb-actions{display:flex;gap:8px;margin-top:11px}
+.tb-actions button{min-height:46px;border-radius:14px;font-weight:900}
+.tb-roll{flex:1;border:1px solid #1d6d88;background:linear-gradient(#389cba,#197c9b);color:white;box-shadow:0 4px 0 #116982,0 6px 12px #145f7e33}
+.tb-roll:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 #116982}
+.tb-roll .cc-ic,.tb-visit .cc-ic{width:20px;height:20px;vertical-align:-5px;margin-right:3px}
+.tb-visit{border:1px solid #c89a62;background:#fff1ce;color:#65482f;padding:0 14px}
+.tb-place{display:flex;gap:10px;align-items:center;min-height:66px;margin:10px 0 0;padding:9px 11px;border:1px solid #dce7e5;border-radius:15px;background:#f5fbf9}
+.tb-place-mark{display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:11px;color:white;background:#6babaa}
+.tb-place-mark .cc-ic{width:21px;height:21px}
+.tb-place b{display:block;font-size:13px;line-height:1.2}
+.tb-place small{display:block;margin-top:3px;font-size:11px;line-height:1.3;color:var(--tb-sub)}
+.tb-event{margin-top:10px;padding:12px;border:1px solid #d0b88a;border-radius:17px;background:linear-gradient(140deg,#fffaf0,#f8e8c6);box-shadow:0 8px 15px #66552d1a}
+.tb-event-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;font:800 18px var(--font-display,"Fredoka",sans-serif)}
+.tb-event-heading button{display:grid;place-items:center;width:30px;height:30px;border:0;border-radius:9px;background:#e9d7b6;color:#5d4a39}
+.tb-event-heading .cc-ic{width:17px;height:17px}
+.tb-event p{margin:6px 0 11px;font-size:13px;line-height:1.4}
+.tb-event-buttons{display:flex;flex-wrap:wrap;gap:7px}
+.tb-event-buttons button{min-height:38px;padding:7px 11px;border:1px solid #b7ab91;border-radius:11px;background:#fffdf5;color:#3b5261;font-size:12px;font-weight:900}
+.tb-event-buttons button:first-child:not(:disabled){border-color:#398d9e;background:#e5f7f4;color:#185b6b}
+.tb-sail{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;margin:13px 0}
+.tb-sail button{display:inline-flex;align-items:center;gap:4px;min-height:34px;padding:5px 9px;border:1px solid #d5e5e2;border-radius:999px;background:#f5faf7;color:#316170;font-size:11px;font-weight:900}
+.tb-sail .cc-ic{width:15px;height:15px}
+.tb-guide{margin:0 0 8px;border:1px solid #d8e4e1;border-radius:13px;background:#f8fbf8}
+.tb-guide summary{padding:10px 12px;color:#386979;font-size:12px;font-weight:900;cursor:pointer}
+.tb-guide-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:5px;padding:4px 9px 10px;max-height:240px;overflow:auto}
+.tb-guide-space{display:flex;align-items:center;gap:6px;min-height:32px;padding:5px 6px;border:1px solid transparent;border-radius:8px;background:transparent;color:#355765;text-align:left;font-size:11px}
+.tb-guide-space:hover,.tb-guide-space.is-here{border-color:#b8d4cf;background:#e9f4ef}
+.tb-guide-space b{min-width:16px;font-variant-numeric:tabular-nums}
+.tb-dot{display:block;flex:none;width:12px;height:12px;border-radius:50%;border:2px solid #ffffffa6;box-shadow:0 1px 2px #244a5555}
+.tb-dot.tb-blue,.tb-place-mark.tb-blue{background:#4e9ddd}.tb-dot.tb-red,.tb-place-mark.tb-red{background:#ec7373}
+.tb-dot.tb-question,.tb-place-mark.tb-question{background:#a77ad4}.tb-dot.tb-chance,.tb-place-mark.tb-chance{background:#ec9dca}
+.tb-dot.tb-shop,.tb-place-mark.tb-shop{background:#e9b85c}.tb-dot.tb-minigame,.tb-place-mark.tb-minigame{background:#58bdad}
+.tb-dot.tb-star,.tb-place-mark.tb-star{background:#d6a73e}.tb-dot.tb-talk,.tb-place-mark.tb-talk{background:#68afae}
+.tb-night{--tb-ink:#e5f1f1;--tb-sub:#b1cad1;--tb-paper:#233d47;--tb-edge:#426477}
+.tb-night .tb-kicker{color:#9dded6}
+.tb-night .tb-legend{color:#b1cad1}
+.tb-night .tb-theme{background:#345d68;color:#f7dc90;box-shadow:0 3px 0 #183c4b}
+.tb-night .tb-stage{background:radial-gradient(ellipse at 50% 70%,#486b63 0 28%,transparent 29%),linear-gradient(#234454,#12384b);border-color:#4a7b82;box-shadow:inset 0 0 0 5px #c1f0ed12,0 9px 24px #102c3e55}
+.tb-night .tb-dashboard{box-shadow:0 8px 17px #0a263733}
+.tb-night .tb-score .cc-ic{color:#f6d783}
+.tb-night .tb-visit{background:#584b3d;border-color:#a68555;color:#f7e2b7}
+.tb-night .tb-place{background:#294652;border-color:#456875}
+.tb-night .tb-event{background:linear-gradient(140deg,#314d55,#3a5360);border-color:#7b8180}
+.tb-night .tb-event-heading button{background:#526b72;color:#eaf6ef}
+.tb-night .tb-event-buttons button{background:#31545e;color:#e9f4ed;border-color:#63848b}
+.tb-night .tb-event-buttons button:first-child:not(:disabled){background:#27727e;color:#fff}
+.tb-night .tb-sail button,.tb-night .tb-guide{background:#284550;color:#d1e8e5;border-color:#456675}
+.tb-night .tb-guide summary,.tb-night .tb-guide-space{color:#d1e8e5}
+.tb-night .tb-guide-space:hover,.tb-night .tb-guide-space.is-here{background:#38616a;border-color:#6d9097}
+.tb-root + .lg-page{padding-bottom:max(90px,calc(70px + env(safe-area-inset-bottom,0px)))}
+@media(max-width:430px){.tb-stage{height:300px}.tb-score{font-size:11px}.tb-sail{justify-content:flex-start}.tb-sail button{font-size:10px}.tb-top h2{font-size:21px}}
+@media(max-height:450px) and (orientation:landscape){.tb-stage{height:260px}.tb-root{padding-bottom:45px}.tb-sail{padding-left:48px}.tb-guide{margin-left:48px}}
+@media(prefers-reduced-motion:reduce){.tb-root *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+.tb-night .tb-top{background:#233d47;padding:12px;border-radius:18px 18px 0 0}
+/* end of src/css/town-board.css */
 </style>
 
 </body></html>

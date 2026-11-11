@@ -152,6 +152,10 @@ There is no PIN. On GitHub, `reefGrownUpGate(kind)` shows a times question; a ri
 (`reefInsideAdult(kind)`: only opening the profile and Manage Profiles ask). The Library asks the app through
 `window.CoralCove.needsGrownUpCheck()`, so its Settings follow the same rules.
 
+## Harbor Town pilot board
+
+`src/js/town-board.js` keeps the pilot engine in a `TownBoard` closure. `townBoardHTML`, `townBoardMount` and `townBoardStop` are its narrow integration with `town.js`; `src/css/town-board.css` styles it. The 36 tile kinds, positions and edges describe a figure-eight route with two shortcuts. The board reuses `TOWN_FOLK` and existing conversation/learner behavior. Per-profile `cc-town-board-<profileId>` stores position, shells, stars, turns, items and board theme. Three.js renders on demand, limits pixel ratio to 1.5, and disposes geometries/materials/textures/context on exit. A drawn SVG and street guide cover WebGL failure. `window.__townBoardView()` exposes read-only diagnostics; `tools/check/town_board_smoke.js` covers phone/tablet orientations and themes.
+
 ## 3D (the reef board and lobby)
 
 - `reef3dBuild` builds the board scene from the decks (zones) and models; `attach()` puts it on screen.

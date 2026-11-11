@@ -1,5 +1,12 @@
 # Changelog
 
+## Harbor Town streets (November 11, 2026)
+
+- Explore a 36-space figure-eight town board, with two shortcut choices, a hopping player, and day and night views.
+- Blue, red, mystery, Chance Time, shop, phrase minigame, star and conversation spaces have their own actions. Shells, stars and your location stay on this device for each profile.
+- All eight conversations remain available directly below the board. Nearby links open Story Lagoon, Echo Caves and Captain’s Deck. Existing learning records and recorded voices are reused.
+- The board renders only when it changes, caps pixel density, frees its scene on exit, and includes a drawn fallback and street guide. Phone/tablet browser coverage accompanies this pilot; physical iPhone XS performance remains to be measured.
+
 ## Captain's Deck opens (November 9, 2026)
 
 - **The last island of the sea is open: Captain's Deck**, for your plan and progress. It ties every other region
