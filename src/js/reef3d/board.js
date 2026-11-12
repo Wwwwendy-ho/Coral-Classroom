@@ -3,6 +3,16 @@
      camera follows. The painted 2D reef stays underneath as the fallback when 3D can't run. ---------- */
   var REEF_THREE_URL = 'three.min.js';
   var R3 = { loading: null, failed: false, view: null };
+  // Coral Cove keeps its established position in S. Each region has its own saved spot per profile.
+  function reef3dPositionKey(region){ return 'cc-region-board-at-' + (S.profile && S.profile.id || '') + '-' + region.id; }
+  function reef3dPosition(view){
+    if(!view.region) return S.reef3dAt;
+    try { var n = +localStorage.getItem(reef3dPositionKey(view.region)); return isFinite(n) && n >= 0 ? n : 0; } catch(e){ return 0; }
+  }
+  function reef3dSavePosition(view, i){
+    if(!view.region){ S.reef3dAt = i; return; }
+    try { localStorage.setItem(reef3dPositionKey(view.region), String(i)); } catch(e){}
+  }
   /* Auto quality. Each device is different and we can't test them all, so the board and lobby time their own frames
      and step down one level at a time while drawing runs slow, and back up again when there's room to spare.
      0: sharpest, 60 a second · 1: a little less sharp · 2: no light rays · 3: 30 a second
@@ -107,19 +117,34 @@
 
   // Board spaces in order: per subject a run of decks with a plain and a surprise space between
   // each pair; the Treasure Reef and Story Bottle close the path.
-  function reef3dSpaces(zones){
+  function reef3dSpaces(zones, region){
     var list = [{ kind: 'start' }];
-    zones.forEach(function(z, zi){
-      z.items.forEach(function(it, i){
-        list.push({ kind: 'plain' });
-        if(i > 0 || zi > 0) list.push({ kind: 'surprise' });
-        list.push({ kind: 'deck', item: it, zone: z, first: i === 0 });
+    if(region){
+      // Every activity gets a destination, while smaller regions get enough game spaces for a full board.
+      // Seven spaces are added by the two side routes below, for 30–40 spaces in all.
+      var stops = [];
+      zones.forEach(function(z){ z.items.forEach(function(it, i){ stops.push({ kind: 'deck', item: it, zone: z, first: i === 0 }); }); });
+      var targetMain = Math.max(23, Math.min(33, stops.length + 16));
+      var spare = Math.max(0, targetMain - 1 - stops.length), placed = 0;
+      stops.forEach(function(stop, i){
+        var before = Math.floor((i + 1) * spare / (stops.length + 1)) - Math.floor(i * spare / (stops.length + 1));
+        for(var j = 0; j < before; j++){ placed++; list.push({ kind: placed % 3 === 1 ? 'surprise' : 'plain' }); }
+        list.push(stop);
       });
-    });
-    list.push({ kind: 'plain' }, { kind: 'surprise' }, { kind: 'plain' });
+      while(placed < spare){ placed++; list.push({ kind: placed % 3 === 1 ? 'surprise' : 'plain' }); }
+    } else {
+      zones.forEach(function(z, zi){
+        z.items.forEach(function(it, i){
+          list.push({ kind: 'plain' });
+          if(i > 0 || zi > 0) list.push({ kind: 'surprise' });
+          list.push({ kind: 'deck', item: it, zone: z, first: i === 0 });
+        });
+      });
+      list.push({ kind: 'plain' }, { kind: 'surprise' }, { kind: 'plain' });
+    }
     // Night: halfway along, the path winds down a broken spiral staircase into the ship's hold (see reef3dWreckDeck).
     // Three stair spaces go in after a deck near the middle; everything after them is on the lower deck.
-    var night = reefNight(), REEF3D_HOLD = 6, k0 = -1;
+    var night = reefNight() && !region, REEF3D_HOLD = 6, k0 = -1;
     if(night && list.length > 10){
       for(var q = Math.round(list.length * .5); q < list.length - 4; q++) if(list[q].kind === 'deck'){ k0 = q; break; }
       if(k0 > 0) list.splice(k0 + 1, 0, { kind: 'plain', stair: 1 }, { kind: 'plain', stair: 2 }, { kind: 'plain', stair: 3 });
@@ -720,8 +745,8 @@
   }
 
   function reef3dBuild(host, zones, models){
-    var THREE = window.THREE, night = reefNight();
-    var spaces = reef3dSpaces(zones);
+    var THREE = window.THREE, night = reefNight(), region = zones.region || null;
+    var spaces = region && typeof window.regionBoardSpaces === 'function' && window.regionBoardSpaces(zones) || reef3dSpaces(zones, region);
     var wrap = document.createElement('div');
     wrap.className = 'r3 ' + (night ? 'night' : 'day');
     wrap.innerHTML = '<canvas class="r3-canvas" aria-hidden="true"></canvas><div class="r3-labels"></div>' +
@@ -739,8 +764,11 @@
     var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: !big && !reef3dPostWanted(R3.q), alpha: true, powerPreference: 'low-power' });
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; renderer.shadowMap.autoUpdate = false; // redrawn only when things move (see reef3dFrame)
     var scene = new THREE.Scene();
-    var fogCol = night ? '#0c2a30' : '#7fd4d8';
+    var regionGround = region && { town:'#b8aa94', lagoon:'#83b6a5', caves:'#6b6873', patterns:'#8cb7ad', beach:'#ebd6ac', light:'#9aa393', captain:'#8b7e6e' }[region.id];
+    var regionSky = region && { town:'#b8d5d8', lagoon:'#97d1c8', caves:'#6d8f9d', patterns:'#8fc9ca', beach:'#a6d9df', light:'#b5d4d6', captain:'#a5bbc0' }[region.id];
+    var fogCol = regionSky || (night ? '#0c2a30' : '#7fd4d8');
     scene.fog = new THREE.Fog(fogCol, night ? 14 : 11, night ? 48 : 42);
+    if(region) scene.background = new THREE.Color(night ? reef3dShade(fogCol, -.5) : fogCol);
     var cam = new THREE.PerspectiveCamera(42, 1, .1, scene.fog.far + 8);   // past the fog nothing shows, so nothing is drawn there
     var kit = reef3dKit(THREE, night), B = kit.B, M = kit.M, mesh = kit.mesh;
     var mainN = spaces.mainN || spaces.length;
@@ -775,6 +803,7 @@
     function onDeck(x, z){ return shipDeck && Math.abs(x) < shipDeck.half + .6 && z < shipDeck.z0 + .6 && z > shipDeck.z1 - shipDeck.half * 1.4; }
     // Night: the sea floor sits low, a third of the way up the hull, and drifts of sand bank up against its sides.
     function sandH(fx, fy){
+      if(region) return 0;
       var h = duneH(fx, fy, duneK(fx, floorZ - fy)) + (Math.abs(fx) > 12 ? (Math.abs(fx) - 12) * .25 : 0);
       if(!shipDeck) return h;
       var zz = floorZ - fy, along = zz < shipDeck.z0 + 2 && zz > shipDeck.z1 - shipDeck.half * 1.4, out = Math.abs(fx) - shipDeck.half;
@@ -811,7 +840,8 @@
         var qb = reef3dQBlock(night); qb.position.set(s.x, REEF3D_QY + (s.y || 0), s.z); qb.traverse(function(c){ c.userData.space = s.i; }); scene.add(qb); hitables.push(qb); s.qb = qb;
       }
       if(s.kind === 'deck' || s.kind === 'treasure' || s.kind === 'story'){
-        var set = night ? ['crate', 'barrel', 'anchor', 'wheel', 'cannon', 'lantern'] : ['brain', 'staghorn', 'fan', 'clam', 'sponge', 'anemone'];
+        var regionProps = { town:['crate','barrel','anchor','wheel','lantern'], lagoon:['story','clam','sponge','star','fan'], caves:['rock','lantern','rock','star'], patterns:['star','clam','sponge','star'], beach:['story','clam','star','sponge'], light:['lantern','rock','barrel','star'], captain:['crate','barrel','anchor','wheel','lantern'] };
+        var set = region ? (regionProps[region.id] || regionProps.town) : night ? ['crate', 'barrel', 'anchor', 'wheel', 'cannon', 'lantern'] : ['brain', 'staghorn', 'fan', 'clam', 'sponge', 'anemone'];
         var kind = s.kind === 'deck' ? set[reefHash(s.item.d.id) % set.length] : s.kind;
         var MODEL_FOR = { crate: [s.i % 2 ? 'crateBottles' : 'crate', 1.1], barrel: ['barrel', 1.2], cannon: ['cannon', 1], treasure: ['chest', 1.1], story: ['bottle', 1.3] };
         var o = (MODEL_FOR[kind] && reef3dModel(models, MODEL_FOR[kind][0], MODEL_FOR[kind][1], kit.grad)) || B[kind](r);
@@ -830,7 +860,7 @@
     // Scenery off the path.
     function nearPath(x, z){ for(var i = 0; i < spaces.length; i++){ var dx = spaces[i].x - x, dz = spaces[i].z - z; if(dx * dx + dz * dz < 12) return true; } return false; }
     var setD = night ? ['kelp', 'rock', 'plank', 'coralBall', 'rock'] : ['kelp', 'coralBall', 'rock', 'staghorn', 'coralBall', 'star', 'kelp'];
-    for(var n = 0; n < mainN * 3.2; n++){
+    for(var n = 0; !region && n < mainN * 3.2; n++){
       var sx = (r() - .5) * 30, sz = 8 - r() * (mainN * 2.6 + 18);
       if(nearPath(sx, sz)) continue;
       if(shipDeck && Math.abs(sx) < shipDeck.half + 1.5 && sz < shipDeck.z0 + 1 && sz > shipDeck.z1 - shipDeck.half * 1.5) continue;   // nothing grows on the wreck
@@ -842,13 +872,13 @@
       if(!d) d = B[nm](r);
       d.position.set(sx, shipDeck ? groundY(sx, sz) + .15 : 0, sz); d.rotation.y = r() * 6; d.scale.multiplyScalar(.7 + r() * .7); statics.add(d);
     }
-    var wreckM = night ? reef3dModel(models, 'wreck', 7, kit.grad, '#3c5560') : null;
+    var wreckM = night && !region ? reef3dModel(models, 'wreck', 7, kit.grad, '#3c5560') : null;
     if(wreckM){ // the pirate shipwreck lies beside the middle of the path
       wreckM.traverse(function(m){ if(/^grass/.test(m.name || '')) m.visible = false; });
       var wmid = spaces[Math.floor(mainN / 2)], wside = wmid.x > 0 ? -1 : 1;
       wreckM.position.set(wmid.x + wside * (shipDeck ? shipDeck.half + 13 : 11), shipDeck ? shipDeck.sand - 1 : -.3, wmid.z - 3); wreckM.rotation.y = wside > 0 ? -.6 : Math.PI + .6; wreckM.scale.multiplyScalar(1);
       statics.add(wreckM);
-    } else if(night){ // the sunken ship lies on its side beside the middle of the path, half buried in the silt
+    } else if(night && !region){ // the sunken ship lies on its side beside the middle of the path, half buried in the silt
       var mid = spaces[Math.floor(mainN / 2)], ship = new THREE.Group();
       var hs = new THREE.Shape(); hs.moveTo(-6, 1.2); hs.quadraticCurveTo(-5.4, -1.6, -1, -2); hs.lineTo(3.6, -2); hs.quadraticCurveTo(6.4, -1.4, 7, 1.6); hs.lineTo(-6, 1.2);
       var hull = mesh(new THREE.ExtrudeGeometry(hs, { depth: 3, bevelEnabled: true, bevelSize: .35, bevelThickness: .35, bevelSegments: 3, curveSegments: 18 }), M('#5a4332'));
@@ -866,7 +896,7 @@
       var side = mid.x > 0 ? -1 : 1;
       ship.position.set(mid.x + side * 11.5, .6, mid.z - 3); ship.rotation.set(0, side > 0 ? -.35 : Math.PI + .35, side * .32);
       statics.add(ship);
-    } else { // a coral-covered rock arch over the path, partway along
+    } else if(!region){ // a coral-covered rock arch over the path, partway along
       var a = spaces[Math.floor(mainN * .6)], arch = mesh(new THREE.TorusGeometry(4.2, .9, 12, 36, Math.PI), M('#a9bcb9'), a.x, -.2, a.z);
       statics.add(arch);
       for(var q = 0; q < 9; q++){ var ang = q / 8 * Math.PI, cb = B.coralBall(r); cb.position.set(a.x + Math.cos(ang) * 4.2, Math.sin(ang) * 4.2 + .5, a.z); cb.scale.setScalar(.55); statics.add(cb); }
@@ -890,10 +920,10 @@
         lamp = { glow: lantern.userData.glow, halo: lantern.userData.halo, pool: pool };
       }
     }
-    var reefFx = !night ? reef3dReefGarden({ THREE: THREE, scene: scene, statics: statics, spaces: spaces, mainN: mainN, M: M, mesh: mesh, B: B, r: reefRand(mainN * 17 + 3), groundY: groundY, taken: deckObjs.map(function(d){ return [d.position.x, d.position.z]; }) }) : null;
-    var wreckFx = shipDeck ? reef3dWreckDeck({ THREE: THREE, scene: scene, statics: statics, deck: shipDeck, spaces: spaces, mainN: mainN, M: M, mesh: mesh, B: B, r: r, models: models, kit: kit, deckObjs: deckObjs }) : null;
+    var reefFx = !night && !region ? reef3dReefGarden({ THREE: THREE, scene: scene, statics: statics, spaces: spaces, mainN: mainN, M: M, mesh: mesh, B: B, r: reefRand(mainN * 17 + 3), groundY: groundY, taken: deckObjs.map(function(d){ return [d.position.x, d.position.z]; }) }) : null;
+    var wreckFx = shipDeck && !region ? reef3dWreckDeck({ THREE: THREE, scene: scene, statics: statics, deck: shipDeck, spaces: spaces, mainN: mainN, M: M, mesh: mesh, B: B, r: r, models: models, kit: kit, deckObjs: deckObjs }) : null;
     // Tall towers in the haze on both sides give the sea floor depth: coral by day, rock spires at night.
-    for(var tz = 6; tz > -mainN * 2.6 - 10; tz -= 7 + r() * 5){
+    for(var tz = 6; !region && tz > -mainN * 2.6 - 10; tz -= 7 + r() * 5){
       [-1, 1].forEach(function(sd){
         var tw = new THREE.Group(), hgt = 4 + r() * 6, x = sd * (15 + r() * 8);
         if(night){ var sp = mesh(new THREE.ConeGeometry(1.4 + r(), hgt, 7), M('#25363c')); sp.position.y = hgt / 2; tw.add(sp); }
@@ -907,9 +937,9 @@
     }
     // Drifting bubbles (by day) or marine snow (by night).
     var bubbleGeo = new THREE.SphereGeometry(.07, 8, 6), bubbleMat = new THREE.MeshBasicMaterial({ color: night ? '#d8efe8' : '#ffffff', transparent: true, opacity: .55 });
-    var bubbles = new THREE.InstancedMesh(bubbleGeo, bubbleMat, 70), bubbleData = [], dummy = new THREE.Object3D();
-    for(var bI = 0; bI < 70; bI++) bubbleData.push({ x: (r() - .5) * 26, y: r() * 8, z: 6 - r() * 40, s: .4 + r() * 1.2, v: .2 + r() * .5 });
-    scene.add(bubbles);
+    var bubbles = new THREE.InstancedMesh(bubbleGeo, bubbleMat, region ? 1 : 70), bubbleData = [], dummy = new THREE.Object3D();
+    if(!region){ for(var bI = 0; bI < 70; bI++) bubbleData.push({ x: (r() - .5) * 26, y: r() * 8, z: 6 - r() * 40, s: .4 + r() * 1.2, v: .2 + r() * .5 });
+      scene.add(bubbles); }
 
     // Moving caustics on the sand: a cell pattern in the floor's glow channel that drifts.
     var caus = (function(){
@@ -926,8 +956,8 @@
     })();
     // The sand covers the whole screen, so it gets the cheapest shader of all: baked light plus the drifting
     // caustics added on top (see reef3dSandMat).
-    floor.material = M(night ? '#2f3e3e' : '#d9cba6'); reef3dBakeObject(floor, rig, bake);
-    floor.material = reef3dSandMat(caus, new THREE.Color(night ? '#2a6f78' : '#fff6da').multiplyScalar(.2));
+    floor.material = M(regionGround ? (night ? reef3dShade(regionGround, -.42) : regionGround) : (night ? '#2f3e3e' : '#d9cba6')); reef3dBakeObject(floor, rig, bake);
+    if(!region) floor.material = reef3dSandMat(caus, new THREE.Color(night ? '#2a6f78' : '#fff6da').multiplyScalar(.2));
 
     // Light rays slanting down from the surface; they travel with the camera.
     var rayTex = (function(){
@@ -940,7 +970,7 @@
       return new THREE.CanvasTexture(c);
     })();
     var rays = new THREE.Group(), rayList = [];
-    for(var ri = 0; ri < 7; ri++){
+    for(var ri = 0; !region && ri < 7; ri++){
       var rm = new THREE.Mesh(new THREE.PlaneGeometry(1.4 + r() * 1.8, 18), new THREE.MeshBasicMaterial({ map: rayTex, color: night ? '#7fe0d6' : '#fffbe8', transparent: true, opacity: night ? .05 : .14, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false }));
       rm.position.set((r() - .5) * 20, 6.5, -4 - r() * 14); rm.rotation.set(0, (r() - .5) * .8, .32 + (r() - .5) * .1);
       rm.userData.base = rm.material.opacity; rm.userData.ph = r() * 6; rays.add(rm); rayList.push(rm);
@@ -956,7 +986,7 @@
       return f;
     }
     var fishMixers = [], schools = [], schoolCols = night ? ['#6fb3c9', '#8a7fc4', '#5fa39a'] : ['#ff9a6b', '#ffd166', '#7fc8f0'];
-    for(var sI = 0; sI < 3; sI++){
+    for(var sI = 0; !region && sI < 3; sI++){
       var sch = { fish: [], ph: r() * 6, rad: 3.5 + r() * 2.5, h: 2.2 + r() * 1.6, spd: (.16 + r() * .1) * (sI % 2 ? -1 : 1), off: (r() - .5) * 8, hx: null, hz: null };
       for(var fI = 0; fI < (models.fish1 ? 3 : 5); fI++){
         var fm = reef3dModel(models, ['fish1', 'fish2', 'fish1'][sI], .36, kit.grad, sI === 2 ? '#ffd166' : null), mx = null;
@@ -970,7 +1000,7 @@
       schools.push(sch);
     }
     // A whale (a manta ray at night) glides slowly far off in the haze.
-    var bigOne = reef3dModel(models, night ? 'manta' : 'whale', night ? .45 : 2.6, kit.grad), bigMixer = null;
+    var bigOne = !region ? reef3dModel(models, night ? 'manta' : 'whale', night ? .45 : 2.6, kit.grad) : null, bigMixer = null;
     // It starts far off: with Calm motion it never swims, so it must not sit on top of the guide.
     if(bigOne){ var bw = new THREE.Group(); bw.add(bigOne); bigOne = bw; bw.position.set(22, night ? 4.5 : 6, spaces[0].z - 18); scene.add(bigOne); bigMixer = new THREE.AnimationMixer(bw.children[0].userData.root); var bc = bw.children[0].userData.gltf.animations[0]; if(bc) bigMixer.clipAction(bc).play(); fishMixers.push(bigMixer); }
     // Coins in a ring around the Treasure Reef, gems here and there, and a star over the next deck.
@@ -1018,23 +1048,24 @@
         b.innerHTML = '<span class="r3-emoji" aria-hidden="true">'+it.d.emoji+'</span><span><b>'+esc(it.d.name)+'</b><small>'+esc(label)+'</small></span>' + (it.state === 'done' ? '<i class="r3-star" aria-hidden="true">★</i>' : '');
         b.setAttribute('aria-label', it.d.name + '. ' + (it.state === 'ready' ? 'Ready to practice.' : it.state === 'done' ? 'All done. Tap to play again.' : 'Tap to ' + it.kind.toLowerCase() + '.'));
       } else {
-        var t = s.kind === 'treasure' ? ['🐠', 'Aquarium', 'My sea friends'] : ['🍾', 'Story Bottle', 'Make a story'];
+        var t = s.kind === 'treasure' ? (region ? ['🧰', 'Treasure cache', 'Find extra shells'] : ['🐠', 'Aquarium', 'My sea friends'])
+          : (region ? ['🍾', 'Bonus bottle', 'A surprise on the route'] : ['🍾', 'Story Bottle', 'Make a story']);
         b.innerHTML = '<span class="r3-emoji" aria-hidden="true">'+t[0]+'</span><span><b>'+t[1]+'</b><small>'+t[2]+'</small></span>';
         b.setAttribute('aria-label', t[1] + '. ' + t[2] + '.');
       }
       b.dataset.space = s.i; s.label = b; labels.appendChild(b);
       if(s.kind === 'deck' && s.first){
-        var names = REEF_ZONE_NAMES[night ? 'night' : 'day'], zn = names[s.zone.id] || s.zone.label;
+        var names = REEF_ZONE_NAMES[night ? 'night' : 'day'], zn = region ? region.name : names[s.zone.id] || s.zone.label;
         var sign = document.createElement('button'); sign.type = 'button'; sign.className = 'r3-sign'; sign.dataset.space = s.i; sign.setAttribute('aria-label', zn + '. Go to ' + s.item.d.name + '.');
         sign.innerHTML = '<b>'+esc(zn)+'</b><small>'+esc(s.zone.label)+'</small>'; s.sign = sign; labels.appendChild(sign);
       }
     });
 
     var view = {
-      wrap: wrap, renderer: renderer, scene: scene, cam: cam, spaces: spaces, guide: guide, ring: ring, night: night,
+      wrap: wrap, renderer: renderer, scene: scene, cam: cam, spaces: spaces, guide: guide, ring: ring, night: night, region: region,
       at: 0, moving: false, camPos: new THREE.Vector3(), camLook: new THREE.Vector3(), t0: performance.now(),
       bubbles: bubbles, bubbleData: bubbleData, dummy: dummy, swayers: swayers, hitables: hitables, sun: sun, key: '', dirty: true,
-      caus: caus, rays: rays, rayList: rayList, schools: schools, fx: [], kit: kit,
+      caus: caus, rays: rays, rayList: rayList, schools: schools, fx: [], kit: kit, regionGround: regionGround,
       fishMixers: fishMixers, bigOne: bigOne, models: models, baked: true, blobG: blobG, blobC: blobC, glowG: glowG, groundY: groundY,
       crab: crab, crabFit: crabFit, crabGap: reefCrabExtent(guide) / 2 + crabFit / 2 + .2, leaving: null, spareCrab: null, chestMixer: chestMixer, chestActs: chestActs, nextStar: nextStar, spinners: spinners, lastT: performance.now(),
       plume: plume, lamp: lamp, wreck: wreckFx, reefFx: reefFx, shipDeck: shipDeck, rig: rig, bake: bake, floor: floor

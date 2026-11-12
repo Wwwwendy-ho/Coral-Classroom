@@ -90,6 +90,7 @@
 
   /* ---------- Opening it, and coming back ---------- */
   function openCaptain(tab){
+    regionBoardOpen('captain', !!tab);
     try { Speech.stop(); } catch(e){}
     S.deckBack = false;
     S.currentDeckId = null;
@@ -144,6 +145,7 @@
 
   /* ---------- The screen ---------- */
   function renderCaptain(){
+    if((!(S.captain && S.captain.cp)) && regionBoardRender('captain')) return;
     var C = S.captain || (S.captain = { tab: 'today' });
     var tabs = [['today', 'Today', 'compass'], ['course', 'Your course', 'map'], ['can', 'What you can do', 'trophy']];
     var body = C.cp ? deckCheckHTML(C) : C.tab === 'course' ? deckCourseHTML(C) : C.tab === 'can' ? deckCanHTML() : deckTodayHTML(C);

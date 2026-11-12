@@ -48,6 +48,7 @@
   }
 
   function openTown(){
+    regionBoardOpen('town');
     try { Speech.stop(); } catch(e){}
     S.currentDeckId = null;
     S.town = { deck: S.town && S.town.deck || null, slow: !!(S.town && S.town.slow) };
@@ -61,7 +62,7 @@
     }).catch(function(){});
   }
   function renderTown(){
-    townBoardStop();
+    if((true) && regionBoardRender('town')) return;
     var T = S.town || (S.town = {}), list = townRanked(T.deck);
     var best = list.find(function(x){ return !x.done; });
     var rows = list.map(function(x){
@@ -75,18 +76,16 @@
       '</button></li>';
     }).join('');
     app.innerHTML = '<div class="nav-row"><button class="back-btn" data-act="tw-home">⟵ Reef</button><span class="nav-title">' + ccIcon('talk') + ' Harbor Town</span></div>' +
-      townBoardHTML() + '<div class="lg-page">' +
+      '<div class="lg-page">' +
         '<div class="lg-intro"><h2>Talk with the townsfolk</h2><p>Jump straight into a conversation whenever you like. Your next suggested conversation is at the top.</p></div>' +
         '<ul class="lg-list">' + rows + '</ul>' +
       '</div>';
-    townBoardMount();
     app.querySelector('[data-act="tw-home"]').addEventListener('click', function(){ goHome(); });
     app.querySelectorAll('[data-tw-open]').forEach(function(b){ b.addEventListener('click', function(){ townOpenTalk(b.dataset.twOpen); }); });
   }
 
   function townOpenTalk(id){
     var f = townFolk(id); if(!f) return;
-    townBoardStop();
     try { Speech.stop(); } catch(e){}
     var T = S.town || (S.town = {});
     T.id = id; T.node = f.start; T.log = []; T.tried = {}; T.turns = {}; T.showEn = {}; T.word = null; T.typed = ''; T.typeMsg = '';
@@ -369,5 +368,3 @@
     var inp = app.querySelector('#twType');
     if(inp) inp.addEventListener('input', function(){ T.typed = inp.value; });
   }
-
-  afterRender('town-board-lifecycle', function(){ if(S.view !== 'town') townBoardStop(); });

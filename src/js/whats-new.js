@@ -52,6 +52,10 @@
     { id:'harbor-town-board', date:'2026-11-11', need:'course', steps:[
       { at:'.r3-mapbtn', say:'Harbor Town is open on the treasure map. Talk with the townsfolk of your trip, in Korean.' },
       { text:'Harbor Town now has streets to explore. Roll the dice, choose a route, and meet the townsfolk. Switch between day and night, or jump straight into any conversation below the board.' }
+    ] },
+    { id:'region-worlds', date:'2026-11-12', need:'course', steps:[
+      { at:'.r3-mapbtn', text:'Every region now has a full 3D board, with the same dice, characters, rewards and movement as Coral Cove. Visit Harbor Town’s streets and waterfront, Echo Caves, Bottle Beach and the other islands from the sea map.' },
+      { text:'Each board has its own setting. Land on a lesson to learn there, or use Activities to go straight to any lesson. Captain’s Deck keeps your plan and progress one tap away.' }
     ] }
   ];
   var WN_RECENT_DAYS = 14;   // a brand-new profile is shown only what's new in the last two weeks, not the whole history

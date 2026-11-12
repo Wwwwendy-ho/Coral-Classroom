@@ -73,6 +73,7 @@
   }
 
   function openLagoon(){
+    regionBoardOpen('lagoon');
     try { Speech.stop(); } catch(e){}
     S.currentDeckId = null;
     S.lagoon = { deck: S.lagoon && S.lagoon.deck || null };
@@ -86,6 +87,7 @@
     }).catch(function(){});
   }
   function renderLagoon(){
+    if((true) && regionBoardRender('lagoon')) return;
     var L = S.lagoon || (S.lagoon = {}), list = lagoonRanked(L.deck);
     var best = list.find(function(x){ return !x.done; });
     var rows = list.map(function(x){

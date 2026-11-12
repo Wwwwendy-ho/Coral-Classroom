@@ -491,7 +491,7 @@
     ['[data-act="toggle-edit-mode"]', 'edit', 'Edit decks'],
     ['[data-r3-games]', 'games', 'Minigame corner'],
     ['.r3 [data-music-toggle]', null, function(b){ return b.getAttribute('aria-pressed') === 'true' ? 'Music: on' : 'Music: off'; }],
-    ['[data-r3-theme]', null, function(){ return reefNight() ? 'Sunlit reef' : 'Midnight wreck'; }],
+    ['[data-r3-theme]', null, function(){ return R3.view && R3.view.region ? (reefNight() ? 'Day view' : 'Night view') : reefNight() ? 'Sunlit reef' : 'Midnight wreck'; }],
     ['[data-act="toggle-sound"]', null, function(b){ return /off/.test(b.getAttribute('aria-label') || '') ? 'Sounds: on' : 'Sounds: off'; }],
     ['[data-act="switch-profile"]', 'profiles', 'Switch profile'],
     ['[data-act="end-session"]', 'flag', 'End session'],
@@ -524,15 +524,16 @@
     m.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ reefBoardMenuClose(); btn.focus(); } });
     document.addEventListener('pointerdown', reefBoardMenuOutside, true);
   }
-  afterRender('board menu', function(){
+  function reefBoardMenuSync(){
     reefBoardMenuClose();
-    var bar = document.querySelector('.cv3-hero .topbar > :last-child'); if(!bar || bar.querySelector('.r3-menubtn')) return;
+    var bar = document.querySelector('.cv3-hero .topbar > :last-child') || document.querySelector('.rb-actions'); if(!bar || bar.querySelector('.r3-menubtn')) return;
     var b = document.createElement('button'); b.type = 'button'; b.className = 'icon-btn r3-menubtn'; b.setAttribute('aria-label', 'Menu'); b.setAttribute('aria-haspopup', 'menu'); b.setAttribute('aria-expanded', 'false'); b.title = 'Menu';
     b.innerHTML = ccIcon('menu'); b.addEventListener('click', function(){ reefBoardMenuOpen(b); });
     bar.appendChild(b);
     var wn = document.createElement('button'); wn.type = 'button'; wn.hidden = true; wn.setAttribute('data-whats-new', ''); wn.setAttribute('aria-label', 'What\'s new');
     wn.addEventListener('click', function(){ reefWhatsNew(true); }); bar.appendChild(wn);   // played from the menu (see whats-new.js)
-  });
+  }
+  afterRender('board menu', reefBoardMenuSync);
 
   /* ---------- No grown-up check in the Claude version (Wendy's choice). The GitHub/iPad copy loads its seed data
      file, which defines CORAL_COVE_SEED, and asks the grown-up maths question (reefGrownUpGate) wherever a PIN

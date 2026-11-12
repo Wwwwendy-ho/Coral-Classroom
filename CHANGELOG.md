@@ -1,5 +1,13 @@
 # Changelog
 
+## A 3D world for every region (November 12, 2026)
+
+- All seven regions now use Coral Cove’s full-screen 3D board-game engine: the same characters, follow camera, dice, movement, shop, rewards and effects.
+- Each region has its own environment: harbor streets and waterfront, lagoon islets, crystal caves, coral terraces, sandy shore, lighthouse cliffs and the captain’s ship.
+- Activities lead to the existing lessons and progress. Direct activity lists remain available, Captain’s plan/course/progress stay accessible, and positions are saved separately for each region.
+- Seven original, loopable region songs share the game’s warm acoustic style with instruments and rhythms suited to each setting. Music is included in the offline download and still fades beneath speech.
+- Replaces the standalone Harbor Town pilot renderer with the shared game engine.
+
 ## Harbor Town streets (November 11, 2026)
 
 - Explore a 36-space figure-eight town board, with two shortcut choices, a hopping player, and day and night views.

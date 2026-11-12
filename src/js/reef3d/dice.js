@@ -144,7 +144,8 @@
       var box = document.createElement('div'); box.className = 'r3-fork'; box.setAttribute('role', 'group'); box.setAttribute('aria-label', 'Which way?');
       box.innerHTML = '<b>Which way?</b>' + opts.map(function(n){
         var br = sp[n].branch;
-        var lab = br === 'treasure' ? ccIcon('fish') + 'Aquarium' : br === 'story' ? ccIcon('bottle') + 'Story Bottle' : ccIcon('arrow-up') + 'Keep going';
+        var lab = br === 'treasure' ? (view.region ? '🧰 Treasure cache' : ccIcon('fish') + 'Aquarium')
+          : br === 'story' ? (view.region ? ccIcon('bottle') + 'Bonus bottle' : ccIcon('bottle') + 'Story Bottle') : ccIcon('arrow-up') + 'Keep going';
         return '<button type="button" data-fork="' + n + '">' + lab + '</button>';
       }).join('');
       view.wrap.appendChild(box); d.fork = box;
@@ -157,11 +158,11 @@
     }
     function land(){
       reef3dDiceDone(view, d);
-      S.reef3dAt = view.at;
+      reef3dSavePosition(view, view.at);
       var s = sp[view.at];
       if(gateStop) reef3dPrize(view, '🐚', 'The clam is shut!', 'It opens again next turn.');
       if(story >= 0 && view.at === story) return reef3dStoryArrive(view, s);
-      if(s.kind === 'treasure' || s.kind === 'story') return reef3dArrive(view, s);   // the end of a branch: go in
+      if((view.region && s.kind === 'deck') || s.kind === 'treasure' || s.kind === 'story') return reef3dArrive(view, s);   // the end of a branch: go in
       reef3dVisit(view, s, false, function(){ reef3dAfterTurn(view); });
     }
     d.startAt = view.at;

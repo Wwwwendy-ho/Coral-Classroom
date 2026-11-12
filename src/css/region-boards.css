@@ -1,0 +1,39 @@
+.rb-root { position:relative; min-height:100svh; isolation:isolate; background:linear-gradient(180deg,#74d9e3,#0d6077); color:#123b49; }
+.rb-root.night { background:linear-gradient(180deg,#122e48,#081d34); color:#f3f4e8; }
+.rb-root .rb-scene { min-height:100svh; padding:7rem 1rem 9rem; box-sizing:border-box; }
+.rb-root.has-3d .rb-scene { display:none; }
+.rb-overlay { position:fixed; z-index:45; top:calc(max(.65rem,env(safe-area-inset-top)) + 6.6rem); left:max(.7rem,env(safe-area-inset-left)); right:max(.7rem,env(safe-area-inset-right)); display:flex; align-items:flex-start; justify-content:space-between; gap:.7rem; pointer-events:none; }
+.rb-title,.rb-actions button,.rb-near,.rb-guide { border:1px solid rgba(255,255,255,.7); border-radius:1rem; background:rgba(255,250,235,.95); box-shadow:0 5px 20px rgba(2,31,52,.2); backdrop-filter:blur(12px); }
+.rb-root.night .rb-title,.rb-root.night .rb-actions button,.rb-root.night .rb-near,.rb-root.night .rb-guide { background:rgba(17,45,64,.94); border-color:rgba(171,234,243,.35); color:#f5f7ef; }
+.rb-title { display:flex; align-items:center; gap:.5rem; padding:.55rem .8rem; pointer-events:auto; max-width:min(39rem,53vw); }
+.rb-title > .cc-ic { width:2rem; height:2rem; flex:none; }
+.rb-title b,.rb-title small { display:block; }
+.rb-title b { font:900 clamp(1rem,2vw,1.3rem) var(--font-display,Fredoka,sans-serif); }
+.rb-title small { font-size:.8rem; line-height:1.2; }
+.rb-actions { position:fixed; top:max(.65rem,env(safe-area-inset-top)); right:max(.7rem,env(safe-area-inset-right)); display:flex; gap:.4rem; pointer-events:auto; }
+.rb-actions button,.rb-near button { cursor:pointer; color:inherit; font:800 .92rem var(--font-body,sans-serif); }
+.rb-actions button { display:flex; align-items:center; gap:.35rem; padding:.7rem .8rem; min-height:44px; }
+.rb-actions .cc-ic,.rb-near .cc-ic,.rb-guide .cc-ic { width:1.25rem; height:1.25rem; flex:none; }
+.rb-near { display:flex; align-items:center; flex-wrap:wrap; gap:.35rem; padding:.3rem .45rem; border-bottom:1px solid rgba(59,127,145,.25); }
+.rb-near > span { font-size:.75rem; font-weight:900; padding:.3rem; }
+.rb-near button { display:flex; align-items:center; gap:.25rem; padding:.45rem; border:0; border-radius:.65rem; background:transparent; }
+.rb-near button:hover,.rb-near button:focus-visible { background:rgba(70,166,189,.2); }
+.rb-guide { position:fixed; z-index:46; right:max(.7rem,env(safe-area-inset-right)); top:calc(max(.65rem,env(safe-area-inset-top)) + 3.25rem); max-width:min(26rem,calc(100vw - 1.4rem)); pointer-events:auto; }
+.rb-guide summary { cursor:pointer; padding:.65rem .85rem; display:flex; align-items:center; gap:.4rem; font-weight:900; min-height:44px; box-sizing:border-box; }
+.rb-guide[open] { max-height:calc(100svh - 6rem); display:flex; flex-direction:column; }
+.rb-guide-list { overflow:auto; padding:.25rem; }
+.rb-card { display:flex; align-items:center; gap:.6rem; width:100%; text-align:left; padding:.65rem; color:inherit; background:transparent; border:0; border-radius:.7rem; cursor:pointer; }
+.rb-card:hover,.rb-card:focus-visible { background:rgba(69,161,186,.2); }
+.rb-card-icon { display:grid; place-items:center; width:2rem; height:2rem; flex:none; border-radius:.55rem; background:#daf4ef; color:#176477; }
+.rb-card-icon .cc-ic { width:1.3rem; height:1.3rem; }
+.rb-card b,.rb-card small { display:block; }
+.rb-card small { font-size:.76rem; opacity:.8; }
+.rb-done { margin-left:auto; color:#168061; }
+.rb-fallback { max-width:38rem; margin:auto; padding:1rem; border-radius:1rem; background:rgba(255,250,235,.92); color:#153d4b; }
+.rb-fallback h2 { margin:.2rem 0; }
+.rb-fallback p { margin:.2rem 0 .7rem; }
+.rb-return { margin-left:auto; }
+@media (max-width:600px) { .rb-title { max-width:44vw; } .rb-title small,.rb-actions button span,.rb-near > span { display:none; } .rb-actions button { padding:.65rem; } .rb-near button span { font-size:.72rem; } }
+@media (max-height:500px) { .rb-overlay { top:calc(max(.4rem,env(safe-area-inset-top)) + 5rem); } .rb-actions { top:max(.4rem,env(safe-area-inset-top)); } .rb-guide { top:calc(max(.4rem,env(safe-area-inset-top)) + 3rem); } .rb-guide[open] { max-height:calc(100svh - 4.5rem); } .rb-title small { display:none; } }
+/* Keep the voyage shortcut clear of the shared die picker at the bottom. */
+.rb-root .r3-voybtn { top:calc(max(.65rem,env(safe-area-inset-top)) + 11rem); bottom:auto; }

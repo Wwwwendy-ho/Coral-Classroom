@@ -152,9 +152,13 @@ There is no PIN. On GitHub, `reefGrownUpGate(kind)` shows a times question; a ri
 (`reefInsideAdult(kind)`: only opening the profile and Manage Profiles ask). The Library asks the app through
 `window.CoralCove.needsGrownUpCheck()`, so its Settings follow the same rules.
 
-## Harbor Town pilot board
+## Regional 3D boards
 
-`src/js/town-board.js` keeps the pilot engine in a `TownBoard` closure. `townBoardHTML`, `townBoardMount` and `townBoardStop` are its narrow integration with `town.js`; `src/css/town-board.css` styles it. The 36 tile kinds, positions and edges describe a figure-eight route with two shortcuts. The board reuses `TOWN_FOLK` and existing conversation/learner behavior. Per-profile `cc-town-board-<profileId>` stores position, shells, stars, turns, items and board theme. Three.js renders on demand, limits pixel ratio to 1.5, and disposes geometries/materials/textures/context on exit. A drawn SVG and street guide cover WebGL failure. `window.__townBoardView()` exposes read-only diagnostics; `tools/check/town_board_smoke.js` covers phone/tablet orientations and themes.
+`src/js/region-boards.js` adapts the seven regions to Coral Cove's existing `reef3dMount` renderer and party engine. Front-page render functions call `regionBoardRender`; direct learning screens keep their existing content, learner records and audio. `regionBoardLaunch` opens a space's activity, and Activities keeps a direct list/dashboard available. Captain's Deck also preserves explicit tab links.
+
+Zones carry a `region` descriptor and each learning destination carries `d.regionActivity`. The renderer shares characters, camera, dice, travel, shop, rewards, effects and quality controls; regional decoration is in `reef3d/region-scenery.js`. Regional ground and scenery replace the reef/wreck setting. `cc-region-board-at-<profile>-<region>` stores each region's position separately from Coral Cove. `region-boards.css` arranges regional navigation around the shared controls. The old standalone Harbor Town renderer has been removed.
+
+`tools/check/region_boards_smoke.js` verifies shared-engine worlds and learning/board navigation and captures phone/tablet orientations in day/night. `window.__regionBoardView()` supplies read-only adapter diagnostics alongside the existing Reef 3D view diagnostics. Physical iPhone XS performance still requires a hardware check.
 
 ## 3D (the reef board and lobby)
 
@@ -168,6 +172,8 @@ There is no PIN. On GitHub, `reefGrownUpGate(kind)` shows a times question; a ri
 - The three.js GLTFLoader is bundled inside the script, marked `THIRD-PARTY CODE`; don't edit it.
 
 ## Sound
+
+The seven regional boards select `region-<id>-song.mp3` through `reefMusicTarget`; learning screens retain the quiet deck/timer music. `tools/compose_regions.py` renders the original scores with the MIT-licensed FluidR3 General MIDI soundfont, preserves loop tails, and normalizes them consistently. The service worker precaches all board music. `window.__reefMusicState()` exposes read-only target and playback levels for QA.
 
 `Background music` picks a song per place (day reef, night ship, lobby, deck, timed cards, minigames). Spoken
 answers use the voice packs in `voice/` on GitHub, recorded clips where they exist, and the device's voice

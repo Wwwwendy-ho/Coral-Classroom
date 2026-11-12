@@ -21,6 +21,7 @@
   function lhManner(id){ return LH_MANNERS.find(function(s){ return s.id === id; }) || null; }
 
   function openLight(){
+    regionBoardOpen('light');
     try { Speech.stop(); } catch(e){}
     S.currentDeckId = null;
     S.light = { view: 'list', deck: S.light && S.light.deck || null };
@@ -32,6 +33,7 @@
     }).catch(function(){});
   }
   function renderLight(){
+    if((!S.light || S.light.view === 'list') && regionBoardRender('light')) return;
     var L = S.light || (S.light = { view: 'list' });
     var sign = L.view === 'sign' && lhSign(L.id), note = L.view === 'manner' && lhManner(L.id);
     var back = sign || note ? '<button class="back-btn" data-act="lh-back">⟵ Lighthouse</button>' : '<button class="back-btn" data-act="lh-home">⟵ Reef</button>';

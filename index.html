@@ -11754,7 +11754,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     ['[data-act="toggle-edit-mode"]', 'edit', 'Edit decks'],
     ['[data-r3-games]', 'games', 'Minigame corner'],
     ['.r3 [data-music-toggle]', null, function(b){ return b.getAttribute('aria-pressed') === 'true' ? 'Music: on' : 'Music: off'; }],
-    ['[data-r3-theme]', null, function(){ return reefNight() ? 'Sunlit reef' : 'Midnight wreck'; }],
+    ['[data-r3-theme]', null, function(){ return R3.view && R3.view.region ? (reefNight() ? 'Day view' : 'Night view') : reefNight() ? 'Sunlit reef' : 'Midnight wreck'; }],
     ['[data-act="toggle-sound"]', null, function(b){ return /off/.test(b.getAttribute('aria-label') || '') ? 'Sounds: on' : 'Sounds: off'; }],
     ['[data-act="switch-profile"]', 'profiles', 'Switch profile'],
     ['[data-act="end-session"]', 'flag', 'End session'],
@@ -11787,15 +11787,16 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     m.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ reefBoardMenuClose(); btn.focus(); } });
     document.addEventListener('pointerdown', reefBoardMenuOutside, true);
   }
-  afterRender('board menu', function(){
+  function reefBoardMenuSync(){
     reefBoardMenuClose();
-    var bar = document.querySelector('.cv3-hero .topbar > :last-child'); if(!bar || bar.querySelector('.r3-menubtn')) return;
+    var bar = document.querySelector('.cv3-hero .topbar > :last-child') || document.querySelector('.rb-actions'); if(!bar || bar.querySelector('.r3-menubtn')) return;
     var b = document.createElement('button'); b.type = 'button'; b.className = 'icon-btn r3-menubtn'; b.setAttribute('aria-label', 'Menu'); b.setAttribute('aria-haspopup', 'menu'); b.setAttribute('aria-expanded', 'false'); b.title = 'Menu';
     b.innerHTML = ccIcon('menu'); b.addEventListener('click', function(){ reefBoardMenuOpen(b); });
     bar.appendChild(b);
     var wn = document.createElement('button'); wn.type = 'button'; wn.hidden = true; wn.setAttribute('data-whats-new', ''); wn.setAttribute('aria-label', 'What\'s new');
     wn.addEventListener('click', function(){ reefWhatsNew(true); }); bar.appendChild(wn);   // played from the menu (see whats-new.js)
-  });
+  }
+  afterRender('board menu', reefBoardMenuSync);
 
   /* ---------- No grown-up check in the Claude version (Wendy's choice). The GitHub/iPad copy loads its seed data
      file, which defines CORAL_COVE_SEED, and asks the grown-up maths question (reefGrownUpGate) wherever a PIN
@@ -13605,6 +13606,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   }
 
   function openLagoon(){
+    regionBoardOpen('lagoon');
     try { Speech.stop(); } catch(e){}
     S.currentDeckId = null;
     S.lagoon = { deck: S.lagoon && S.lagoon.deck || null };
@@ -13618,6 +13620,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     }).catch(function(){});
   }
   function renderLagoon(){
+    if((true) && regionBoardRender('lagoon')) return;
     var L = S.lagoon || (S.lagoon = {}), list = lagoonRanked(L.deck);
     var best = list.find(function(x){ return !x.done; });
     var rows = list.map(function(x){
@@ -14133,6 +14136,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   }
 
   function openTown(){
+    regionBoardOpen('town');
     try { Speech.stop(); } catch(e){}
     S.currentDeckId = null;
     S.town = { deck: S.town && S.town.deck || null, slow: !!(S.town && S.town.slow) };
@@ -14146,7 +14150,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     }).catch(function(){});
   }
   function renderTown(){
-    townBoardStop();
+    if((true) && regionBoardRender('town')) return;
     var T = S.town || (S.town = {}), list = townRanked(T.deck);
     var best = list.find(function(x){ return !x.done; });
     var rows = list.map(function(x){
@@ -14160,18 +14164,16 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       '</button></li>';
     }).join('');
     app.innerHTML = '<div class="nav-row"><button class="back-btn" data-act="tw-home">⟵ Reef</button><span class="nav-title">' + ccIcon('talk') + ' Harbor Town</span></div>' +
-      townBoardHTML() + '<div class="lg-page">' +
+      '<div class="lg-page">' +
         '<div class="lg-intro"><h2>Talk with the townsfolk</h2><p>Jump straight into a conversation whenever you like. Your next suggested conversation is at the top.</p></div>' +
         '<ul class="lg-list">' + rows + '</ul>' +
       '</div>';
-    townBoardMount();
     app.querySelector('[data-act="tw-home"]').addEventListener('click', function(){ goHome(); });
     app.querySelectorAll('[data-tw-open]').forEach(function(b){ b.addEventListener('click', function(){ townOpenTalk(b.dataset.twOpen); }); });
   }
 
   function townOpenTalk(id){
     var f = townFolk(id); if(!f) return;
-    townBoardStop();
     try { Speech.stop(); } catch(e){}
     var T = S.town || (S.town = {});
     T.id = id; T.node = f.start; T.log = []; T.tried = {}; T.turns = {}; T.showEn = {}; T.word = null; T.typed = ''; T.typeMsg = '';
@@ -14454,387 +14456,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     var inp = app.querySelector('#twType');
     if(inp) inp.addEventListener('input', function(){ T.typed = inp.value; });
   }
-
-  afterRender('town-board-lifecycle', function(){ if(S.view !== 'town') townBoardStop(); });
 /* end of src/js/town.js */
-/* from src/js/town-board.js */
-  /* Harbor Town pilot board. Kept in a closure so its scene and game state do not add to the shared app scope.
-     The three functions at the end are the only integration points for town.js. */
-  var TownBoard = (function(){
-    var N = 36, current = null, rollToken = 0;
-    var kinds = [
-      'talk','blue','blue','question','red','talk','blue','shop','blue','chance','talk','red',
-      'blue','minigame','talk','blue','question','star','talk','blue','red','chance','talk','blue',
-      'shop','blue','talk','question','red','minigame','talk','blue','chance','blue','talk','star'
-    ];
-    // The talk IDs are taken from TOWN_FOLK by index below, so additions to that data remain usable.
-    var talkAt = { 0:0, 5:1, 10:2, 14:3, 18:4, 22:5, 26:6, 30:7, 34:0 };
-    var names = { blue:'Blue space', red:'Red space', question:'Mystery space', chance:'Chance Time',
-      shop:'Bok’s shop', minigame:'Lantern game', star:'Star space', talk:'Town conversation' };
-    var colors = { blue:'#4e9ddd', red:'#ec7373', question:'#a77ad4', chance:'#ec9dca',
-      shop:'#e9b85c', minigame:'#58bdad', star:'#f5d371', talk:'#68afae' };
-    var pos = [];
-    for(var i = 0; i < N; i++){
-      var t = i * Math.PI * 2 / N;
-      pos.push({ x: 4.2 * Math.sin(2 * t) + (i === 0 ? .48 : i === 18 ? -.48 : 0),
-        z: 6.75 * Math.sin(t) + (i === 0 ? -.48 : i === 18 ? .48 : 0) });
-    }
-    var edges = [];
-    for(i = 0; i < N; i++) edges.push([i, (i + 1) % N]);
-    edges.push([8, 13], [26, 31]);
-
-    function key(){ return 'cc-town-board-' + (S.profile && S.profile.id || 'guest'); }
-    function read(){
-      var v = null;
-      try { v = JSON.parse(localStorage.getItem(key()) || 'null'); } catch(e){}
-      v = v && typeof v === 'object' ? v : {};
-      return { position: Number.isInteger(v.position) && v.position >= 0 && v.position < N ? v.position : 0,
-        shells: Number.isInteger(v.shells) && v.shells >= 0 ? Math.min(v.shells, 999) : 8,
-        stars: Number.isInteger(v.stars) && v.stars >= 0 ? Math.min(v.stars, 999) : 0,
-        turns: Number.isInteger(v.turns) && v.turns >= 0 ? v.turns : 0,
-        pass: !!v.pass, double: !!v.double, night: typeof v.night === 'boolean' ? v.night : reefNight() };
-    }
-    function save(){
-      if(!current) return;
-      var a = current.state;
-      try { localStorage.setItem(key(), JSON.stringify({ position:a.position, shells:a.shells, stars:a.stars,
-        turns:a.turns, pass:a.pass, double:a.double, night:a.night })); } catch(e){}
-    }
-    function icon(kind){
-      return ccIcon({blue:'sparkle',red:'heart',question:'bulb',chance:'sparkle',shop:'bag',
-        minigame:'games',star:'star',talk:'talk'}[kind] || 'map');
-    }
-    function folkAt(n){ return TOWN_FOLK[talkAt[n] || 0] || TOWN_FOLK[0]; }
-    function tileDescription(n){
-      var kind = kinds[n];
-      return kind === 'talk' ? folkAt(n).en + ' · ' + folkAt(n).place : names[kind];
-    }
-    function html(){
-      var a = read();
-      var roads = edges.map(function(e){ var p=pos[e[0]], q=pos[e[1]];
-        return '<path d="M' + (180+p.x*16).toFixed(1) + ' ' + (180+p.z*16).toFixed(1) + 'L' + (180+q.x*16).toFixed(1) + ' ' + (180+q.z*16).toFixed(1) + '"/>';
-      }).join('');
-      var mapTiles = pos.map(function(p,n){ return '<circle cx="' + (180+p.x*16).toFixed(1) + '" cy="' +
-        (180+p.z*16).toFixed(1) + '" r="6" fill="' + colors[kinds[n]] + '"/>'; }).join('');
-      var fallback = '<svg viewBox="0 0 360 360" role="img" aria-label="Figure eight town map with 36 colored spaces">' +
-        '<ellipse cx="180" cy="180" rx="100" ry="149" fill="' + (a.night ? '#536f6e' : '#e5d5ab') + '"/>' +
-        '<g fill="none" stroke="' + (a.night ? '#ad987e' : '#fdf2cc') + '" stroke-width="9" stroke-linecap="round">' + roads + '</g>' +
-        '<g stroke="#fff8e7" stroke-width="2">' + mapTiles + '</g></svg>';
-      var guide = kinds.map(function(kind, n){
-        return '<button type="button" class="tb-guide-space" data-tb-preview="' + n + '"><span class="tb-dot tb-' + kind + '"></span><b>' +
-          (n + 1) + '</b><span>' + esc(tileDescription(n)) + '</span></button>';
-      }).join('');
-      return '<section class="tb-root' + (a.night ? ' tb-night' : '') + '" aria-label="Harbor Town board">' +
-        '<div class="tb-top"><div><span class="tb-kicker">STREETS BY THE SEA</span><h2>Take a walk through town</h2></div>' +
-          '<button type="button" class="tb-theme" data-tb-night aria-label="Switch to ' + (a.night ? 'day' : 'night') + ' view">' + ccIcon(a.night ? 'sun' : 'moon') + '</button></div>' +
-        '<div class="tb-stage"><div class="tb-canvas" aria-hidden="true">' + fallback + '</div><div class="tb-stage-label">Two streets, two shortcuts, a town full of conversations</div></div>' +
-        '<div class="tb-legend" aria-label="Board space colors"><span><i class="tb-blue"></i>+3 shells</span><span><i class="tb-red"></i>−2 shells</span>' +
-          '<span><i class="tb-question"></i>surprise</span><span><i class="tb-talk"></i>conversation</span><span><i class="tb-star"></i>star</span></div>' +
-        '<div class="tb-dashboard"><div class="tb-score"><span>' + ccIcon('shell') + ' Shells <b data-tb-shells>' + a.shells + '</b></span>' +
-          '<span>' + ccIcon('star') + ' Stars <b data-tb-stars>' + a.stars + '</b></span>' +
-          '<span>Walks <b data-tb-turns>' + a.turns + '</b></span></div>' +
-          '<div class="tb-actions"><button type="button" class="tb-roll" data-tb-roll>' + ccIcon('dice') + ' Roll the die</button>' +
-          '<button type="button" class="tb-visit" data-tb-visit>Talk here</button></div></div>' +
-        '<div class="tb-place" data-tb-place role="status"></div>' +
-        '<div class="tb-event" data-tb-event aria-live="polite" hidden></div>' +
-        '<nav class="tb-sail" aria-label="Nearby places"><button type="button" data-tb-go="lagoon">' + ccIcon('bottle') + ' Story Lagoon</button>' +
-          '<button type="button" data-tb-go="captain">' + ccIcon('anchor') + ' Captain’s Deck</button>' +
-          '<button type="button" data-tb-go="caves">' + ccIcon('sound') + ' Echo Caves</button></nav>' +
-        '<details class="tb-guide"><summary>Street guide · all 36 spaces</summary><div class="tb-guide-grid">' + guide + '</div></details>' +
-      '</section>';
-    }
-    function sound(note){ try { Sound.bloop(note); } catch(e){} }
-    function status(message){
-      if(!current) return;
-      var c = current, a = c.state, root = c.root, n = a.position;
-      root.querySelector('[data-tb-shells]').textContent = a.shells;
-      root.querySelector('[data-tb-stars]').textContent = a.stars;
-      root.querySelector('[data-tb-turns]').textContent = a.turns;
-      root.querySelector('[data-tb-place]').innerHTML = '<span class="tb-place-mark tb-' + kinds[n] + '">' + icon(kinds[n]) + '</span>' +
-        '<span><b>Space ' + (n + 1) + ' · ' + esc(tileDescription(n)) + '</b><small>' + esc(message || 'Roll to explore, or choose a conversation here.') + '</small></span>';
-      root.querySelector('[data-tb-visit]').hidden = kinds[n] !== 'talk';
-      root.querySelector('[data-tb-roll]').disabled = !!c.busy;
-      root.querySelector('[data-tb-roll]').innerHTML = c.busy ? 'Walking…' : ccIcon('dice') + ' Roll the die';
-      root.querySelector('[data-tb-night]').disabled = !!c.busy;
-      if(c.tokenMesh){ c.tokenMesh.position.set(pos[n].x, .72, pos[n].z); render3d(c); }
-      root.querySelectorAll('[data-tb-preview]').forEach(function(b){ b.classList.toggle('is-here', +b.dataset.tbPreview === n); });
-    }
-    function event(title, body, options){
-      if(!current) return;
-      var el = current.root.querySelector('[data-tb-event]');
-      el.hidden = false;
-      el.innerHTML = '<div class="tb-event-heading"><b>' + esc(title) + '</b><button type="button" data-tb-close aria-label="Close">' + ccIcon('close') + '</button></div>' +
-        '<p>' + esc(body) + '</p><div class="tb-event-buttons">' + (options || []).map(function(o,j){
-          return '<button type="button" data-tb-choice="' + j + '"' + (o.disabled ? ' disabled' : '') + '>' + esc(o.label) + '</button>';
-        }).join('') + '</div>';
-      current.options = options || [];
-      el.scrollIntoView({ block:'nearest', behavior: reefCalm() ? 'auto' : 'smooth' });
-    }
-    function closeEvent(){
-      if(!current) return;
-      current.root.querySelector('[data-tb-event]').hidden = true;
-      current.options = [];
-    }
-    function effect(kind){
-      if(!current) return;
-      var a = current.state, n = a.position, who, reward;
-      if(kind === 'talk'){
-        who = folkAt(n);
-        event('A conversation awaits', who.en + ' is here. Practice a real exchange and add useful phrases to My words.',
-          [{label:'Talk with ' + who.en, action:function(){ openTalk(who.id); }}, {label:'Keep walking', action:closeEvent}]);
-      } else if(kind === 'blue'){
-        a.shells += 3; save(); status('You found 3 shells.'); event('Blue space', 'You found 3 shells for the town shop.', [{label:'Continue',action:closeEvent}]); sound(650);
-      } else if(kind === 'red'){
-        if(a.pass){ a.pass = false; status('Your Lucky Pass protected your shells.'); event('Lucky Pass!', 'Your pass protected you from this red space.', [{label:'Continue',action:closeEvent}]); }
-        else { a.shells = Math.max(0, a.shells - 2); status('You lost 2 shells.'); event('Red space', 'A gust carried away 2 shells.', [{label:'Continue',action:closeEvent}]); }
-        save(); sound(320);
-      } else if(kind === 'question'){
-        reward = (a.turns + n) % 3;
-        if(reward === 0){ a.shells += 5; status('A mystery crate held 5 shells.'); event('Mystery crate', 'Five shells were tucked inside.', [{label:'Continue',action:closeEvent}]); }
-        else if(reward === 1){ a.pass = true; status('You found a Lucky Pass for a red space.'); event('Mystery crate', 'A Lucky Pass will protect you from your next red space.', [{label:'Continue',action:closeEvent}]); }
-        else { a.double = true; status('Your next die roll will double.'); event('Mystery crate', 'Your next die roll will double.', [{label:'Continue',action:closeEvent}]); }
-        save(); sound(720);
-      } else if(kind === 'chance'){
-        var cards = [
-          {label:'Shell shower', body:'You gained 6 shells.', apply:function(){ a.shells += 6; }},
-          {label:'Windfall', body:'You lost 3 shells.', apply:function(){ a.shells = Math.max(0, a.shells - 3); }},
-          {label:'Second wind', body:'Your next die roll will double.', apply:function(){ a.double = true; }}
-        ];
-        var card = cards[Math.floor(Math.random() * cards.length)]; card.apply(); save(); status(card.body);
-        event('Chance Time · ' + card.label, card.body, [{label:'Continue',action:closeEvent}]); sound(800);
-      } else if(kind === 'shop'){
-        event('Bok’s shop', 'Spend shells on something useful for the next walk.', [
-          {label:'Lucky Pass · 5 shells',disabled:a.shells < 5,action:function(){ a.shells -= 5; a.pass = true; save(); status('Lucky Pass ready.'); event('Lucky Pass ready', 'Your next red space will cost no shells.', [{label:'Continue',action:closeEvent}]); }},
-          {label:'Double die · 7 shells',disabled:a.shells < 7,action:function(){ a.shells -= 7; a.double = true; save(); status('Your next die roll will double.'); event('Double die ready', 'Your next die roll will double.', [{label:'Continue',action:closeEvent}]); }},
-          {label:'Leave shop',action:closeEvent}
-        ]);
-      } else if(kind === 'minigame'){
-        lanternQuiz(0);
-      } else if(kind === 'star'){
-        event('Star space', 'Trade 12 shells for a star. Stars mark your town adventures.', [
-          {label:'Take a star · 12 shells',disabled:a.shells < 12,action:function(){ a.shells -= 12; a.stars++; save(); status('You earned a star!'); event('A new star!', 'Your Harbor Town collection grew by one star.', [{label:'Continue',action:closeEvent}]); sound(950); }},
-          {label:'Save your shells',action:closeEvent}
-        ]);
-      }
-    }
-    function lanternQuiz(attempt){
-      if(!current) return;
-      var a = current.state, idx = (a.turns + a.position + attempt) % TOWN_FOLK.length;
-      var f = TOWN_FOLK[idx], phrase = f.nodes[f.start].t, candidates = [idx,(idx + 3) % TOWN_FOLK.length,(idx + 5) % TOWN_FOLK.length];
-      candidates.sort(function(){ return Math.random() - .5; });
-      event('Lantern game · read and choose', 'What does “' + phrase[0] + '” mean?', candidates.map(function(k){
-        return {label:TOWN_FOLK[k].nodes[TOWN_FOLK[k].start].t[1],action:function(){
-          if(k === idx){
-            var prize = attempt ? 3 : 6; a.shells += prize; save(); status('You earned ' + prize + ' shells.');
-            event('You got it!', 'That phrase means “' + phrase[1] + '” You earned ' + prize + ' shells.', [{label:'Continue',action:closeEvent}]); sound(850);
-          } else if(!attempt){
-            event('Try another lantern', '“' + phrase[0] + '” means “' + phrase[1] + '” Try one more phrase for 3 shells.',
-              [{label:'Try again',action:function(){ lanternQuiz(1); }},{label:'Keep walking',action:closeEvent}]); sound(430);
-          } else {
-            a.shells++; save(); status('You found 1 shell.');
-            event('A little light', '“' + phrase[0] + '” means “' + phrase[1] + '” You found 1 shell.', [{label:'Continue',action:closeEvent}]); sound(430);
-          }
-        }};
-      }));
-    }
-    function openTalk(id){ stop(); townOpenTalk(id); }
-    function nextChoices(n){ return n === 8 ? [9,13] : n === 26 ? [27,31] : [(n + 1) % N]; }
-    function moveOne(to, token){
-      return new Promise(function(resolve){
-        var c = current, from = c.state.position, start = performance.now(), duration = reefCalm() ? 90 : 300;
-        function frame(now){
-          if(!current || current !== c || token !== rollToken){ resolve(false); return; }
-          var p = Math.min(1, (now - start) / duration), lift = Math.sin(p * Math.PI) * .68;
-          if(c.tokenMesh){ c.tokenMesh.position.set(pos[from].x + (pos[to].x - pos[from].x) * p,
-            .72 + lift, pos[from].z + (pos[to].z - pos[from].z) * p); render3d(c); }
-          if(p < 1){ c.raf = requestAnimationFrame(frame); }
-          else { c.state.position = to; save(); status(); sound(480 + (to % 5) * 40); resolve(true); }
-        }
-        c.raf = requestAnimationFrame(frame);
-      });
-    }
-    async function advance(token){
-      var c = current;
-      while(current === c && token === rollToken && c.remaining > 0){
-        var choices = nextChoices(c.state.position);
-        if(choices.length > 1){
-          event('Choose a street', 'The harbor path splits here. Pick the market street or the quay shortcut.', [
-            {label:'Market street · space ' + (choices[0] + 1),action:function(){ closeEvent(); resume(choices[0], token); }},
-            {label:'Quay shortcut · space ' + (choices[1] + 1),action:function(){ closeEvent(); resume(choices[1], token); }}
-          ]);
-          return;
-        }
-        if(!await moveOne(choices[0], token)) return;
-        c.remaining--;
-      }
-      if(current === c && token === rollToken){ c.busy = false; status(); effect(kinds[c.state.position]); }
-    }
-    async function resume(to, token){
-      var c = current;
-      if(!c || token !== rollToken || !c.busy) return;
-      if(!await moveOne(to, token)) return;
-      c.remaining--; advance(token);
-    }
-    function roll(){
-      var c = current;
-      if(!c || c.busy) return;
-      closeEvent(); c.busy = true; c.state.turns++;
-      var die = 1 + Math.floor(Math.random() * 6), doubled = c.state.double;
-      c.state.double = false; c.remaining = doubled ? die * 2 : die; save();
-      status('You rolled ' + die + (doubled ? ' × 2' : '') + '. Walking ' + c.remaining + ' spaces…');
-      sound(700); advance(++rollToken);
-    }
-    function preview(n){
-      var c = current;
-      if(!c || c.busy) return;
-      event('Space ' + (n + 1) + ' · ' + tileDescription(n),
-        kinds[n] === 'talk' ? 'Talk with ' + folkAt(n).en + ' here.' : 'Land here to use this ' + names[kinds[n]].toLowerCase() + '.',
-        [{label:'Close',action:closeEvent}]);
-    }
-    function go(where){
-      stop();
-      if(where === 'lagoon') openLagoon();
-      if(where === 'caves') openCaves();
-      if(where === 'captain') openCaptain();
-    }
-    function mount(){
-      var root = app.querySelector('.tb-root');
-      if(!root) return;
-      stop();
-      var c = current = { root:root, state:read(), options:[], busy:false, raf:0, renderer:null, tokenMesh:null };
-      root.addEventListener('click', function(e){
-        var b = e.target.closest('button'); if(!b || !root.contains(b)) return;
-        if(b.hasAttribute('data-tb-roll')) roll();
-        else if(b.hasAttribute('data-tb-night') && !c.busy){ c.state.night = !c.state.night; save(); root.classList.toggle('tb-night', c.state.night);
-          b.innerHTML = ccIcon(c.state.night ? 'sun' : 'moon'); b.setAttribute('aria-label', 'Switch to ' + (c.state.night ? 'day' : 'night') + ' view'); build3d(c); }
-        else if(b.hasAttribute('data-tb-visit')) openTalk(folkAt(c.state.position).id);
-        else if(b.hasAttribute('data-tb-choice')){ var o = c.options[+b.dataset.tbChoice]; if(o && !o.disabled) o.action(); }
-        else if(b.hasAttribute('data-tb-close')){ if(c.busy && c.remaining > 0) return; closeEvent(); }
-        else if(b.hasAttribute('data-tb-preview')) preview(+b.dataset.tbPreview);
-        else if(b.hasAttribute('data-tb-go')) go(b.dataset.tbGo);
-      });
-      status(); build3d(c);
-    }
-    function render3d(c){ if(c.renderer) c.renderer.render(c.scene, c.camera); }
-    function dispose3d(c){
-      if(c.raf) cancelAnimationFrame(c.raf);
-      if(c.resizeObserver){ c.resizeObserver.disconnect(); c.resizeObserver = null; }
-      if(c.resizeHandler){ window.removeEventListener('resize', c.resizeHandler); c.resizeHandler = null; }
-      if(c.scene){
-        var seen = [];
-        c.scene.traverse(function(o){
-          if(o.geometry && seen.indexOf(o.geometry) < 0){ seen.push(o.geometry); o.geometry.dispose(); }
-          var mats = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : [];
-          mats.forEach(function(m){ if(seen.indexOf(m) >= 0) return; seen.push(m); if(m.map && seen.indexOf(m.map) < 0){ seen.push(m.map); m.map.dispose(); } m.dispose(); });
-        });
-      }
-      if(c.renderer){ c.renderer.dispose(); try { c.renderer.forceContextLoss(); } catch(e){} c.renderer.domElement.remove(); }
-      var host = c.root && c.root.querySelector('.tb-canvas'); if(host) host.classList.remove('tb-webgl');
-      c.scene = null; c.renderer = null; c.tokenMesh = null;
-    }
-    function stop(){
-      rollToken++;
-      if(!current) return;
-      dispose3d(current);
-      current = null;
-    }
-
-    function build3d(c){
-      dispose3d(c);
-      var host = c.root.querySelector('.tb-canvas');
-      if(!host || !window.THREE) return;
-      var T = window.THREE, night = c.state.night;
-      try {
-        var renderer = new T.WebGLRenderer({ antialias:false, alpha:true, powerPreference:'low-power' });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
-        renderer.outputEncoding = T.sRGBEncoding;
-        renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = .85;
-        renderer.setClearColor(night ? 0x163948 : 0x79c8d5, 1);
-        host.appendChild(renderer.domElement); c.renderer = renderer;
-        var scene = c.scene = new T.Scene();
-        scene.fog = new T.Fog(night ? 0x163948 : 0x79c8d5, 32, 55);
-        scene.add(new T.HemisphereLight(night ? 0xa8d5ed : 0xfff6df, night ? 0x18394a : 0x5e887e, .75));
-        var sun = new T.DirectionalLight(night ? 0xb7dafa : 0xffe6ac, night ? .55 : .65);
-        sun.position.set(-6, 11, 6); scene.add(sun);
-        var camera = c.camera = new T.OrthographicCamera(-10, 10, 8, -8, .1, 100);
-        camera.position.set(0, 17, 13); camera.lookAt(0, 0, 0);
-        var mat = function(col, opt){ return new T.MeshLambertMaterial(Object.assign({color:col}, opt || {})); };
-        var mesh = function(geo, material, x, y, z){ var o = new T.Mesh(geo, material); o.position.set(x || 0,y || 0,z || 0); scene.add(o); return o; };
-        var water = mesh(new T.PlaneGeometry(48, 32), new T.MeshBasicMaterial({color:night ? 0x17485b : 0x6bbacd}));
-        water.rotation.x = -Math.PI / 2; water.position.y = -.25;
-        var island = mesh(new T.CylinderGeometry(10.1, 10.4, .22, 48), mat(night ? 0x58716b : 0xdccda1));
-        island.scale.x = .63; island.position.y = -.2;
-        var roadMat = mat(night ? 0x9a8b78 : 0xf9e5ba), railMat = mat(night ? 0x5d594a : 0x9e8067);
-        edges.forEach(function(edge){
-          var p = pos[edge[0]], q = pos[edge[1]], v1 = new T.Vector3(p.x,.04,p.z), v2 = new T.Vector3(q.x,.04,q.z);
-          var curve = new T.LineCurve3(v1,v2), path = mesh(new T.TubeGeometry(curve, 1, .26, 6, false), roadMat);
-          path.name = 'street';
-        });
-        var tileGeo = new T.CylinderGeometry(.36,.43,.18,12), trimGeo = new T.CylinderGeometry(.44,.47,.07,12);
-        var trim = mat(night ? 0x2e4650 : 0x9b886f);
-        var faces = {};
-        kinds.forEach(function(kind){ if(faces[kind]) return;
-          var cv = document.createElement('canvas'); cv.width = cv.height = 128;
-          var g = cv.getContext('2d'); g.fillStyle = colors[kind]; g.fillRect(0,0,128,128);
-          g.strokeStyle = 'rgba(255,255,255,.8)'; g.lineWidth = 7; g.beginPath(); g.arc(64,64,49,0,Math.PI*2); g.stroke();
-          g.fillStyle = '#fffdf6'; g.font = '900 76px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText({blue:'+',red:'−',question:'?',chance:'!',shop:'$',minigame:'M',star:'★',talk:'T'}[kind],64,69);
-          var tex = new T.CanvasTexture(cv); tex.minFilter = T.LinearFilter; tex.magFilter = T.LinearFilter;
-          faces[kind] = [mat(colors[kind]), new T.MeshBasicMaterial({map:tex}), mat(colors[kind])];
-        });
-        pos.forEach(function(p,n){
-          mesh(trimGeo,trim,p.x,.16,p.z);
-          mesh(tileGeo,faces[kinds[n]],p.x,.29,p.z);
-        });
-        // Simple shopfronts, rooflines and piers give the town a silhouette without model downloads.
-        var house = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
-        house.forEach(function(h){
-          var angle = h * Math.PI * 2 / house.length, x = Math.cos(angle) * 5.9, z = Math.sin(angle) * 8.45;
-          var height = .65 + (h % 3) * .19;
-          mesh(new T.BoxGeometry(.95,height,.7),mat(night ? 0x728c86 : [0xf2ddba,0xf0c9a6,0xc4d7c4][h%3]),x,height/2-.05,z);
-          var roof = mesh(new T.ConeGeometry(.76,.42,4),mat(night ? 0x9b6881 : [0xc66c68,0x6d9995,0xa8829d][h%3]),x,height+.1,z);
-          roof.rotation.y = Math.PI/4;
-          if(night){ var lamp = mesh(new T.PlaneGeometry(.25,.3),new T.MeshBasicMaterial({color:0xffd58a,side:T.DoubleSide}),x,height*.58,z+(z>0?.37:-.37)); lamp.rotation.y = z>0 ? 0 : Math.PI; }
-        });
-        for(var d = 0; d < 4; d++){
-          var dx = -4.8 + d * 3.2, dz = d % 2 ? 8.9 : -8.9;
-          mesh(new T.BoxGeometry(1.45,.13,1.2),railMat,dx,-.08,dz);
-          mesh(new T.CylinderGeometry(.07,.07,.5,6),railMat,dx-.6,.1,dz);
-          mesh(new T.CylinderGeometry(.07,.07,.5,6),railMat,dx+.6,.1,dz);
-        }
-        var pawn = new T.Group();
-        pawn.add(new T.Mesh(new T.SphereGeometry(.37,12,9),mat(night ? 0xffdc8f : 0xffd97f)));
-        var cap = new T.Mesh(new T.ConeGeometry(.31,.34,10),mat(0x397d99)); cap.position.y = .39; pawn.add(cap);
-        scene.add(pawn); c.tokenMesh = pawn;
-        pawn.position.set(pos[c.state.position].x,.72,pos[c.state.position].z);
-        function resize(){ if(!current || current !== c || !c.renderer) return;
-          var w = Math.max(1,host.clientWidth), h = Math.max(1,host.clientHeight), aspect = w/h;
-          camera.left=-9.6*aspect; camera.right=9.6*aspect; camera.top=9.6; camera.bottom=-9.6; camera.updateProjectionMatrix();
-          renderer.setSize(w,h,false); render3d(c);
-        }
-        host.classList.add('tb-webgl');
-        if(window.ResizeObserver){ c.resizeObserver = new ResizeObserver(resize); c.resizeObserver.observe(host); }
-        else { c.resizeHandler = resize; window.addEventListener('resize', resize); }
-        resize();
-      } catch(e){ dispose3d(c); host.classList.add('tb-no-webgl'); }
-    }
-    function inspect(){
-      if(!current) return null;
-      return { tiles:N, forks:[8,26], position:current.state.position, state:Object.assign({},current.state),
-        webgl:!!current.renderer, renderer:current.renderer ? {
-          calls:current.renderer.info.render.calls, triangles:current.renderer.info.render.triangles,
-          geometries:current.renderer.info.memory.geometries, textures:current.renderer.info.memory.textures,
-          pixelRatio:current.renderer.getPixelRatio()
-        } : null };
-    }
-    return { html:html, mount:mount, stop:stop, inspect:inspect };
-  })();
-  function townBoardHTML(){ return TownBoard.html(); }
-  function townBoardMount(){ TownBoard.mount(); }
-  function townBoardStop(){ TownBoard.stop(); }
-  // Read-only diagnostics for the pilot's phone and tablet performance checks.
-  window.__townBoardView = function(){ return TownBoard.inspect(); };
-/* end of src/js/town-board.js */
 /* from src/js/caves-sounds.js */
   /* ---------- ECHO CAVES: the sounds, the sound rules and the pitch measure ----------
      The data for Echo Caves (caves.js), and its one piece of signal work, kept apart from the screens so the unit
@@ -15026,6 +14648,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   }
 
   function openCaves(sec){
+    regionBoardOpen('caves');
     try { Speech.stop(); } catch(e){}
     cavesStopAll();
     S.currentDeckId = null;
@@ -15056,6 +14679,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   }
 
   function renderCaves(){
+    if((!(S.caves && S.caves.sec)) && regionBoardRender('caves')) return;
     var C = S.caves || (S.caves = {});
     if(cavesRec && !C.line) cavesRecReset();
     var title = C.sec === 'pairs' ? 'Sound pairs' : C.sec === 'shadow' ? 'Shadowing' : C.sec === 'rules' ? 'Sound rules' : 'Echo Caves';
@@ -15886,6 +15510,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   function patNext(d){ return PAT_LIST.find(function(p){ return (d.m[p.id] || 0) < PAT_MASTERED; }) || null; }
 
   function openPatterns(id){
+    regionBoardOpen('patterns');
     try { Speech.stop(); } catch(e){}
     S.currentDeckId = null;
     S.patterns = { id: patById(id) ? id : null, round: null };
@@ -15893,6 +15518,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     render(); window.scrollTo(0, 0);
   }
   function renderPatterns(){
+    if((!(S.patterns && S.patterns.id)) && regionBoardRender('patterns')) return;
     var P = S.patterns || (S.patterns = {}), p = patById(P.id);
     var R = P.round, title = p ? p.en : 'Pattern Reef';
     var back = p ? '<button class="back-btn" data-act="pr-back">⟵ Reef</button>' : '<button class="back-btn" data-act="pr-home">⟵ Reef</button>';
@@ -16431,6 +16057,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   }
 
   function openBeach(){
+    regionBoardOpen('beach');
     try { Speech.stop(); } catch(e){}
     S.currentDeckId = null;
     S.beach = { id: null, view: 'list', deck: S.beach && S.beach.deck || null };
@@ -16445,6 +16072,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   }
   function bbLex(B){ return B.lex || (B.lex = bbLexicon(B.deck)); }
   function renderBeach(){
+    if((!S.beach || S.beach.view === 'list') && regionBoardRender('beach')) return;
     var B = S.beach || (S.beach = { view: 'list' }), b = bbById(B.id);
     var back = B.view === 'list' ? '<button class="back-btn" data-act="bb-home">⟵ Reef</button>' : '<button class="back-btn" data-act="bb-back">⟵ Beach</button>';
     var title = B.view === 'letters' ? 'Your letters' : b ? 'A bottle from 지수' : 'Bottle Beach';
@@ -16820,6 +16448,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   function lhManner(id){ return LH_MANNERS.find(function(s){ return s.id === id; }) || null; }
 
   function openLight(){
+    regionBoardOpen('light');
     try { Speech.stop(); } catch(e){}
     S.currentDeckId = null;
     S.light = { view: 'list', deck: S.light && S.light.deck || null };
@@ -16831,6 +16460,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     }).catch(function(){});
   }
   function renderLight(){
+    if((!S.light || S.light.view === 'list') && regionBoardRender('light')) return;
     var L = S.light || (S.light = { view: 'list' });
     var sign = L.view === 'sign' && lhSign(L.id), note = L.view === 'manner' && lhManner(L.id);
     var back = sign || note ? '<button class="back-btn" data-act="lh-back">⟵ Lighthouse</button>' : '<button class="back-btn" data-act="lh-home">⟵ Reef</button>';
@@ -17218,6 +16848,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
 
   /* ---------- Opening it, and coming back ---------- */
   function openCaptain(tab){
+    regionBoardOpen('captain', !!tab);
     try { Speech.stop(); } catch(e){}
     S.deckBack = false;
     S.currentDeckId = null;
@@ -17272,6 +16903,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
 
   /* ---------- The screen ---------- */
   function renderCaptain(){
+    if((!(S.captain && S.captain.cp)) && regionBoardRender('captain')) return;
     var C = S.captain || (S.captain = { tab: 'today' });
     var tabs = [['today', 'Today', 'compass'], ['course', 'Your course', 'map'], ['can', 'What you can do', 'trophy']];
     var body = C.cp ? deckCheckHTML(C) : C.tab === 'course' ? deckCourseHTML(C) : C.tab === 'can' ? deckCanHTML() : deckTodayHTML(C);
@@ -17523,6 +17155,189 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     }).join('') + '</ul><button type="button" class="r3-btn" data-r3-deck>' + ccIcon('anchor') + ' Open Captain\'s Deck</button></div>';
   }
 /* end of src/js/deck.js */
+/* from src/js/region-boards.js */
+  /* A region supplies ordinary Reef 3D zones. Lessons keep their own screens and progress. */
+  var REGION_BOARD_META = {
+    lagoon: { name:'Story Lagoon', icon:'story', lead:'Sail between short conversations from your trip.', near:['town','caves','captain'], theme:'lagoon' },
+    town: { name:'Harbor Town', icon:'talk', lead:'Visit the townsfolk and practice a conversation.', near:['lagoon','patterns','captain'], theme:'town' },
+    caves: { name:'Echo Caves', icon:'sound', lead:'Listen, echo, and learn the sounds of Korean.', near:['town','patterns','captain'], theme:'caves' },
+    patterns: { name:'Pattern Reef', icon:'sentence', lead:'Build sentences, one pattern at a time.', near:['caves','beach','captain'], theme:'patterns' },
+    beach: { name:'Bottle Beach', icon:'bottle', lead:'Read a letter from Jisu and write back.', near:['patterns','light','captain'], theme:'beach' },
+    light: { name:'The Lighthouse', icon:'lighthouse', lead:'Read signs and discover everyday manners.', near:['beach','lagoon','captain'], theme:'light' },
+    captain: { name:"Captain's Deck", icon:'anchor', lead:'Choose a day or check the course and your progress.', near:['lagoon','town','light'], theme:'captain' }
+  };
+  var REGION_BOARD_DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
+  function regionBoardOpen(region, direct){
+    if(!REGION_BOARD_META[region]) return;
+    S.regionBoard = { region:region, mode:direct ? 'list' : 'board', pid:S.profile && S.profile.id || null };
+  }
+  function regionBoardState(region){
+    var r = S.regionBoard, pid = S.profile && S.profile.id || null;
+    if(!r || r.region !== region || r.pid !== pid) regionBoardOpen(region);
+    return S.regionBoard;
+  }
+  function regionBoardActivities(region){
+    var out = [], i;
+    function add(id, name, icon, detail, done){ out.push({ region:region, id:id, name:name, icon:icon, detail:detail || '', done:!!done }); }
+    if(region === 'lagoon'){
+      var lg = lagoonDone();
+      LAGOON_STORIES.forEach(function(s){ add(s.id, s.en, LAGOON_ICON[s.id] || 'story', s.ko, lg[s.id]); });
+    } else if(region === 'town'){
+      var tw = townDone();
+      TOWN_FOLK.forEach(function(f){ add(f.id, f.en, f.icon || 'talk', f.place, tw[f.id]); });
+    } else if(region === 'caves'){
+      var cv = cavesData();
+      add('pairs', 'Sound pairs', 'pairs', 'Hear the difference between sounds', false);
+      add('shadow', 'Shadow a line', 'mic', 'Listen and echo a Korean line', false);
+      add('rules', 'Sound rules', 'bulb', 'Learn how each sound works', CAVES_RULES.every(function(r){ return cv.rules[r.id]; }));
+    } else if(region === 'patterns'){
+      var pd = patData();
+      PAT_LIST.forEach(function(p){ add(p.id, p.en, 'sentence', p.ko, (pd.m[p.id] || 0) >= PAT_MASTERED); });
+    } else if(region === 'beach'){
+      var bd = bbAnswered(bbData());
+      BB_BOTTLES.forEach(function(b){ add(b.id, b.en, 'bottle', b.ko, bd[b.id]); });
+      add('letters', 'Your letters', 'story', 'Read the letters you have sent');
+    } else if(region === 'light'){
+      var ld = lhData();
+      LH_SIGNS.forEach(function(s){ add(s.id, s.en, s.icon || 'search', 'Read a sign', ld.s[s.id] === s.qs.length); });
+      LH_MANNERS.forEach(function(m){ add('manner:' + m.id, m.en, m.icon || 'heart', 'Everyday manners', ld.m[m.id]); });
+    } else if(region === 'captain'){
+      for(i = 0; i < REGION_BOARD_DAYS.length; i++) add('day:' + i, REGION_BOARD_DAYS[i] + ' voyage', 'calendar', 'Open today\'s sailing plan');
+      add('today', "Today's plan", 'compass', 'Your next legs');
+      add('course', 'The course', 'island', 'Islands and checkpoints');
+      add('can', 'What you can do', 'progress', 'See your skills and progress');
+    }
+    return out;
+  }
+  function regionBoardZones(region){
+    var meta = REGION_BOARD_META[region], acts = regionBoardActivities(region);
+    var place = reefPlaceFor('korean', meta.name);
+    var zone = { id:region, label:meta.name, place:place, region:{ id:region, name:meta.name, theme:meta.theme }, items:acts.map(function(a, i){
+      return { d:{ id:'rb-' + region + '-' + a.id, name:a.name, emoji:String(i + 1), regionActivity:{ region:region, id:a.id } },
+        dc:{ due:a.done ? 0 : 1, total:1 }, kind:null, state:a.done ? 'done' : 'ready' };
+    }) };
+    var zones = [zone]; zones.region = zone.region;
+    return zones;
+  }
+  function regionBoardNavigate(region){
+    var go = { lagoon:openLagoon, town:openTown, caves:openCaves, patterns:openPatterns,
+      beach:openBeach, light:openLight, captain:openCaptain }[region];
+    if(go) go();
+  }
+  function regionBoardLaunch(activity){
+    if(!activity || !REGION_BOARD_META[activity.region]) return false;
+    var region = activity.region, id = String(activity.id || '');
+    if(!regionBoardActivities(region).some(function(a){ return a.id === id; })) return false;
+    reef3dUnmount();
+    if(S.view !== region && !(region === 'lagoon' && S.view === 'lagoonRead') && !(region === 'town' && S.view === 'townTalk')) regionBoardNavigate(region);
+    if(region !== 'captain') regionBoardState(region).played = true;
+    try { Speech.stop(); } catch(e){}
+    if(region === 'lagoon') lagoonOpenStory(id);
+    else if(region === 'town') townOpenTalk(id);
+    else if(region === 'caves'){
+      cavesGo(id);
+      if(id === 'pairs') setTimeout(function(){ if(S.view === 'caves') cavesPlayQ(); }, 350);
+    } else if(region === 'patterns'){ S.patterns.id = id; S.patterns.round = null; renderPatterns(); }
+    else if(region === 'beach'){
+      if(id === 'letters'){ S.beach.view = 'letters'; renderBeach(); }
+      else { bbStart(bbById(id)); renderBeach(); }
+    } else if(region === 'light'){
+      if(id.indexOf('manner:') === 0) lhOpenManner(S.light, id.slice(7));
+      else lhOpenSign(S.light, id);
+      renderLight();
+    } else if(region === 'captain'){
+      var tab = id === 'course' || id === 'can' ? id : 'today';
+      S.captain.tab = tab;
+      regionBoardShowList(region);
+    }
+    window.scrollTo(0, 0);
+    return true;
+  }
+  function regionBoardShowList(region){
+    var st = regionBoardState(region);
+    st.mode = 'list';
+    render();
+    window.scrollTo(0, 0);
+  }
+  function regionBoardListNav(region){
+    var st = S.regionBoard, page = app.querySelector('.nav-row');
+    if(!st || st.region !== region || st.mode !== 'list' || S.view !== region || !page || page.querySelector('[data-rb-board]')) return;
+    var button = document.createElement('button');
+    button.type = 'button'; button.className = 'back-btn rb-return'; button.dataset.rbBoard = region;
+    button.innerHTML = ccIcon('map') + ' Board';
+    button.addEventListener('click', function(){ regionBoardReturn(region); });
+    page.appendChild(button);
+  }
+  function regionBoardReturn(region){
+    if(!REGION_BOARD_META[region]) return;
+    var st = regionBoardState(region); st.mode = 'board';
+    if(region === 'lagoon'){ lagoonStop(); S.view = 'lagoon'; }
+    else if(region === 'town'){ townStop(); S.view = 'town'; }
+    else if(region === 'caves'){ cavesStopAll(); S.caves.sec = null; S.caves.line = null; S.caves.rule = null; S.caves.round = null; S.view = 'caves'; }
+    else if(region === 'patterns'){ S.patterns.id = null; S.patterns.round = null; S.view = 'patterns'; }
+    else if(region === 'beach'){ S.beach.id = null; S.beach.view = 'list'; S.view = 'beach'; }
+    else if(region === 'light'){ S.light.id = null; S.light.view = 'list'; S.view = 'light'; }
+    else if(region === 'captain'){ S.captain.cp = null; S.view = 'captain'; }
+    render(); window.scrollTo(0, 0);
+  }
+  function regionBoardRender(region){
+    if(!REGION_BOARD_META[region]) return false;
+    if(regionBoardState(region).mode === 'list'){
+      // Some content screens call their own renderer directly, bypassing the app's afterRender hooks.
+      Promise.resolve().then(function(){ regionBoardListNav(region); });
+      return false;
+    }
+    if(S.regionBoard.played){ R3.fromRegionActivity = true; S.regionBoard.played = false; }
+    var meta = REGION_BOARD_META[region], zones = regionBoardZones(region), acts = regionBoardActivities(region);
+    var homeLabel = S.deckBack ? "Captain's Deck" : 'Coral Cove';
+    var links = meta.near.map(function(id){ var m = REGION_BOARD_META[id]; return '<button type="button" data-rb-region="' + id + '">' + ccIcon(m.icon) + '<span>' + esc(m.name) + '</span></button>'; }).join('');
+    var cards = acts.map(function(a){ return '<button type="button" class="rb-card' + (a.done ? ' done' : '') + '" data-rb-activity="' + esc(a.id) + '">' +
+      '<span class="rb-card-icon" aria-hidden="true">' + ccIcon(a.icon) + '</span><span><b>' + esc(a.name) + '</b><small>' + esc(a.detail) + '</small></span>' +
+      (a.done ? '<span class="rb-done" aria-label="Complete">' + ccIcon('check') + '</span>' : '') + '</button>'; }).join('');
+    app.innerHTML = '<section class="rb-root rw ' + (reefNight() ? 'night' : 'day') + '" data-region-board="' + region + '" aria-label="' + esc(meta.name) + ' board">' +
+      '<div class="rb-overlay"><div class="rb-title">' + ccIcon(meta.icon) + '<span><b>' + esc(meta.name) + '</b><small>' + esc(meta.lead) + '</small></span></div>' +
+      '<div class="rb-actions"><button type="button" data-rb-home aria-label="' + esc(homeLabel) + '">' + ccIcon(S.deckBack ? 'anchor' : 'map') + '<span>' + esc(homeLabel) + '</span></button>' +
+      '<button type="button" data-rb-roll aria-label="Choose or roll a die">' + ccIcon('dice') + '<span>Dice</span></button>' +
+      '<button type="button" class="rb-activities" data-rb-list aria-label="Activities">' + ccIcon('cards') + '<span>Activities</span></button></div></div>' +
+      '<div class="rw-scene rb-scene"><div class="rb-fallback"><h2>' + esc(meta.name) + '</h2><p>' + esc(meta.lead) + '</p>' + cards + '</div></div>' +
+      '<details class="rb-guide"><summary>' + ccIcon('cards') + ' All activities</summary><div class="rb-guide-list">' +
+      '<nav class="rb-near" aria-label="Nearby places"><span>Nearby</span>' + links + '</nav>' + cards + '</div></details>' +
+      '</section>';
+    var root = app.querySelector('.rb-root');
+    root.addEventListener('click', function(e){
+      var b = e.target.closest('button'); if(!b || !root.contains(b)) return;
+      if(b.hasAttribute('data-rb-home')){ goHome(); return; }
+      if(b.hasAttribute('data-rb-roll')){
+        var v = R3.view;
+        if(v && v.region && v.region.id === region && !v.moving && !v.wrap.querySelector('.r3-panel')){
+          if(v.dice) reef3dDiceHit(v); else reef3dDice(v);
+        }
+        return;
+      }
+      if(b.hasAttribute('data-rb-list')){ regionBoardShowList(region); return; }
+      if(b.dataset.rbRegion){ regionBoardNavigate(b.dataset.rbRegion); return; }
+      if(b.dataset.rbActivity){ regionBoardLaunch({ region:region, id:b.dataset.rbActivity }); }
+    });
+    reef3dMount(root, zones);
+    reefBoardMenuSync();
+    return true;
+  }
+  window.__regionBoardView = function(){
+    var st = S.regionBoard, region = st && st.region, v = R3.view;
+    if(!region || !REGION_BOARD_META[region] || !S.profile || st.pid !== S.profile.id ||
+       (S.view !== region && !(region === 'lagoon' && S.view === 'lagoonRead') && !(region === 'town' && S.view === 'townTalk'))) return null;
+    var root = app.querySelector('.rb-root[data-region-board="' + region + '"]');
+    return { region:region, mode:st.mode, activities:regionBoardActivities(region).length,
+      has3d:!!(root && v && v.wrap && root.contains(v.wrap) && v.region && v.region.id === region),
+      position:v && v.region && v.region.id === region ? v.at : null };
+  };
+  afterRender('region board lifecycle', function(){
+    var root = app.querySelector('.rb-root[data-region-board]');
+    if(!root && R3.view && R3.view.region) reef3dUnmount(R3.view.region.id);
+    if(!root && S.regionBoard) regionBoardListNav(S.regionBoard.region);
+  });
+/* end of src/js/region-boards.js */
 /* from src/js/ui-icons.js */
   /* ---------- One look for every screen: drawn icons, never emoji, in the app's own chrome ----------
      Titles, buttons, labels, badges and chips across the app (and the Library) were written over years with
@@ -17647,6 +17462,10 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     { id:'harbor-town-board', date:'2026-11-11', need:'course', steps:[
       { at:'.r3-mapbtn', say:'Harbor Town is open on the treasure map. Talk with the townsfolk of your trip, in Korean.' },
       { text:'Harbor Town now has streets to explore. Roll the dice, choose a route, and meet the townsfolk. Switch between day and night, or jump straight into any conversation below the board.' }
+    ] },
+    { id:'region-worlds', date:'2026-11-12', need:'course', steps:[
+      { at:'.r3-mapbtn', text:'Every region now has a full 3D board, with the same dice, characters, rewards and movement as Coral Cove. Visit Harbor Town’s streets and waterfront, Echo Caves, Bottle Beach and the other islands from the sea map.' },
+      { text:'Each board has its own setting. Land on a lesson to learn there, or use Activities to go straight to any lesson. Captain’s Deck keeps your plan and progress one tap away.' }
     ] }
   ];
   var WN_RECENT_DAYS = 14;   // a brand-new profile is shown only what's new in the last two weeks, not the whole history
@@ -23067,6 +22886,16 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
      camera follows. The painted 2D reef stays underneath as the fallback when 3D can't run. ---------- */
   var REEF_THREE_URL = 'three.min.js';
   var R3 = { loading: null, failed: false, view: null };
+  // Coral Cove keeps its established position in S. Each region has its own saved spot per profile.
+  function reef3dPositionKey(region){ return 'cc-region-board-at-' + (S.profile && S.profile.id || '') + '-' + region.id; }
+  function reef3dPosition(view){
+    if(!view.region) return S.reef3dAt;
+    try { var n = +localStorage.getItem(reef3dPositionKey(view.region)); return isFinite(n) && n >= 0 ? n : 0; } catch(e){ return 0; }
+  }
+  function reef3dSavePosition(view, i){
+    if(!view.region){ S.reef3dAt = i; return; }
+    try { localStorage.setItem(reef3dPositionKey(view.region), String(i)); } catch(e){}
+  }
   /* Auto quality. Each device is different and we can't test them all, so the board and lobby time their own frames
      and step down one level at a time while drawing runs slow, and back up again when there's room to spare.
      0: sharpest, 60 a second · 1: a little less sharp · 2: no light rays · 3: 30 a second
@@ -23171,19 +23000,34 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
 
   // Board spaces in order: per subject a run of decks with a plain and a surprise space between
   // each pair; the Treasure Reef and Story Bottle close the path.
-  function reef3dSpaces(zones){
+  function reef3dSpaces(zones, region){
     var list = [{ kind: 'start' }];
-    zones.forEach(function(z, zi){
-      z.items.forEach(function(it, i){
-        list.push({ kind: 'plain' });
-        if(i > 0 || zi > 0) list.push({ kind: 'surprise' });
-        list.push({ kind: 'deck', item: it, zone: z, first: i === 0 });
+    if(region){
+      // Every activity gets a destination, while smaller regions get enough game spaces for a full board.
+      // Seven spaces are added by the two side routes below, for 30–40 spaces in all.
+      var stops = [];
+      zones.forEach(function(z){ z.items.forEach(function(it, i){ stops.push({ kind: 'deck', item: it, zone: z, first: i === 0 }); }); });
+      var targetMain = Math.max(23, Math.min(33, stops.length + 16));
+      var spare = Math.max(0, targetMain - 1 - stops.length), placed = 0;
+      stops.forEach(function(stop, i){
+        var before = Math.floor((i + 1) * spare / (stops.length + 1)) - Math.floor(i * spare / (stops.length + 1));
+        for(var j = 0; j < before; j++){ placed++; list.push({ kind: placed % 3 === 1 ? 'surprise' : 'plain' }); }
+        list.push(stop);
       });
-    });
-    list.push({ kind: 'plain' }, { kind: 'surprise' }, { kind: 'plain' });
+      while(placed < spare){ placed++; list.push({ kind: placed % 3 === 1 ? 'surprise' : 'plain' }); }
+    } else {
+      zones.forEach(function(z, zi){
+        z.items.forEach(function(it, i){
+          list.push({ kind: 'plain' });
+          if(i > 0 || zi > 0) list.push({ kind: 'surprise' });
+          list.push({ kind: 'deck', item: it, zone: z, first: i === 0 });
+        });
+      });
+      list.push({ kind: 'plain' }, { kind: 'surprise' }, { kind: 'plain' });
+    }
     // Night: halfway along, the path winds down a broken spiral staircase into the ship's hold (see reef3dWreckDeck).
     // Three stair spaces go in after a deck near the middle; everything after them is on the lower deck.
-    var night = reefNight(), REEF3D_HOLD = 6, k0 = -1;
+    var night = reefNight() && !region, REEF3D_HOLD = 6, k0 = -1;
     if(night && list.length > 10){
       for(var q = Math.round(list.length * .5); q < list.length - 4; q++) if(list[q].kind === 'deck'){ k0 = q; break; }
       if(k0 > 0) list.splice(k0 + 1, 0, { kind: 'plain', stair: 1 }, { kind: 'plain', stair: 2 }, { kind: 'plain', stair: 3 });
@@ -23784,8 +23628,8 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   }
 
   function reef3dBuild(host, zones, models){
-    var THREE = window.THREE, night = reefNight();
-    var spaces = reef3dSpaces(zones);
+    var THREE = window.THREE, night = reefNight(), region = zones.region || null;
+    var spaces = region && typeof window.regionBoardSpaces === 'function' && window.regionBoardSpaces(zones) || reef3dSpaces(zones, region);
     var wrap = document.createElement('div');
     wrap.className = 'r3 ' + (night ? 'night' : 'day');
     wrap.innerHTML = '<canvas class="r3-canvas" aria-hidden="true"></canvas><div class="r3-labels"></div>' +
@@ -23803,8 +23647,11 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: !big && !reef3dPostWanted(R3.q), alpha: true, powerPreference: 'low-power' });
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; renderer.shadowMap.autoUpdate = false; // redrawn only when things move (see reef3dFrame)
     var scene = new THREE.Scene();
-    var fogCol = night ? '#0c2a30' : '#7fd4d8';
+    var regionGround = region && { town:'#b8aa94', lagoon:'#83b6a5', caves:'#6b6873', patterns:'#8cb7ad', beach:'#ebd6ac', light:'#9aa393', captain:'#8b7e6e' }[region.id];
+    var regionSky = region && { town:'#b8d5d8', lagoon:'#97d1c8', caves:'#6d8f9d', patterns:'#8fc9ca', beach:'#a6d9df', light:'#b5d4d6', captain:'#a5bbc0' }[region.id];
+    var fogCol = regionSky || (night ? '#0c2a30' : '#7fd4d8');
     scene.fog = new THREE.Fog(fogCol, night ? 14 : 11, night ? 48 : 42);
+    if(region) scene.background = new THREE.Color(night ? reef3dShade(fogCol, -.5) : fogCol);
     var cam = new THREE.PerspectiveCamera(42, 1, .1, scene.fog.far + 8);   // past the fog nothing shows, so nothing is drawn there
     var kit = reef3dKit(THREE, night), B = kit.B, M = kit.M, mesh = kit.mesh;
     var mainN = spaces.mainN || spaces.length;
@@ -23839,6 +23686,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     function onDeck(x, z){ return shipDeck && Math.abs(x) < shipDeck.half + .6 && z < shipDeck.z0 + .6 && z > shipDeck.z1 - shipDeck.half * 1.4; }
     // Night: the sea floor sits low, a third of the way up the hull, and drifts of sand bank up against its sides.
     function sandH(fx, fy){
+      if(region) return 0;
       var h = duneH(fx, fy, duneK(fx, floorZ - fy)) + (Math.abs(fx) > 12 ? (Math.abs(fx) - 12) * .25 : 0);
       if(!shipDeck) return h;
       var zz = floorZ - fy, along = zz < shipDeck.z0 + 2 && zz > shipDeck.z1 - shipDeck.half * 1.4, out = Math.abs(fx) - shipDeck.half;
@@ -23875,7 +23723,8 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
         var qb = reef3dQBlock(night); qb.position.set(s.x, REEF3D_QY + (s.y || 0), s.z); qb.traverse(function(c){ c.userData.space = s.i; }); scene.add(qb); hitables.push(qb); s.qb = qb;
       }
       if(s.kind === 'deck' || s.kind === 'treasure' || s.kind === 'story'){
-        var set = night ? ['crate', 'barrel', 'anchor', 'wheel', 'cannon', 'lantern'] : ['brain', 'staghorn', 'fan', 'clam', 'sponge', 'anemone'];
+        var regionProps = { town:['crate','barrel','anchor','wheel','lantern'], lagoon:['story','clam','sponge','star','fan'], caves:['rock','lantern','rock','star'], patterns:['star','clam','sponge','star'], beach:['story','clam','star','sponge'], light:['lantern','rock','barrel','star'], captain:['crate','barrel','anchor','wheel','lantern'] };
+        var set = region ? (regionProps[region.id] || regionProps.town) : night ? ['crate', 'barrel', 'anchor', 'wheel', 'cannon', 'lantern'] : ['brain', 'staghorn', 'fan', 'clam', 'sponge', 'anemone'];
         var kind = s.kind === 'deck' ? set[reefHash(s.item.d.id) % set.length] : s.kind;
         var MODEL_FOR = { crate: [s.i % 2 ? 'crateBottles' : 'crate', 1.1], barrel: ['barrel', 1.2], cannon: ['cannon', 1], treasure: ['chest', 1.1], story: ['bottle', 1.3] };
         var o = (MODEL_FOR[kind] && reef3dModel(models, MODEL_FOR[kind][0], MODEL_FOR[kind][1], kit.grad)) || B[kind](r);
@@ -23894,7 +23743,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     // Scenery off the path.
     function nearPath(x, z){ for(var i = 0; i < spaces.length; i++){ var dx = spaces[i].x - x, dz = spaces[i].z - z; if(dx * dx + dz * dz < 12) return true; } return false; }
     var setD = night ? ['kelp', 'rock', 'plank', 'coralBall', 'rock'] : ['kelp', 'coralBall', 'rock', 'staghorn', 'coralBall', 'star', 'kelp'];
-    for(var n = 0; n < mainN * 3.2; n++){
+    for(var n = 0; !region && n < mainN * 3.2; n++){
       var sx = (r() - .5) * 30, sz = 8 - r() * (mainN * 2.6 + 18);
       if(nearPath(sx, sz)) continue;
       if(shipDeck && Math.abs(sx) < shipDeck.half + 1.5 && sz < shipDeck.z0 + 1 && sz > shipDeck.z1 - shipDeck.half * 1.5) continue;   // nothing grows on the wreck
@@ -23906,13 +23755,13 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       if(!d) d = B[nm](r);
       d.position.set(sx, shipDeck ? groundY(sx, sz) + .15 : 0, sz); d.rotation.y = r() * 6; d.scale.multiplyScalar(.7 + r() * .7); statics.add(d);
     }
-    var wreckM = night ? reef3dModel(models, 'wreck', 7, kit.grad, '#3c5560') : null;
+    var wreckM = night && !region ? reef3dModel(models, 'wreck', 7, kit.grad, '#3c5560') : null;
     if(wreckM){ // the pirate shipwreck lies beside the middle of the path
       wreckM.traverse(function(m){ if(/^grass/.test(m.name || '')) m.visible = false; });
       var wmid = spaces[Math.floor(mainN / 2)], wside = wmid.x > 0 ? -1 : 1;
       wreckM.position.set(wmid.x + wside * (shipDeck ? shipDeck.half + 13 : 11), shipDeck ? shipDeck.sand - 1 : -.3, wmid.z - 3); wreckM.rotation.y = wside > 0 ? -.6 : Math.PI + .6; wreckM.scale.multiplyScalar(1);
       statics.add(wreckM);
-    } else if(night){ // the sunken ship lies on its side beside the middle of the path, half buried in the silt
+    } else if(night && !region){ // the sunken ship lies on its side beside the middle of the path, half buried in the silt
       var mid = spaces[Math.floor(mainN / 2)], ship = new THREE.Group();
       var hs = new THREE.Shape(); hs.moveTo(-6, 1.2); hs.quadraticCurveTo(-5.4, -1.6, -1, -2); hs.lineTo(3.6, -2); hs.quadraticCurveTo(6.4, -1.4, 7, 1.6); hs.lineTo(-6, 1.2);
       var hull = mesh(new THREE.ExtrudeGeometry(hs, { depth: 3, bevelEnabled: true, bevelSize: .35, bevelThickness: .35, bevelSegments: 3, curveSegments: 18 }), M('#5a4332'));
@@ -23930,7 +23779,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       var side = mid.x > 0 ? -1 : 1;
       ship.position.set(mid.x + side * 11.5, .6, mid.z - 3); ship.rotation.set(0, side > 0 ? -.35 : Math.PI + .35, side * .32);
       statics.add(ship);
-    } else { // a coral-covered rock arch over the path, partway along
+    } else if(!region){ // a coral-covered rock arch over the path, partway along
       var a = spaces[Math.floor(mainN * .6)], arch = mesh(new THREE.TorusGeometry(4.2, .9, 12, 36, Math.PI), M('#a9bcb9'), a.x, -.2, a.z);
       statics.add(arch);
       for(var q = 0; q < 9; q++){ var ang = q / 8 * Math.PI, cb = B.coralBall(r); cb.position.set(a.x + Math.cos(ang) * 4.2, Math.sin(ang) * 4.2 + .5, a.z); cb.scale.setScalar(.55); statics.add(cb); }
@@ -23954,10 +23803,10 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
         lamp = { glow: lantern.userData.glow, halo: lantern.userData.halo, pool: pool };
       }
     }
-    var reefFx = !night ? reef3dReefGarden({ THREE: THREE, scene: scene, statics: statics, spaces: spaces, mainN: mainN, M: M, mesh: mesh, B: B, r: reefRand(mainN * 17 + 3), groundY: groundY, taken: deckObjs.map(function(d){ return [d.position.x, d.position.z]; }) }) : null;
-    var wreckFx = shipDeck ? reef3dWreckDeck({ THREE: THREE, scene: scene, statics: statics, deck: shipDeck, spaces: spaces, mainN: mainN, M: M, mesh: mesh, B: B, r: r, models: models, kit: kit, deckObjs: deckObjs }) : null;
+    var reefFx = !night && !region ? reef3dReefGarden({ THREE: THREE, scene: scene, statics: statics, spaces: spaces, mainN: mainN, M: M, mesh: mesh, B: B, r: reefRand(mainN * 17 + 3), groundY: groundY, taken: deckObjs.map(function(d){ return [d.position.x, d.position.z]; }) }) : null;
+    var wreckFx = shipDeck && !region ? reef3dWreckDeck({ THREE: THREE, scene: scene, statics: statics, deck: shipDeck, spaces: spaces, mainN: mainN, M: M, mesh: mesh, B: B, r: r, models: models, kit: kit, deckObjs: deckObjs }) : null;
     // Tall towers in the haze on both sides give the sea floor depth: coral by day, rock spires at night.
-    for(var tz = 6; tz > -mainN * 2.6 - 10; tz -= 7 + r() * 5){
+    for(var tz = 6; !region && tz > -mainN * 2.6 - 10; tz -= 7 + r() * 5){
       [-1, 1].forEach(function(sd){
         var tw = new THREE.Group(), hgt = 4 + r() * 6, x = sd * (15 + r() * 8);
         if(night){ var sp = mesh(new THREE.ConeGeometry(1.4 + r(), hgt, 7), M('#25363c')); sp.position.y = hgt / 2; tw.add(sp); }
@@ -23971,9 +23820,9 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     }
     // Drifting bubbles (by day) or marine snow (by night).
     var bubbleGeo = new THREE.SphereGeometry(.07, 8, 6), bubbleMat = new THREE.MeshBasicMaterial({ color: night ? '#d8efe8' : '#ffffff', transparent: true, opacity: .55 });
-    var bubbles = new THREE.InstancedMesh(bubbleGeo, bubbleMat, 70), bubbleData = [], dummy = new THREE.Object3D();
-    for(var bI = 0; bI < 70; bI++) bubbleData.push({ x: (r() - .5) * 26, y: r() * 8, z: 6 - r() * 40, s: .4 + r() * 1.2, v: .2 + r() * .5 });
-    scene.add(bubbles);
+    var bubbles = new THREE.InstancedMesh(bubbleGeo, bubbleMat, region ? 1 : 70), bubbleData = [], dummy = new THREE.Object3D();
+    if(!region){ for(var bI = 0; bI < 70; bI++) bubbleData.push({ x: (r() - .5) * 26, y: r() * 8, z: 6 - r() * 40, s: .4 + r() * 1.2, v: .2 + r() * .5 });
+      scene.add(bubbles); }
 
     // Moving caustics on the sand: a cell pattern in the floor's glow channel that drifts.
     var caus = (function(){
@@ -23990,8 +23839,8 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     })();
     // The sand covers the whole screen, so it gets the cheapest shader of all: baked light plus the drifting
     // caustics added on top (see reef3dSandMat).
-    floor.material = M(night ? '#2f3e3e' : '#d9cba6'); reef3dBakeObject(floor, rig, bake);
-    floor.material = reef3dSandMat(caus, new THREE.Color(night ? '#2a6f78' : '#fff6da').multiplyScalar(.2));
+    floor.material = M(regionGround ? (night ? reef3dShade(regionGround, -.42) : regionGround) : (night ? '#2f3e3e' : '#d9cba6')); reef3dBakeObject(floor, rig, bake);
+    if(!region) floor.material = reef3dSandMat(caus, new THREE.Color(night ? '#2a6f78' : '#fff6da').multiplyScalar(.2));
 
     // Light rays slanting down from the surface; they travel with the camera.
     var rayTex = (function(){
@@ -24004,7 +23853,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       return new THREE.CanvasTexture(c);
     })();
     var rays = new THREE.Group(), rayList = [];
-    for(var ri = 0; ri < 7; ri++){
+    for(var ri = 0; !region && ri < 7; ri++){
       var rm = new THREE.Mesh(new THREE.PlaneGeometry(1.4 + r() * 1.8, 18), new THREE.MeshBasicMaterial({ map: rayTex, color: night ? '#7fe0d6' : '#fffbe8', transparent: true, opacity: night ? .05 : .14, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false }));
       rm.position.set((r() - .5) * 20, 6.5, -4 - r() * 14); rm.rotation.set(0, (r() - .5) * .8, .32 + (r() - .5) * .1);
       rm.userData.base = rm.material.opacity; rm.userData.ph = r() * 6; rays.add(rm); rayList.push(rm);
@@ -24020,7 +23869,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       return f;
     }
     var fishMixers = [], schools = [], schoolCols = night ? ['#6fb3c9', '#8a7fc4', '#5fa39a'] : ['#ff9a6b', '#ffd166', '#7fc8f0'];
-    for(var sI = 0; sI < 3; sI++){
+    for(var sI = 0; !region && sI < 3; sI++){
       var sch = { fish: [], ph: r() * 6, rad: 3.5 + r() * 2.5, h: 2.2 + r() * 1.6, spd: (.16 + r() * .1) * (sI % 2 ? -1 : 1), off: (r() - .5) * 8, hx: null, hz: null };
       for(var fI = 0; fI < (models.fish1 ? 3 : 5); fI++){
         var fm = reef3dModel(models, ['fish1', 'fish2', 'fish1'][sI], .36, kit.grad, sI === 2 ? '#ffd166' : null), mx = null;
@@ -24034,7 +23883,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       schools.push(sch);
     }
     // A whale (a manta ray at night) glides slowly far off in the haze.
-    var bigOne = reef3dModel(models, night ? 'manta' : 'whale', night ? .45 : 2.6, kit.grad), bigMixer = null;
+    var bigOne = !region ? reef3dModel(models, night ? 'manta' : 'whale', night ? .45 : 2.6, kit.grad) : null, bigMixer = null;
     // It starts far off: with Calm motion it never swims, so it must not sit on top of the guide.
     if(bigOne){ var bw = new THREE.Group(); bw.add(bigOne); bigOne = bw; bw.position.set(22, night ? 4.5 : 6, spaces[0].z - 18); scene.add(bigOne); bigMixer = new THREE.AnimationMixer(bw.children[0].userData.root); var bc = bw.children[0].userData.gltf.animations[0]; if(bc) bigMixer.clipAction(bc).play(); fishMixers.push(bigMixer); }
     // Coins in a ring around the Treasure Reef, gems here and there, and a star over the next deck.
@@ -24082,23 +23931,24 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
         b.innerHTML = '<span class="r3-emoji" aria-hidden="true">'+it.d.emoji+'</span><span><b>'+esc(it.d.name)+'</b><small>'+esc(label)+'</small></span>' + (it.state === 'done' ? '<i class="r3-star" aria-hidden="true">★</i>' : '');
         b.setAttribute('aria-label', it.d.name + '. ' + (it.state === 'ready' ? 'Ready to practice.' : it.state === 'done' ? 'All done. Tap to play again.' : 'Tap to ' + it.kind.toLowerCase() + '.'));
       } else {
-        var t = s.kind === 'treasure' ? ['🐠', 'Aquarium', 'My sea friends'] : ['🍾', 'Story Bottle', 'Make a story'];
+        var t = s.kind === 'treasure' ? (region ? ['🧰', 'Treasure cache', 'Find extra shells'] : ['🐠', 'Aquarium', 'My sea friends'])
+          : (region ? ['🍾', 'Bonus bottle', 'A surprise on the route'] : ['🍾', 'Story Bottle', 'Make a story']);
         b.innerHTML = '<span class="r3-emoji" aria-hidden="true">'+t[0]+'</span><span><b>'+t[1]+'</b><small>'+t[2]+'</small></span>';
         b.setAttribute('aria-label', t[1] + '. ' + t[2] + '.');
       }
       b.dataset.space = s.i; s.label = b; labels.appendChild(b);
       if(s.kind === 'deck' && s.first){
-        var names = REEF_ZONE_NAMES[night ? 'night' : 'day'], zn = names[s.zone.id] || s.zone.label;
+        var names = REEF_ZONE_NAMES[night ? 'night' : 'day'], zn = region ? region.name : names[s.zone.id] || s.zone.label;
         var sign = document.createElement('button'); sign.type = 'button'; sign.className = 'r3-sign'; sign.dataset.space = s.i; sign.setAttribute('aria-label', zn + '. Go to ' + s.item.d.name + '.');
         sign.innerHTML = '<b>'+esc(zn)+'</b><small>'+esc(s.zone.label)+'</small>'; s.sign = sign; labels.appendChild(sign);
       }
     });
 
     var view = {
-      wrap: wrap, renderer: renderer, scene: scene, cam: cam, spaces: spaces, guide: guide, ring: ring, night: night,
+      wrap: wrap, renderer: renderer, scene: scene, cam: cam, spaces: spaces, guide: guide, ring: ring, night: night, region: region,
       at: 0, moving: false, camPos: new THREE.Vector3(), camLook: new THREE.Vector3(), t0: performance.now(),
       bubbles: bubbles, bubbleData: bubbleData, dummy: dummy, swayers: swayers, hitables: hitables, sun: sun, key: '', dirty: true,
-      caus: caus, rays: rays, rayList: rayList, schools: schools, fx: [], kit: kit,
+      caus: caus, rays: rays, rayList: rayList, schools: schools, fx: [], kit: kit, regionGround: regionGround,
       fishMixers: fishMixers, bigOne: bigOne, models: models, baked: true, blobG: blobG, blobC: blobC, glowG: glowG, groundY: groundY,
       crab: crab, crabFit: crabFit, crabGap: reefCrabExtent(guide) / 2 + crabFit / 2 + .2, leaving: null, spareCrab: null, chestMixer: chestMixer, chestActs: chestActs, nextStar: nextStar, spinners: spinners, lastT: performance.now(),
       plume: plume, lamp: lamp, wreck: wreckFx, reefFx: reefFx, shipDeck: shipDeck, rig: rig, bake: bake, floor: floor
@@ -25094,6 +24944,286 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   }
 
 /* end of src/js/reef3d/scenes.js */
+/* from src/js/reef3d/region-scenery.js */
+  /* Regional board scenery. The board owns the route, characters and camera; this adds
+     one still, baked world around that route. All shapes share the board's materials. */
+  window.regionBoardDecorate = function(view, config){
+    var id = config && config.id, allowed = { town: 1, lagoon: 1, caves: 1, patterns: 1, beach: 1, light: 1, captain: 1 };
+    if(!allowed[id] || !view || !view.kit || !view.spaces) return;
+    var T = window.THREE, M = view.kit.M, mesh = view.kit.mesh, sp = view.spaces,
+        main = sp.slice(0, sp.mainN || sp.length), root = new T.Group(), geos = {};
+    root.name = 'region-' + id;
+    function box(w,h,d){ var k = ['b',w,h,d].join(':'); return geos[k] || (geos[k] = new T.BoxGeometry(w,h,d)); }
+    function cyl(rt,rb,h,n){ var k = ['c',rt,rb,h,n || 10].join(':'); return geos[k] || (geos[k] = new T.CylinderGeometry(rt,rb,h,n || 10)); }
+    function cone(r,h,n){ return cyl(0,r,h,n || 7); }
+    function ball(r,n){ var k = ['s',r,n || 10].join(':'); return geos[k] || (geos[k] = new T.SphereGeometry(r,n || 10,7)); }
+    function torus(r,t){ var k = ['t',r,t].join(':'); return geos[k] || (geos[k] = new T.TorusGeometry(r,t,6,16)); }
+    function add(g,col,x,y,z,rx,ry,rz){ var o = mesh(g,M(col),x,y,z); if(rx) o.rotation.x=rx; if(ry) o.rotation.y=ry; if(rz) o.rotation.z=rz; root.add(o); return o; }
+    function block(w,h,d,col,x,y,z,ry){ return add(box(w,h,d),col,x,y,z,0,ry); }
+    function post(r,h,col,x,y,z){ return add(cyl(r,r,h,8),col,x,y+h/2,z); }
+    function orb(r,col,x,y,z){ return add(ball(r,10),col,x,y,z); }
+    function at(s,side,dist,dz){ var x=s.x+side*(dist||5), z=s.z+(dz||0); return [x,-.27,z]; }
+    function placed(s,side,dist,dz,fn){ var p=at(s,side,dist,dz); fn(p[0],p[1],p[2]); }
+    function pathSide(s,i){ return ((i%2)?1:-1) * (s.x>3 ? -1 : s.x< -3 ? 1 : 1); }
+    function foundations(col){
+      main.forEach(function(s,i){ if(i%2) return; add(cyl(1.75,1.9,.12,12),col,s.x,(s.y||0)-.16,s.z); });
+    }
+    function lantern(x,y,z,col){
+      post(.07,2.2,'#50445d',x,y,z); add(cyl(.42,.24,.52,6),'#744f64',x,y+2.16,z);
+      orb(.24,col,x,y+2.16,z); add(cone(.48,.24,6),'#4c5367',x,y+2.55,z);
+    }
+    function crystal(x,y,z,scale,col){
+      add(cyl(0,.43*scale,1.8*scale,5),col,x,y+.9*scale,z,0,(x+z)*.2,.16);
+      add(cone(.23*scale,.72*scale,5),'#d8f7fb',x+.27*scale,y+.4*scale,z+.17*scale,0,0,-.32);
+    }
+    function coral(x,y,z,k,col){
+      post(.13*k,1.5*k,col,x,y,z);
+      for(var a=0;a<3;a++){ var ang=a*2.094+.3, bx=x+Math.cos(ang)*.45*k, bz=z+Math.sin(ang)*.45*k;
+        add(cyl(.04*k,.1*k,1.15*k,5),col,bx,y+.85*k,bz,Math.sin(ang)*.42,0,Math.cos(ang)*-.42);
+        orb(.12*k,'#ffe3d5',bx+Math.cos(ang)*.15*k,y+1.48*k,bz+Math.sin(ang)*.15*k);
+      }
+    }
+    function harborBoat(x,z,n){
+      var sh=new T.Shape(); sh.moveTo(-.67,-1.4); sh.lineTo(.67,-1.4);
+      sh.lineTo(1,0); sh.lineTo(.67,1.4); sh.lineTo(-.67,1.4); sh.lineTo(-1,0); sh.closePath();
+      var hull=new T.ExtrudeGeometry(sh,{depth:.42,bevelEnabled:false}); hull.rotateX(-Math.PI/2);
+      add(hull,n%2?'#c66f56':'#487e89',x,-.42,z);
+      block(1.38,.08,2.25,'#d8be8c',x,-.03,z);
+      [-1,1].forEach(function(sd){ block(.12,.12,2.6,'#f5e7be',x+sd*.72,.08,z); });
+      post(.055,2.6,'#795d49',x,-.02,z);
+      var sail=new T.BufferGeometry(); sail.setAttribute('position',new T.Float32BufferAttribute([
+        0,.35,0, 0,2.35,0, .9,.35,0,
+        0,.35,0, -.68,.35,0, 0,1.65,0
+      ],3)); sail.computeVertexNormals();
+      root.add(mesh(sail,M(n%2?'#fff1cf':'#f7d9bf',{side:T.DoubleSide}),x,-.02,z));
+      block(.1,.07,.36,'#efb665',x,.55,z+.95);
+    }
+    // Replace the generic dune mesh with a broad, flat regional landform. Its top is
+    // below the path, so every original tile, ribbon and character remains visible.
+    var terrainColor={ town:'#b5bbb6', lagoon:'#4ca8ad', caves:'#647281', patterns:'#bc9aa1',
+      beach:'#f3dba9', light:'#557f87', captain:'#387d91' };
+    var length=main.length*2.6+35, middle=(main[0].z+main[main.length-1].z)/2;
+    if(view.floor) view.floor.visible=false;
+    block(70,.16,length,terrainColor[id],0,-.43,middle);
+    if(view.wrap) view.wrap.classList.add('region-'+id);
+    function sea(x,w,col,y){ block(w,.06,length,col,x,y,middle); }
+    if(id==='town'){
+      sea(18.3,33.4,'#559ca7',-.31);
+      block(15.6,.1,length,'#c4c2ad',-6.2,-.29,middle);
+      block(.4,.48,length,'#7e8990',1.6,-.05,middle);
+      // The route occasionally reaches over the harbor; short timber piers
+      // carry those tiles while leaving blue water visible between them.
+      main.forEach(function(s,i){ if(s.x<.55) return;
+        block(4.8,.18,2.8,'#a67b55',s.x,-.27,s.z);
+        for(var dj=-1;dj<=1;dj++) block(4.8,.05,.1,'#d4aa75',s.x,-.14,s.z+dj*.83);
+        if(i%2===0) post(.12,1.1,'#7e6049',s.x+2.15,-.4,s.z+1.1);
+      });
+    } else if(id==='lagoon'){
+      sea(0,70,'#4cabb0',-.3);
+      for(var li=0;li<main.length;li+=2){ var ls=main[li];
+        add(cyl(2.2,2.45,.26,12),'#a9c9ae',ls.x,-.14,ls.z);
+        add(cyl(1.65,1.82,.1,12),'#dfd6b0',ls.x,.04,ls.z);
+      }
+    } else if(id==='caves'){
+      [-1,1].forEach(function(sd){
+        block(8,7,length,'#3c5361',sd*20,2.9,middle);
+        for(var ci=0;ci<main.length;ci+=4){ var cs=main[ci];
+          add(cone(2.4,4.6,6),'#486071',sd*13,1.9,cs.z);
+          add(cone(1.4,3.2,6),'#435667',sd*10,-.3,cs.z-1.8,Math.PI);
+        }
+      });
+    } else if(id==='patterns'){
+      for(var pi=0;pi<main.length;pi+=3){ var ps=main[pi];
+        add(cyl(4.5,5,.34,8),['#ca929d','#dcb090','#91b7b0'][Math.floor(pi/3)%3],ps.x,-.13,ps.z);
+      }
+    } else if(id==='beach'){
+      sea(18.3,33.4,'#58b5c0',-.31);
+      block(15.6,.13,length,'#f3dba9',-6.2,-.27,middle);
+      block(1.4,.08,length,'#f8efe0',1.8,-.22,middle);
+      main.forEach(function(s){ if(s.x>.5) add(cyl(1.75,2,.22,12),'#f0d7a7',s.x,-.17,s.z); });
+      for(var bi=0;bi<main.length;bi+=3){ var bs=main[bi];
+        add(cyl(2.5,3,.18,12),'#f0d7a7',bs.x,-.17,bs.z);
+      }
+    } else if(id==='light'){
+      sea(18.3,33.4,'#4d9ba9',-.32);
+      block(15.6,.42,length,'#8b9b93',-6.2,-.12,middle);
+      block(1.2,1.15,length,'#677e78',1.6,-.78,middle);
+      main.forEach(function(s){ if(s.x>.5) add(cyl(1.8,2,.3,10),'#879a92',s.x,-.13,s.z); });
+    } else if(id==='captain'){
+      sea(0,70,'#3b8498',-.31);
+      block(16,.52,length,'#654531',0,-.34,middle);
+      [-1,1].forEach(function(sd){
+        block(.65,1.15,length,'#8a6040',sd*8,-.08,middle);
+        block(.22,.17,length,'#d6b580',sd*8,.55,middle);
+        for(var ri=0;ri<main.length;ri+=3){
+          post(.1,1.15,'#72523b',sd*8,.1,main[ri].z);
+        }
+      });
+    }
+    function town(){
+      foundations('#a9afb0');
+      harborBoat(2.65,-8.5,0); harborBoat(3.15,-18,1);
+      function shop(x,y,z,n){
+        var wall=n%3===0?'#f5dbc1':n%3===1?'#d8e6dd':'#e8d5d5', roof=n%2?'#335b72':'#aa4e58';
+        block(3.8,2.9,2.7,wall,x,y+1.45,z);
+        block(4.25,.28,3.05,roof,x,y+2.96,z); block(4.45,.18,.26,'#e7b889',x,y+2.73,z+1.48);
+        // Separate roof ridges and deep eaves give the street its Korean harbor profile.
+        block(4.1,.16,.2,'#243d50',x,y+3.19,z-1.28);
+        block(.9,1.65,.12,'#7c5245',x,y+.83,z+1.42);
+        [-1,1].forEach(function(sd){
+          block(.68,.73,.13,'#47758a',x+sd*1.22,y+1.75,z+1.42);
+          block(.72,.1,.19,'#f0be84',x+sd*1.22,y+2.16,z+1.45);
+          block(.1,.8,.2,'#f0be84',x+sd*1.22,y+1.75,z+1.51);
+        });
+        block(1.45,.38,.13,n%2?'#b84e65':'#547c87',x,y+2.35,z+1.51);
+        lantern(x+2.55,y,z+1.3,'#ffd58c');
+      }
+      main.forEach(function(s,i){ if(i%4!==1) return; placed(s,-1,5.7,0,function(x,y,z){ shop(x,y,z,i); }); });
+      for(var k=4;k<main.length;k+=9) placed(main[k],1,5.7,0,function(x,y,z){
+        block(3.1,.18,2.2,'#936443',x,y+.1,z); for(var j=-1;j<=1;j++) block(.14,.12,2.2,'#c39161',x+j*.95,y+.23,z);
+        post(.12,2.5,'#754c38',x-1.3,y,z); post(.12,2.5,'#754c38',x+1.3,y,z);
+        block(2.8,.16,.14,'#e8cc9c',x,y+2.45,z);
+      });
+    }
+    function lagoon(){
+      foundations('#7fbdad');
+      function reeds(x,y,z){ for(var j=0;j<5;j++){ var dx=(j-2)*.25, h=1.7+(j%3)*.37;
+        add(cyl(.025,.05,h,5),'#408970',x+dx,y+h/2,z+(j%2)*.18,0,0,dx*.23);
+        add(cyl(.075,.09,.37,6),'#ac8251',x+dx+dx*.12,y+h-.1,z+(j%2)*.18);
+      } }
+      main.forEach(function(s,i){ if(i%3!==0) return; var sd=pathSide(s,i);
+        placed(s,sd,4.4,0,function(x,y,z){
+          add(cyl(1.2,1.35,.22,10),'#8cb9a4',x,y+.07,z);
+          add(cyl(.83,.91,.17,10),'#e4d7a8',x+.35,y+.2,z+.35);
+          reeds(x-1.3,y,z-.5);
+          if(i%2===0){ orb(.34,'#f9a8c4',x+.45,y+.48,z-.3); orb(.18,'#ffe4b3',x+.55,y+.78,z-.28); }
+        });
+        placed(s,-sd,5.4,1,function(x,y,z){ reeds(x,y,z); reeds(x+1,y,z+.6); });
+      });
+      for(var k=4;k<main.length;k+=8) placed(main[k],-pathSide(main[k],k),6,0,function(x,y,z){
+        post(.17,2.6,'#7a604d',x-1.4,y,z); post(.17,2.6,'#7a604d',x+1.4,y,z);
+        block(3,.19,.55,'#b59568',x,y+2.45,z); block(2.6,.13,.44,'#5b907e',x,y+2.15,z);
+      });
+    }
+    function caves(){
+      if(view.scene.fog){ view.scene.fog.color.set('#284354'); view.scene.fog.near=12; view.scene.fog.far=47; }
+      foundations('#7b93a3');
+      function arch(x,y,z,n){
+        var col=n%2?'#555b78':'#45687a';
+        add(cyl(.54,.82,4,7),col,x-2,y+2,z,0,0,-.18);
+        add(cyl(.54,.82,4,7),col,x+2,y+2,z,0,0,.18);
+        block(4.2,.6,1.1,col,x,y+4.25,z);
+        [-1,1].forEach(function(sd){ crystal(x+sd*2.3,y,z+.7,.9,sd<0?'#9dbfe1':'#90e4d8'); });
+        crystal(x,y+4.4,z,.8,'#9bd9ef');
+      }
+      for(var i=3;i<main.length;i+=7){ var s=main[i]; arch(s.x,(s.y||0)-.28,s.z,i); }
+      main.forEach(function(s,i){ if(i%3!==1) return; var sd=pathSide(s,i);
+        placed(s,sd,4.6,0,function(x,y,z){ crystal(x,y,z,1.25,i%2?'#79d5dc':'#aaa7e9'); crystal(x+1,y,z+.65,.65,'#c5eaff'); });
+        placed(s,-sd,5.2,-1,function(x,y,z){
+          add(cone(.8,2,7),'#556878',x,y+1,z); crystal(x+.8,y,z,.58,'#8de4e4');
+        });
+      });
+    }
+    function patterns(){
+      foundations('#d7b1a1');
+      function terrace(x,y,z,i){
+        var pal=['#d88891','#e9b878','#9badd0','#80bfae'];
+        for(var l=0;l<3;l++){
+          var rr=2.55-l*.48, h=.55;
+          add(cyl(rr,rr+.14,h,8),pal[(i+l)%4],x,y+h/2+l*.57,z,0,l*.2);
+          add(torus(rr-.16,.085),'#ffe7ce',x,y+h+l*.57,z,Math.PI/2);
+        }
+        coral(x,y+1.65,z,.9,pal[(i+2)%4]);
+      }
+      main.forEach(function(s,i){ if(i%4!==1) return; var sd=pathSide(s,i);
+        placed(s,sd,5,0,function(x,y,z){ terrace(x,y,z,i); });
+        placed(s,-sd,5.4,1,function(x,y,z){ terrace(x,y,z,i+2); });
+      });
+      // Repeated colored blocks follow each rise like a board-game pattern.
+      main.forEach(function(s,i){ if(i%2) return; var sd=pathSide(s,i), p=at(s,sd,2.25,0);
+        block(.48,.18,.48,['#eaa0a2','#f3cc86','#8ebdc7','#bba6d9'][Math.floor(i/2)%4],p[0],p[1]+.13,p[2],Math.PI/4);
+      });
+    }
+    function beach(){
+      foundations('#f2dcad');
+      function palm(x,y,z,i){
+        var h=3.8+(i%3)*.45;
+        add(cyl(.16,.25,h,8),'#a77b54',x,y+h/2,z,0,0,.11);
+        orb(.38,'#c79c68',x+.22,y+h,z);
+        for(var j=0;j<6;j++){ var a=j*Math.PI/3;
+          var leaf=add(cone(.45,2.3,5),j%2?'#5eaa76':'#3a9277',x+.22+Math.cos(a)*1.05,y+h-.2,z+Math.sin(a)*1.05);
+          leaf.rotation.z=Math.cos(a)*1.18; leaf.rotation.x=-Math.sin(a)*1.18;
+        }
+        for(var c=0;c<3;c++) orb(.16,'#9a7045',x+.22+(c-1)*.2,y+h-.38,z+.18);
+      }
+      function bottle(x,y,z){
+        add(cyl(.27,.33,.75,10),'#8fc9bb',x,y+.45,z,0,0,.36);
+        add(cyl(.11,.11,.32,10),'#addbd0',x-.15,y+.91,z,0,0,.36);
+        add(cyl(.12,.12,.12,8),'#b98754',x-.2,y+1.09,z,0,0,.36);
+        block(.42,.3,.06,'#fff0d0',x,y+.48,z+.27,.36);
+      }
+      main.forEach(function(s,i){ if(i%4!==0) return; var sd=pathSide(s,i);
+        placed(s,sd,5.5,0,function(x,y,z){ palm(x,y,z,i); bottle(x+1.3,y,z+.8); });
+        placed(s,-sd,4.7,1,function(x,y,z){
+          add(cyl(1.5,1.7,.36,10),'#eac991',x,y+.12,z);
+          for(var j=0;j<3;j++) orb(.22,['#e58f87','#f7e3bc','#e8ad78'][j],x-.6+j*.52,y+.39,z+.4);
+        });
+      });
+    }
+    function light(){
+      if(view.scene.fog){ view.scene.fog.color.set('#9ac4d2'); view.scene.fog.far=55; }
+      foundations('#b9b8aa');
+      function cliff(x,y,z,i){
+        var h=2.5+(i%3)*.75;
+        add(cyl(2.1,2.55,h,8),'#7d8d8d',x,y+h/2,z);
+        add(cyl(2.25,2.3,.32,8),'#b7b8a5',x,y+h+.08,z);
+        for(var j=0;j<3;j++) add(cone(.46,1.1,6),'#5f8584',x+(j-1)*1.1,y+h+.63,z+.7);
+      }
+      main.forEach(function(s,i){ if(i%5!==1) return; placed(s,-1,6.1,0,function(x,y,z){ cliff(x,y,z,i); }); });
+      var mid=main[Math.floor(main.length*.5)] || main[0];
+      if(mid) placed(mid,-1,8.5,0,function(x,y,z){
+        add(cyl(3,3.5,3.2,12),'#747f81',x,y+1.6,z);
+        add(cyl(2.7,2.85,.35,12),'#e4d9be',x,y+3.37,z);
+        for(var l=0;l<5;l++) add(cyl(l%2?1.1:1.18,l%2?1.12:1.2,1.08,12),l%2?'#d75d5d':'#fff0dc',x,y+4.1+l*1.07,z);
+        add(cyl(1.5,1.5,.26,12),'#384f5c',x,y+9.55,z);
+        add(cyl(1.05,1.05,1.15,12),'#ffe09b',x,y+10.24,z);
+        for(var k=0;k<6;k++){ var a=k*Math.PI/3; post(.06,1.08,'#354e60',x+Math.cos(a)*1.06,y+9.65,z+Math.sin(a)*1.06); }
+        add(cone(1.68,.83,12),'#c9545e',x,y+11.22,z);
+      });
+    }
+    function captain(){
+      // Seven colored watch sections repeat along the voyage; the walkway stays below the tiles.
+      var watch=['#b75863','#d99a5f','#e8c273','#74a4aa','#6d829e','#a185ab','#8ba578'];
+      main.forEach(function(s,i){
+        var c=watch[Math.floor(i/5)%7], y=(s.y||0)-.24;
+        block(5.1,.24,2.38,'#805a42',s.x,y,s.z);
+        for(var j=-1;j<=1;j++) block(4.9,.08,.12,'#b7875b',s.x,y+.15,s.z+j*.67);
+        if(i%5!==0) return;
+        var sd=pathSide(s,i), p=at(s,sd,3.25,0), q=at(s,-sd,3.25,0);
+        post(.13,2.9,'#72513c',p[0],p[1],p[2]); post(.13,2.9,'#72513c',q[0],q[1],q[2]);
+        block(6.6,.18,.18,c,s.x,(s.y||0)+2.72,s.z);
+        add(cone(.52,.72,3),c,s.x,(s.y||0)+3.1,s.z,0,0,Math.PI/2);
+        [-1,1].forEach(function(side){ var r=at(s,side,4.5,1.1);
+          block(1.2,1,.82,'#976945',r[0],r[1]+.5,r[2]);
+          block(1.3,.11,.9,c,r[0],r[1]+1.03,r[2]);
+        });
+      });
+      for(var k=2;k<main.length;k+=8){ var s=main[k];
+        var p=at(s,pathSide(s,k),5,0);
+        post(.2,3.8,'#765138',p[0],p[1],p[2]);
+        add(torus(.75,.08),'#ebd4a0',p[0],p[1]+2.9,p[2],0,Math.PI/2);
+        for(var n=0;n<6;n++){ var a=n*Math.PI/3;
+          block(.07,1.4,.08,'#c39760',p[0]+Math.cos(a)*.35,p[1]+2.9+Math.sin(a)*.35,p[2]+.1,a);
+        }
+      }
+    }
+    ({ town:town, lagoon:lagoon, caves:caves, patterns:patterns, beach:beach, light:light, captain:captain })[id]();
+    // Chunked baked meshes use the same fast path and fog as the original board scenery.
+    var merged = reef3dMerge(root,view.rig,view.bake);
+    merged.name = root.name; view.scene.add(merged);
+    view.regionScenery = merged;
+  };
+/* end of src/js/reef3d/region-scenery.js */
 /* from src/js/reef3d/dice.js */
   /* ---------- The dice block (after leaving a deck): it floats over the guide's head and flicks through its
      numbers; a tap and she jumps up and hits it, then hops that many spaces along the path, counting down.
@@ -25241,7 +25371,8 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       var box = document.createElement('div'); box.className = 'r3-fork'; box.setAttribute('role', 'group'); box.setAttribute('aria-label', 'Which way?');
       box.innerHTML = '<b>Which way?</b>' + opts.map(function(n){
         var br = sp[n].branch;
-        var lab = br === 'treasure' ? ccIcon('fish') + 'Aquarium' : br === 'story' ? ccIcon('bottle') + 'Story Bottle' : ccIcon('arrow-up') + 'Keep going';
+        var lab = br === 'treasure' ? (view.region ? '🧰 Treasure cache' : ccIcon('fish') + 'Aquarium')
+          : br === 'story' ? (view.region ? ccIcon('bottle') + 'Bonus bottle' : ccIcon('bottle') + 'Story Bottle') : ccIcon('arrow-up') + 'Keep going';
         return '<button type="button" data-fork="' + n + '">' + lab + '</button>';
       }).join('');
       view.wrap.appendChild(box); d.fork = box;
@@ -25254,11 +25385,11 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     }
     function land(){
       reef3dDiceDone(view, d);
-      S.reef3dAt = view.at;
+      reef3dSavePosition(view, view.at);
       var s = sp[view.at];
       if(gateStop) reef3dPrize(view, '🐚', 'The clam is shut!', 'It opens again next turn.');
       if(story >= 0 && view.at === story) return reef3dStoryArrive(view, s);
-      if(s.kind === 'treasure' || s.kind === 'story') return reef3dArrive(view, s);   // the end of a branch: go in
+      if((view.region && s.kind === 'deck') || s.kind === 'treasure' || s.kind === 'story') return reef3dArrive(view, s);   // the end of a branch: go in
       reef3dVisit(view, s, false, function(){ reef3dAfterTurn(view); });
     }
     d.startAt = view.at;
@@ -25306,7 +25437,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     h.querySelector('.r3-hud-pearls b').textContent = b.pearls;
     var mb = view.wrap.querySelector('[data-r3-mode]');
     if(mb){
-      mb.hidden = !planOn();
+      mb.hidden = !!view.region || !planOn();
       var tg = reef3dStoryTarget(view), day = S.planDay, total = day && day.blocks ? day.blocks.length : 0, done = total ? day.blocks.filter(function(x){ return x.done; }).length : 0;
       mb.innerHTML = reef3dStoryOn() ? ccIcon('story') + '<span>Story · ' + (total ? done + ' of ' + total : 'today') + '</span>' : ccIcon('dice') + '<span>Free play</span>';
       mb.setAttribute('aria-label', reef3dStoryOn() ? 'Story mode: following today\'s plan. Tap for free play.' : 'Free play. Tap for story mode.');
@@ -25509,12 +25640,12 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   function reef3dSwirlTo(view, to, done){
     var g = view.guide, body = g.userData.body;
     try { Sound.bubbles(5); } catch(e){}
-    if(reefCalm()){ reef3dPlace(view, to); S.reef3dAt = to; return done(); }
+    if(reefCalm()){ reef3dPlace(view, to); reef3dSavePosition(view, to); return done(); }
     view.moving = true; view.emote = null;
     var r0 = g.rotation.y;
     view.fx.push({ t0: performance.now(), dur: 800, step: function(p){ g.rotation.y = r0 + p * p * Math.PI * 6; body.scale.setScalar(1 - p * .95); body.position.y = -p * .5; },
       end: function(){
-        reef3dPlace(view, to); S.reef3dAt = to;
+        reef3dPlace(view, to); reef3dSavePosition(view, to);
         view.fx.push({ t0: performance.now(), dur: 700, step: function(p){ var e = reef3dBounce(p); g.rotation.y = r0 + (1 - p) * Math.PI * 4; body.scale.setScalar(.05 + .95 * e); body.position.y = Math.sin(p * Math.PI) * 1.2; },
           end: function(){ body.scale.setScalar(1); body.position.y = 0; view.moving = false; reef3dPuff(view, view.spaces[to]); done(); } });
       } });
@@ -25598,7 +25729,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       if(!card) return;
       card.innerHTML = '<div class="r3-panel-e" aria-hidden="true">' + (won ? '🎉' : '🐚') + '</div><h3>' + (won ? (note ? 'Well done!' : 'You did it!') : 'Nice try!') + '</h3>' +
         (note ? '<p class="r3-mini-score">' + note + '</p>' : '') + (reward ? '<p>You get ' + reward + ' shells.</p>' : '<p>Want to play again?</p>') +
-        '<div class="r3-panel-row">' + (practice ? '<button type="button" class="r3-btn main" data-again>Play again</button>' : '') + '<button type="button" class="r3-btn' + (practice ? '' : ' main') + '" data-back>Back to the ' + (view.night ? 'wreck' : 'reef') + '</button></div>';
+        '<div class="r3-panel-row">' + (practice ? '<button type="button" class="r3-btn main" data-again>Play again</button>' : '') + '<button type="button" class="r3-btn' + (practice ? '' : ' main') + '" data-back>Back to ' + (view.region ? esc(view.region.name) : 'the ' + (view.night ? 'wreck' : 'reef')) + '</button></div>';
       if(won){ try { reefWinSound(false); } catch(e){} reef3dCrabAct(view, 'Dance', true); }
       if(reward) reef3dShells(view, reward);
       var bk = card.querySelector('[data-back]'); bk.focus({ preventScroll: true });
@@ -25688,6 +25819,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
      as before. Only profiles with a daily plan have the switch. ---- */
   function reef3dStoryOn(){ if(!planOn()) return false; var m = reefBoard().mode; return m !== 'free'; }
   function reef3dStoryTarget(view){
+    if(view.region) return -1;
     if(!reef3dStoryOn()) return -1;
     var day = S.planDay; if(!day || day.off || day.date !== todayISO() || !day.blocks) return -1;
     var i = planNextIndex(day); if(i < 0) return -1;
@@ -25742,7 +25874,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   var R3amb = null;
   function reef3dAmbience(view, on){
     try {
-      on = on && Sound.isEnabled() && document.body.contains(view.wrap);
+      on = on && !view.region && Sound.isEnabled() && document.body.contains(view.wrap);
       view.amb = on;
       if(!on){ if(R3amb) R3amb.gain.gain.setTargetAtTime(0, R3amb.ctx.currentTime, .3); return; }
       var ctx = Sound.getCtx(); if(!ctx) return;
@@ -25873,7 +26005,15 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   function reef3dArrive(view, s){
     var i = s.i;
     (function(){
-      S.reef3dAt = i;
+      reef3dSavePosition(view, i);
+      if(view.region && (s.kind === 'treasure' || s.kind === 'story')){
+        reef3dStars(view, s); reef3dEmote(view, 'cheer'); reef3dShells(view, s.kind === 'treasure' ? 5 : 3);
+        reef3dPrize(view, s.kind === 'treasure' ? '🧰' : '🍾', s.kind === 'treasure' ? 'Treasure cache!' : 'Bonus bottle!', 'Extra shells for exploring this side route.');
+        return setTimeout(function(){
+          if(!document.body.contains(view.wrap) || view.moving) return;
+          reef3dTravel(view, s.jn, function(){ reef3dSavePosition(view, view.at); reef3dAfterTurn(view); });
+        }, 2600);
+      }
       if(s.kind === 'shop') return reef3dShop(view, null, true);
       if(s.kind === 'surprise'){
         if(reefCalm()){ reef3dQHit(view, s); return reef3dSurprise(view, s); }
@@ -25885,7 +26025,11 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       if(s.kind === 'treasure' && view.chestActs.open){ var co = view.chestActs.open; co.reset(); co.setLoop(window.THREE.LoopOnce); co.clampWhenFinished = true; co.play(); }
       if(s.kind === 'deck' || s.kind === 'treasure') reef3dStars(view, s);
       if(s.kind === 'deck' || s.kind === 'story') reef3dEmote(view, 'dive'); else if(s.kind === 'treasure') reef3dEmote(view, 'twirl');
-      if(s.kind === 'deck'){ Sound.bloop(520); S.reefReturnY = window.scrollY; return setTimeout(function(){ reefGo('dive', s.label, function(){ reefStartDeck(s.item.d.id); }); }, reefCalm() ? 0 : 750); }
+      if(s.kind === 'deck'){ Sound.bloop(520); if(!view.region) S.reefReturnY = window.scrollY;
+        return setTimeout(function(){ if(!document.body.contains(view.wrap)) return; reefGo('dive', s.label, function(){
+          if(view.region && s.item.d.regionActivity) regionBoardLaunch(s.item.d.regionActivity);
+          else reefStartDeck(s.item.d.id);
+        }); }, reefCalm() ? 0 : 750); }
       if(s.kind === 'treasure'){ Sound.bloop(600); S.reefReturnY = window.scrollY; return setTimeout(function(){ reefGo('swim', s.label, function(){ S.view = 'collection'; render(); window.scrollTo(0, 0); }); }, reefCalm() ? 0 : 750); }
       if(s.kind === 'story'){ S.reefReturnY = window.scrollY; return setTimeout(function(){ reefGo('dive', s.label, startStoryMaker); }, reefCalm() ? 0 : 250); }
     })();
@@ -25910,7 +26054,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     ov.classList.add('closing'); setTimeout(function(){ ov.remove(); }, 380);
     var THREE = window.THREE, tp = new THREE.Vector3(), tl = new THREE.Vector3();
     function land(){
-      reef3dPlace(view, i); S.reef3dAt = i; view.dirty = true; view.moving = false;
+      reef3dPlace(view, i); reef3dSavePosition(view, i); view.dirty = true; view.moving = false;
       reef3dCamTarget(view, tp, tl); view.camPos.copy(tp); view.camLook.copy(tl);   // the board view waits at her new spot
     }
     try { Sound.bubbles(3); } catch(e){}
@@ -25980,7 +26124,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     }).join('');
     var spots = sp.filter(function(s){ return s.label; }).map(function(s){
       var x = px(s), y = py(s), left = x > W / 2;
-      var name = s.kind === 'deck' ? s.item.d.name : s.kind === 'treasure' ? 'Aquarium' : 'Story Bottle';
+      var name = s.kind === 'deck' ? s.item.d.name : s.kind === 'treasure' ? (view.region ? 'Treasure cache' : 'Aquarium') : (view.region ? 'Bonus bottle' : 'Story Bottle');
       var em = s.kind === 'deck' ? s.item.d.emoji : s.kind === 'treasure' ? '🐠' : '🍾';
       return '<button type="button" class="r3-map-spot'+(s.kind === 'deck' ? ' ' + s.item.state : '')+(left ? ' left' : '')+'" data-r3-go="'+s.i+'" style="left:'+(x / W * 100).toFixed(1)+'%;top:'+y.toFixed(0)+'px" aria-label="Go to '+esc(name)+'">' +
         '<span class="r3-map-em" aria-hidden="true">'+em+'</span><span class="r3-map-name">'+esc(name)+'</span></button>';
@@ -25988,9 +26132,11 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     var me = sp[view.at];
     var ov = document.createElement('div');
     ov.className = 'r3-map' + (fromZoom ? ' from-zoom' : ''); ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-label', 'Treasure map');
-    var sea = reefCourseOn();   // the sea chart (seamap.js) is for profiles with a language course, for now
-    ov.innerHTML = '<div class="r3-map-card"><div class="r3-map-head"><b>Treasure map</b><button type="button" class="r3-map-close" data-r3-close aria-label="Close the map">'+ccIcon('close')+'</button></div>' +
-      (sea ? '<div class="r3-map-tabs" role="tablist"><button type="button" role="tab" class="r3-map-tab on" aria-selected="true" data-sea-tab="cove">Coral Cove</button><button type="button" role="tab" class="r3-map-tab" aria-selected="false" data-sea-tab="sea">The sea</button></div>' : '') +
+    var sea = reefCourseOn() || !!view.region;   // the sea chart also links back from each region
+    var seaId = view.region ? ({ patterns:'reef', captain:'deck' }[view.region.id] || view.region.id) : 'cove';
+    var mapName = view.region ? view.region.name : 'Coral Cove';
+    ov.innerHTML = '<div class="r3-map-card"><div class="r3-map-head"><b>'+esc(mapName)+' map</b><button type="button" class="r3-map-close" data-r3-close aria-label="Close the map">'+ccIcon('close')+'</button></div>' +
+      (sea ? '<div class="r3-map-tabs" role="tablist"><button type="button" role="tab" class="r3-map-tab on" aria-selected="true" data-sea-tab="cove">'+esc(mapName)+'</button><button type="button" role="tab" class="r3-map-tab" aria-selected="false" data-sea-tab="sea">The sea</button></div>' : '') +
       '<div class="r3-map-cove" role="tabpanel">' +
       '<p class="r3-map-hint">Tap a place to swim there.</p>' + reef3dVoyageHTML(view) +
       '<div class="r3-map-board" style="height:'+H+'px"><svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true">' +
@@ -26008,7 +26154,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     function tab(which){
       ov.querySelectorAll('[data-sea-tab][role="tab"]').forEach(function(t){ var on = t.dataset.seaTab === which; t.classList.toggle('on', on); t.setAttribute('aria-selected', String(on)); });
       ov.classList.toggle('sea-on', which === 'sea');
-      if(which === 'sea' && !ov.querySelector('.r3-sea-isle.picked')) reefSeaInfo(ov, 'cove');
+      if(which === 'sea' && !ov.querySelector('.r3-sea-isle.picked')) reefSeaInfo(ov, seaId);
       var card = ov.querySelector('.r3-map-card'); if(card) card.scrollTop = 0;
     }
     ov.addEventListener('click', function(e){
@@ -26022,6 +26168,13 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     });
     ov.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });
     document.body.appendChild(ov);
+    if(view.region){
+      var current = REEF_REGIONS.find(function(r){ return r.id === seaId; }), marker = ov.querySelector('.r3-sea-me');
+      if(current && marker){ marker.style.left = (current.x / 300 * 100).toFixed(1) + '%'; marker.style.top = ((current.y - 30) / 390 * 100).toFixed(1) + '%'; }
+      ov.querySelectorAll('.r3-sea-isle').forEach(function(b){
+        var tag = b.querySelector('.r3-sea-tag'); if(tag) tag.textContent = b.dataset.sea === seaId ? 'You are here' : 'Open now';
+      });
+    }
     reef3dMapDeclutter(ov);
     var meEl = ov.querySelector('.r3-map-me'); if(meEl) meEl.scrollIntoView({ block: 'center' });
     ov.querySelector('[data-r3-close]').focus();
@@ -26063,6 +26216,12 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     try {
       var THREE = window.THREE, kit = view.kit, B = kit.B, night = view.night, sp = view.spaces, r = reefRand(91);
       var minZ = 1e9, maxZ = -1e9; sp.forEach(function(s){ minZ = Math.min(minZ, s.z); maxZ = Math.max(maxZ, s.z); });
+      if(view.region){
+        var plain = new THREE.Mesh(new THREE.PlaneGeometry(440, maxZ - minZ + 440),
+          new THREE.MeshBasicMaterial({ color: view.regionGround || '#a9b7ae' }));
+        plain.rotation.x = -Math.PI / 2; plain.position.set(0, -.6, (minZ + maxZ) / 2);
+        view.scene.add(plain); view.outskirts = plain; return plain;
+      }
       var off = night && view.shipDeck ? view.shipDeck.sand : 0, len = maxZ - minZ, cz = (minZ + maxZ) / 2;
       var W = 440, L = len + 440;   // wide enough that its edge never shows, even pulled right out for a map trip
       var hull = night && view.shipDeck ? view.shipDeck.half + 3 : 0;
@@ -26190,6 +26349,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     deckBoardButton(view.wrap);
     view.wrap.querySelector('[data-r3-games]').addEventListener('click', function(e){ e.stopPropagation(); if(!view.moving && !(view.dice && !view.dice.rolling)) reef3dGames(view); });   // the dice can still be waiting for a tap
     view.wrap.querySelector('[data-r3-mode]').addEventListener('click', function(e){
+      if(view.region) return;
       e.stopPropagation(); var b = reefBoard(); b.mode = reef3dStoryOn() ? 'free' : 'story'; reefBoardSave(); reef3dHud(view);
       if(!reef3dStoryMark(view)){ var nx = view.spaces.find(function(x){ return x.kind === 'deck' && x.item.state === 'ready'; }); view.ring.visible = !!nx; if(nx) view.ring.position.set(nx.x, .34 + (nx.y || 0), nx.z); }
       try { Sound.tap(); } catch(err){}
@@ -27066,7 +27226,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     var toDark = !view.night, mode = toDark ? 'dark' : 'light';
     function swap(){ try { setThemeMode(mode, true); } catch(e){} }
     if(view.themeFx || view.moving || document.querySelector('.r3-cycle')) return;
-    if(reefCalm()){ var w0 = reef3dWash(toDark); setTimeout(swap, 280); setTimeout(function(){ reef3dWashOut(w0); }, 420); return; }
+    if(view.region || reefCalm()){ var w0 = reef3dWash(toDark); setTimeout(swap, 280); setTimeout(function(){ reef3dWashOut(w0); }, 420); return; }
     try { reefThemeSting(toDark); } catch(e){}
     view.emote = null; view.themeFx = { cycle: true };
     var stars = '', glints = '', k;
@@ -27148,9 +27308,10 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   function reef3dGreet(view, zones, quiet){
     var now = {}, finished = false;
     zones.forEach(function(z){ z.items.forEach(function(it){ now[it.d.id] = it.state; }); });
-    if(R3.fromDeck){ R3.fromDeck = false; finished = true; }
-    var first = !R3.seen || R3.seenProfile !== (S.profile && S.profile.id);
-    R3.seen = now; R3.seenProfile = S.profile && S.profile.id;
+    if(R3.fromDeck && !view.region){ R3.fromDeck = false; finished = true; }
+    if(R3.fromRegionActivity && view.region){ R3.fromRegionActivity = false; finished = true; }
+    var first = !R3.seen || R3.seenProfile !== (S.profile && S.profile.id) || R3.seenRegion !== (view.region && view.region.id || 'cove');
+    R3.seen = now; R3.seenProfile = S.profile && S.profile.id; R3.seenRegion = view.region && view.region.id || 'cove';
     if(quiet || (!finished && !first)) return;
     setTimeout(function(){
       if(!document.body.contains(view.wrap) || view.moving) return;
@@ -27208,24 +27369,45 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     }
     return dflt;
   }
+  function reef3dDispose(view){
+    if(!view) return;
+    clearTimeout(view.homeT);
+    if(view.raf) cancelAnimationFrame(view.raf);
+    reef3dAmbience(view, false);
+    if(view.post && view.post.dispose) view.post.dispose();
+    view.renderer.dispose();
+    if(view.renderer.forceContextLoss) view.renderer.forceContextLoss();
+    view.wrap.remove();
+    if(R3.view === view) R3.view = null;
+  }
+  function reef3dUnmount(regionId){
+    var view = R3.view;
+    if(view && view.region && (!regionId || view.region.id === regionId)) reef3dDispose(view);
+    if(!document.querySelector('.r3')) document.body.classList.remove('r3-full', 'r3-loading');
+  }
   function reef3dMount(rw, zones){
     var scene2d = rw.querySelector('.rw-scene');
     if(!scene2d || R3.failed) return;
-    var key = (reefNight() ? 'n' : 'd') + zones.map(function(z){ return z.id + ':' + z.items.map(function(it){ return it.d.id + it.state; }).join(','); }).join('|') + ':' + reefTally().found;
+    var region = zones.region || null;
+    var key = (S.profile && S.profile.id || '') + ':' + (region ? region.id : 'cove') + ':' + (reefNight() ? 'n' : 'd') + ':' + zones.map(function(z){ return z.id + ':' + z.items.map(function(it){ return it.d.id + it.state; }).join(','); }).join('|') + ':' + reefTally().found;
     function attach(){
       if(!document.body.contains(rw)) return;
       try {
         var view = R3.view;
         if(!view || view.key !== key){
           var was = view;
-          if(view){ view.renderer.dispose(); view.renderer.forceContextLoss && view.renderer.forceContextLoss(); }
+          if(view) reef3dDispose(view);
           view = R3.view = reef3dBuild(rw, zones, models); view.key = key;
+          if(region && typeof window.regionBoardDecorate === 'function') window.regionBoardDecorate(view, region);
           reef3dWarm(view);
           reef3dWire(view);
-          var start = S.reef3dAt != null && S.reef3dAt < view.spaces.length ? S.reef3dAt : 0;
+          var saved = reef3dPosition(view), start = saved != null && saved < view.spaces.length ? saved : 0;
           // A deck came or went (My words appears while it has words due): keep her by the same place, not the same number
-          if(was && S.reef3dAt != null && was.key.charAt(0) === key.charAt(0)) start = reef3dSameSpot(was.spaces, view.spaces, S.reef3dAt, start);
+          if(was && saved != null && ((was.region && region && was.region.id === region.id) || (!was.region && !region))){
+            if(was.night === view.night) start = reef3dSameSpot(was.spaces, view.spaces, saved, start);
+          }
           reef3dPlace(view, start);
+          if(region) reef3dSavePosition(view, start);
           reef3dCamTarget(view, view.camPos, view.camLook);
         }
         scene2d.hidden = true;
@@ -27235,10 +27417,10 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
         scene2d.parentNode.insertBefore(view.wrap, scene2d);
         var next = view.spaces.find(function(s){ return s.kind === 'deck' && s.item.state === 'ready'; });
         if(next){ view.ring.visible = true; view.ring.position.set(next.x, .34 + (next.y || 0), next.z); } else view.ring.visible = false;
-        if(view.nextStar){ view.nextStar.visible = !!(next && next.obj); if(next && next.obj){ view.nextStar.position.set(next.obj.position.x, 3.2 + (next.y || 0), next.obj.position.z); view.nextStar.userData.y = 3.2 + (next.y || 0); } }
+        if(view.nextStar){ view.nextStar.visible = !region && !!(next && next.obj); if(next && next.obj){ view.nextStar.position.set(next.obj.position.x, 3.2 + (next.y || 0), next.obj.position.z); view.nextStar.userData.y = 3.2 + (next.y || 0); } }
         reef3dPearlShow(view); reef3dHat(view); reef3dGateShow(view); reef3dHud(view);
         reef3dStoryMark(view);
-        if(planOn() && (!S.planDay || S.planDay.date !== todayISO()) && !S.planLoading) planLoad().then(function(){ reef3dHud(view); reef3dStoryMark(view); });
+        if(!region && planOn() && (!S.planDay || S.planDay.date !== todayISO()) && !S.planLoading) planLoad().then(function(){ reef3dHud(view); reef3dStoryMark(view); });
         view.w = 0; reef3dLoop(view);
         reef3dAmbience(view, true);
         reef3dGreet(view, zones, reef3dThemeArrive(view));   // after a day/night switch she waves on her own cue
@@ -27249,7 +27431,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
           view.homeT = setTimeout(function(){
             var h = view.spaces[view.at];
             if(!document.body.contains(view.wrap) || view.moving || view.dice || !h || !h.branch) return;
-            reef3dTravel(view, h.jn, function(){ S.reef3dAt = view.at; reef3dEmote(view, 'hello'); });
+            reef3dTravel(view, h.jn, function(){ reef3dSavePosition(view, view.at); reef3dEmote(view, 'hello'); });
           }, 1300);
         }
       } catch(err){
@@ -27528,11 +27710,12 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   }
 /* end of src/js/reef3d/lobby.js */
 /* from src/js/music.js */
-  /* ---------- Background music: day-song.mp3 on the sunlit reef, night-song.mp3 on the shipwreck,
+  /* ---------- Background music: a distinct sampled-instrument loop on each region board,
+     day-song.mp3 on the sunlit reef, night-song.mp3 on the shipwreck,
      lobby-song.mp3 (easy jazz) on the profile screen, deck-song.mp3 (calm, quiet) inside decks, timer-song.mp3
      (a kalimba ticking every second, in step with the countdown) on Timed Choice cards, and game-song.mp3
      (bouncy) in minigames. All but the day and night songs are original loops made for Coral Cove
-     (tools/compose_music.py). Plays in the lobby and in every profile's game,
+     (tools/compose_music.py and tools/compose_regions.py). Plays in the lobby and in every profile's game,
      dips under the celebration clip, and follows a 🎵 switch saved on this device. ---------- */
   var RM = { el: {}, cur: null, duck: 1, started: false };
   var RM_KEY = 'cc-music';
@@ -27639,11 +27822,24 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     if(!S.profile) return { name: 'lobby-song', vol: 1 };       // the profile screen
     if(!reefGame()) return null;
     if(S.view === 'study' && S.timedChoiceTimerHandle && S.timedChoiceState && !S.timedChoiceState.reefCalm) return { name: 'timer-song', vol: RM_DECK };
-    if(reefInDeck() || S.view === 'summary') return { name: 'deck-song', vol: RM_DECK };   // kept low so speech stays clear
     if(document.querySelector('.r3-mini')) return { name: 'game-song', vol: RM_GAME };    // under the minigame's sound effects
+    // The region state persists while lessons are open, so require the actual
+    // board element as well as its current view before changing the score.
+    var board = typeof window.__regionBoardView === 'function' ? window.__regionBoardView() : null;
+    if(board && board.mode === 'board' && board.region === S.view &&
+       document.querySelector('.rb-root[data-region-board="' + board.region + '"]')){
+      return { name: 'region-' + board.region + '-song', vol: 1 };
+    }
+    if(reefInDeck() || S.view === 'summary') return { name: 'deck-song', vol: RM_DECK };   // kept low so speech stays clear
     return { name: name, vol: 1 };
   }
-  var RM_SONGS = ['day-song', 'night-song', 'lobby-song', 'deck-song', 'timer-song', 'game-song'];
+  var RM_REGION_SONGS = ['town', 'lagoon', 'caves', 'patterns', 'beach', 'light', 'captain'].map(function(id){ return 'region-' + id + '-song'; });
+  var RM_SONGS = ['day-song', 'night-song', 'lobby-song', 'deck-song', 'timer-song', 'game-song'].concat(RM_REGION_SONGS);
+  window.__reefMusicState = function(){
+    var target = reefMusicTarget(), tracks = {};
+    Object.keys(RM.el).forEach(function(name){ var m = RM.el[name]; tracks[name] = { level:m.level, stage:m.stage, paused:reefMusicPaused(m) }; });
+    return { target:target && { name:target.name, vol:target.vol }, current:RM.cur, started:RM.started, duck:RM.duck, tracks:tracks };
+  };
   // Lines the timer song up with a countdown that started at startMs, so its firm kalimba notes land on the seconds.
   function reefMusicTimerSync(startMs){
     RM.timerStart = startMs; reefMusicUpdate();
@@ -27691,7 +27887,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     var warm = function(name){ return fetch(name + '.mp3').then(function(r){ return r.ok ? r.blob() : null; }).catch(function(){}); };
     warm('lobby-song');
     setTimeout(function(){
-      var rest = [reefNight() ? 'night-song' : 'day-song', 'deck-song', reefNight() ? 'day-song' : 'night-song', 'game-song', 'timer-song'];
+      var rest = [reefNight() ? 'night-song' : 'day-song', 'deck-song', reefNight() ? 'day-song' : 'night-song', 'game-song', 'timer-song'].concat(RM_REGION_SONGS);
       rest.reduce(function(p, n){ return p.then(function(){ return warm(n); }); }, Promise.resolve());   // one at a time, so the board loads first
     }, 6000);
   }
@@ -27801,6 +27997,10 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   // the db handle resolves; nothing needs to wait on it, since Speech.speak() falls back to the
   // synthesized voice until then anyway.
   coveIdle(function(){ AudioClips.init(); VoicePack.warm(); });
+
+  // Some learning screens redraw directly, so update the soundtrack after their root changes too.
+  var reefMusicScreenWatch = new MutationObserver(function(){ reefMusicUpdate(); reefMusicButtons(); });
+  reefMusicScreenWatch.observe(app, { childList:true });
 /* end of src/js/music.js */
 /* from src/js/ask.js */
   /* ---------- Ask Shelly (Lumi at night): what a word or sentence means and how it's built ---------- */
@@ -29595,91 +29795,47 @@ body.r3-full .r3-musicbtn, body.r3-full .r3-themebtn, body.r3-full .r3-gamesbtn{
 .r3-sea-info .r3-btn{ display:inline-flex; align-items:center; gap:6px; }
 body.reef-calm .r3-map.sea-on .r3-sea, body.reef-calm .r3-sea-me{ animation:none; }
 /* end of src/css/reef-3d.css */
-/* from src/css/town-board.css */
-/* Harbor Town pilot board: a compact game layer above the existing conversation list. */
-.tb-root{--tb-ink:#234052;--tb-sub:#567586;--tb-paper:#fff9e9;--tb-edge:#e4d6b7;--tb-sea:#75c4d3;position:relative;max-width:780px;margin:12px auto 22px;padding:0 12px;color:var(--tb-ink);font-family:var(--font-body,"Nunito Sans",sans-serif)}
-.tb-root *{box-sizing:border-box}
-.tb-root button{font:inherit;cursor:pointer}
-.tb-root button:disabled{cursor:default;opacity:.53}
-.tb-root button:focus-visible,.tb-root summary:focus-visible{outline:3px solid #147da8;outline-offset:3px}
-.tb-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:2px 3px 10px}
-.tb-top h2{margin:2px 0 0;font:800 clamp(20px,4vw,28px)/1.15 var(--font-display,"Fredoka",sans-serif);letter-spacing:-.02em}
-.tb-kicker{font-size:10px;font-weight:900;letter-spacing:.16em;color:#147d91}
-.tb-theme{width:42px;height:42px;border:1px solid var(--tb-edge);border-radius:14px;background:#fff7d9;color:#8b5e30;display:grid;place-items:center;box-shadow:0 3px 0 #d6cda9}
-.tb-theme .cc-ic{width:23px;height:23px}
-.tb-stage{position:relative;height:clamp(285px,42vw,400px);overflow:hidden;border-radius:24px 24px 11px 11px;background:radial-gradient(ellipse at 50% 80%,#b8d8c5 0 28%,transparent 29%),linear-gradient(175deg,#a1dde4,#69b9cd);border:1px solid #b7d0c9;box-shadow:inset 0 0 0 5px #ffffff55,0 9px 24px #2f71802b}
-.tb-canvas{position:absolute;inset:0;overflow:hidden}
-.tb-canvas canvas{display:block;width:100%;height:100%;touch-action:pan-y}
-.tb-canvas svg{position:absolute;inset:8% 3%;width:94%;height:84%;filter:drop-shadow(0 5px 6px #1f667043)}
-.tb-night .tb-canvas svg ellipse{fill:#536f6e}
-.tb-night .tb-canvas svg path{stroke:#ad987e}
-.tb-canvas.tb-webgl svg{display:none}
-.tb-stage-label{position:absolute;left:10px;right:10px;bottom:9px;width:max-content;max-width:calc(100% - 20px);margin:auto;padding:5px 10px;border-radius:999px;background:#163e50bd;color:#fff;font-size:11px;font-weight:800;letter-spacing:.01em;text-align:center;pointer-events:none}
-.tb-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:4px 10px;padding:6px 3px 0;color:#537283;font-size:10px;font-weight:900}
-.tb-legend span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
-.tb-legend i{display:inline-block;width:10px;height:10px;border-radius:50%;border:1px solid #fff8;box-shadow:0 1px 2px #244a5555}
-.tb-legend .tb-blue{background:#4e9ddd}.tb-legend .tb-red{background:#ec7373}.tb-legend .tb-question{background:#a77ad4}.tb-legend .tb-talk{background:#68afae}.tb-legend .tb-star{background:#d6a73e}
-.tb-dashboard{position:relative;z-index:1;background:var(--tb-paper);border:1px solid var(--tb-edge);border-top:0;border-radius:0 0 22px 22px;padding:12px 14px 14px;box-shadow:0 8px 17px #46605a15}
-.tb-score{display:flex;align-items:center;justify-content:space-between;gap:7px;color:var(--tb-sub);font-size:12px;font-weight:800}
-.tb-score span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
-.tb-score .cc-ic{width:17px;height:17px;color:#b4863b}
-.tb-score b{color:var(--tb-ink);font-size:15px;font-variant-numeric:tabular-nums}
-.tb-actions{display:flex;gap:8px;margin-top:11px}
-.tb-actions button{min-height:46px;border-radius:14px;font-weight:900}
-.tb-roll{flex:1;border:1px solid #1d6d88;background:linear-gradient(#389cba,#197c9b);color:white;box-shadow:0 4px 0 #116982,0 6px 12px #145f7e33}
-.tb-roll:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 #116982}
-.tb-roll .cc-ic,.tb-visit .cc-ic{width:20px;height:20px;vertical-align:-5px;margin-right:3px}
-.tb-visit{border:1px solid #c89a62;background:#fff1ce;color:#65482f;padding:0 14px}
-.tb-place{display:flex;gap:10px;align-items:center;min-height:66px;margin:10px 0 0;padding:9px 11px;border:1px solid #dce7e5;border-radius:15px;background:#f5fbf9}
-.tb-place-mark{display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:11px;color:white;background:#6babaa}
-.tb-place-mark .cc-ic{width:21px;height:21px}
-.tb-place b{display:block;font-size:13px;line-height:1.2}
-.tb-place small{display:block;margin-top:3px;font-size:11px;line-height:1.3;color:var(--tb-sub)}
-.tb-event{margin-top:10px;padding:12px;border:1px solid #d0b88a;border-radius:17px;background:linear-gradient(140deg,#fffaf0,#f8e8c6);box-shadow:0 8px 15px #66552d1a}
-.tb-event-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;font:800 18px var(--font-display,"Fredoka",sans-serif)}
-.tb-event-heading button{display:grid;place-items:center;width:30px;height:30px;border:0;border-radius:9px;background:#e9d7b6;color:#5d4a39}
-.tb-event-heading .cc-ic{width:17px;height:17px}
-.tb-event p{margin:6px 0 11px;font-size:13px;line-height:1.4}
-.tb-event-buttons{display:flex;flex-wrap:wrap;gap:7px}
-.tb-event-buttons button{min-height:38px;padding:7px 11px;border:1px solid #b7ab91;border-radius:11px;background:#fffdf5;color:#3b5261;font-size:12px;font-weight:900}
-.tb-event-buttons button:first-child:not(:disabled){border-color:#398d9e;background:#e5f7f4;color:#185b6b}
-.tb-sail{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;margin:13px 0}
-.tb-sail button{display:inline-flex;align-items:center;gap:4px;min-height:34px;padding:5px 9px;border:1px solid #d5e5e2;border-radius:999px;background:#f5faf7;color:#316170;font-size:11px;font-weight:900}
-.tb-sail .cc-ic{width:15px;height:15px}
-.tb-guide{margin:0 0 8px;border:1px solid #d8e4e1;border-radius:13px;background:#f8fbf8}
-.tb-guide summary{padding:10px 12px;color:#386979;font-size:12px;font-weight:900;cursor:pointer}
-.tb-guide-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:5px;padding:4px 9px 10px;max-height:240px;overflow:auto}
-.tb-guide-space{display:flex;align-items:center;gap:6px;min-height:32px;padding:5px 6px;border:1px solid transparent;border-radius:8px;background:transparent;color:#355765;text-align:left;font-size:11px}
-.tb-guide-space:hover,.tb-guide-space.is-here{border-color:#b8d4cf;background:#e9f4ef}
-.tb-guide-space b{min-width:16px;font-variant-numeric:tabular-nums}
-.tb-dot{display:block;flex:none;width:12px;height:12px;border-radius:50%;border:2px solid #ffffffa6;box-shadow:0 1px 2px #244a5555}
-.tb-dot.tb-blue,.tb-place-mark.tb-blue{background:#4e9ddd}.tb-dot.tb-red,.tb-place-mark.tb-red{background:#ec7373}
-.tb-dot.tb-question,.tb-place-mark.tb-question{background:#a77ad4}.tb-dot.tb-chance,.tb-place-mark.tb-chance{background:#ec9dca}
-.tb-dot.tb-shop,.tb-place-mark.tb-shop{background:#e9b85c}.tb-dot.tb-minigame,.tb-place-mark.tb-minigame{background:#58bdad}
-.tb-dot.tb-star,.tb-place-mark.tb-star{background:#d6a73e}.tb-dot.tb-talk,.tb-place-mark.tb-talk{background:#68afae}
-.tb-night{--tb-ink:#e5f1f1;--tb-sub:#b1cad1;--tb-paper:#233d47;--tb-edge:#426477}
-.tb-night .tb-kicker{color:#9dded6}
-.tb-night .tb-legend{color:#b1cad1}
-.tb-night .tb-theme{background:#345d68;color:#f7dc90;box-shadow:0 3px 0 #183c4b}
-.tb-night .tb-stage{background:radial-gradient(ellipse at 50% 70%,#486b63 0 28%,transparent 29%),linear-gradient(#234454,#12384b);border-color:#4a7b82;box-shadow:inset 0 0 0 5px #c1f0ed12,0 9px 24px #102c3e55}
-.tb-night .tb-dashboard{box-shadow:0 8px 17px #0a263733}
-.tb-night .tb-score .cc-ic{color:#f6d783}
-.tb-night .tb-visit{background:#584b3d;border-color:#a68555;color:#f7e2b7}
-.tb-night .tb-place{background:#294652;border-color:#456875}
-.tb-night .tb-event{background:linear-gradient(140deg,#314d55,#3a5360);border-color:#7b8180}
-.tb-night .tb-event-heading button{background:#526b72;color:#eaf6ef}
-.tb-night .tb-event-buttons button{background:#31545e;color:#e9f4ed;border-color:#63848b}
-.tb-night .tb-event-buttons button:first-child:not(:disabled){background:#27727e;color:#fff}
-.tb-night .tb-sail button,.tb-night .tb-guide{background:#284550;color:#d1e8e5;border-color:#456675}
-.tb-night .tb-guide summary,.tb-night .tb-guide-space{color:#d1e8e5}
-.tb-night .tb-guide-space:hover,.tb-night .tb-guide-space.is-here{background:#38616a;border-color:#6d9097}
-.tb-root + .lg-page{padding-bottom:max(90px,calc(70px + env(safe-area-inset-bottom,0px)))}
-@media(max-width:430px){.tb-stage{height:300px}.tb-score{font-size:11px}.tb-sail{justify-content:flex-start}.tb-sail button{font-size:10px}.tb-top h2{font-size:21px}}
-@media(max-height:450px) and (orientation:landscape){.tb-stage{height:260px}.tb-root{padding-bottom:45px}.tb-sail{padding-left:48px}.tb-guide{margin-left:48px}}
-@media(prefers-reduced-motion:reduce){.tb-root *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
-
-.tb-night .tb-top{background:#233d47;padding:12px;border-radius:18px 18px 0 0}
-/* end of src/css/town-board.css */
+/* from src/css/region-boards.css */
+.rb-root { position:relative; min-height:100svh; isolation:isolate; background:linear-gradient(180deg,#74d9e3,#0d6077); color:#123b49; }
+.rb-root.night { background:linear-gradient(180deg,#122e48,#081d34); color:#f3f4e8; }
+.rb-root .rb-scene { min-height:100svh; padding:7rem 1rem 9rem; box-sizing:border-box; }
+.rb-root.has-3d .rb-scene { display:none; }
+.rb-overlay { position:fixed; z-index:45; top:calc(max(.65rem,env(safe-area-inset-top)) + 6.6rem); left:max(.7rem,env(safe-area-inset-left)); right:max(.7rem,env(safe-area-inset-right)); display:flex; align-items:flex-start; justify-content:space-between; gap:.7rem; pointer-events:none; }
+.rb-title,.rb-actions button,.rb-near,.rb-guide { border:1px solid rgba(255,255,255,.7); border-radius:1rem; background:rgba(255,250,235,.95); box-shadow:0 5px 20px rgba(2,31,52,.2); backdrop-filter:blur(12px); }
+.rb-root.night .rb-title,.rb-root.night .rb-actions button,.rb-root.night .rb-near,.rb-root.night .rb-guide { background:rgba(17,45,64,.94); border-color:rgba(171,234,243,.35); color:#f5f7ef; }
+.rb-title { display:flex; align-items:center; gap:.5rem; padding:.55rem .8rem; pointer-events:auto; max-width:min(39rem,53vw); }
+.rb-title > .cc-ic { width:2rem; height:2rem; flex:none; }
+.rb-title b,.rb-title small { display:block; }
+.rb-title b { font:900 clamp(1rem,2vw,1.3rem) var(--font-display,Fredoka,sans-serif); }
+.rb-title small { font-size:.8rem; line-height:1.2; }
+.rb-actions { position:fixed; top:max(.65rem,env(safe-area-inset-top)); right:max(.7rem,env(safe-area-inset-right)); display:flex; gap:.4rem; pointer-events:auto; }
+.rb-actions button,.rb-near button { cursor:pointer; color:inherit; font:800 .92rem var(--font-body,sans-serif); }
+.rb-actions button { display:flex; align-items:center; gap:.35rem; padding:.7rem .8rem; min-height:44px; }
+.rb-actions .cc-ic,.rb-near .cc-ic,.rb-guide .cc-ic { width:1.25rem; height:1.25rem; flex:none; }
+.rb-near { display:flex; align-items:center; flex-wrap:wrap; gap:.35rem; padding:.3rem .45rem; border-bottom:1px solid rgba(59,127,145,.25); }
+.rb-near > span { font-size:.75rem; font-weight:900; padding:.3rem; }
+.rb-near button { display:flex; align-items:center; gap:.25rem; padding:.45rem; border:0; border-radius:.65rem; background:transparent; }
+.rb-near button:hover,.rb-near button:focus-visible { background:rgba(70,166,189,.2); }
+.rb-guide { position:fixed; z-index:46; right:max(.7rem,env(safe-area-inset-right)); top:calc(max(.65rem,env(safe-area-inset-top)) + 3.25rem); max-width:min(26rem,calc(100vw - 1.4rem)); pointer-events:auto; }
+.rb-guide summary { cursor:pointer; padding:.65rem .85rem; display:flex; align-items:center; gap:.4rem; font-weight:900; min-height:44px; box-sizing:border-box; }
+.rb-guide[open] { max-height:calc(100svh - 6rem); display:flex; flex-direction:column; }
+.rb-guide-list { overflow:auto; padding:.25rem; }
+.rb-card { display:flex; align-items:center; gap:.6rem; width:100%; text-align:left; padding:.65rem; color:inherit; background:transparent; border:0; border-radius:.7rem; cursor:pointer; }
+.rb-card:hover,.rb-card:focus-visible { background:rgba(69,161,186,.2); }
+.rb-card-icon { display:grid; place-items:center; width:2rem; height:2rem; flex:none; border-radius:.55rem; background:#daf4ef; color:#176477; }
+.rb-card-icon .cc-ic { width:1.3rem; height:1.3rem; }
+.rb-card b,.rb-card small { display:block; }
+.rb-card small { font-size:.76rem; opacity:.8; }
+.rb-done { margin-left:auto; color:#168061; }
+.rb-fallback { max-width:38rem; margin:auto; padding:1rem; border-radius:1rem; background:rgba(255,250,235,.92); color:#153d4b; }
+.rb-fallback h2 { margin:.2rem 0; }
+.rb-fallback p { margin:.2rem 0 .7rem; }
+.rb-return { margin-left:auto; }
+@media (max-width:600px) { .rb-title { max-width:44vw; } .rb-title small,.rb-actions button span,.rb-near > span { display:none; } .rb-actions button { padding:.65rem; } .rb-near button span { font-size:.72rem; } }
+@media (max-height:500px) { .rb-overlay { top:calc(max(.4rem,env(safe-area-inset-top)) + 5rem); } .rb-actions { top:max(.4rem,env(safe-area-inset-top)); } .rb-guide { top:calc(max(.4rem,env(safe-area-inset-top)) + 3rem); } .rb-guide[open] { max-height:calc(100svh - 4.5rem); } .rb-title small { display:none; } }
+/* Keep the voyage shortcut clear of the shared die picker at the bottom. */
+.rb-root .r3-voybtn { top:calc(max(.65rem,env(safe-area-inset-top)) + 11rem); bottom:auto; }
+/* end of src/css/region-boards.css */
 </style>
 
 </body></html>

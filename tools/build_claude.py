@@ -18,7 +18,7 @@ import base64, json, os, re, shutil, subprocess, sys, tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 THREE_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'
-SONGS = ['day-song', 'night-song', 'lobby-song', 'deck-song', 'timer-song', 'game-song', 'win']
+SONGS = ['day-song', 'night-song', 'lobby-song', 'deck-song', 'timer-song', 'game-song', 'win'] + ['region-' + region + '-song' for region in ['town','lagoon','caves','patterns','beach','light','captain']]
 LIMIT = 16 * 1024 * 1024
 
 

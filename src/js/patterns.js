@@ -50,6 +50,7 @@
   function patNext(d){ return PAT_LIST.find(function(p){ return (d.m[p.id] || 0) < PAT_MASTERED; }) || null; }
 
   function openPatterns(id){
+    regionBoardOpen('patterns');
     try { Speech.stop(); } catch(e){}
     S.currentDeckId = null;
     S.patterns = { id: patById(id) ? id : null, round: null };
@@ -57,6 +58,7 @@
     render(); window.scrollTo(0, 0);
   }
   function renderPatterns(){
+    if((!(S.patterns && S.patterns.id)) && regionBoardRender('patterns')) return;
     var P = S.patterns || (S.patterns = {}), p = patById(P.id);
     var R = P.round, title = p ? p.en : 'Pattern Reef';
     var back = p ? '<button class="back-btn" data-act="pr-back">⟵ Reef</button>' : '<button class="back-btn" data-act="pr-home">⟵ Reef</button>';

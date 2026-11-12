@@ -26,6 +26,7 @@ async function menuPick(p, label) {
   if (btn && await btn.isVisible()) { await btn.click(); await p.waitForTimeout(300); await p.click('.r3-menu-row:has-text("' + label + '")'); }
   else await p.click('[data-act="toggle-edit-mode"]');
 }
+async function regionList(p) { const b = p.locator('[data-rb-list]'); if (await b.count()) { await b.click(); await p.waitForTimeout(200); } }
 function check(name, ok, detail) { console.log((ok ? 'ok    ' : 'FAIL  ') + name + (detail ? '  ' + detail : '')); if (!ok) failed++; }
 const nearestDeck = () => { const v = window.__reef3dView(), here = v.at; const s = v.spaces.filter(s => s.kind === 'deck').sort((a, b) => Math.abs(a.i - here) - Math.abs(b.i - here))[0]; window.__reef3dGo(s.i); return s.item.d.name; };
 
@@ -160,6 +161,7 @@ async function newPage(browser) {
   const lgBtn = await p.$('[data-sea-go="lagoon"]');
   check('grown-up: the sea chart has an Open Story Lagoon button', !!lgBtn && /Open Story Lagoon/.test(await lgBtn.textContent()));
   if (lgBtn) { await lgBtn.click(); await p.waitForTimeout(2500); }
+  await regionList(p);
   check('grown-up: Story Lagoon lists its twelve stories', await p.evaluate(() => document.querySelectorAll('.lg-story').length === 12));
   await p.click('.lg-story'); await p.waitForTimeout(800);
   check('grown-up: a story opens, ready to listen', await p.evaluate(() => document.querySelectorAll('.lg-line').length >= 4 && !!document.querySelector('[data-lg-play]')));
@@ -178,6 +180,7 @@ async function newPage(browser) {
   const twBtn = await p.$('[data-sea-go="town"]');
   check('grown-up: the sea chart has an Open Harbor Town button', !!twBtn && /Open Harbor Town/.test(await twBtn.textContent()));
   if (twBtn) { await twBtn.click(); await p.waitForTimeout(2500); }
+  await regionList(p);
   check('grown-up: Harbor Town lists its eight townsfolk', await p.evaluate(() => document.querySelectorAll('.tw-folk').length === 8));
   await p.click('[data-tw-open="cafe"]'); await p.waitForTimeout(800);
   check('grown-up: a conversation starts with the townsperson\'s line and answers to pick', await p.evaluate(() =>
@@ -199,6 +202,7 @@ async function newPage(browser) {
   const cvBtn = await p.$('[data-sea-go="caves"]');
   check('grown-up: the sea chart has an Open Echo Caves button', !!cvBtn && /Open Echo Caves/.test(await cvBtn.textContent()));
   if (cvBtn) { await cvBtn.click(); await p.waitForTimeout(2500); }
+  await regionList(p);
   check('grown-up: Echo Caves shows its three parts', await p.evaluate(() => document.querySelectorAll('.cv-sec').length === 3));
   await p.click('[data-cv-go="pairs"]'); await p.waitForTimeout(600);
   check('grown-up: a sound pair offers two or three look-alike words', await p.evaluate(() => { const n = document.querySelectorAll('.cv-opt').length; return n >= 2 && n <= 3; }));
@@ -244,6 +248,7 @@ async function newPage(browser) {
   const prBtn = await p.$('[data-sea-go="reef"]');
   check('grown-up: the sea chart has an Open Pattern Reef button', !!prBtn && /Open Pattern Reef/.test(await prBtn.textContent()));
   if (prBtn) { await prBtn.click(); await p.waitForTimeout(2500); }
+  await regionList(p);
   check('grown-up: Pattern Reef lists its twelve patterns, the first suggested', await p.evaluate(() =>
     document.querySelectorAll('.pr-pat').length === 12 && !!document.querySelector('.pr-pat.best[data-pr-open="topic"]')));
   await p.click('[data-pr-open="topic"]'); await p.waitForTimeout(500);
@@ -281,6 +286,7 @@ async function newPage(browser) {
   const bbBtn = await p.$('[data-sea-go="beach"]');
   check('grown-up: the sea chart has an Open Bottle Beach button', !!bbBtn && /Open Bottle Beach/.test(await bbBtn.textContent()));
   if (bbBtn) { await bbBtn.click(); await p.waitForTimeout(2500); }
+  await regionList(p);
   check('grown-up: Bottle Beach lists twelve bottles and the handwriting link', await p.evaluate(() =>
     document.querySelectorAll('.bb-bottle').length === 12 && !!document.querySelector('[data-bb-hand]')));
   await p.click('[data-bb-open="food"]'); await p.waitForTimeout(500);
@@ -307,6 +313,7 @@ async function newPage(browser) {
   const lhBtn = await p.$('[data-sea-go="light"]');
   check('grown-up: the sea chart has an Open the Lighthouse button', !!lhBtn && /Open the Lighthouse/.test(await lhBtn.textContent()));
   if (lhBtn) { await lhBtn.click(); await p.waitForTimeout(2500); }
+  await regionList(p);
   check('grown-up: the Lighthouse lists ten signs and eight manners notes', await p.evaluate(() =>
     document.querySelectorAll('[data-lh-sign]').length === 10 && document.querySelectorAll('[data-lh-manner]').length === 8));
   await p.click('[data-lh-sign="cafe"]'); await p.waitForTimeout(400);
@@ -328,6 +335,7 @@ async function newPage(browser) {
   const cdBtn = await p.$('[data-sea-go="deck"]');
   check('grown-up: the sea chart has an Open Captain\'s Deck button', !!cdBtn && /Open Captain's Deck/.test(await cdBtn.textContent()));
   if (cdBtn) { await cdBtn.click(); await p.waitForTimeout(2500); }
+  await regionList(p);
   await p.waitForFunction(() => document.querySelectorAll('.cd-leg').length > 0, null, { timeout: 10000 }).catch(() => {});
   const legs = await p.evaluate(() => [...document.querySelectorAll('.cd-leg b')].map(b => b.textContent));
   check('grown-up: Captain\'s Deck shows today\'s three or four legs, kept for the day', legs.length >= 3 && legs.length <= 4 &&
@@ -338,6 +346,7 @@ async function newPage(browser) {
     !document.querySelector('.cd-leg') && document.querySelectorAll('.lg-line').length >= 4 && !!document.querySelector('[data-lg-play]')));
   if (await p.$('[data-act="lg-back"]')) { await p.click('[data-act="lg-back"]'); await p.waitForTimeout(400); }
   if (await p.$('[data-act="lg-home"]')) { await p.click('[data-act="lg-home"]'); await p.waitForTimeout(2500); }
+  if (await p.locator('[data-rb-home]').count()) { await p.click('[data-rb-home]'); await p.waitForSelector('.cd-leg'); }
   check('grown-up: leaving the region comes back to Captain\'s Deck', await p.evaluate(() => document.querySelectorAll('.cd-leg').length > 0));
   await p.click('[data-cd-tab="can"]'); await p.waitForTimeout(500);
   check('grown-up: What you can do shows five skill meters and trip readiness for ten situations', await p.evaluate(() =>

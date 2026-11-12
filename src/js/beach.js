@@ -52,6 +52,7 @@
   }
 
   function openBeach(){
+    regionBoardOpen('beach');
     try { Speech.stop(); } catch(e){}
     S.currentDeckId = null;
     S.beach = { id: null, view: 'list', deck: S.beach && S.beach.deck || null };
@@ -66,6 +67,7 @@
   }
   function bbLex(B){ return B.lex || (B.lex = bbLexicon(B.deck)); }
   function renderBeach(){
+    if((!S.beach || S.beach.view === 'list') && regionBoardRender('beach')) return;
     var B = S.beach || (S.beach = { view: 'list' }), b = bbById(B.id);
     var back = B.view === 'list' ? '<button class="back-btn" data-act="bb-home">⟵ Reef</button>' : '<button class="back-btn" data-act="bb-back">⟵ Beach</button>';
     var title = B.view === 'letters' ? 'Your letters' : b ? 'A bottle from 지수' : 'Bottle Beach';

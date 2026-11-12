@@ -38,6 +38,7 @@
   }
 
   function openCaves(sec){
+    regionBoardOpen('caves');
     try { Speech.stop(); } catch(e){}
     cavesStopAll();
     S.currentDeckId = null;
@@ -68,6 +69,7 @@
   }
 
   function renderCaves(){
+    if((!(S.caves && S.caves.sec)) && regionBoardRender('caves')) return;
     var C = S.caves || (S.caves = {});
     if(cavesRec && !C.line) cavesRecReset();
     var title = C.sec === 'pairs' ? 'Sound pairs' : C.sec === 'shadow' ? 'Shadowing' : C.sec === 'rules' ? 'Sound rules' : 'Echo Caves';

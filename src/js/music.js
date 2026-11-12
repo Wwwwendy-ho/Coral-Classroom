@@ -1,8 +1,9 @@
-  /* ---------- Background music: day-song.mp3 on the sunlit reef, night-song.mp3 on the shipwreck,
+  /* ---------- Background music: a distinct sampled-instrument loop on each region board,
+     day-song.mp3 on the sunlit reef, night-song.mp3 on the shipwreck,
      lobby-song.mp3 (easy jazz) on the profile screen, deck-song.mp3 (calm, quiet) inside decks, timer-song.mp3
      (a kalimba ticking every second, in step with the countdown) on Timed Choice cards, and game-song.mp3
      (bouncy) in minigames. All but the day and night songs are original loops made for Coral Cove
-     (tools/compose_music.py). Plays in the lobby and in every profile's game,
+     (tools/compose_music.py and tools/compose_regions.py). Plays in the lobby and in every profile's game,
      dips under the celebration clip, and follows a 🎵 switch saved on this device. ---------- */
   var RM = { el: {}, cur: null, duck: 1, started: false };
   var RM_KEY = 'cc-music';
@@ -109,11 +110,24 @@
     if(!S.profile) return { name: 'lobby-song', vol: 1 };       // the profile screen
     if(!reefGame()) return null;
     if(S.view === 'study' && S.timedChoiceTimerHandle && S.timedChoiceState && !S.timedChoiceState.reefCalm) return { name: 'timer-song', vol: RM_DECK };
-    if(reefInDeck() || S.view === 'summary') return { name: 'deck-song', vol: RM_DECK };   // kept low so speech stays clear
     if(document.querySelector('.r3-mini')) return { name: 'game-song', vol: RM_GAME };    // under the minigame's sound effects
+    // The region state persists while lessons are open, so require the actual
+    // board element as well as its current view before changing the score.
+    var board = typeof window.__regionBoardView === 'function' ? window.__regionBoardView() : null;
+    if(board && board.mode === 'board' && board.region === S.view &&
+       document.querySelector('.rb-root[data-region-board="' + board.region + '"]')){
+      return { name: 'region-' + board.region + '-song', vol: 1 };
+    }
+    if(reefInDeck() || S.view === 'summary') return { name: 'deck-song', vol: RM_DECK };   // kept low so speech stays clear
     return { name: name, vol: 1 };
   }
-  var RM_SONGS = ['day-song', 'night-song', 'lobby-song', 'deck-song', 'timer-song', 'game-song'];
+  var RM_REGION_SONGS = ['town', 'lagoon', 'caves', 'patterns', 'beach', 'light', 'captain'].map(function(id){ return 'region-' + id + '-song'; });
+  var RM_SONGS = ['day-song', 'night-song', 'lobby-song', 'deck-song', 'timer-song', 'game-song'].concat(RM_REGION_SONGS);
+  window.__reefMusicState = function(){
+    var target = reefMusicTarget(), tracks = {};
+    Object.keys(RM.el).forEach(function(name){ var m = RM.el[name]; tracks[name] = { level:m.level, stage:m.stage, paused:reefMusicPaused(m) }; });
+    return { target:target && { name:target.name, vol:target.vol }, current:RM.cur, started:RM.started, duck:RM.duck, tracks:tracks };
+  };
   // Lines the timer song up with a countdown that started at startMs, so its firm kalimba notes land on the seconds.
   function reefMusicTimerSync(startMs){
     RM.timerStart = startMs; reefMusicUpdate();
@@ -161,7 +175,7 @@
     var warm = function(name){ return fetch(name + '.mp3').then(function(r){ return r.ok ? r.blob() : null; }).catch(function(){}); };
     warm('lobby-song');
     setTimeout(function(){
-      var rest = [reefNight() ? 'night-song' : 'day-song', 'deck-song', reefNight() ? 'day-song' : 'night-song', 'game-song', 'timer-song'];
+      var rest = [reefNight() ? 'night-song' : 'day-song', 'deck-song', reefNight() ? 'day-song' : 'night-song', 'game-song', 'timer-song'].concat(RM_REGION_SONGS);
       rest.reduce(function(p, n){ return p.then(function(){ return warm(n); }); }, Promise.resolve());   // one at a time, so the board loads first
     }, 6000);
   }
@@ -271,3 +285,7 @@
   // the db handle resolves; nothing needs to wait on it, since Speech.speak() falls back to the
   // synthesized voice until then anyway.
   coveIdle(function(){ AudioClips.init(); VoicePack.warm(); });
+
+  // Some learning screens redraw directly, so update the soundtrack after their root changes too.
+  var reefMusicScreenWatch = new MutationObserver(function(){ reefMusicUpdate(); reefMusicButtons(); });
+  reefMusicScreenWatch.observe(app, { childList:true });

@@ -23,7 +23,7 @@
     h.querySelector('.r3-hud-pearls b').textContent = b.pearls;
     var mb = view.wrap.querySelector('[data-r3-mode]');
     if(mb){
-      mb.hidden = !planOn();
+      mb.hidden = !!view.region || !planOn();
       var tg = reef3dStoryTarget(view), day = S.planDay, total = day && day.blocks ? day.blocks.length : 0, done = total ? day.blocks.filter(function(x){ return x.done; }).length : 0;
       mb.innerHTML = reef3dStoryOn() ? ccIcon('story') + '<span>Story · ' + (total ? done + ' of ' + total : 'today') + '</span>' : ccIcon('dice') + '<span>Free play</span>';
       mb.setAttribute('aria-label', reef3dStoryOn() ? 'Story mode: following today\'s plan. Tap for free play.' : 'Free play. Tap for story mode.');
@@ -226,12 +226,12 @@
   function reef3dSwirlTo(view, to, done){
     var g = view.guide, body = g.userData.body;
     try { Sound.bubbles(5); } catch(e){}
-    if(reefCalm()){ reef3dPlace(view, to); S.reef3dAt = to; return done(); }
+    if(reefCalm()){ reef3dPlace(view, to); reef3dSavePosition(view, to); return done(); }
     view.moving = true; view.emote = null;
     var r0 = g.rotation.y;
     view.fx.push({ t0: performance.now(), dur: 800, step: function(p){ g.rotation.y = r0 + p * p * Math.PI * 6; body.scale.setScalar(1 - p * .95); body.position.y = -p * .5; },
       end: function(){
-        reef3dPlace(view, to); S.reef3dAt = to;
+        reef3dPlace(view, to); reef3dSavePosition(view, to);
         view.fx.push({ t0: performance.now(), dur: 700, step: function(p){ var e = reef3dBounce(p); g.rotation.y = r0 + (1 - p) * Math.PI * 4; body.scale.setScalar(.05 + .95 * e); body.position.y = Math.sin(p * Math.PI) * 1.2; },
           end: function(){ body.scale.setScalar(1); body.position.y = 0; view.moving = false; reef3dPuff(view, view.spaces[to]); done(); } });
       } });
@@ -315,7 +315,7 @@
       if(!card) return;
       card.innerHTML = '<div class="r3-panel-e" aria-hidden="true">' + (won ? '🎉' : '🐚') + '</div><h3>' + (won ? (note ? 'Well done!' : 'You did it!') : 'Nice try!') + '</h3>' +
         (note ? '<p class="r3-mini-score">' + note + '</p>' : '') + (reward ? '<p>You get ' + reward + ' shells.</p>' : '<p>Want to play again?</p>') +
-        '<div class="r3-panel-row">' + (practice ? '<button type="button" class="r3-btn main" data-again>Play again</button>' : '') + '<button type="button" class="r3-btn' + (practice ? '' : ' main') + '" data-back>Back to the ' + (view.night ? 'wreck' : 'reef') + '</button></div>';
+        '<div class="r3-panel-row">' + (practice ? '<button type="button" class="r3-btn main" data-again>Play again</button>' : '') + '<button type="button" class="r3-btn' + (practice ? '' : ' main') + '" data-back>Back to ' + (view.region ? esc(view.region.name) : 'the ' + (view.night ? 'wreck' : 'reef')) + '</button></div>';
       if(won){ try { reefWinSound(false); } catch(e){} reef3dCrabAct(view, 'Dance', true); }
       if(reward) reef3dShells(view, reward);
       var bk = card.querySelector('[data-back]'); bk.focus({ preventScroll: true });
@@ -405,6 +405,7 @@
      as before. Only profiles with a daily plan have the switch. ---- */
   function reef3dStoryOn(){ if(!planOn()) return false; var m = reefBoard().mode; return m !== 'free'; }
   function reef3dStoryTarget(view){
+    if(view.region) return -1;
     if(!reef3dStoryOn()) return -1;
     var day = S.planDay; if(!day || day.off || day.date !== todayISO() || !day.blocks) return -1;
     var i = planNextIndex(day); if(i < 0) return -1;
@@ -459,7 +460,7 @@
   var R3amb = null;
   function reef3dAmbience(view, on){
     try {
-      on = on && Sound.isEnabled() && document.body.contains(view.wrap);
+      on = on && !view.region && Sound.isEnabled() && document.body.contains(view.wrap);
       view.amb = on;
       if(!on){ if(R3amb) R3amb.gain.gain.setTargetAtTime(0, R3amb.ctx.currentTime, .3); return; }
       var ctx = Sound.getCtx(); if(!ctx) return;
@@ -590,7 +591,15 @@
   function reef3dArrive(view, s){
     var i = s.i;
     (function(){
-      S.reef3dAt = i;
+      reef3dSavePosition(view, i);
+      if(view.region && (s.kind === 'treasure' || s.kind === 'story')){
+        reef3dStars(view, s); reef3dEmote(view, 'cheer'); reef3dShells(view, s.kind === 'treasure' ? 5 : 3);
+        reef3dPrize(view, s.kind === 'treasure' ? '🧰' : '🍾', s.kind === 'treasure' ? 'Treasure cache!' : 'Bonus bottle!', 'Extra shells for exploring this side route.');
+        return setTimeout(function(){
+          if(!document.body.contains(view.wrap) || view.moving) return;
+          reef3dTravel(view, s.jn, function(){ reef3dSavePosition(view, view.at); reef3dAfterTurn(view); });
+        }, 2600);
+      }
       if(s.kind === 'shop') return reef3dShop(view, null, true);
       if(s.kind === 'surprise'){
         if(reefCalm()){ reef3dQHit(view, s); return reef3dSurprise(view, s); }
@@ -602,7 +611,11 @@
       if(s.kind === 'treasure' && view.chestActs.open){ var co = view.chestActs.open; co.reset(); co.setLoop(window.THREE.LoopOnce); co.clampWhenFinished = true; co.play(); }
       if(s.kind === 'deck' || s.kind === 'treasure') reef3dStars(view, s);
       if(s.kind === 'deck' || s.kind === 'story') reef3dEmote(view, 'dive'); else if(s.kind === 'treasure') reef3dEmote(view, 'twirl');
-      if(s.kind === 'deck'){ Sound.bloop(520); S.reefReturnY = window.scrollY; return setTimeout(function(){ reefGo('dive', s.label, function(){ reefStartDeck(s.item.d.id); }); }, reefCalm() ? 0 : 750); }
+      if(s.kind === 'deck'){ Sound.bloop(520); if(!view.region) S.reefReturnY = window.scrollY;
+        return setTimeout(function(){ if(!document.body.contains(view.wrap)) return; reefGo('dive', s.label, function(){
+          if(view.region && s.item.d.regionActivity) regionBoardLaunch(s.item.d.regionActivity);
+          else reefStartDeck(s.item.d.id);
+        }); }, reefCalm() ? 0 : 750); }
       if(s.kind === 'treasure'){ Sound.bloop(600); S.reefReturnY = window.scrollY; return setTimeout(function(){ reefGo('swim', s.label, function(){ S.view = 'collection'; render(); window.scrollTo(0, 0); }); }, reefCalm() ? 0 : 750); }
       if(s.kind === 'story'){ S.reefReturnY = window.scrollY; return setTimeout(function(){ reefGo('dive', s.label, startStoryMaker); }, reefCalm() ? 0 : 250); }
     })();
@@ -627,7 +640,7 @@
     ov.classList.add('closing'); setTimeout(function(){ ov.remove(); }, 380);
     var THREE = window.THREE, tp = new THREE.Vector3(), tl = new THREE.Vector3();
     function land(){
-      reef3dPlace(view, i); S.reef3dAt = i; view.dirty = true; view.moving = false;
+      reef3dPlace(view, i); reef3dSavePosition(view, i); view.dirty = true; view.moving = false;
       reef3dCamTarget(view, tp, tl); view.camPos.copy(tp); view.camLook.copy(tl);   // the board view waits at her new spot
     }
     try { Sound.bubbles(3); } catch(e){}
@@ -697,7 +710,7 @@
     }).join('');
     var spots = sp.filter(function(s){ return s.label; }).map(function(s){
       var x = px(s), y = py(s), left = x > W / 2;
-      var name = s.kind === 'deck' ? s.item.d.name : s.kind === 'treasure' ? 'Aquarium' : 'Story Bottle';
+      var name = s.kind === 'deck' ? s.item.d.name : s.kind === 'treasure' ? (view.region ? 'Treasure cache' : 'Aquarium') : (view.region ? 'Bonus bottle' : 'Story Bottle');
       var em = s.kind === 'deck' ? s.item.d.emoji : s.kind === 'treasure' ? '🐠' : '🍾';
       return '<button type="button" class="r3-map-spot'+(s.kind === 'deck' ? ' ' + s.item.state : '')+(left ? ' left' : '')+'" data-r3-go="'+s.i+'" style="left:'+(x / W * 100).toFixed(1)+'%;top:'+y.toFixed(0)+'px" aria-label="Go to '+esc(name)+'">' +
         '<span class="r3-map-em" aria-hidden="true">'+em+'</span><span class="r3-map-name">'+esc(name)+'</span></button>';
@@ -705,9 +718,11 @@
     var me = sp[view.at];
     var ov = document.createElement('div');
     ov.className = 'r3-map' + (fromZoom ? ' from-zoom' : ''); ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-label', 'Treasure map');
-    var sea = reefCourseOn();   // the sea chart (seamap.js) is for profiles with a language course, for now
-    ov.innerHTML = '<div class="r3-map-card"><div class="r3-map-head"><b>Treasure map</b><button type="button" class="r3-map-close" data-r3-close aria-label="Close the map">'+ccIcon('close')+'</button></div>' +
-      (sea ? '<div class="r3-map-tabs" role="tablist"><button type="button" role="tab" class="r3-map-tab on" aria-selected="true" data-sea-tab="cove">Coral Cove</button><button type="button" role="tab" class="r3-map-tab" aria-selected="false" data-sea-tab="sea">The sea</button></div>' : '') +
+    var sea = reefCourseOn() || !!view.region;   // the sea chart also links back from each region
+    var seaId = view.region ? ({ patterns:'reef', captain:'deck' }[view.region.id] || view.region.id) : 'cove';
+    var mapName = view.region ? view.region.name : 'Coral Cove';
+    ov.innerHTML = '<div class="r3-map-card"><div class="r3-map-head"><b>'+esc(mapName)+' map</b><button type="button" class="r3-map-close" data-r3-close aria-label="Close the map">'+ccIcon('close')+'</button></div>' +
+      (sea ? '<div class="r3-map-tabs" role="tablist"><button type="button" role="tab" class="r3-map-tab on" aria-selected="true" data-sea-tab="cove">'+esc(mapName)+'</button><button type="button" role="tab" class="r3-map-tab" aria-selected="false" data-sea-tab="sea">The sea</button></div>' : '') +
       '<div class="r3-map-cove" role="tabpanel">' +
       '<p class="r3-map-hint">Tap a place to swim there.</p>' + reef3dVoyageHTML(view) +
       '<div class="r3-map-board" style="height:'+H+'px"><svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true">' +
@@ -725,7 +740,7 @@
     function tab(which){
       ov.querySelectorAll('[data-sea-tab][role="tab"]').forEach(function(t){ var on = t.dataset.seaTab === which; t.classList.toggle('on', on); t.setAttribute('aria-selected', String(on)); });
       ov.classList.toggle('sea-on', which === 'sea');
-      if(which === 'sea' && !ov.querySelector('.r3-sea-isle.picked')) reefSeaInfo(ov, 'cove');
+      if(which === 'sea' && !ov.querySelector('.r3-sea-isle.picked')) reefSeaInfo(ov, seaId);
       var card = ov.querySelector('.r3-map-card'); if(card) card.scrollTop = 0;
     }
     ov.addEventListener('click', function(e){
@@ -739,6 +754,13 @@
     });
     ov.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });
     document.body.appendChild(ov);
+    if(view.region){
+      var current = REEF_REGIONS.find(function(r){ return r.id === seaId; }), marker = ov.querySelector('.r3-sea-me');
+      if(current && marker){ marker.style.left = (current.x / 300 * 100).toFixed(1) + '%'; marker.style.top = ((current.y - 30) / 390 * 100).toFixed(1) + '%'; }
+      ov.querySelectorAll('.r3-sea-isle').forEach(function(b){
+        var tag = b.querySelector('.r3-sea-tag'); if(tag) tag.textContent = b.dataset.sea === seaId ? 'You are here' : 'Open now';
+      });
+    }
     reef3dMapDeclutter(ov);
     var meEl = ov.querySelector('.r3-map-me'); if(meEl) meEl.scrollIntoView({ block: 'center' });
     ov.querySelector('[data-r3-close]').focus();
@@ -780,6 +802,12 @@
     try {
       var THREE = window.THREE, kit = view.kit, B = kit.B, night = view.night, sp = view.spaces, r = reefRand(91);
       var minZ = 1e9, maxZ = -1e9; sp.forEach(function(s){ minZ = Math.min(minZ, s.z); maxZ = Math.max(maxZ, s.z); });
+      if(view.region){
+        var plain = new THREE.Mesh(new THREE.PlaneGeometry(440, maxZ - minZ + 440),
+          new THREE.MeshBasicMaterial({ color: view.regionGround || '#a9b7ae' }));
+        plain.rotation.x = -Math.PI / 2; plain.position.set(0, -.6, (minZ + maxZ) / 2);
+        view.scene.add(plain); view.outskirts = plain; return plain;
+      }
       var off = night && view.shipDeck ? view.shipDeck.sand : 0, len = maxZ - minZ, cz = (minZ + maxZ) / 2;
       var W = 440, L = len + 440;   // wide enough that its edge never shows, even pulled right out for a map trip
       var hull = night && view.shipDeck ? view.shipDeck.half + 3 : 0;
@@ -907,6 +935,7 @@
     deckBoardButton(view.wrap);
     view.wrap.querySelector('[data-r3-games]').addEventListener('click', function(e){ e.stopPropagation(); if(!view.moving && !(view.dice && !view.dice.rolling)) reef3dGames(view); });   // the dice can still be waiting for a tap
     view.wrap.querySelector('[data-r3-mode]').addEventListener('click', function(e){
+      if(view.region) return;
       e.stopPropagation(); var b = reefBoard(); b.mode = reef3dStoryOn() ? 'free' : 'story'; reefBoardSave(); reef3dHud(view);
       if(!reef3dStoryMark(view)){ var nx = view.spaces.find(function(x){ return x.kind === 'deck' && x.item.state === 'ready'; }); view.ring.visible = !!nx; if(nx) view.ring.position.set(nx.x, .34 + (nx.y || 0), nx.z); }
       try { Sound.tap(); } catch(err){}

@@ -66,7 +66,7 @@
     var toDark = !view.night, mode = toDark ? 'dark' : 'light';
     function swap(){ try { setThemeMode(mode, true); } catch(e){} }
     if(view.themeFx || view.moving || document.querySelector('.r3-cycle')) return;
-    if(reefCalm()){ var w0 = reef3dWash(toDark); setTimeout(swap, 280); setTimeout(function(){ reef3dWashOut(w0); }, 420); return; }
+    if(view.region || reefCalm()){ var w0 = reef3dWash(toDark); setTimeout(swap, 280); setTimeout(function(){ reef3dWashOut(w0); }, 420); return; }
     try { reefThemeSting(toDark); } catch(e){}
     view.emote = null; view.themeFx = { cycle: true };
     var stars = '', glints = '', k;
@@ -148,9 +148,10 @@
   function reef3dGreet(view, zones, quiet){
     var now = {}, finished = false;
     zones.forEach(function(z){ z.items.forEach(function(it){ now[it.d.id] = it.state; }); });
-    if(R3.fromDeck){ R3.fromDeck = false; finished = true; }
-    var first = !R3.seen || R3.seenProfile !== (S.profile && S.profile.id);
-    R3.seen = now; R3.seenProfile = S.profile && S.profile.id;
+    if(R3.fromDeck && !view.region){ R3.fromDeck = false; finished = true; }
+    if(R3.fromRegionActivity && view.region){ R3.fromRegionActivity = false; finished = true; }
+    var first = !R3.seen || R3.seenProfile !== (S.profile && S.profile.id) || R3.seenRegion !== (view.region && view.region.id || 'cove');
+    R3.seen = now; R3.seenProfile = S.profile && S.profile.id; R3.seenRegion = view.region && view.region.id || 'cove';
     if(quiet || (!finished && !first)) return;
     setTimeout(function(){
       if(!document.body.contains(view.wrap) || view.moving) return;
@@ -208,24 +209,45 @@
     }
     return dflt;
   }
+  function reef3dDispose(view){
+    if(!view) return;
+    clearTimeout(view.homeT);
+    if(view.raf) cancelAnimationFrame(view.raf);
+    reef3dAmbience(view, false);
+    if(view.post && view.post.dispose) view.post.dispose();
+    view.renderer.dispose();
+    if(view.renderer.forceContextLoss) view.renderer.forceContextLoss();
+    view.wrap.remove();
+    if(R3.view === view) R3.view = null;
+  }
+  function reef3dUnmount(regionId){
+    var view = R3.view;
+    if(view && view.region && (!regionId || view.region.id === regionId)) reef3dDispose(view);
+    if(!document.querySelector('.r3')) document.body.classList.remove('r3-full', 'r3-loading');
+  }
   function reef3dMount(rw, zones){
     var scene2d = rw.querySelector('.rw-scene');
     if(!scene2d || R3.failed) return;
-    var key = (reefNight() ? 'n' : 'd') + zones.map(function(z){ return z.id + ':' + z.items.map(function(it){ return it.d.id + it.state; }).join(','); }).join('|') + ':' + reefTally().found;
+    var region = zones.region || null;
+    var key = (S.profile && S.profile.id || '') + ':' + (region ? region.id : 'cove') + ':' + (reefNight() ? 'n' : 'd') + ':' + zones.map(function(z){ return z.id + ':' + z.items.map(function(it){ return it.d.id + it.state; }).join(','); }).join('|') + ':' + reefTally().found;
     function attach(){
       if(!document.body.contains(rw)) return;
       try {
         var view = R3.view;
         if(!view || view.key !== key){
           var was = view;
-          if(view){ view.renderer.dispose(); view.renderer.forceContextLoss && view.renderer.forceContextLoss(); }
+          if(view) reef3dDispose(view);
           view = R3.view = reef3dBuild(rw, zones, models); view.key = key;
+          if(region && typeof window.regionBoardDecorate === 'function') window.regionBoardDecorate(view, region);
           reef3dWarm(view);
           reef3dWire(view);
-          var start = S.reef3dAt != null && S.reef3dAt < view.spaces.length ? S.reef3dAt : 0;
+          var saved = reef3dPosition(view), start = saved != null && saved < view.spaces.length ? saved : 0;
           // A deck came or went (My words appears while it has words due): keep her by the same place, not the same number
-          if(was && S.reef3dAt != null && was.key.charAt(0) === key.charAt(0)) start = reef3dSameSpot(was.spaces, view.spaces, S.reef3dAt, start);
+          if(was && saved != null && ((was.region && region && was.region.id === region.id) || (!was.region && !region))){
+            if(was.night === view.night) start = reef3dSameSpot(was.spaces, view.spaces, saved, start);
+          }
           reef3dPlace(view, start);
+          if(region) reef3dSavePosition(view, start);
           reef3dCamTarget(view, view.camPos, view.camLook);
         }
         scene2d.hidden = true;
@@ -235,10 +257,10 @@
         scene2d.parentNode.insertBefore(view.wrap, scene2d);
         var next = view.spaces.find(function(s){ return s.kind === 'deck' && s.item.state === 'ready'; });
         if(next){ view.ring.visible = true; view.ring.position.set(next.x, .34 + (next.y || 0), next.z); } else view.ring.visible = false;
-        if(view.nextStar){ view.nextStar.visible = !!(next && next.obj); if(next && next.obj){ view.nextStar.position.set(next.obj.position.x, 3.2 + (next.y || 0), next.obj.position.z); view.nextStar.userData.y = 3.2 + (next.y || 0); } }
+        if(view.nextStar){ view.nextStar.visible = !region && !!(next && next.obj); if(next && next.obj){ view.nextStar.position.set(next.obj.position.x, 3.2 + (next.y || 0), next.obj.position.z); view.nextStar.userData.y = 3.2 + (next.y || 0); } }
         reef3dPearlShow(view); reef3dHat(view); reef3dGateShow(view); reef3dHud(view);
         reef3dStoryMark(view);
-        if(planOn() && (!S.planDay || S.planDay.date !== todayISO()) && !S.planLoading) planLoad().then(function(){ reef3dHud(view); reef3dStoryMark(view); });
+        if(!region && planOn() && (!S.planDay || S.planDay.date !== todayISO()) && !S.planLoading) planLoad().then(function(){ reef3dHud(view); reef3dStoryMark(view); });
         view.w = 0; reef3dLoop(view);
         reef3dAmbience(view, true);
         reef3dGreet(view, zones, reef3dThemeArrive(view));   // after a day/night switch she waves on her own cue
@@ -249,7 +271,7 @@
           view.homeT = setTimeout(function(){
             var h = view.spaces[view.at];
             if(!document.body.contains(view.wrap) || view.moving || view.dice || !h || !h.branch) return;
-            reef3dTravel(view, h.jn, function(){ S.reef3dAt = view.at; reef3dEmote(view, 'hello'); });
+            reef3dTravel(view, h.jn, function(){ reef3dSavePosition(view, view.at); reef3dEmote(view, 'hello'); });
           }, 1300);
         }
       } catch(err){
