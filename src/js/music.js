@@ -168,16 +168,9 @@
     reefMusicUpdate();   // inside the tap, where the iPad allows a song to start (cheap when nothing changed)
   }
   ['pointerdown', 'touchend', 'click', 'keydown'].forEach(function(t){ document.addEventListener(t, reefMusicStart, true); });
-  // Music can't play before the first tap, but it can download: fetch the profile screen's song straight away
-  // and the others a little later, so each one starts the moment it's needed instead of after a download.
-  // (The offline helper, sw.js, keeps each whole song once fetched, and plays later requests from that copy.)
+  // Do not warm every song during startup: the active screen streams its own track.
   if(window.CORAL_COVE_SEED && window.fetch){
-    var warm = function(name){ return fetch(name + '.mp3').then(function(r){ return r.ok ? r.blob() : null; }).catch(function(){}); };
-    warm('lobby-song');
-    setTimeout(function(){
-      var rest = [reefNight() ? 'night-song' : 'day-song', 'deck-song', reefNight() ? 'day-song' : 'night-song', 'game-song', 'timer-song'].concat(RM_REGION_SONGS);
-      rest.reduce(function(p, n){ return p.then(function(){ return warm(n); }); }, Promise.resolve());   // one at a time, so the board loads first
-    }, 6000);
+    fetch('lobby-song.mp3').catch(function(){});
   }
   // Leaving the app or locking the device stops the music straight away (no fade: timers stop in the background);
   // coming back picks it up again.

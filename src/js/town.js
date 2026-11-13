@@ -228,6 +228,7 @@
     T.debrief = { well: well, fixes: fixes, need: need, turns: turns.length, pat: Object.keys(T.pat || {}) };
     T.phase = 'done';
     townMarkDone(f.id, well.length);
+    regionBoardActivityCompleted('town', f.id);
     deckTick('talk', f.id);   // a leg of Captain's Deck's voyage, if today's has this talk
     try { reefWinSound(true); } catch(e){}
     try { if(!reefCalm()) Ocean.bubbles(10); } catch(e){}

@@ -35,3 +35,6 @@
 .ask-wait, .ask-err{ font-weight:700; color:var(--ink-soft); }
 .ask-read, .ask-done{ align-self:flex-start; }
 .ask-done{ align-self:stretch; padding:12px; }
+
+.ask-btn.ask-inline{position:static;flex:none;width:44px;height:44px;min-width:44px;padding:5px;left:auto;bottom:auto;z-index:auto;box-shadow:none;justify-content:center;margin-left:auto}
+.ask-inline > span:last-child{display:none}

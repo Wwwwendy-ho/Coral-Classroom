@@ -56,6 +56,10 @@
     { id:'region-worlds', date:'2026-11-12', need:'course', steps:[
       { at:'.r3-mapbtn', text:'Every region now has a full 3D board, with the same dice, characters, rewards and movement as Coral Cove. Visit Harbor Town’s streets and waterfront, Echo Caves, Bottle Beach and the other islands from the sea map.' },
       { text:'Each board has its own setting. Land on a lesson to learn there, or use Activities to go straight to any lesson. Captain’s Deck keeps your plan and progress one tap away.' }
+    ] },
+    { id:'richer-regions-and-voyages', date:'2026-11-13', need:'course', steps:[
+      { at:'.r3-mapbtn', text:'The islands have more to explore: harbor shopfronts and boats, rocky crystal caves, coral gardens, shoreline details, and a ship with sails and railings. A short sailing scene takes you between regions.' },
+      { text:'Returning from an activity can reuse the board to save loading time. Coral Cove’s top-left controls have more room, and regional lesson help now fits in the header. At the end of a region’s path, roll again to sail back to the start.' }
     ] }
   ];
   var WN_RECENT_DAYS = 14;   // a brand-new profile is shown only what's new in the last two weeks, not the whole history

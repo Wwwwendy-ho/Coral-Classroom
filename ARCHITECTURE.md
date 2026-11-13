@@ -158,6 +158,10 @@ There is no PIN. On GitHub, `reefGrownUpGate(kind)` shows a times question; a ri
 
 Zones carry a `region` descriptor and each learning destination carries `d.regionActivity`. The renderer shares characters, camera, dice, travel, shop, rewards, effects and quality controls; regional decoration is in `reef3d/region-scenery.js`. Regional ground and scenery replace the reef/wreck setting. `cc-region-board-at-<profile>-<region>` stores each region's position separately from Coral Cove. `region-boards.css` arranges regional navigation around the shared controls. The old standalone Harbor Town renderer has been removed.
 
+`region-travel.js` owns the sailing overlay and runs the destination callback under a navigation lock; reduced motion uses a short fade. `regionBoardActivityCompleted` records only the board-launched activity's actual finish so returning rewards completion rather than visits. Regional scenery is baked into material/chunk meshes rather than adding separate live objects.
+
+`reef3dUnmount` can park one idle regional renderer while its own list or lesson is open. Resume refreshes activity labels, tile states and HUD without rebuilding. Region/profile/theme/layout incompatibility or active effects dispose normally. Pending greeting timers are invalidated when parked. `window.__reef3dLoadPerf()` reports model timing, caustic builds, board builds and reuse. Model parsing yields between assets; lobby and Cove share caustic pixels, while regional worlds skip caustics. Songs stream when selected instead of warming the full playlist from the page; the service worker still precaches songs for offline use.
+
 `tools/check/region_boards_smoke.js` verifies shared-engine worlds and learning/board navigation and captures phone/tablet orientations in day/night. `window.__regionBoardView()` supplies read-only adapter diagnostics alongside the existing Reef 3D view diagnostics. Physical iPhone XS performance still requires a hardware check.
 
 ## 3D (the reef board and lobby)

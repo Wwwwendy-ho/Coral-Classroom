@@ -215,7 +215,7 @@ body.reef-calm .r3-dice-tip, body.reef-calm .r3-dice-num{ animation:none !import
 .r3-games{ list-style:none; margin:8px 0 0; padding:0; display:grid; gap:8px; } .r3-games .r3-btn{ width:100%; }
 body.reef-calm .r3-panel-card, body.reef-calm .r3-bub, body.reef-calm .r3-shellpop{ animation:none !important; } body.reef-calm .r3-wheel{ transition:none; }
 /* narrow portrait phones: the shells and pearls stack so the six top buttons fit beside them */
-@media (max-width:480px) and (orientation:portrait){ .r3-hud{ flex-direction:column; align-items:flex-start; } body.r3-full .cv3-hero .icon-btn{ width:38px; height:38px; min-width:38px; } body.r3-full .cv3-hero .topbar > :last-child{ gap:5px !important; } body.r3-full .rw-head{ top:calc(max(10px, env(safe-area-inset-top, 0px)) + 90px); } }
+@media (max-width:480px) and (orientation:portrait){ .r3-hud{ flex-direction:row; align-items:center; } body.r3-full .cv3-hero .icon-btn{ width:38px; height:38px; min-width:38px; } body.r3-full .cv3-hero .topbar > :last-child{ gap:5px !important; } body.r3-full .rw-head{ top:calc(max(10px, env(safe-area-inset-top, 0px)) + 90px); } }
 @media (max-width:480px), (max-height:500px){ .r3-hud span{ font-size:.95rem; padding:4px 10px; } body .r3-gamesbtn{ width:48px; height:48px; font-size:1.3rem; bottom:calc(max(16px, env(safe-area-inset-bottom, 0px)) + 60px); } }
 @media (max-height:500px) and (orientation:landscape){ .r3-modebtn{ top:calc(max(10px, env(safe-area-inset-top, 0px)) + 44px); } }
 /* the ? block's prize: a ta-da card in the middle of the screen */

@@ -57,17 +57,7 @@
     var floorGeo = new THREE.PlaneGeometry(60, 50, 60, 50), pos = floorGeo.attributes.position;
     for(var v = 0; v < pos.count; v++){ var fx = pos.getX(v), fy = pos.getY(v); pos.setZ(v, Math.sin(fx * .35) * .25 + Math.cos(fy * .22 + fx * .1) * .3 + Math.max(0, -fy - 6) * .18); }
     floorGeo.computeVertexNormals();
-    var caus = (function(){
-      var N = 128, c = document.createElement('canvas'); c.width = c.height = N; var g = c.getContext('2d'), img = g.createImageData(N, N), pts = [];
-      for(var q = 0; q < 22; q++) pts.push([r() * N, r() * N]);
-      for(var y = 0; y < N; y++) for(var x = 0; x < N; x++){
-        var d1 = 1e9, d2 = 1e9;
-        pts.forEach(function(p){ for(var ox = -N; ox <= N; ox += N) for(var oy = -N; oy <= N; oy += N){ var dx = x - p[0] - ox, dy = y - p[1] - oy, d = dx * dx + dy * dy; if(d < d1){ d2 = d1; d1 = d; } else if(d < d2) d2 = d; } });
-        var e = Math.max(0, 1 - (Math.sqrt(d2) - Math.sqrt(d1)) / 5), val = Math.round(255 * e * e), o = (y * N + x) * 4;
-        img.data[o] = img.data[o + 1] = img.data[o + 2] = val; img.data[o + 3] = 255;
-      }
-      g.putImageData(img, 0, 0); var t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(12, 10); return t;
-    })();
+    var caus = reef3dCausticTexture(12, 10);
     var floor = new THREE.Mesh(floorGeo, M(night ? '#2f3e3e' : '#d9cba6'));
     floor.rotation.x = -Math.PI / 2; floor.position.y = -.15; scene.add(floor);
     reef3dBakeObject(floor, rig, bake); floor.material = reef3dSandMat(caus, new THREE.Color(night ? '#2a6f78' : '#fff6da').multiplyScalar(.2));

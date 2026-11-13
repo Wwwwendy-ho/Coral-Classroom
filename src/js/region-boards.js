@@ -6,9 +6,8 @@
     patterns: { name:'Pattern Reef', icon:'sentence', lead:'Build sentences, one pattern at a time.', near:['caves','beach','captain'], theme:'patterns' },
     beach: { name:'Bottle Beach', icon:'bottle', lead:'Read a letter from Jisu and write back.', near:['patterns','light','captain'], theme:'beach' },
     light: { name:'The Lighthouse', icon:'lighthouse', lead:'Read signs and discover everyday manners.', near:['beach','lagoon','captain'], theme:'light' },
-    captain: { name:"Captain's Deck", icon:'anchor', lead:'Choose a day or check the course and your progress.', near:['lagoon','town','light'], theme:'captain' }
+    captain: { name:"Captain's Deck", icon:'anchor', lead:"See today's plan, your course, and your progress.", near:['lagoon','town','light'], theme:'captain' }
   };
-  var REGION_BOARD_DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 
   function regionBoardOpen(region, direct){
     if(!REGION_BOARD_META[region]) return;
@@ -20,7 +19,7 @@
     return S.regionBoard;
   }
   function regionBoardActivities(region){
-    var out = [], i;
+    var out = [];
     function add(id, name, icon, detail, done){ out.push({ region:region, id:id, name:name, icon:icon, detail:detail || '', done:!!done }); }
     if(region === 'lagoon'){
       var lg = lagoonDone();
@@ -45,7 +44,6 @@
       LH_SIGNS.forEach(function(s){ add(s.id, s.en, s.icon || 'search', 'Read a sign', ld.s[s.id] === s.qs.length); });
       LH_MANNERS.forEach(function(m){ add('manner:' + m.id, m.en, m.icon || 'heart', 'Everyday manners', ld.m[m.id]); });
     } else if(region === 'captain'){
-      for(i = 0; i < REGION_BOARD_DAYS.length; i++) add('day:' + i, REGION_BOARD_DAYS[i] + ' voyage', 'calendar', 'Open today\'s sailing plan');
       add('today', "Today's plan", 'compass', 'Your next legs');
       add('course', 'The course', 'island', 'Islands and checkpoints');
       add('can', 'What you can do', 'progress', 'See your skills and progress');
@@ -62,24 +60,33 @@
     var zones = [zone]; zones.region = zone.region;
     return zones;
   }
-  function regionBoardNavigate(region){
+  function regionBoardNavigate(region, immediate){
     var go = { lagoon:openLagoon, town:openTown, caves:openCaves, patterns:openPatterns,
       beach:openBeach, light:openLight, captain:openCaptain }[region];
-    if(go) go();
+    if(go){ if(immediate) go(); else regionTravel(region, go); }
   }
   function regionBoardLaunch(activity){
     if(!activity || !REGION_BOARD_META[activity.region]) return false;
     var region = activity.region, id = String(activity.id || '');
     if(!regionBoardActivities(region).some(function(a){ return a.id === id; })) return false;
     reef3dUnmount();
-    if(S.view !== region && !(region === 'lagoon' && S.view === 'lagoonRead') && !(region === 'town' && S.view === 'townTalk')) regionBoardNavigate(region);
-    if(region !== 'captain') regionBoardState(region).played = true;
+    if(S.view !== region && !(region === 'lagoon' && S.view === 'lagoonRead') && !(region === 'town' && S.view === 'townTalk')) regionBoardNavigate(region, true);
+    if(region !== 'captain'){
+      var st = regionBoardState(region);
+      st.played = true; st.activity = id; st.completed = false;
+    }
     try { Speech.stop(); } catch(e){}
     if(region === 'lagoon') lagoonOpenStory(id);
     else if(region === 'town') townOpenTalk(id);
     else if(region === 'caves'){
       cavesGo(id);
-      if(id === 'pairs') setTimeout(function(){ if(S.view === 'caves') cavesPlayQ(); }, 350);
+      if(id === 'pairs'){
+        var round = S.caves && S.caves.round;
+        setTimeout(function(){
+          if(S.view === 'caves' && S.caves && S.caves.sec === 'pairs' && S.caves.round === round &&
+             S.regionBoard && S.regionBoard.region === 'caves' && S.regionBoard.activity === 'pairs') cavesPlayQ();
+        }, 350);
+      }
     } else if(region === 'patterns'){ S.patterns.id = id; S.patterns.round = null; renderPatterns(); }
     else if(region === 'beach'){
       if(id === 'letters'){ S.beach.view = 'letters'; renderBeach(); }
@@ -95,6 +102,12 @@
     }
     window.scrollTo(0, 0);
     return true;
+  }
+  // A region calls this at a real finish point, after its learning record has been saved.
+  // Merely opening or leaving an activity never grants a completion reward.
+  function regionBoardActivityCompleted(region, id){
+    var st = S.regionBoard, pid = S.profile && S.profile.id || null;
+    if(st && st.pid === pid && st.region === region && st.activity === id && st.played) st.completed = true;
   }
   function regionBoardShowList(region){
     var st = regionBoardState(region);
@@ -130,7 +143,10 @@
       Promise.resolve().then(function(){ regionBoardListNav(region); });
       return false;
     }
-    if(S.regionBoard.played){ R3.fromRegionActivity = true; S.regionBoard.played = false; }
+    if(S.regionBoard.played){
+      R3.fromRegionActivity = { region:region, pid:S.regionBoard.pid, completed:!!S.regionBoard.completed };
+      S.regionBoard.played = false; S.regionBoard.completed = false; S.regionBoard.activity = null;
+    }
     var meta = REGION_BOARD_META[region], zones = regionBoardZones(region), acts = regionBoardActivities(region);
     var homeLabel = S.deckBack ? "Captain's Deck" : 'Coral Cove';
     var links = meta.near.map(function(id){ var m = REGION_BOARD_META[id]; return '<button type="button" data-rb-region="' + id + '">' + ccIcon(m.icon) + '<span>' + esc(m.name) + '</span></button>'; }).join('');
@@ -149,7 +165,7 @@
     var root = app.querySelector('.rb-root');
     root.addEventListener('click', function(e){
       var b = e.target.closest('button'); if(!b || !root.contains(b)) return;
-      if(b.hasAttribute('data-rb-home')){ goHome(); return; }
+      if(b.hasAttribute('data-rb-home')){ regionTravel(S.deckBack ? 'captain' : 'cove', goHome); return; }
       if(b.hasAttribute('data-rb-roll')){
         var v = R3.view;
         if(v && v.region && v.region.id === region && !v.moving && !v.wrap.querySelector('.r3-panel')){

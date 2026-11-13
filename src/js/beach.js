@@ -175,6 +175,7 @@
     var r = bbReply(b, B.text), d = bbData();
     d.l.unshift({ id: b.id, at: Date.now(), text: B.text.trim().slice(0, 400), r: b.replies.indexOf(r) });
     d.l = d.l.slice(0, BB_KEEP); bbSave(d);
+    regionBoardActivityCompleted('beach', b.id);
     deckTick('letter', b.id);   // a leg of Captain's Deck's voyage, if today's has this bottle
     B.sent = { r: r, showEn: false };
     try { reefWinSound(true); } catch(e){}

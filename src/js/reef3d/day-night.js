@@ -149,15 +149,19 @@
     var now = {}, finished = false;
     zones.forEach(function(z){ z.items.forEach(function(it){ now[it.d.id] = it.state; }); });
     if(R3.fromDeck && !view.region){ R3.fromDeck = false; finished = true; }
-    if(R3.fromRegionActivity && view.region){ R3.fromRegionActivity = false; finished = true; }
+    if(R3.fromRegionActivity != null){
+      var completion = R3.fromRegionActivity; R3.fromRegionActivity = null;
+      if(view.region && completion.region === view.region.id && completion.pid === (S.profile && S.profile.id)) finished = completion.completed;
+    }
     var first = !R3.seen || R3.seenProfile !== (S.profile && S.profile.id) || R3.seenRegion !== (view.region && view.region.id || 'cove');
     R3.seen = now; R3.seenProfile = S.profile && S.profile.id; R3.seenRegion = view.region && view.region.id || 'cove';
     if(quiet || (!finished && !first)) return;
+    var greetEpoch = view.greetEpoch = view.greetEpoch || 0;
     setTimeout(function(){
-      if(!document.body.contains(view.wrap) || view.moving) return;
+      if(R3.view !== view || view.greetEpoch !== greetEpoch || !document.body.contains(view.wrap) || view.moving) return;
       if(finished){ reef3dShells(view, 2); reef3dCelebrate(view); var sp = view.spaces[view.at]; if(sp && !reefCalm()) reef3dStars(view, sp); if(!reefCalm()) reef3dCrabAct(view, 'Dance', true);
-        setTimeout(function(){ if(!view.moving) reef3dDice(view); }, reefCalm() ? 200 : 2000); }   // then the dice block comes out
-      else { reef3dEmote(view, 'hello'); if(reef3dStoryTarget(view) >= 0 && reef3dStoryTarget(view) !== view.at) setTimeout(function(){ if(!view.moving) reef3dDice(view); }, 1800); }
+        setTimeout(function(){ if(R3.view === view && view.greetEpoch === greetEpoch && document.body.contains(view.wrap) && !view.moving) reef3dDice(view); }, reefCalm() ? 200 : 2000); }   // then the dice block comes out
+      else { reef3dEmote(view, 'hello'); if(reef3dStoryTarget(view) >= 0 && reef3dStoryTarget(view) !== view.at) setTimeout(function(){ if(R3.view === view && view.greetEpoch === greetEpoch && document.body.contains(view.wrap) && !view.moving) reef3dDice(view); }, 1800); }
     }, 650);
   }
 
@@ -213,6 +217,7 @@
     if(!view) return;
     clearTimeout(view.homeT);
     if(view.raf) cancelAnimationFrame(view.raf);
+    view.raf = null;
     reef3dAmbience(view, false);
     if(view.post && view.post.dispose) view.post.dispose();
     view.renderer.dispose();
@@ -220,16 +225,65 @@
     view.wrap.remove();
     if(R3.view === view) R3.view = null;
   }
+  // Keep only an idle regional board while its own lesson or activity list is open.
+  // An active animation can have a callback that changes the board, so it still takes the dispose path.
+  function reef3dParkable(view){
+    return view && view.region && !view.parked && !view.moving && !view.dice && !view.emote &&
+      !(view.fx && view.fx.length) && !view.themeFx && !view.themeIn && !view.flyIn &&
+      !view.leaving && !view.mapOpening && !view.zoomAnim && !view.zoomGoal && !view.zoomNow &&
+      !view.wrap.querySelector('.r3-panel') && !document.querySelector('.r3-map') &&
+      S.profile && S.regionBoard && S.regionBoard.pid === S.profile.id && S.regionBoard.region === view.region.id;
+  }
+  function reef3dRegionStillOpen(view){
+    var id = view.region.id, s = S.regionBoard;
+    return s && S.profile && s.pid === S.profile.id && s.region === id &&
+      (S.view === id || (id === 'lagoon' && S.view === 'lagoonRead') || (id === 'town' && S.view === 'townTalk'));
+  }
+  function reef3dPark(view){
+    clearTimeout(view.homeT); view.homeT = null;
+    view.greetEpoch = (view.greetEpoch || 0) + 1;
+    if(view.raf) cancelAnimationFrame(view.raf);
+    view.raf = null;
+    reef3dAmbience(view, false);
+    view.wrap.remove(); view.parked = true;
+  }
   function reef3dUnmount(regionId){
     var view = R3.view;
-    if(view && view.region && (!regionId || view.region.id === regionId)) reef3dDispose(view);
+    if(view && view.region && (!regionId || view.region.id === regionId)){
+      if(view.parked){ if(!reef3dRegionStillOpen(view)) reef3dDispose(view); }
+      else if(reef3dParkable(view) && reef3dRegionStillOpen(view)) reef3dPark(view);
+      else reef3dDispose(view);
+    }
     if(!document.querySelector('.r3')) document.body.classList.remove('r3-full', 'r3-loading');
+  }
+  // A regional lesson changes activity progress, not the board's path. Refresh the labels and
+  // painted deck tops in place so the retained view reflects completion immediately on return.
+  function reef3dRefreshRegion(view, zones){
+    var byId = {};
+    zones.forEach(function(z){ z.items.forEach(function(it){ byId[it.d.id] = { item: it, zone: z }; }); });
+    view.spaces.forEach(function(s){
+      if(s.kind !== 'deck' || !s.item) return;
+      var fresh = byId[s.item.d.id]; if(!fresh) return;
+      var old = s.item, it = fresh.item, changed = old.state !== it.state || old.d.emoji !== it.d.emoji;
+      s.item = it; s.zone = fresh.zone;
+      if(changed){
+        var face = view.hitables.find(function(h){ return h.isMesh && h.userData.space === s.i; });
+        if(face){ face.material.map = reef3dTileTex(s.zone.place.hue, it.d.emoji, view.night, 'deck-' + it.state); face.material.needsUpdate = true; }
+      }
+      if(s.label){
+        s.label.classList.remove('ready', 'done'); s.label.classList.add(it.state);
+        var label = it.state === 'ready' ? 'Ready' : it.state === 'done' ? 'All done' : it.kind;
+        s.label.innerHTML = '<span class="r3-emoji" aria-hidden="true">'+esc(it.d.emoji)+'</span><span><b>'+esc(it.d.name)+'</b><small>'+esc(label)+'</small></span>' + (it.state === 'done' ? '<i class="r3-star" aria-hidden="true">★</i>' : '');
+        s.label.setAttribute('aria-label', it.d.name + '. ' + (it.state === 'ready' ? 'Ready to practice.' : it.state === 'done' ? 'All done. Tap to play again.' : 'Tap to ' + it.kind.toLowerCase() + '.'));
+      }
+      if(s.sign) s.sign.setAttribute('aria-label', view.region.name + '. Go to ' + it.d.name + '.');
+    });
   }
   function reef3dMount(rw, zones){
     var scene2d = rw.querySelector('.rw-scene');
     if(!scene2d || R3.failed) return;
     var region = zones.region || null;
-    var key = (S.profile && S.profile.id || '') + ':' + (region ? region.id : 'cove') + ':' + (reefNight() ? 'n' : 'd') + ':' + zones.map(function(z){ return z.id + ':' + z.items.map(function(it){ return it.d.id + it.state; }).join(','); }).join('|') + ':' + reefTally().found;
+    var key = (S.profile && S.profile.id || '') + ':' + (region ? region.id : 'cove') + ':' + (reefNight() ? 'n' : 'd') + ':' + zones.map(function(z){ return z.id + ':' + z.items.map(function(it){ return it.d.id + (region ? '' : it.state); }).join(','); }).join('|') + (region ? ':' + (innerWidth < 640 ? 'phone' : 'wide') : ':' + reefTally().found);
     function attach(){
       if(!document.body.contains(rw)) return;
       try {
@@ -249,6 +303,14 @@
           reef3dPlace(view, start);
           if(region) reef3dSavePosition(view, start);
           reef3dCamTarget(view, view.camPos, view.camLook);
+        } else if(region){
+          reef3dRefreshRegion(view, zones);
+          if(view.parked){
+            view.parked = false;
+            view.lastT = performance.now(); view.frameN = 0; view.qs = null; view.w = 0;
+            var at = reef3dPosition(view); if(at != null && at >= 0 && at < view.spaces.length) reef3dPlace(view, at);
+            reef3dLoadPerf.reused = (reef3dLoadPerf.reused || 0) + 1;
+          }
         }
         scene2d.hidden = true;
         rw.classList.add('has-3d');

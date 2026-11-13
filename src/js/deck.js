@@ -147,12 +147,12 @@
   function renderCaptain(){
     if((!(S.captain && S.captain.cp)) && regionBoardRender('captain')) return;
     var C = S.captain || (S.captain = { tab: 'today' });
-    var tabs = [['today', 'Today', 'compass'], ['course', 'Your course', 'map'], ['can', 'What you can do', 'trophy']];
+    var tabs = [['today', 'Today', 'compass'], ['course', 'Your course', 'map'], ['can', 'Skills', 'trophy']];
     var body = C.cp ? deckCheckHTML(C) : C.tab === 'course' ? deckCourseHTML(C) : C.tab === 'can' ? deckCanHTML() : deckTodayHTML(C);
     app.innerHTML = '<div class="nav-row"><button class="back-btn" data-act="cd-home">⟵ Reef</button><span class="nav-title">' + ccIcon('anchor') + ' Captain\'s Deck</span></div>' +
       '<div class="lg-page cd-page">' +
         (C.cp ? '' : '<div class="cd-tabs" role="tablist" aria-label="Captain\'s Deck">' + tabs.map(function(t){
-          return '<button type="button" role="tab" class="cd-tab' + (C.tab === t[0] ? ' on' : '') + '" aria-selected="' + (C.tab === t[0]) + '" data-cd-tab="' + t[0] + '">' + ccIcon(t[2]) + '<span>' + t[1] + '</span></button>';
+          return '<button type="button" role="tab" aria-label="' + (t[0] === 'can' ? 'What you can do' : t[1]) + '" class="cd-tab' + (C.tab === t[0] ? ' on' : '') + '" aria-selected="' + (C.tab === t[0]) + '" data-cd-tab="' + t[0] + '">' + ccIcon(t[2]) + '<span>' + t[1] + '</span></button>';
         }).join('') + '</div>') +
         body + '</div>';
     deckWire(C);

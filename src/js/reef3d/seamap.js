@@ -60,17 +60,17 @@
     var r = REEF_REGIONS.find(function(x){ return x.id === id; }), box = ov.querySelector('.r3-sea-info'); if(!r || !box) return;
     ov.querySelectorAll('.r3-sea-isle').forEach(function(b){ b.classList.toggle('picked', b.dataset.sea === id); });
     box.innerHTML = '<b>' + esc(r.name) + '</b><small>' + esc(r.teaches) + '</small><p>' + esc(r.about) + '</p>' +
-      (r.id === 'cove' ? '<button type="button" class="r3-btn main" data-sea-tab="cove">' + ccIcon('map') + ' Open Coral Cove</button>' :
+      (r.id === 'cove' ? '<button type="button" class="r3-btn main" ' + (R3.view && R3.view.region ? 'data-sea-go="cove"' : 'data-sea-tab="cove"') + '>' + ccIcon('map') + ' Open Coral Cove</button>' :
        r.open ? '<button type="button" class="r3-btn main" data-sea-go="' + r.id + '">' + ccIcon(r.icon || 'story') + ' Open ' + esc(r.openAs || r.name) + '</button>' :
        '<span class="r3-sea-soon">' + ccIcon('sparkle') + ' Opening soon</span>');
     try { Speech.speak(r.say); } catch(e){}
   }
   // Leaves the board for an open region: the map closes and the water covers the change, as when diving into a deck
   function reefSeaGo(ov, id){
-    var r = REEF_REGIONS.find(function(x){ return x.id === id; }), fn = r && { openLagoon: openLagoon, openTown: openTown, openCaves: openCaves, openPatterns: openPatterns, openBeach: openBeach, openLight: openLight, openCaptain: openCaptain }[r.go];
+    var r = REEF_REGIONS.find(function(x){ return x.id === id; }), fn = id === 'cove' ? goHomeNow : r && { openLagoon: openLagoon, openTown: openTown, openCaves: openCaves, openPatterns: openPatterns, openBeach: openBeach, openLight: openLight, openCaptain: openCaptain }[r.go];
     if(!fn) return;
     try { Speech.stop(); } catch(e){}
     ov.remove();
     try { Sound.bloop(520); } catch(e){}
-    reefGo('dive', null, fn);
+    regionTravel(id, fn);
   }

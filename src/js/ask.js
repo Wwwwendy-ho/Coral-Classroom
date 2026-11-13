@@ -37,7 +37,13 @@
       b.addEventListener('click', askOpen);
       document.body.appendChild(b);
     }
+    var nav = app.querySelector('.nav-row');
+    var inline = !!nav && ['lagoon','lagoonRead','town','townTalk','caves','patterns','beach','light','captain'].indexOf(S.view) !== -1 && !app.querySelector('.rb-root');
+    b.classList.toggle('ask-inline', inline);
+    var parent = inline ? nav : document.body;
+    if(b.parentNode !== parent) parent.appendChild(b);
     var label = 'Ask ' + askName();
+    b.setAttribute('aria-label', label);
     if(b.dataset.label !== label){ b.dataset.label = label; b.innerHTML = '<span class="ask-btn-q" aria-hidden="true">' + ccIcon('ask') + '</span><span>' + esc(label) + '</span>'; }
   }
   function askResHTML(){
@@ -152,3 +158,6 @@
   }
   afterRender('ask', function(){ askSyncBtn(); if(Ask.open) askRender(); });
   askNS().then(function(){ try { askSyncBtn(); } catch(e){} });
+
+  var askScreenWatch = new MutationObserver(function(){ askSyncBtn(); });
+  askScreenWatch.observe(app, { childList:true });

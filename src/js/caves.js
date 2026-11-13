@@ -150,6 +150,7 @@
     R.i++;
     if(R.i >= CAVES_ROUND){
       R.done = true;
+      regionBoardActivityCompleted('caves', 'pairs');
       deckTick('sound', S.caves.focus || null);   // a leg of Captain's Deck's voyage: any round of sound pairs counts
       try { reefWinSound(R.right === CAVES_ROUND); } catch(e){}
       try { if(!reefCalm()) Ocean.bubbles(10); } catch(e){}
@@ -334,6 +335,7 @@
     }
     // 'say': right the first time is good; after another try it's hard
     try { Learner.record(L.ko, 'say', L.retried ? 'hard' : 'good'); } catch(e){}
+    regionBoardActivityCompleted('caves', 'shadow');
     var d = cavesData(), k = learnerKey(L.ko); d.said[k] = (d.said[k] || 0) + 1; cavesSave(d);
     try { Sound.correct(); } catch(e){}
     if(C.lines && C.lines[L.i + 1]) cavesOpenLine(L.i + 1);
@@ -437,7 +439,7 @@
     Rs.picked = i;
     var ok = Rs.opts[i] === r.check.word;
     try { Learner.record(r.check.word, 'hear', ok ? 'good' : 'again'); } catch(e){}
-    if(ok){ var d = cavesData(); d.rules[r.id] = Date.now(); cavesSave(d); try { Sound.correct(); } catch(e){} }
+    if(ok){ var d = cavesData(); d.rules[r.id] = Date.now(); cavesSave(d); regionBoardActivityCompleted('caves', 'rules'); try { Sound.correct(); } catch(e){} }
     else try { Sound.wrong(); } catch(e){}
     var y = window.scrollY; renderCaves(); window.scrollTo(0, y);
     try { Speech.speak(r.check.word); } catch(e){}

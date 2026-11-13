@@ -32,7 +32,11 @@
   }
   function reef3dDiceRoll(k){ var f = k.faces, r = function(){ return f[Math.floor(Math.random() * f.length)]; }; return k.double ? r() + r() : r(); }
   function reef3dDice(view){
-    if(view.dice || !reef3dWays(view.spaces, view.at).length || !document.body.contains(view.wrap)) return;
+    if(view.dice || !document.body.contains(view.wrap)) return;
+    if(!reef3dWays(view.spaces, view.at).length){
+      if(view.region && view.at === (view.spaces.mainN || view.spaces.length) - 1) reef3dRegionRestart(view);
+      return;
+    }
     var THREE = window.THREE, b = reefBoard(), kinds = reef3dDiceKinds(view);
     var kind = kinds.find(function(k){ return k.id === b.die; }) || kinds[0];
     var n = reef3dDiceRoll(kind);
@@ -64,6 +68,19 @@
     view.wrap.appendChild(ui); d.tip = ui;
     try { Sound.bloop(660, 0, .05); Sound.bloop(990, .1, .04); } catch(e){}
     if(reefCalm()) dg.scale.setScalar(1);
+  }
+  // Regional paths have an end. Offer a short return voyage so the Dice control never becomes inert.
+  function reef3dRegionRestart(view){
+    if(view.moving || view.wrap.querySelector('.r3-panel')) return;
+    var el = reef3dPanel(view, 'r3-restart', '<h3>End of the path</h3><p>Sail back to the start to keep playing this board?</p>' +
+      '<div class="r3-panel-row"><button type="button" class="r3-btn main" data-restart>Sail back</button><button type="button" class="r3-btn" data-stay>Stay here</button></div>');
+    el.querySelector('[data-stay]').addEventListener('click', function(){ el.remove(); });
+    el.querySelector('[data-restart]').addEventListener('click', function(){
+      el.remove();
+      if(!document.body.contains(view.wrap) || view.moving) return;
+      reef3dSwirlTo(view, 0, function(){ if(document.body.contains(view.wrap)) reef3dEmote(view, 'hello'); });
+    });
+    el.querySelector('[data-restart]').focus({ preventScroll:true });
   }
   // Every frame while the dice is out: grow in, bob and spin, and flick through the numbers until it's hit.
   function reef3dDiceTick(view, now, t){
@@ -162,7 +179,7 @@
       var s = sp[view.at];
       if(gateStop) reef3dPrize(view, '🐚', 'The clam is shut!', 'It opens again next turn.');
       if(story >= 0 && view.at === story) return reef3dStoryArrive(view, s);
-      if((view.region && s.kind === 'deck') || s.kind === 'treasure' || s.kind === 'story') return reef3dArrive(view, s);   // the end of a branch: go in
+      if((view.region && s.kind === 'deck') || s.kind === 'treasure' || s.kind === 'story') return reef3dArrive(view, s, { viaDie:true });   // the end of a branch: go in
       reef3dVisit(view, s, false, function(){ reef3dAfterTurn(view); });
     }
     d.startAt = view.at;

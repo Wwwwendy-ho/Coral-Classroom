@@ -1,0 +1,36 @@
+/* A drawn sea crossing between destinations. The overlay owns taps until it is gone. */
+.region-travel{position:fixed;inset:0;z-index:99991;overflow:hidden;isolation:isolate;pointer-events:auto;background:#61bed0;color:#fffaf0;animation:rt-enter .22s ease-out both;font-family:var(--font-display,'Baloo 2',system-ui,sans-serif);}
+.region-travel::after{content:"";position:absolute;inset:0;z-index:8;pointer-events:none;box-shadow:inset 0 0 110px rgba(9,58,80,.14);}
+.region-travel.rt-arriving{animation:rt-leave .54s ease-in .18s both;}
+.rt-sky{position:absolute;inset:0 0 43%;background:linear-gradient(180deg,#5ab7df 0%,#a8e2e1 68%,#f7dcad 100%);}
+.rt-sun{position:absolute;top:12%;right:21%;width:clamp(45px,9vw,95px);aspect-ratio:1;border-radius:50%;background:#fff4c7;box-shadow:0 0 0 18px rgba(255,242,191,.22),0 0 70px 30px rgba(255,240,175,.45);}
+.rt-cloud{position:absolute;width:clamp(100px,23vw,250px);height:30px;border-radius:50%;background:rgba(255,255,245,.8);filter:blur(1px);}
+.rt-cloud::before,.rt-cloud::after{content:"";position:absolute;bottom:6px;background:inherit;border-radius:50%;}
+.rt-cloud::before{left:18%;width:34%;height:45px;}.rt-cloud::after{left:47%;width:37%;height:59px;}
+.rt-cloud-one{left:10%;top:18%;animation:rt-cloud 5s ease-in-out infinite alternate;}.rt-cloud-two{right:3%;top:34%;transform:scale(.7);opacity:.62;}
+.rt-horizon{position:absolute;inset:46% 0 auto;height:15%;overflow:hidden;z-index:1;}
+.rt-island{position:absolute;bottom:-21%;width:min(39vw,330px);height:92%;background:linear-gradient(155deg,#78a577 4%,#487f77 65%,#276d75);clip-path:polygon(0 100%,8% 77%,20% 74%,31% 42%,46% 18%,57% 37%,66% 32%,84% 72%,100% 100%);}
+.rt-island-left{left:-8%;opacity:.6;transform:scale(.75);transform-origin:bottom left;animation:rt-left 1.35s ease-in both;}
+.rt-island-right{right:-16%;background:linear-gradient(150deg,#8ab07b,#4e8979 65%,#2c7375);animation:rt-right 1.35s ease-out both;}
+.rt-water{position:absolute;inset:54% 0 0;z-index:2;background:linear-gradient(180deg,#31a9bd 0%,#17829e 52%,#0c5b7f 100%);}
+.rt-wave{position:absolute;left:-10%;width:120%;height:48px;border-radius:50%;border-top:8px solid rgba(220,255,241,.5);transform:rotate(-1deg);animation:rt-wave 1s ease-in-out infinite alternate;}
+.rt-wave-one{top:4%;}.rt-wave-two{top:32%;left:-24%;opacity:.45;animation-delay:-.45s;}.rt-wave-three{top:69%;left:-4%;opacity:.26;animation-delay:-.8s;}
+.rt-spark{position:absolute;width:34px;height:5px;border-radius:50%;background:#e5f9da;box-shadow:0 0 18px #e5f9da;opacity:.6;transform:rotate(-5deg);}.rt-spark-one{top:43%;left:17%;}.rt-spark-two{top:73%;right:22%;width:20px;}
+.rt-vessel{position:absolute;z-index:4;left:50%;top:54%;width:clamp(160px,32vw,270px);transform:translate(-50%,-66%);animation:rt-sail 1.42s cubic-bezier(.25,.05,.7,.95) both;filter:drop-shadow(0 12px 10px rgba(11,69,83,.28));}
+.rt-vessel svg{display:block;width:100%;height:auto;animation:rt-bob .5s ease-in-out infinite alternate;}
+.rt-caption{position:absolute;z-index:5;left:50%;bottom:calc(7% + env(safe-area-inset-bottom,0px));width:min(430px,calc(100% - 36px));box-sizing:border-box;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;text-align:center;padding:11px 20px 13px;border:1px solid rgba(255,255,255,.45);border-radius:20px;background:rgba(8,65,88,.72);box-shadow:0 8px 25px rgba(8,53,75,.18);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);line-height:1.1;}
+.rt-status{font:800 .8rem var(--font-body,system-ui,sans-serif);text-transform:uppercase;letter-spacing:.12em;color:#d1f9eb;}.rt-name{font:900 clamp(1.45rem,4vw,2.2rem)/1.12 var(--font-display,'Baloo 2',system-ui,sans-serif);}.rt-voyage{margin-top:3px;font:700 .82rem var(--font-body,system-ui,sans-serif);color:#d9f4ec;}
+.region-travel[data-destination="caves"] .rt-island-right{background:linear-gradient(145deg,#83969a,#536f7e 60%,#2b6377);}.region-travel[data-destination="beach"] .rt-island-right{background:linear-gradient(160deg,#d7c78f,#b6a978 65%,#6e9479);}.region-travel[data-destination="light"] .rt-sun{box-shadow:0 0 0 22px rgba(255,242,191,.28),0 0 100px 45px rgba(255,240,175,.6);}.region-travel[data-destination="captain"] .rt-island-right{background:linear-gradient(160deg,#d0ad79,#967b6b 65%,#4d777c);}
+@keyframes rt-enter{from{opacity:0}to{opacity:1}}
+@keyframes rt-leave{from{opacity:1}to{opacity:0}}
+@keyframes rt-sail{0%{transform:translate(-110vw,-62%) scale(.76)}50%{transform:translate(-50%,-67%) scale(1)}100%{transform:translate(110vw,-61%) scale(.8)}}
+@keyframes rt-bob{to{transform:translateY(5px) rotate(2deg)}}
+@keyframes rt-wave{to{transform:translateX(4%) rotate(1deg)}}
+@keyframes rt-left{to{transform:translateX(-25%) scale(.68);opacity:.3}}
+@keyframes rt-right{from{transform:translateX(30%) scale(.58);opacity:.45}to{transform:translateX(-6%) scale(1.12);opacity:1}}
+@keyframes rt-cloud{to{transform:translateX(16px)}}
+@media(max-height:500px){.rt-caption{bottom:calc(3% + env(safe-area-inset-bottom,0px));padding:6px 14px;}.rt-vessel{width:clamp(130px,26vw,200px);}.rt-voyage{display:none;}}
+@media(prefers-reduced-motion:reduce){.region-travel *{animation:none!important;transition:none!important;}}
+body.reef-calm .region-travel *{animation:none!important;transition:none!important;}
+.region-travel.rt-calm{animation:rt-enter .08s ease-out both;}.region-travel.rt-calm.rt-arriving{animation:rt-leave .14s ease-in .04s both;}
+.region-travel.rt-calm .rt-vessel{left:50%;transform:translate(-50%,-66%);}

@@ -3,6 +3,30 @@
      camera follows. The painted 2D reef stays underneath as the fallback when 3D can't run. ---------- */
   var REEF_THREE_URL = 'three.min.js';
   var R3 = { loading: null, failed: false, view: null };
+  var reef3dLoadPerf = { causticBuilds: 0, causticMs: 0, modelCount: 0, modelFailures: 0, modelDecodeMs: 0, modelParseMs: 0, modelLoadMs: 0, boardBuilds: 0, boardBuildMs: 0 };
+  window.__reef3dLoadPerf = function(){ return Object.assign({}, reef3dLoadPerf); };
+  // The sand pattern is independent of the world. Keep its pixels, but give each view its own
+  // texture so the lobby and board can scroll and repeat it independently.
+  var reef3dCausticSource = null;
+  function reef3dCausticTexture(xRepeat, yRepeat){
+    var THREE = window.THREE;
+    if(!reef3dCausticSource){
+      var start = performance.now(), N = 128, c = document.createElement('canvas'); c.width = c.height = N;
+      var g = c.getContext('2d'), img = g.createImageData(N, N), pts = [], rand = reefRand(1709);
+      for(var q = 0; q < 22; q++) pts.push([rand() * N, rand() * N]);
+      for(var y = 0; y < N; y++) for(var x = 0; x < N; x++){
+        var d1 = 1e9, d2 = 1e9;
+        pts.forEach(function(p){ for(var ox = -N; ox <= N; ox += N) for(var oy = -N; oy <= N; oy += N){ var dx = x - p[0] - ox, dy = y - p[1] - oy, d = dx * dx + dy * dy; if(d < d1){ d2 = d1; d1 = d; } else if(d < d2) d2 = d; } });
+        var e = Math.max(0, 1 - (Math.sqrt(d2) - Math.sqrt(d1)) / 5), val = Math.round(255 * e * e), o = (y * N + x) * 4;
+        img.data[o] = img.data[o + 1] = img.data[o + 2] = val; img.data[o + 3] = 255;
+      }
+      g.putImageData(img, 0, 0); reef3dCausticSource = c;
+      reef3dLoadPerf.causticBuilds++;
+      reef3dLoadPerf.causticMs += performance.now() - start;
+    }
+    var t = new THREE.CanvasTexture(reef3dCausticSource);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(xRepeat, yRepeat); return t;
+  }
   // Coral Cove keeps its established position in S. Each region has its own saved spot per profile.
   function reef3dPositionKey(region){ return 'cc-region-board-at-' + (S.profile && S.profile.id || '') + '-' + region.id; }
   function reef3dPosition(view){
@@ -530,16 +554,32 @@
     try { reefInstallGLTF(); } catch(e){}
     var THREE = window.THREE;
     if(!THREE.GLTFLoader) return (R3models = Promise.resolve({}));
-    var loader = new THREE.GLTFLoader(), REEF_MODELS = {};
-    R3models = reef3dModelData().then(function(data){ REEF_MODELS = data || {}; return Promise.all(Object.keys(REEF_MODELS).map(function(k){
-      return new Promise(function(res){
-        try {
-          var s = atob(REEF_MODELS[k]), u = new Uint8Array(s.length);
-          for(var i = 0; i < s.length; i++) u[i] = s.charCodeAt(i);
-          loader.parse(u.buffer, '', function(g){ res([k, g]); }, function(){ res([k, null]); });
-        } catch(e){ res([k, null]); }
+    var loader = new THREE.GLTFLoader();
+    R3models = reef3dModelData().then(function(data){
+      var packed = data || {}, keys = Object.keys(packed), ready = {}, at = 0, started = performance.now();
+      return new Promise(function(resolve){
+        function next(){
+          if(at >= keys.length){ reef3dLoadPerf.modelLoadMs = performance.now() - started; R3.modelsReady = ready; resolve(ready); return; }
+          var k = keys[at++], t0 = performance.now(), done = false;
+          function finish(g){
+            if(done) return; done = true;
+            reef3dLoadPerf.modelCount++;
+            if(g) ready[k] = g; else reef3dLoadPerf.modelFailures++;
+            // One model per browser task lets input and painting run between large GLB parses.
+            setTimeout(next, 0);
+          }
+          try {
+            var s = atob(packed[k]), u = new Uint8Array(s.length);
+            for(var i = 0; i < s.length; i++) u[i] = s.charCodeAt(i);
+            reef3dLoadPerf.modelDecodeMs += performance.now() - t0;
+            t0 = performance.now();
+            loader.parse(u.buffer, '', function(g){ finish(g); }, function(){ finish(null); });
+            reef3dLoadPerf.modelParseMs += performance.now() - t0;
+          } catch(e){ finish(null); }
+        }
+        next();
       });
-    })); }).then(function(list){ var o = {}; list.forEach(function(p){ if(p[1]) o[p[0]] = p[1]; }); R3.modelsReady = o; return o; });
+    });
     return R3models;
   }
   // A ready-to-place copy of a model, scaled to the given height, sitting on y = 0.
@@ -745,6 +785,7 @@
   }
 
   function reef3dBuild(host, zones, models){
+    var buildStarted = performance.now();
     var THREE = window.THREE, night = reefNight(), region = zones.region || null;
     var spaces = region && typeof window.regionBoardSpaces === 'function' && window.regionBoardSpaces(zones) || reef3dSpaces(zones, region);
     var wrap = document.createElement('div');
@@ -766,9 +807,9 @@
     var scene = new THREE.Scene();
     var regionGround = region && { town:'#b8aa94', lagoon:'#83b6a5', caves:'#6b6873', patterns:'#8cb7ad', beach:'#ebd6ac', light:'#9aa393', captain:'#8b7e6e' }[region.id];
     var regionSky = region && { town:'#b8d5d8', lagoon:'#97d1c8', caves:'#6d8f9d', patterns:'#8fc9ca', beach:'#a6d9df', light:'#b5d4d6', captain:'#a5bbc0' }[region.id];
-    var fogCol = regionSky || (night ? '#0c2a30' : '#7fd4d8');
+    var fogCol = regionSky ? (night ? reef3dShade(regionSky, -.5) : regionSky) : (night ? '#0c2a30' : '#7fd4d8');
     scene.fog = new THREE.Fog(fogCol, night ? 14 : 11, night ? 48 : 42);
-    if(region) scene.background = new THREE.Color(night ? reef3dShade(fogCol, -.5) : fogCol);
+    if(region) scene.background = new THREE.Color(fogCol);
     var cam = new THREE.PerspectiveCamera(42, 1, .1, scene.fog.far + 8);   // past the fog nothing shows, so nothing is drawn there
     var kit = reef3dKit(THREE, night), B = kit.B, M = kit.M, mesh = kit.mesh;
     var mainN = spaces.mainN || spaces.length;
@@ -942,18 +983,7 @@
       scene.add(bubbles); }
 
     // Moving caustics on the sand: a cell pattern in the floor's glow channel that drifts.
-    var caus = (function(){
-      var N = 128, c = document.createElement('canvas'); c.width = c.height = N; var g = c.getContext('2d'), img = g.createImageData(N, N), pts = [];
-      for(var q = 0; q < 22; q++) pts.push([r() * N, r() * N]);
-      for(var y = 0; y < N; y++) for(var x = 0; x < N; x++){
-        var d1 = 1e9, d2 = 1e9;
-        pts.forEach(function(p){ for(var ox = -N; ox <= N; ox += N) for(var oy = -N; oy <= N; oy += N){ var dx = x - p[0] - ox, dy = y - p[1] - oy, d = dx * dx + dy * dy; if(d < d1){ d2 = d1; d1 = d; } else if(d < d2) d2 = d; } });
-        var e = Math.max(0, 1 - (Math.sqrt(d2) - Math.sqrt(d1)) / 5), v = Math.round(255 * e * e), o = (y * N + x) * 4;
-        img.data[o] = img.data[o + 1] = img.data[o + 2] = v; img.data[o + 3] = 255;
-      }
-      g.putImageData(img, 0, 0);
-      var t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(16, Math.round(len / 4.5)); return t;
-    })();
+    var caus = region ? null : reef3dCausticTexture(16, Math.round(len / 4.5));
     // The sand covers the whole screen, so it gets the cheapest shader of all: baked light plus the drifting
     // caustics added on top (see reef3dSandMat).
     floor.material = M(regionGround ? (night ? reef3dShade(regionGround, -.42) : regionGround) : (night ? '#2f3e3e' : '#d9cba6')); reef3dBakeObject(floor, rig, bake);
@@ -1076,6 +1106,8 @@
     if(R3.flownFor !== who && !reefCalm()){ R3.flownFor = who; view.flyIn = { t0: null, dur: 2600 }; }   // the swoop in, once per visit (see life.js)
     reef3dPartyBuild(view);
     reef3dQApply(view);
+    reef3dLoadPerf.boardBuilds++;
+    reef3dLoadPerf.boardBuildMs += performance.now() - buildStarted;
     return view;
   }
 
@@ -1215,7 +1247,7 @@
       // eyes: blink, happy squint (^ ^) or wide with surprise
       (parts.eyes || []).forEach(function(e){ var w = q.eyes > 1 ? q.eyes : 1; e.scale.set(w, blink * q.eyes, w); });
       if(parts.glow) parts.glow.intensity = 1.2 + Math.sin(t * 3) * .25;
-      view.caus.offset.set(t * .012, t * .02);
+      if(view.caus) view.caus.offset.set(t * .012, t * .02);
       view.rays.position.set(g.x * .5, 0, g.z);
       var rayK = Math.max(0, 1 - (view.zoomNow || 0) * 3);   // seen from straight above they'd read as stripes, so they fade as she pulls out
       view.rayList.forEach(function(rm){ rm.material.opacity = rm.userData.base * rayK * (.65 + .35 * Math.sin(t * .5 + rm.userData.ph)); });

@@ -31,11 +31,11 @@ function check(name, ok, detail){
   console.log((ok ? 'ok    ' : 'FAIL  ') + name + (detail ? '  ' + detail : ''));
   if(!ok) failures++;
 }
-async function stable(p){
-  await p.waitForFunction(() => {
+async function stable(p, region){
+  await p.waitForFunction(expected => {
     const v = window.__regionBoardView && window.__regionBoardView();
-    return v && v.mode === 'board' && v.has3d && document.querySelector('.rb-root canvas');
-  }, null, { timeout:30000 });
+    return v && (!expected || v.region === expected) && v.mode === 'board' && v.has3d && document.querySelector('.rb-root canvas') && !document.querySelector('.region-travel');
+  }, region, { timeout:30000 });
 }
 async function openRegion(p, r){
   await p.click('[data-r3-map]');
@@ -43,7 +43,7 @@ async function openRegion(p, r){
   await p.click('.r3-map-tab[data-sea-tab="sea"]');
   await p.click('.r3-sea-isle[data-sea="' + r.sea + '"]');
   await p.click('[data-sea-go="' + r.sea + '"]');
-  await stable(p);
+  await stable(p, r.id);
 }
 async function overflow(p){
   return p.evaluate(() => {
@@ -140,7 +140,7 @@ async function musicTarget(p){
     const listHasLesson = await p.locator(listSelectors[r.id]).count();
     check(r.id + ': Activities opens the existing region list', listHasLesson > 0, 'lesson controls=' + listHasLesson);
     await p.click('[data-rb-board]');
-    await stable(p);
+    await stable(p, r.id);
 
     // Seed one learner's saved spot for this region, then make sure visiting a neighbor keeps its own spot.
     const seeded = await p.evaluate(id => {
@@ -150,7 +150,7 @@ async function musicTarget(p){
     }, r.id);
     await p.click('.rb-guide summary');
     await p.click('[data-rb-region="' + neighbor[r.id] + '"]');
-    await stable(p);
+    await stable(p, neighbor[r.id]);
     const isolated = await p.evaluate(({ id, from, savedKey }) => {
       const v = window.__regionBoardView(), key = 'cc-region-board-at-' + window.CoralCove.profile().id + '-' + id;
       return { region:v.region, position:v.position, saved:localStorage.getItem(savedKey), neighbor:localStorage.getItem(key) };
@@ -159,7 +159,7 @@ async function musicTarget(p){
       isolated.saved === '2' && isolated.neighbor !== '2', JSON.stringify(isolated));
     await p.click('.rb-guide summary');
     await p.click('[data-rb-region="' + r.id + '"]');
-    await stable(p);
+    await stable(p, r.id);
     check(r.id + ': returning restores its own position', await p.evaluate(() => window.__regionBoardView().position === 2));
 
     // Open an existing lesson through the board's guide; its own back control returns to the same board.
@@ -177,7 +177,7 @@ async function musicTarget(p){
         patterns:'[data-act="pr-back"]', beach:'[data-act="bb-back"]', light:'[data-act="lh-back"]', captain:'[data-rb-board]' };
       if(r.id === 'captain') await p.click('[data-rb-board]');
       else { await p.waitForSelector(backs[r.id], { timeout:15000 }); await p.click(backs[r.id]); }
-      await stable(p);
+      await stable(p, r.id);
       check(r.id + ': returns from activity to its region board', await p.evaluate(id => {
         const v = window.__regionBoardView(); return v.region === id && v.mode === 'board' && !!document.querySelector('.rb-root canvas');
       }, r.id));
@@ -195,7 +195,8 @@ async function musicTarget(p){
       await themeNight(p, night);
       for(const size of sizes){
         await p.setViewportSize({ width:size.width, height:size.height });
-        await p.waitForTimeout(250);
+        await p.waitForFunction(size => { const v = window.__reef3dView(); return v && v.w === size.width && v.h === size.height && Math.abs(v.cam.aspect - size.width / size.height) < .001; }, size);
+        await p.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
         const dims = await overflow(p);
         check(r.id + ' ' + size.name + ' ' + (night ? 'night' : 'day') + ': no horizontal overflow', dims.page && dims.board, JSON.stringify(dims));
         if(captures) await p.screenshot({ path:path.join(out, r.id + '-' + size.name + '-' + (night ? 'night' : 'day') + '.png') });

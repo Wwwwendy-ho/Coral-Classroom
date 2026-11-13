@@ -1,5 +1,14 @@
 # Changelog
 
+## Richer islands and sailing (November 13, 2026)
+
+- Harbor Town has detailed shopfronts, rooflines, awnings, boats, timber piers and cargo. Other regions gain reeds and islets, cave walls and crystal formations, coral gardens, shoreline detail, lighthouse cliffs, and ship planks, ropes, railings and sails.
+- A drawn sailing scene connects regions and Coral Cove, with a brief fade for reduced motion.
+- Reuse one safe, idle regional scene across its own activity screens; incompatible destinations still release it. Cache the caustic pattern, skip it in regional worlds, and spread model parsing across browser turns. Remove duplicate startup music warming.
+- Fix Coral Cove’s overlapping top-left controls and move regional Ask help into lesson headers. Shorten the Captain’s progress tab to Skills.
+- Regional paths offer a return to the start. Opening and leaving an activity no longer grants completion shells; real finishes do. Captain’s spaces link to its actual plan, course and skills.
+- Browser checks cover regional navigation, saved positions, playback and offline songs. Physical iPhone XS performance remains to be measured.
+
 ## A 3D world for every region (November 12, 2026)
 
 - All seven regions now use Coral Cove’s full-screen 3D board-game engine: the same characters, follow camera, dice, movement, shop, rewards and effects.

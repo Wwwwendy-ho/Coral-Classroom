@@ -588,16 +588,18 @@
     reef3dTravel(view, i, function(){ reef3dArrive(view, s); });
   }
   // What happens when the guide stops on a space she was sent to (a deck opens, the Treasure Reef shelf opens…).
-  function reef3dArrive(view, s){
+  function reef3dArrive(view, s, arrival){
     var i = s.i;
     (function(){
       reef3dSavePosition(view, i);
       if(view.region && (s.kind === 'treasure' || s.kind === 'story')){
-        reef3dStars(view, s); reef3dEmote(view, 'cheer'); reef3dShells(view, s.kind === 'treasure' ? 5 : 3);
-        reef3dPrize(view, s.kind === 'treasure' ? '🧰' : '🍾', s.kind === 'treasure' ? 'Treasure cache!' : 'Bonus bottle!', 'Extra shells for exploring this side route.');
+        var earned = !!(arrival && arrival.viaDie);
+        if(earned){ reef3dStars(view, s); reef3dEmote(view, 'cheer'); reef3dShells(view, s.kind === 'treasure' ? 5 : 3); }
+        reef3dPrize(view, s.kind === 'treasure' ? '🧰' : '🍾', s.kind === 'treasure' ? 'Treasure cache!' : 'Bonus bottle!',
+          earned ? 'Extra shells for exploring this side route.' : 'Roll onto this side route to collect shells.');
         return setTimeout(function(){
           if(!document.body.contains(view.wrap) || view.moving) return;
-          reef3dTravel(view, s.jn, function(){ reef3dSavePosition(view, view.at); reef3dAfterTurn(view); });
+          reef3dTravel(view, s.jn, function(){ reef3dSavePosition(view, view.at); if(earned) reef3dAfterTurn(view); });
         }, 2600);
       }
       if(s.kind === 'shop') return reef3dShop(view, null, true);
