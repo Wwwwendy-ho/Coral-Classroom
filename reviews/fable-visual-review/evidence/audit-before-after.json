@@ -1,0 +1,893 @@
+{
+  "scope": "CPU-only actual source scenery construction and merge, not whole-game draw calls or device FPS",
+  "results": [
+    {
+      "id": "town",
+      "variant": "before",
+      "mainStops": 24,
+      "spaces": 31,
+      "triangles": 6158,
+      "meshBins": 15,
+      "uniqueMaterials": 3,
+      "staticBytes": 446832,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 1,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-1": {
+          "materials": 3,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "0,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        }
+      },
+      "cpuBuildAndExportMs": 104
+    },
+    {
+      "id": "cove",
+      "variant": "before",
+      "mainStops": 39,
+      "spaces": 46,
+      "triangles": 14064,
+      "meshBins": 4,
+      "uniqueMaterials": 1,
+      "staticBytes": 1012608,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 0,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        }
+      },
+      "cpuBuildAndExportMs": 250
+    },
+    {
+      "id": "lagoon",
+      "variant": "before",
+      "mainStops": 28,
+      "spaces": 35,
+      "triangles": 16524,
+      "meshBins": 11,
+      "uniqueMaterials": 1,
+      "staticBytes": 1189728,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 0,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "0,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        }
+      },
+      "cpuBuildAndExportMs": 86
+    },
+    {
+      "id": "caves",
+      "variant": "before",
+      "mainStops": 23,
+      "spaces": 30,
+      "triangles": 3275,
+      "meshBins": 8,
+      "uniqueMaterials": 1,
+      "staticBytes": 235800,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 0,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "0,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        }
+      },
+      "cpuBuildAndExportMs": 19
+    },
+    {
+      "id": "patterns",
+      "variant": "before",
+      "mainStops": 28,
+      "spaces": 35,
+      "triangles": 20562,
+      "meshBins": 18,
+      "uniqueMaterials": 2,
+      "staticBytes": 1480464,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 0,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "0,-1": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "0,-2": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "-1,-3": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "0,-3": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        }
+      },
+      "cpuBuildAndExportMs": 169
+    },
+    {
+      "id": "beach",
+      "variant": "before",
+      "mainStops": 29,
+      "spaces": 36,
+      "triangles": 11798,
+      "meshBins": 11,
+      "uniqueMaterials": 1,
+      "staticBytes": 849456,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 0,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        }
+      },
+      "cpuBuildAndExportMs": 96
+    },
+    {
+      "id": "light",
+      "variant": "before",
+      "mainStops": 33,
+      "spaces": 40,
+      "triangles": 3545,
+      "meshBins": 13,
+      "uniqueMaterials": 1,
+      "staticBytes": 255240,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 0,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        }
+      },
+      "cpuBuildAndExportMs": 19
+    },
+    {
+      "id": "captain",
+      "variant": "before",
+      "mainStops": 23,
+      "spaces": 30,
+      "triangles": 4549,
+      "meshBins": 7,
+      "uniqueMaterials": 2,
+      "staticBytes": 330240,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 1,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-1": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        }
+      },
+      "cpuBuildAndExportMs": 26
+    },
+    {
+      "id": "town",
+      "variant": "after",
+      "mainStops": 24,
+      "spaces": 31,
+      "triangles": 5898,
+      "meshBins": 18,
+      "uniqueMaterials": 3,
+      "staticBytes": 627336,
+      "surfaceTriangles": 5630,
+      "surfaceAttributeBytes": 202680,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 2,
+      "chunks": {
+        "0,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "0,-1": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "-1,0": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-1": {
+          "materials": 3,
+          "surfaceMaterials": 2
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-2,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "0,-3": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        }
+      },
+      "cpuBuildAndExportMs": 48
+    },
+    {
+      "id": "cove",
+      "variant": "after",
+      "mainStops": 39,
+      "spaces": 46,
+      "triangles": 14064,
+      "meshBins": 7,
+      "uniqueMaterials": 2,
+      "staticBytes": 1462464,
+      "surfaceTriangles": 12496,
+      "surfaceAttributeBytes": 449856,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 1,
+      "chunks": {
+        "-1,0": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-2,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        }
+      },
+      "cpuBuildAndExportMs": 191
+    },
+    {
+      "id": "lagoon",
+      "variant": "after",
+      "mainStops": 28,
+      "spaces": 35,
+      "triangles": 15900,
+      "meshBins": 20,
+      "uniqueMaterials": 2,
+      "staticBytes": 1444608,
+      "surfaceTriangles": 8328,
+      "surfaceAttributeBytes": 299808,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 1,
+      "chunks": {
+        "0,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,0": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-3": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-2,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        }
+      },
+      "cpuBuildAndExportMs": 93
+    },
+    {
+      "id": "caves",
+      "variant": "after",
+      "mainStops": 23,
+      "spaces": 30,
+      "triangles": 2895,
+      "meshBins": 9,
+      "uniqueMaterials": 2,
+      "staticBytes": 312228,
+      "surfaceTriangles": 2883,
+      "surfaceAttributeBytes": 103788,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 1,
+      "chunks": {
+        "0,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        }
+      },
+      "cpuBuildAndExportMs": 19
+    },
+    {
+      "id": "patterns",
+      "variant": "after",
+      "mainStops": 28,
+      "spaces": 35,
+      "triangles": 17006,
+      "meshBins": 19,
+      "uniqueMaterials": 3,
+      "staticBytes": 1836216,
+      "surfaceTriangles": 16994,
+      "surfaceAttributeBytes": 611784,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 2,
+      "chunks": {
+        "0,-1": {
+          "materials": 3,
+          "surfaceMaterials": 2
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "0,-2": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,0": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "-1,-3": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "0,-3": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        }
+      },
+      "cpuBuildAndExportMs": 120
+    },
+    {
+      "id": "beach",
+      "variant": "after",
+      "mainStops": 29,
+      "spaces": 36,
+      "triangles": 8886,
+      "meshBins": 21,
+      "uniqueMaterials": 2,
+      "staticBytes": 873576,
+      "surfaceTriangles": 6494,
+      "surfaceAttributeBytes": 233784,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 1,
+      "chunks": {
+        "0,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,0": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,0": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-2,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-2,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-3": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "0,-3": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        }
+      },
+      "cpuBuildAndExportMs": 50
+    },
+    {
+      "id": "light",
+      "variant": "after",
+      "mainStops": 33,
+      "spaces": 40,
+      "triangles": 4049,
+      "meshBins": 17,
+      "uniqueMaterials": 2,
+      "staticBytes": 415692,
+      "surfaceTriangles": 3449,
+      "surfaceAttributeBytes": 124164,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 1,
+      "chunks": {
+        "-1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-2,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-2,-3": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-3": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "0,-3": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        }
+      },
+      "cpuBuildAndExportMs": 28
+    },
+    {
+      "id": "captain",
+      "variant": "after",
+      "mainStops": 23,
+      "spaces": 30,
+      "triangles": 3337,
+      "meshBins": 7,
+      "uniqueMaterials": 2,
+      "staticBytes": 359964,
+      "surfaceTriangles": 3325,
+      "surfaceAttributeBytes": 119700,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 1,
+      "chunks": {
+        "0,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "0,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        }
+      },
+      "cpuBuildAndExportMs": 19
+    }
+  ]
+}

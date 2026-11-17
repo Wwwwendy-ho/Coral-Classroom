@@ -1,0 +1,2610 @@
+[
+  {
+    "file": "town-overview-before.png",
+    "region": "town",
+    "variant": "before",
+    "frame": "overview",
+    "camera": {
+      "location": [
+        14.764965057373047,
+        -48.92055892944336,
+        59.829063415527344
+      ],
+      "target": [
+        -12.487438201904297,
+        -0.4718453884124756,
+        2.2962141036987305
+      ],
+      "orthographicScale": 50.86257553100586
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "a446822995106917fc5047ac77277f70bb8abbdb67c0b30fb7178f7ab65a4cdc",
+      "region-scenery.js": "16d2eaf3f66b35956b53a53a41d620a70405ee3ebea13cfb1143d1f91ae660de",
+      "world-detail.js": "c28c0f99ae5e9bd5093e7fca59914abf545fd77f8281457db5e3888b63480144"
+    },
+    "stats": {
+      "id": "town",
+      "variant": "before",
+      "mainStops": 24,
+      "spaces": 31,
+      "triangles": 6158,
+      "meshBins": 15,
+      "uniqueMaterials": 3,
+      "staticBytes": 446832,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 1,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-1": {
+          "materials": 3,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "0,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "town-overview-after.png",
+    "region": "town",
+    "variant": "after",
+    "frame": "overview",
+    "camera": {
+      "location": [
+        14.764965057373047,
+        -48.92055892944336,
+        59.829063415527344
+      ],
+      "target": [
+        -12.487438201904297,
+        -0.4718453884124756,
+        2.2962141036987305
+      ],
+      "orthographicScale": 50.86257553100586
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "b386804b98087aa97c9753572f0d400e71234448be35c353ce2f8a239a924654",
+      "region-scenery.js": "43280c1770c6bc8cac8746104995d93d6dfd13898ed56e1f0a87eb5c626f463c",
+      "world-detail.js": "9b87493d0ff54332c4e69888475b2f7d95eb9417a327601b0175a001c00d8778"
+    },
+    "stats": {
+      "id": "town",
+      "variant": "after",
+      "mainStops": 24,
+      "spaces": 31,
+      "triangles": 5898,
+      "meshBins": 18,
+      "uniqueMaterials": 3,
+      "staticBytes": 627336,
+      "surfaceTriangles": 5630,
+      "surfaceAttributeBytes": 202680,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 2,
+      "chunks": {
+        "0,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "0,-1": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "-1,0": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-1": {
+          "materials": 3,
+          "surfaceMaterials": 2
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-2,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "0,-3": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "town-close-before.png",
+    "region": "town",
+    "variant": "before",
+    "frame": "close",
+    "camera": {
+      "location": [
+        21.84439468383789,
+        -45.13898468017578,
+        60.317806243896484
+      ],
+      "target": [
+        -5.408008098602295,
+        3.309729814529419,
+        2.78495717048645
+      ],
+      "orthographicScale": 39.50078201293945
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "a446822995106917fc5047ac77277f70bb8abbdb67c0b30fb7178f7ab65a4cdc",
+      "region-scenery.js": "16d2eaf3f66b35956b53a53a41d620a70405ee3ebea13cfb1143d1f91ae660de",
+      "world-detail.js": "c28c0f99ae5e9bd5093e7fca59914abf545fd77f8281457db5e3888b63480144"
+    },
+    "stats": {
+      "id": "town",
+      "variant": "before",
+      "mainStops": 24,
+      "spaces": 31,
+      "triangles": 6158,
+      "meshBins": 15,
+      "uniqueMaterials": 3,
+      "staticBytes": 446832,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 1,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-1": {
+          "materials": 3,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "0,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "town-close-after.png",
+    "region": "town",
+    "variant": "after",
+    "frame": "close",
+    "camera": {
+      "location": [
+        21.84439468383789,
+        -45.13898468017578,
+        60.317806243896484
+      ],
+      "target": [
+        -5.408008098602295,
+        3.309729814529419,
+        2.78495717048645
+      ],
+      "orthographicScale": 39.50078201293945
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "b386804b98087aa97c9753572f0d400e71234448be35c353ce2f8a239a924654",
+      "region-scenery.js": "43280c1770c6bc8cac8746104995d93d6dfd13898ed56e1f0a87eb5c626f463c",
+      "world-detail.js": "9b87493d0ff54332c4e69888475b2f7d95eb9417a327601b0175a001c00d8778"
+    },
+    "stats": {
+      "id": "town",
+      "variant": "after",
+      "mainStops": 24,
+      "spaces": 31,
+      "triangles": 5898,
+      "meshBins": 18,
+      "uniqueMaterials": 3,
+      "staticBytes": 627336,
+      "surfaceTriangles": 5630,
+      "surfaceAttributeBytes": 202680,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 2,
+      "chunks": {
+        "0,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "0,-1": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "-1,0": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-1": {
+          "materials": 3,
+          "surfaceMaterials": 2
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-2,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "0,-3": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "cove-overview-before.png",
+    "region": "cove",
+    "variant": "before",
+    "frame": "overview",
+    "camera": {
+      "location": [
+        12.016180038452148,
+        -48.27687454223633,
+        57.5328483581543
+      ],
+      "target": [
+        -15.236223220825195,
+        0.17184162139892578,
+        -4.76837158203125e-07
+      ],
+      "orthographicScale": 52.855709075927734
+    },
+    "scope": "CoveDetail only; reference seabed excluded from stats",
+    "sourceHashes": {
+      "board.js": "a446822995106917fc5047ac77277f70bb8abbdb67c0b30fb7178f7ab65a4cdc",
+      "region-scenery.js": "16d2eaf3f66b35956b53a53a41d620a70405ee3ebea13cfb1143d1f91ae660de",
+      "world-detail.js": "c28c0f99ae5e9bd5093e7fca59914abf545fd77f8281457db5e3888b63480144"
+    },
+    "stats": {
+      "id": "cove",
+      "variant": "before",
+      "mainStops": 39,
+      "spaces": 46,
+      "triangles": 14064,
+      "meshBins": 4,
+      "uniqueMaterials": 1,
+      "staticBytes": 1012608,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 0,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "cove-overview-after.png",
+    "region": "cove",
+    "variant": "after",
+    "frame": "overview",
+    "camera": {
+      "location": [
+        12.016180038452148,
+        -48.27687454223633,
+        57.5328483581543
+      ],
+      "target": [
+        -15.236223220825195,
+        0.17184162139892578,
+        -4.76837158203125e-07
+      ],
+      "orthographicScale": 52.855709075927734
+    },
+    "scope": "CoveDetail only; reference seabed excluded from stats",
+    "sourceHashes": {
+      "board.js": "b386804b98087aa97c9753572f0d400e71234448be35c353ce2f8a239a924654",
+      "region-scenery.js": "43280c1770c6bc8cac8746104995d93d6dfd13898ed56e1f0a87eb5c626f463c",
+      "world-detail.js": "9b87493d0ff54332c4e69888475b2f7d95eb9417a327601b0175a001c00d8778"
+    },
+    "stats": {
+      "id": "cove",
+      "variant": "after",
+      "mainStops": 39,
+      "spaces": 46,
+      "triangles": 14064,
+      "meshBins": 7,
+      "uniqueMaterials": 2,
+      "staticBytes": 1462464,
+      "surfaceTriangles": 12496,
+      "surfaceAttributeBytes": 449856,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 1,
+      "chunks": {
+        "-1,0": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-2,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "cove-close-before.png",
+    "region": "cove",
+    "variant": "before",
+    "frame": "close",
+    "camera": {
+      "location": [
+        23.910680770874023,
+        -39.64468765258789,
+        58.709712982177734
+      ],
+      "target": [
+        -3.341722011566162,
+        8.804027557373047,
+        1.176865577697754
+      ],
+      "orthographicScale": 28.819332122802734
+    },
+    "scope": "CoveDetail only; reference seabed excluded from stats",
+    "sourceHashes": {
+      "board.js": "a446822995106917fc5047ac77277f70bb8abbdb67c0b30fb7178f7ab65a4cdc",
+      "region-scenery.js": "16d2eaf3f66b35956b53a53a41d620a70405ee3ebea13cfb1143d1f91ae660de",
+      "world-detail.js": "c28c0f99ae5e9bd5093e7fca59914abf545fd77f8281457db5e3888b63480144"
+    },
+    "stats": {
+      "id": "cove",
+      "variant": "before",
+      "mainStops": 39,
+      "spaces": 46,
+      "triangles": 14064,
+      "meshBins": 4,
+      "uniqueMaterials": 1,
+      "staticBytes": 1012608,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 0,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "cove-close-after.png",
+    "region": "cove",
+    "variant": "after",
+    "frame": "close",
+    "camera": {
+      "location": [
+        23.910680770874023,
+        -39.64468765258789,
+        58.709712982177734
+      ],
+      "target": [
+        -3.341722011566162,
+        8.804027557373047,
+        1.176865577697754
+      ],
+      "orthographicScale": 28.819332122802734
+    },
+    "scope": "CoveDetail only; reference seabed excluded from stats",
+    "sourceHashes": {
+      "board.js": "b386804b98087aa97c9753572f0d400e71234448be35c353ce2f8a239a924654",
+      "region-scenery.js": "43280c1770c6bc8cac8746104995d93d6dfd13898ed56e1f0a87eb5c626f463c",
+      "world-detail.js": "9b87493d0ff54332c4e69888475b2f7d95eb9417a327601b0175a001c00d8778"
+    },
+    "stats": {
+      "id": "cove",
+      "variant": "after",
+      "mainStops": 39,
+      "spaces": 46,
+      "triangles": 14064,
+      "meshBins": 7,
+      "uniqueMaterials": 2,
+      "staticBytes": 1462464,
+      "surfaceTriangles": 12496,
+      "surfaceAttributeBytes": 449856,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 1,
+      "chunks": {
+        "-1,0": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-2,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "lagoon-overview-before.png",
+    "region": "lagoon",
+    "variant": "before",
+    "frame": "overview",
+    "camera": {
+      "location": [
+        14.337440490722656,
+        -49.314640045166016,
+        58.587867736816406
+      ],
+      "target": [
+        -12.914962768554688,
+        -0.8659259080886841,
+        1.055021047592163
+      ],
+      "orthographicScale": 48.785255432128906
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "a446822995106917fc5047ac77277f70bb8abbdb67c0b30fb7178f7ab65a4cdc",
+      "region-scenery.js": "16d2eaf3f66b35956b53a53a41d620a70405ee3ebea13cfb1143d1f91ae660de",
+      "world-detail.js": "c28c0f99ae5e9bd5093e7fca59914abf545fd77f8281457db5e3888b63480144"
+    },
+    "stats": {
+      "id": "lagoon",
+      "variant": "before",
+      "mainStops": 28,
+      "spaces": 35,
+      "triangles": 16524,
+      "meshBins": 11,
+      "uniqueMaterials": 1,
+      "staticBytes": 1189728,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 0,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "0,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "lagoon-overview-after.png",
+    "region": "lagoon",
+    "variant": "after",
+    "frame": "overview",
+    "camera": {
+      "location": [
+        14.337440490722656,
+        -49.314640045166016,
+        58.587867736816406
+      ],
+      "target": [
+        -12.914962768554688,
+        -0.8659259080886841,
+        1.055021047592163
+      ],
+      "orthographicScale": 48.785255432128906
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "b386804b98087aa97c9753572f0d400e71234448be35c353ce2f8a239a924654",
+      "region-scenery.js": "43280c1770c6bc8cac8746104995d93d6dfd13898ed56e1f0a87eb5c626f463c",
+      "world-detail.js": "9b87493d0ff54332c4e69888475b2f7d95eb9417a327601b0175a001c00d8778"
+    },
+    "stats": {
+      "id": "lagoon",
+      "variant": "after",
+      "mainStops": 28,
+      "spaces": 35,
+      "triangles": 15900,
+      "meshBins": 20,
+      "uniqueMaterials": 2,
+      "staticBytes": 1444608,
+      "surfaceTriangles": 8328,
+      "surfaceAttributeBytes": 299808,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 1,
+      "chunks": {
+        "0,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,0": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-3": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-2,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "lagoon-close-before.png",
+    "region": "lagoon",
+    "variant": "before",
+    "frame": "close",
+    "camera": {
+      "location": [
+        21.701581954956055,
+        -45.5104866027832,
+        58.73686218261719
+      ],
+      "target": [
+        -5.550821781158447,
+        2.9382290840148926,
+        1.2040157318115234
+      ],
+      "orthographicScale": 33.612571716308594
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "a446822995106917fc5047ac77277f70bb8abbdb67c0b30fb7178f7ab65a4cdc",
+      "region-scenery.js": "16d2eaf3f66b35956b53a53a41d620a70405ee3ebea13cfb1143d1f91ae660de",
+      "world-detail.js": "c28c0f99ae5e9bd5093e7fca59914abf545fd77f8281457db5e3888b63480144"
+    },
+    "stats": {
+      "id": "lagoon",
+      "variant": "before",
+      "mainStops": 28,
+      "spaces": 35,
+      "triangles": 16524,
+      "meshBins": 11,
+      "uniqueMaterials": 1,
+      "staticBytes": 1189728,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 0,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "0,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "lagoon-close-after.png",
+    "region": "lagoon",
+    "variant": "after",
+    "frame": "close",
+    "camera": {
+      "location": [
+        21.701581954956055,
+        -45.5104866027832,
+        58.73686218261719
+      ],
+      "target": [
+        -5.550821781158447,
+        2.9382290840148926,
+        1.2040157318115234
+      ],
+      "orthographicScale": 33.612571716308594
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "b386804b98087aa97c9753572f0d400e71234448be35c353ce2f8a239a924654",
+      "region-scenery.js": "43280c1770c6bc8cac8746104995d93d6dfd13898ed56e1f0a87eb5c626f463c",
+      "world-detail.js": "9b87493d0ff54332c4e69888475b2f7d95eb9417a327601b0175a001c00d8778"
+    },
+    "stats": {
+      "id": "lagoon",
+      "variant": "after",
+      "mainStops": 28,
+      "spaces": 35,
+      "triangles": 15900,
+      "meshBins": 20,
+      "uniqueMaterials": 2,
+      "staticBytes": 1444608,
+      "surfaceTriangles": 8328,
+      "surfaceAttributeBytes": 299808,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 1,
+      "chunks": {
+        "0,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,0": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-3": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-2,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "caves-overview-before.png",
+    "region": "caves",
+    "variant": "before",
+    "frame": "overview",
+    "camera": {
+      "location": [
+        15.655613899230957,
+        -48.40716552734375,
+        59.60386276245117
+      ],
+      "target": [
+        -11.596789360046387,
+        0.04154932498931885,
+        2.071014642715454
+      ],
+      "orthographicScale": 47.245758056640625
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "a446822995106917fc5047ac77277f70bb8abbdb67c0b30fb7178f7ab65a4cdc",
+      "region-scenery.js": "16d2eaf3f66b35956b53a53a41d620a70405ee3ebea13cfb1143d1f91ae660de",
+      "world-detail.js": "c28c0f99ae5e9bd5093e7fca59914abf545fd77f8281457db5e3888b63480144"
+    },
+    "stats": {
+      "id": "caves",
+      "variant": "before",
+      "mainStops": 23,
+      "spaces": 30,
+      "triangles": 3275,
+      "meshBins": 8,
+      "uniqueMaterials": 1,
+      "staticBytes": 235800,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 0,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "0,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "caves-overview-after.png",
+    "region": "caves",
+    "variant": "after",
+    "frame": "overview",
+    "camera": {
+      "location": [
+        15.655613899230957,
+        -48.40716552734375,
+        59.60386276245117
+      ],
+      "target": [
+        -11.596789360046387,
+        0.04154932498931885,
+        2.071014642715454
+      ],
+      "orthographicScale": 47.245758056640625
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "b386804b98087aa97c9753572f0d400e71234448be35c353ce2f8a239a924654",
+      "region-scenery.js": "43280c1770c6bc8cac8746104995d93d6dfd13898ed56e1f0a87eb5c626f463c",
+      "world-detail.js": "9b87493d0ff54332c4e69888475b2f7d95eb9417a327601b0175a001c00d8778"
+    },
+    "stats": {
+      "id": "caves",
+      "variant": "after",
+      "mainStops": 23,
+      "spaces": 30,
+      "triangles": 2895,
+      "meshBins": 9,
+      "uniqueMaterials": 2,
+      "staticBytes": 312228,
+      "surfaceTriangles": 2883,
+      "surfaceAttributeBytes": 103788,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 1,
+      "chunks": {
+        "0,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "caves-close-before.png",
+    "region": "caves",
+    "variant": "before",
+    "frame": "close",
+    "camera": {
+      "location": [
+        23.91704559326172,
+        -47.28518295288086,
+        59.07677459716797
+      ],
+      "target": [
+        -3.3353567123413086,
+        1.163533091545105,
+        1.54392671585083
+      ],
+      "orthographicScale": 29.7794132232666
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "a446822995106917fc5047ac77277f70bb8abbdb67c0b30fb7178f7ab65a4cdc",
+      "region-scenery.js": "16d2eaf3f66b35956b53a53a41d620a70405ee3ebea13cfb1143d1f91ae660de",
+      "world-detail.js": "c28c0f99ae5e9bd5093e7fca59914abf545fd77f8281457db5e3888b63480144"
+    },
+    "stats": {
+      "id": "caves",
+      "variant": "before",
+      "mainStops": 23,
+      "spaces": 30,
+      "triangles": 3275,
+      "meshBins": 8,
+      "uniqueMaterials": 1,
+      "staticBytes": 235800,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 0,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "0,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "caves-close-after.png",
+    "region": "caves",
+    "variant": "after",
+    "frame": "close",
+    "camera": {
+      "location": [
+        23.91704559326172,
+        -47.28518295288086,
+        59.07677459716797
+      ],
+      "target": [
+        -3.3353567123413086,
+        1.163533091545105,
+        1.54392671585083
+      ],
+      "orthographicScale": 29.7794132232666
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "b386804b98087aa97c9753572f0d400e71234448be35c353ce2f8a239a924654",
+      "region-scenery.js": "43280c1770c6bc8cac8746104995d93d6dfd13898ed56e1f0a87eb5c626f463c",
+      "world-detail.js": "9b87493d0ff54332c4e69888475b2f7d95eb9417a327601b0175a001c00d8778"
+    },
+    "stats": {
+      "id": "caves",
+      "variant": "after",
+      "mainStops": 23,
+      "spaces": 30,
+      "triangles": 2895,
+      "meshBins": 9,
+      "uniqueMaterials": 2,
+      "staticBytes": 312228,
+      "surfaceTriangles": 2883,
+      "surfaceAttributeBytes": 103788,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 1,
+      "chunks": {
+        "0,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "patterns-overview-before.png",
+    "region": "patterns",
+    "variant": "before",
+    "frame": "overview",
+    "camera": {
+      "location": [
+        13.43441104888916,
+        -49.564910888671875,
+        57.88109588623047
+      ],
+      "target": [
+        -13.817992210388184,
+        -1.1161956787109375,
+        0.3482472896575928
+      ],
+      "orthographicScale": 44.919944763183594
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "a446822995106917fc5047ac77277f70bb8abbdb67c0b30fb7178f7ab65a4cdc",
+      "region-scenery.js": "16d2eaf3f66b35956b53a53a41d620a70405ee3ebea13cfb1143d1f91ae660de",
+      "world-detail.js": "c28c0f99ae5e9bd5093e7fca59914abf545fd77f8281457db5e3888b63480144"
+    },
+    "stats": {
+      "id": "patterns",
+      "variant": "before",
+      "mainStops": 28,
+      "spaces": 35,
+      "triangles": 20562,
+      "meshBins": 18,
+      "uniqueMaterials": 2,
+      "staticBytes": 1480464,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 0,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "0,-1": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "0,-2": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "-1,-3": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "0,-3": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "patterns-overview-after.png",
+    "region": "patterns",
+    "variant": "after",
+    "frame": "overview",
+    "camera": {
+      "location": [
+        13.43441104888916,
+        -49.564910888671875,
+        57.88109588623047
+      ],
+      "target": [
+        -13.817992210388184,
+        -1.1161956787109375,
+        0.3482472896575928
+      ],
+      "orthographicScale": 44.919944763183594
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "b386804b98087aa97c9753572f0d400e71234448be35c353ce2f8a239a924654",
+      "region-scenery.js": "43280c1770c6bc8cac8746104995d93d6dfd13898ed56e1f0a87eb5c626f463c",
+      "world-detail.js": "9b87493d0ff54332c4e69888475b2f7d95eb9417a327601b0175a001c00d8778"
+    },
+    "stats": {
+      "id": "patterns",
+      "variant": "after",
+      "mainStops": 28,
+      "spaces": 35,
+      "triangles": 17006,
+      "meshBins": 19,
+      "uniqueMaterials": 3,
+      "staticBytes": 1836216,
+      "surfaceTriangles": 16994,
+      "surfaceAttributeBytes": 611784,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 2,
+      "chunks": {
+        "0,-1": {
+          "materials": 3,
+          "surfaceMaterials": 2
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "0,-2": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,0": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "-1,-3": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "0,-3": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "patterns-close-before.png",
+    "region": "patterns",
+    "variant": "before",
+    "frame": "close",
+    "camera": {
+      "location": [
+        26.622417449951172,
+        -45.853309631347656,
+        58.456363677978516
+      ],
+      "target": [
+        -0.6299857497215271,
+        2.5954067707061768,
+        0.9235166907310486
+      ],
+      "orthographicScale": 26.748435974121094
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "a446822995106917fc5047ac77277f70bb8abbdb67c0b30fb7178f7ab65a4cdc",
+      "region-scenery.js": "16d2eaf3f66b35956b53a53a41d620a70405ee3ebea13cfb1143d1f91ae660de",
+      "world-detail.js": "c28c0f99ae5e9bd5093e7fca59914abf545fd77f8281457db5e3888b63480144"
+    },
+    "stats": {
+      "id": "patterns",
+      "variant": "before",
+      "mainStops": 28,
+      "spaces": 35,
+      "triangles": 20562,
+      "meshBins": 18,
+      "uniqueMaterials": 2,
+      "staticBytes": 1480464,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 0,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "0,-1": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "0,-2": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "-1,-3": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "0,-3": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "patterns-close-after.png",
+    "region": "patterns",
+    "variant": "after",
+    "frame": "close",
+    "camera": {
+      "location": [
+        26.622417449951172,
+        -45.853309631347656,
+        58.456363677978516
+      ],
+      "target": [
+        -0.6299857497215271,
+        2.5954067707061768,
+        0.9235166907310486
+      ],
+      "orthographicScale": 26.748435974121094
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "b386804b98087aa97c9753572f0d400e71234448be35c353ce2f8a239a924654",
+      "region-scenery.js": "43280c1770c6bc8cac8746104995d93d6dfd13898ed56e1f0a87eb5c626f463c",
+      "world-detail.js": "9b87493d0ff54332c4e69888475b2f7d95eb9417a327601b0175a001c00d8778"
+    },
+    "stats": {
+      "id": "patterns",
+      "variant": "after",
+      "mainStops": 28,
+      "spaces": 35,
+      "triangles": 17006,
+      "meshBins": 19,
+      "uniqueMaterials": 3,
+      "staticBytes": 1836216,
+      "surfaceTriangles": 16994,
+      "surfaceAttributeBytes": 611784,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 2,
+      "chunks": {
+        "0,-1": {
+          "materials": 3,
+          "surfaceMaterials": 2
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "0,-2": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,0": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "-1,-3": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "0,-3": {
+          "materials": 2,
+          "surfaceMaterials": 2
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "beach-overview-before.png",
+    "region": "beach",
+    "variant": "before",
+    "frame": "overview",
+    "camera": {
+      "location": [
+        10.609817504882812,
+        -50.029354095458984,
+        60.14193344116211
+      ],
+      "target": [
+        -16.64258575439453,
+        -1.5806381702423096,
+        2.609083890914917
+      ],
+      "orthographicScale": 51.25571823120117
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "a446822995106917fc5047ac77277f70bb8abbdb67c0b30fb7178f7ab65a4cdc",
+      "region-scenery.js": "16d2eaf3f66b35956b53a53a41d620a70405ee3ebea13cfb1143d1f91ae660de",
+      "world-detail.js": "c28c0f99ae5e9bd5093e7fca59914abf545fd77f8281457db5e3888b63480144"
+    },
+    "stats": {
+      "id": "beach",
+      "variant": "before",
+      "mainStops": 29,
+      "spaces": 36,
+      "triangles": 11798,
+      "meshBins": 11,
+      "uniqueMaterials": 1,
+      "staticBytes": 849456,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 0,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "beach-overview-after.png",
+    "region": "beach",
+    "variant": "after",
+    "frame": "overview",
+    "camera": {
+      "location": [
+        10.609817504882812,
+        -50.029354095458984,
+        60.14193344116211
+      ],
+      "target": [
+        -16.64258575439453,
+        -1.5806381702423096,
+        2.609083890914917
+      ],
+      "orthographicScale": 51.25571823120117
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "b386804b98087aa97c9753572f0d400e71234448be35c353ce2f8a239a924654",
+      "region-scenery.js": "43280c1770c6bc8cac8746104995d93d6dfd13898ed56e1f0a87eb5c626f463c",
+      "world-detail.js": "9b87493d0ff54332c4e69888475b2f7d95eb9417a327601b0175a001c00d8778"
+    },
+    "stats": {
+      "id": "beach",
+      "variant": "after",
+      "mainStops": 29,
+      "spaces": 36,
+      "triangles": 8886,
+      "meshBins": 21,
+      "uniqueMaterials": 2,
+      "staticBytes": 873576,
+      "surfaceTriangles": 6494,
+      "surfaceAttributeBytes": 233784,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 1,
+      "chunks": {
+        "0,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,0": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,0": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-2,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-2,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-3": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "0,-3": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "beach-close-before.png",
+    "region": "beach",
+    "variant": "before",
+    "frame": "close",
+    "camera": {
+      "location": [
+        21.140016555786133,
+        -46.448326110839844,
+        58.751976013183594
+      ],
+      "target": [
+        -6.112386226654053,
+        2.000389575958252,
+        1.2191275358200073
+      ],
+      "orthographicScale": 35.400794982910156
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "a446822995106917fc5047ac77277f70bb8abbdb67c0b30fb7178f7ab65a4cdc",
+      "region-scenery.js": "16d2eaf3f66b35956b53a53a41d620a70405ee3ebea13cfb1143d1f91ae660de",
+      "world-detail.js": "c28c0f99ae5e9bd5093e7fca59914abf545fd77f8281457db5e3888b63480144"
+    },
+    "stats": {
+      "id": "beach",
+      "variant": "before",
+      "mainStops": 29,
+      "spaces": 36,
+      "triangles": 11798,
+      "meshBins": 11,
+      "uniqueMaterials": 1,
+      "staticBytes": 849456,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 0,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "beach-close-after.png",
+    "region": "beach",
+    "variant": "after",
+    "frame": "close",
+    "camera": {
+      "location": [
+        21.140016555786133,
+        -46.448326110839844,
+        58.751976013183594
+      ],
+      "target": [
+        -6.112386226654053,
+        2.000389575958252,
+        1.2191275358200073
+      ],
+      "orthographicScale": 35.400794982910156
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "b386804b98087aa97c9753572f0d400e71234448be35c353ce2f8a239a924654",
+      "region-scenery.js": "43280c1770c6bc8cac8746104995d93d6dfd13898ed56e1f0a87eb5c626f463c",
+      "world-detail.js": "9b87493d0ff54332c4e69888475b2f7d95eb9417a327601b0175a001c00d8778"
+    },
+    "stats": {
+      "id": "beach",
+      "variant": "after",
+      "mainStops": 29,
+      "spaces": 36,
+      "triangles": 8886,
+      "meshBins": 21,
+      "uniqueMaterials": 2,
+      "staticBytes": 873576,
+      "surfaceTriangles": 6494,
+      "surfaceAttributeBytes": 233784,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 1,
+      "chunks": {
+        "0,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,0": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,0": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-2,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-2,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,-3": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "0,-3": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "light-overview-before.png",
+    "region": "light",
+    "variant": "before",
+    "frame": "overview",
+    "camera": {
+      "location": [
+        10.320693969726562,
+        -44.03509521484375,
+        57.5328483581543
+      ],
+      "target": [
+        -16.93170928955078,
+        4.41362190246582,
+        -9.5367431640625e-07
+      ],
+      "orthographicScale": 51.657264709472656
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "a446822995106917fc5047ac77277f70bb8abbdb67c0b30fb7178f7ab65a4cdc",
+      "region-scenery.js": "16d2eaf3f66b35956b53a53a41d620a70405ee3ebea13cfb1143d1f91ae660de",
+      "world-detail.js": "c28c0f99ae5e9bd5093e7fca59914abf545fd77f8281457db5e3888b63480144"
+    },
+    "stats": {
+      "id": "light",
+      "variant": "before",
+      "mainStops": 33,
+      "spaces": 40,
+      "triangles": 3545,
+      "meshBins": 13,
+      "uniqueMaterials": 1,
+      "staticBytes": 255240,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 0,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "light-overview-after.png",
+    "region": "light",
+    "variant": "after",
+    "frame": "overview",
+    "camera": {
+      "location": [
+        10.320693969726562,
+        -44.03509521484375,
+        57.5328483581543
+      ],
+      "target": [
+        -16.93170928955078,
+        4.41362190246582,
+        -9.5367431640625e-07
+      ],
+      "orthographicScale": 51.657264709472656
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "b386804b98087aa97c9753572f0d400e71234448be35c353ce2f8a239a924654",
+      "region-scenery.js": "43280c1770c6bc8cac8746104995d93d6dfd13898ed56e1f0a87eb5c626f463c",
+      "world-detail.js": "9b87493d0ff54332c4e69888475b2f7d95eb9417a327601b0175a001c00d8778"
+    },
+    "stats": {
+      "id": "light",
+      "variant": "after",
+      "mainStops": 33,
+      "spaces": 40,
+      "triangles": 4049,
+      "meshBins": 17,
+      "uniqueMaterials": 2,
+      "staticBytes": 415692,
+      "surfaceTriangles": 3449,
+      "surfaceAttributeBytes": 124164,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 1,
+      "chunks": {
+        "-1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-2,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-2,-3": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-3": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "0,-3": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "light-close-before.png",
+    "region": "light",
+    "variant": "before",
+    "frame": "close",
+    "camera": {
+      "location": [
+        19.004364013671875,
+        -44.49454116821289,
+        59.02629089355469
+      ],
+      "target": [
+        -8.248040199279785,
+        3.954174280166626,
+        1.4934427738189697
+      ],
+      "orthographicScale": 25.8070068359375
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "a446822995106917fc5047ac77277f70bb8abbdb67c0b30fb7178f7ab65a4cdc",
+      "region-scenery.js": "16d2eaf3f66b35956b53a53a41d620a70405ee3ebea13cfb1143d1f91ae660de",
+      "world-detail.js": "c28c0f99ae5e9bd5093e7fca59914abf545fd77f8281457db5e3888b63480144"
+    },
+    "stats": {
+      "id": "light",
+      "variant": "before",
+      "mainStops": 33,
+      "spaces": 40,
+      "triangles": 3545,
+      "meshBins": 13,
+      "uniqueMaterials": 1,
+      "staticBytes": 255240,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 0,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-2,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-3": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "light-close-after.png",
+    "region": "light",
+    "variant": "after",
+    "frame": "close",
+    "camera": {
+      "location": [
+        19.004364013671875,
+        -44.49454116821289,
+        59.02629089355469
+      ],
+      "target": [
+        -8.248040199279785,
+        3.954174280166626,
+        1.4934427738189697
+      ],
+      "orthographicScale": 25.8070068359375
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "b386804b98087aa97c9753572f0d400e71234448be35c353ce2f8a239a924654",
+      "region-scenery.js": "43280c1770c6bc8cac8746104995d93d6dfd13898ed56e1f0a87eb5c626f463c",
+      "world-detail.js": "9b87493d0ff54332c4e69888475b2f7d95eb9417a327601b0175a001c00d8778"
+    },
+    "stats": {
+      "id": "light",
+      "variant": "after",
+      "mainStops": 33,
+      "spaces": 40,
+      "triangles": 4049,
+      "meshBins": 17,
+      "uniqueMaterials": 2,
+      "staticBytes": 415692,
+      "surfaceTriangles": 3449,
+      "surfaceAttributeBytes": 124164,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 1,
+      "chunks": {
+        "-1,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-2,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-2,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-2,-3": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-3": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "0,-3": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,-1": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "captain-overview-before.png",
+    "region": "captain",
+    "variant": "before",
+    "frame": "overview",
+    "camera": {
+      "location": [
+        13.456003189086914,
+        -46.896995544433594,
+        57.76569747924805
+      ],
+      "target": [
+        -13.79640007019043,
+        1.5517189502716064,
+        0.2328486442565918
+      ],
+      "orthographicScale": 36.8029899597168
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "a446822995106917fc5047ac77277f70bb8abbdb67c0b30fb7178f7ab65a4cdc",
+      "region-scenery.js": "16d2eaf3f66b35956b53a53a41d620a70405ee3ebea13cfb1143d1f91ae660de",
+      "world-detail.js": "c28c0f99ae5e9bd5093e7fca59914abf545fd77f8281457db5e3888b63480144"
+    },
+    "stats": {
+      "id": "captain",
+      "variant": "before",
+      "mainStops": 23,
+      "spaces": 30,
+      "triangles": 4549,
+      "meshBins": 7,
+      "uniqueMaterials": 2,
+      "staticBytes": 330240,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 1,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-1": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "captain-overview-after.png",
+    "region": "captain",
+    "variant": "after",
+    "frame": "overview",
+    "camera": {
+      "location": [
+        13.456003189086914,
+        -46.896995544433594,
+        57.76569747924805
+      ],
+      "target": [
+        -13.79640007019043,
+        1.5517189502716064,
+        0.2328486442565918
+      ],
+      "orthographicScale": 36.8029899597168
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "b386804b98087aa97c9753572f0d400e71234448be35c353ce2f8a239a924654",
+      "region-scenery.js": "43280c1770c6bc8cac8746104995d93d6dfd13898ed56e1f0a87eb5c626f463c",
+      "world-detail.js": "9b87493d0ff54332c4e69888475b2f7d95eb9417a327601b0175a001c00d8778"
+    },
+    "stats": {
+      "id": "captain",
+      "variant": "after",
+      "mainStops": 23,
+      "spaces": 30,
+      "triangles": 3337,
+      "meshBins": 7,
+      "uniqueMaterials": 2,
+      "staticBytes": 359964,
+      "surfaceTriangles": 3325,
+      "surfaceAttributeBytes": 119700,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 1,
+      "chunks": {
+        "0,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "0,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "captain-close-before.png",
+    "region": "captain",
+    "variant": "before",
+    "frame": "close",
+    "camera": {
+      "location": [
+        23.075576782226562,
+        -47.71266174316406,
+        58.56284713745117
+      ],
+      "target": [
+        -4.176826477050781,
+        0.736054003238678,
+        1.0299999713897705
+      ],
+      "orthographicScale": 24.26412010192871
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "a446822995106917fc5047ac77277f70bb8abbdb67c0b30fb7178f7ab65a4cdc",
+      "region-scenery.js": "16d2eaf3f66b35956b53a53a41d620a70405ee3ebea13cfb1143d1f91ae660de",
+      "world-detail.js": "c28c0f99ae5e9bd5093e7fca59914abf545fd77f8281457db5e3888b63480144"
+    },
+    "stats": {
+      "id": "captain",
+      "variant": "before",
+      "mainStops": 23,
+      "spaces": 30,
+      "triangles": 4549,
+      "meshBins": 7,
+      "uniqueMaterials": 2,
+      "staticBytes": 330240,
+      "surfaceTriangles": 0,
+      "surfaceAttributeBytes": 0,
+      "textureCount": 1,
+      "surfaceMapCount": 0,
+      "maxAtlasBinsPerChunk": 0,
+      "chunks": {
+        "0,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "-1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 0
+        },
+        "0,-1": {
+          "materials": 2,
+          "surfaceMaterials": 0
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  },
+  {
+    "file": "captain-close-after.png",
+    "region": "captain",
+    "variant": "after",
+    "frame": "close",
+    "camera": {
+      "location": [
+        23.075576782226562,
+        -47.71266174316406,
+        58.56284713745117
+      ],
+      "target": [
+        -4.176826477050781,
+        0.736054003238678,
+        1.0299999713897705
+      ],
+      "orthographicScale": 24.26412010192871
+    },
+    "scope": "regionBoardDecorate only; procedural reef3dKit fallback props; no imported GLTFs",
+    "sourceHashes": {
+      "board.js": "b386804b98087aa97c9753572f0d400e71234448be35c353ce2f8a239a924654",
+      "region-scenery.js": "43280c1770c6bc8cac8746104995d93d6dfd13898ed56e1f0a87eb5c626f463c",
+      "world-detail.js": "9b87493d0ff54332c4e69888475b2f7d95eb9417a327601b0175a001c00d8778"
+    },
+    "stats": {
+      "id": "captain",
+      "variant": "after",
+      "mainStops": 23,
+      "spaces": 30,
+      "triangles": 3337,
+      "meshBins": 7,
+      "uniqueMaterials": 2,
+      "staticBytes": 359964,
+      "surfaceTriangles": 3325,
+      "surfaceAttributeBytes": 119700,
+      "textureCount": 1,
+      "surfaceMapCount": 1,
+      "maxAtlasBinsPerChunk": 1,
+      "chunks": {
+        "0,-2": {
+          "materials": 2,
+          "surfaceMaterials": 1
+        },
+        "0,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,0": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "-1,-2": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        },
+        "0,-1": {
+          "materials": 1,
+          "surfaceMaterials": 1
+        }
+      }
+    },
+    "fog": false,
+    "render": "offline scenery-only CPU emission; Raw view; reference route disks; Cove reference seabed"
+  }
+]

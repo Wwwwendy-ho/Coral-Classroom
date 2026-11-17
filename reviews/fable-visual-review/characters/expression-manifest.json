@@ -1,0 +1,256 @@
+{
+  "version": "a-eyes-natural-reactions-2026-11-16",
+  "status": "A-eye and natural-mouth direction accepted for development; personality-specific eye acting required. Portraits sample one reaction; runtime controls remain to implement.",
+  "userDirection": "Keep A eyes and natural mouth anatomy across the whole cast including Shelly. Personalities must shape the facial expressions of the eyes as development continues.",
+  "eyeRule": "Use A as the appealing eye design and rendering direction; each personality determines its own resting gaze, lid pose where appropriate, attention shifts and expressive timing throughout conversation.",
+  "mouthRule": "Species-specific natural mouth or mouthparts; avoid fixed human smiles, human lips and human teeth. Octopus/squid beaks stay hidden under the arm crown; jellyfish has no mouth.",
+  "entries": [
+    {
+      "id": "shelly",
+      "reaction": "curious",
+      "eyeStyle": "A",
+      "sheet": "sheet-01.png",
+      "row": 0,
+      "column": 0,
+      "eyeActing": {
+        "baseline": "Bright, open forward gaze with slight curious eye widening.",
+        "engaged": "Eyes track new details with lively focus, then return to the speaker.",
+        "rhythm": "Quick attentive shifts, with brief pauses to take things in."
+      }
+    },
+    {
+      "id": "mira",
+      "reaction": "ready to explore",
+      "eyeStyle": "A",
+      "sheet": "sheet-01.png",
+      "row": 0,
+      "column": 1,
+      "eyeActing": {
+        "baseline": "Confident, alert forward gaze, relaxed lids.",
+        "engaged": "Aim eyes toward the next discovery, then check back with companions.",
+        "rhythm": "Decisive gaze changes with an easy, curious pause."
+      }
+    },
+    {
+      "id": "echo",
+      "reaction": "listening",
+      "eyeStyle": "A",
+      "sheet": "sheet-01.png",
+      "row": 0,
+      "column": 2,
+      "eyeActing": {
+        "baseline": "Attentive, calm steady gaze toward the speaker.",
+        "engaged": "Hold listening focus; gently redirect eyes when a new voice or idea appears.",
+        "rhythm": "Measured and reassuring, with smooth transitions."
+      }
+    },
+    {
+      "id": "pip",
+      "reaction": "thinking",
+      "eyeStyle": "A",
+      "sheet": "sheet-01.png",
+      "row": 1,
+      "column": 0,
+      "eyeActing": {
+        "baseline": "Focused, slightly angled gaze as if considering a puzzle.",
+        "engaged": "Eyes dart to imagined parts of an idea, then settle with an inventive spark.",
+        "rhythm": "Concentrated holds punctuated by quick thought shifts."
+      }
+    },
+    {
+      "id": "jisu",
+      "reaction": "eager",
+      "eyeStyle": "A",
+      "sheet": "sheet-01.png",
+      "row": 1,
+      "column": 1,
+      "eyeActing": {
+        "baseline": "Eager forward eye-stalk focus, alert and bright.",
+        "engaged": "Quickly lock onto activity and follow it with lively stalk turns.",
+        "rhythm": "Fast, eager focus changes, settling briefly when listening."
+      }
+    },
+    {
+      "id": "bok",
+      "reaction": "welcoming",
+      "eyeStyle": "A",
+      "sheet": "sheet-01.png",
+      "row": 1,
+      "column": 2,
+      "eyeActing": {
+        "baseline": "Warm, amused gaze toward visitors.",
+        "engaged": "Meet a customer’s eyes, then glance naturally toward goods or the conversation.",
+        "rhythm": "Easy, welcoming shifts with unhurried holds."
+      }
+    },
+    {
+      "id": "lumi",
+      "reaction": "alert",
+      "eyeStyle": "A",
+      "sheet": "sheet-01.png",
+      "row": 2,
+      "column": 0,
+      "eyeActing": {
+        "baseline": "Alert exploratory gaze, often lifted toward the lure or surroundings.",
+        "engaged": "Track intriguing movement with curious focus, then look back to companions.",
+        "rhythm": "Light, searching shifts and short attentive pauses."
+      }
+    },
+    {
+      "id": "kiko-mochi",
+      "reaction": "playful",
+      "eyeStyle": "A",
+      "sheet": "sheet-01.png",
+      "row": 2,
+      "column": 1,
+      "eyeActing": {
+        "baseline": "Playful bright gaze, often angled toward the next bit of fun.",
+        "engaged": "Make quick sideways looks that accompany lively claw gestures.",
+        "rhythm": "Bouncy, rapid shifts with playful holds."
+      }
+    },
+    {
+      "id": "kiko-hermit",
+      "reaction": "thoughtful",
+      "eyeStyle": "A",
+      "sheet": "sheet-01.png",
+      "row": 2,
+      "column": 2,
+      "eyeActing": {
+        "baseline": "Cautious, observant gaze through the small glasses; stalks peek from the shell.",
+        "engaged": "Carefully inspect details, then hold focus on the speaker.",
+        "rhythm": "Deliberate peeks and measured eye-stalk turns."
+      }
+    },
+    {
+      "id": "shop-octopus",
+      "reaction": "composed",
+      "eyeStyle": "A",
+      "sheet": "sheet-02.png",
+      "row": 0,
+      "column": 0,
+      "eyeActing": {
+        "baseline": "Composed gaze with eye orientation steady and deliberate.",
+        "engaged": "Attend to the customer, then glance toward the item being discussed.",
+        "rhythm": "Calm, practiced shifts with considered pauses."
+      }
+    },
+    {
+      "id": "taxi-squid",
+      "reaction": "bored",
+      "eyeStyle": "A",
+      "sheet": "sheet-02.png",
+      "row": 0,
+      "column": 1,
+      "eyeActing": {
+        "baseline": "Bored half-lidded eyes with a relaxed, slightly averted gaze.",
+        "engaged": "Give a slow sideways glance toward the passenger, then let the gaze drift.",
+        "rhythm": "Very slow, restrained gaze changes with heavy-lid stillness."
+      }
+    },
+    {
+      "id": "subway-ray",
+      "reaction": "helpful",
+      "eyeStyle": "A",
+      "sheet": "sheet-02.png",
+      "row": 0,
+      "column": 2,
+      "eyeActing": {
+        "baseline": "Helpful, alert eyes directed toward the traveler.",
+        "engaged": "Follow the traveler’s attention and turn toward the route being indicated.",
+        "rhythm": "Smooth, reassuring shifts; lively focus when giving directions."
+      }
+    },
+    {
+      "id": "cafe-seahorse",
+      "reaction": "attentive",
+      "eyeStyle": "A",
+      "sheet": "sheet-02.png",
+      "row": 1,
+      "column": 0,
+      "eyeActing": {
+        "baseline": "Bright, attentive gaze toward the customer.",
+        "engaged": "Track the order and nearby counter activity with brisk eye turns.",
+        "rhythm": "Brisk but composed shifts, returning promptly to the speaker."
+      }
+    },
+    {
+      "id": "restaurant-otter",
+      "reaction": "sociable",
+      "eyeStyle": "A",
+      "sheet": "sheet-02.png",
+      "row": 1,
+      "column": 1,
+      "eyeActing": {
+        "baseline": "Sociable, confident gaze with relaxed lids.",
+        "engaged": "Make friendly eye contact, then glance toward the dish or table.",
+        "rhythm": "Quick natural shifts that keep pace with serving."
+      }
+    },
+    {
+      "id": "hotel-whale",
+      "reaction": "reassuring",
+      "eyeStyle": "A",
+      "sheet": "sheet-02.png",
+      "row": 1,
+      "column": 2,
+      "eyeActing": {
+        "baseline": "Steady, reassuring gaze with mature relaxed lids.",
+        "engaged": "Hold kind attention on the guest and shift gently to acknowledge their needs.",
+        "rhythm": "Slow, smooth transitions that feel dependable."
+      }
+    },
+    {
+      "id": "pharmacy-shrimp",
+      "reaction": "careful",
+      "eyeStyle": "A",
+      "sheet": "sheet-02.png",
+      "row": 2,
+      "column": 0,
+      "eyeActing": {
+        "baseline": "Careful focused gaze, eye stalks angled toward the task.",
+        "engaged": "Inspect the item closely, then look up attentively to the visitor.",
+        "rhythm": "Precise, small shifts with patient pauses."
+      }
+    },
+    {
+      "id": "friend-seal",
+      "reaction": "relaxed",
+      "eyeStyle": "A",
+      "sheet": "sheet-02.png",
+      "row": 2,
+      "column": 1,
+      "eyeActing": {
+        "baseline": "Relaxed warm gaze toward friends.",
+        "engaged": "Follow the conversation easily and turn eyes toward whoever is speaking.",
+        "rhythm": "Unhurried, friendly shifts with comfortable holds."
+      }
+    },
+    {
+      "id": "hana",
+      "reaction": "serene",
+      "eyeStyle": "A",
+      "sheet": "sheet-02.png",
+      "row": 2,
+      "column": 2,
+      "eyeActing": {
+        "baseline": "Minimal two-dot eyes remain calm and attentive; the bell carries most expression.",
+        "engaged": "Keep the dots simple while a gentle bell tilt and tentacle orientation show attention.",
+        "rhythm": "Unhurried bell tilts and soft body responses; no added human facial features."
+      }
+    },
+    {
+      "id": "captain-bay",
+      "reaction": "confident",
+      "eyeStyle": "A",
+      "sheet": "captain.png",
+      "row": 0,
+      "column": 0,
+      "eyeActing": {
+        "baseline": "Composed, capable gaze, steady within the natural folds of the walrus face.",
+        "engaged": "Meet the crew’s eyes, then glance toward the task or direction at hand.",
+        "rhythm": "Measured, confident shifts with decisive focus when needed."
+      }
+    }
+  ]
+}

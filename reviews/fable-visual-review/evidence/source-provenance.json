@@ -1,0 +1,33 @@
+{
+  "scope": "Actual regional scenery and CoveDetail only. ReefGarden/Wreck tags in scenes.js are outside this CPU audit and these renders. No full-game material/frame-rate or device-FPS claim.",
+  "currentSources": {
+    "src/js/reef3d/board.js": "b386804b98087aa97c9753572f0d400e71234448be35c353ce2f8a239a924654",
+    "src/js/reef3d/region-scenery.js": "43280c1770c6bc8cac8746104995d93d6dfd13898ed56e1f0a87eb5c626f463c",
+    "src/js/reef3d/world-detail.js": "9b87493d0ff54332c4e69888475b2f7d95eb9417a327601b0175a001c00d8778",
+    "src/js/reef3d/world-surfaces.js": "a2cfea65147c2867d926822000feec70bfccb131eb18251e45a9245004eeac2c",
+    "src/js/reef3d/scenes.js": "4f608d40a801314c6d624e5e59e1d0cc2352b5b2b30fd4499167bf6b54cd18f5",
+    "assets/world/world-surfaces.jpg": "9e40e1c575d643a1db0ce7daf866340869111bde7f967273a3eb519f2b3b2523",
+    "tools/art/audit_world_scenery.cjs": "b3bf49f4d8fbfc11d4a664eb1ad669009e9d3636c9dd9b5cce98624522205917",
+    "tools/art/render_world_scenery.py": "693756c63bcf380b39e95b1dbd92eed7970a03e71f0bd141f00f744c02ba8227"
+  },
+  "baselineSources": {
+    "board.js": "a446822995106917fc5047ac77277f70bb8abbdb67c0b30fb7178f7ab65a4cdc",
+    "region-scenery.js": "16d2eaf3f66b35956b53a53a41d620a70405ee3ebea13cfb1143d1f91ae660de",
+    "tile-art.js": "938242aa065eea14efc0163638d004321bc55b8455f1908f9d112dcc0f26be5f",
+    "world-detail.js": "c28c0f99ae5e9bd5093e7fca59914abf545fd77f8281457db5e3888b63480144",
+    "world-overview.js": "8f49251cc49d329f9ea9f7b27e8f08bd1adedc25c4133369adfd644712d59994"
+  },
+  "commands": [
+    "node tools/art/audit_world_scenery.cjs --variant=both --boards=town,cove,lagoon,caves,patterns,beach,light,captain --out=/workspace/work/world-realism",
+    "blender -b -t 4 --python tools/art/render_world_scenery.py -- --exports /workspace/work/world-realism --output /workspace/work/world-realism/renders --regions town cove lagoon caves patterns beach light captain --frames overview close"
+  ],
+  "validated": {
+    "renders": 32,
+    "matchedCameraPairs": 16,
+    "dimensions": [
+      1024,
+      768
+    ],
+    "allExportAndManifestHashesMatchSources": true
+  }
+}

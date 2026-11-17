@@ -1,0 +1,159 @@
+{
+  "version": "cast-preferences-2026-11-16",
+  "conceptVersion": "cast-v1",
+  "interpretation": "Choices follow the order the image sheets appeared: companions, harbor-friends, keepers-town, reef-hosts, harbor-residents. The turtle at position 11 is Mira; the user separately clarified a teenage redesign. Columns 1/2/3 correspond to A/B/C.",
+  "rawChoices": "2, 1, 1, 3 with glasses, 3, 1, 3, 2, 1, 2, shelly is fine as she is, 3, 1, 2, 2, 2, 3, 3",
+  "shelly": {
+    "status": "Included in current expression concept review; existing game asset unchanged until review is resolved.",
+    "earlierStatus": "keep-approved-appearance-unchanged"
+  },
+  "sharedDirection": {
+    "style": "Organically sculpted 3D storybook marine characters, cohesive with approved Shelly.",
+    "individuality": "Distinct silhouettes, eye and brow shapes, expressions, ages, posture, work accessories, materials and movement personalities.",
+    "tone": "The cast must not all look dreamy or ethereal. Use grounded textures and role-appropriate colors. Reserve subtle bioluminescence and pearlescence for characters where it belongs.",
+    "constraints": [
+      "Marine organisms only",
+      "No assembled-primitive or clay appearance",
+      "No universal gold filigree, sparkles or iridescence",
+      "Preserve handheld performance",
+      "Final models must match their references from viewable angles"
+    ],
+    "paletteCorrection": "The third revised cast sheet was rejected for repeating green/pink colors and similar expressions. Echo, Pip, Jisu, the town shopkeeper, taxi driver and subway guide need visibly separate palettes and facial acting while sharing modeling, materials and rendering style.",
+    "paletteRule": "Thoughtfully choose animal colors from real biological references and use occupational colors in clothing/accessories. Preserve the improved differentiated shapes/expressions. Avoid a cast-wide yellow/brown or green/pink scheme.",
+    "eyeStyle": "Expressive A eyes from natural-survey sheets, preferred across whole cast.",
+    "mouths": "Remove human-like smiles. Use species-specific mouths/mouthparts and role-appropriate facial reactions; see expression-review/manifest.json.",
+    "expressionReview": "A-eye and natural mouth direction accepted for development, with explicit personality-dependent eye acting across the cast.",
+    "eyePerformance": "Each personality shapes eye expressions: resting gaze, eyelid pose where suitable, gaze shifts, response timing and species-appropriate stalk/head/bell motion. A defines the eye design; dialogue and emotion drive changing eye acting."
+  },
+  "characters": [
+    {
+      "id": "lumi",
+      "option": "B",
+      "number": 2
+    },
+    {
+      "id": "bok",
+      "option": "A",
+      "number": 1
+    },
+    {
+      "id": "kiko-mochi",
+      "option": "A",
+      "number": 1
+    },
+    {
+      "id": "kiko-hermit",
+      "option": "C",
+      "number": 3,
+      "notes": "Add glasses."
+    },
+    {
+      "id": "pharmacy-shrimp",
+      "option": "C",
+      "number": 3
+    },
+    {
+      "id": "friend-seal",
+      "option": "A",
+      "number": 1
+    },
+    {
+      "id": "hana",
+      "option": "C",
+      "number": 3
+    },
+    {
+      "id": "captain-bay",
+      "option": "B",
+      "number": 2
+    },
+    {
+      "id": "cafe-seahorse",
+      "option": "A",
+      "number": 1
+    },
+    {
+      "id": "restaurant-otter",
+      "option": "B",
+      "number": 2
+    },
+    {
+      "id": "mira",
+      "option": "3",
+      "customDirection": "A teenage turtle. Keep the design family similar to Shelly, with an obviously different color theme and teenager-appropriate accessories. Younger than an adult storyteller, visibly older than baby Shelly.",
+      "implementationDirection": "Selected teenage concept3:seafoam and cream skin, slate-blue/sage shell, forehead goggles, coral canvas map satchel, youthful confident expression; keep Shelly unchanged.",
+      "number": 3,
+      "conceptSource": "mira-teen-options-2026-11-16.png",
+      "conceptVersion": "cast-refinement-2026-11-16",
+      "selection": "Coastal adventurer"
+    },
+    {
+      "id": "echo",
+      "option": "3",
+      "number": 3,
+      "paletteProposal": "biological-palettes-2026-11-16.json",
+      "earlierSurveyChoice": {
+        "option": "C",
+        "number": 3
+      },
+      "conceptSource": "echo-pip-vertebrate-options-2026-11-16.png",
+      "conceptVersion": "vertebrate-revision-2026-11-16",
+      "status": "Selected concept; detailed model pending",
+      "selection": "Beluga",
+      "species": "Delphinapterus leucas",
+      "implementationDirection": "Selected Echo3 beluga: round pearl-white/cool-gray body, recognizable melon forehead, no dorsal fin, horizontal tail flukes, gentle confident face and cobalt-blue side satchel. Supersedes the nautilus and the brief Echo1 bottlenose selection."
+    },
+    {
+      "id": "pip",
+      "option": "2",
+      "number": 2,
+      "paletteProposal": "biological-palettes-2026-11-16.json",
+      "earlierSurveyChoice": {
+        "option": "A",
+        "number": 1
+      },
+      "conceptSource": "echo-pip-vertebrate-options-2026-11-16.png",
+      "conceptVersion": "vertebrate-revision-2026-11-16",
+      "status": "Selected concept; detailed model pending",
+      "selection": "Royal gramma",
+      "species": "Gramma loreto",
+      "implementationDirection": "Selected Pip2 royal gramma: violet-purple front half, golden-yellow rear/tail, lively mischievous expression, mint/cream puzzle notebook; natural fish body, fins and vertical tail, no human hands or legs. Supersedes the cuttlefish."
+    },
+    {
+      "id": "jisu",
+      "option": "B",
+      "number": 2,
+      "paletteProposal": "biological-palettes-2026-11-16.json",
+      "accessories": "Tangerine-orange postal pouch and orange scallop-shell envelope seal.",
+      "movement": "Quick scuttle with brief blue-white electrical speed cues, skipped in Calm Motion."
+    },
+    {
+      "id": "shop-octopus",
+      "option": "B",
+      "number": 2,
+      "paletteProposal": "biological-palettes-2026-11-16.json",
+      "ability": "Intentionally change skin among natural ruby, harbor stone camouflage and cream/maroon display; keep apron and eyes unchanged.",
+      "anatomy": "Exactly eight separate unbranched arms, each originating at the body and ending in one tip. No merged or tip-to-tip connections. All eight tips clearly visible in the corrected concept; verify actual 3D geometry from several angles before activation."
+    },
+    {
+      "id": "taxi-squid",
+      "option": "B",
+      "number": 2,
+      "paletteProposal": "biological-palettes-2026-11-16.json",
+      "expression": "Bored: half-lidded eyes, relaxed low brows, short flat closed mouth, slouched unhurried posture. No smile or smirk."
+    },
+    {
+      "id": "subway-ray",
+      "option": "C",
+      "number": 3,
+      "paletteProposal": "biological-palettes-2026-11-16.json",
+      "scale": "Dominant wide-bodied marine organism; substantially larger than the octopus and tiny Jisu. Camera adapts to wingspan."
+    },
+    {
+      "id": "hotel-whale",
+      "option": "C",
+      "number": 3
+    }
+  ],
+  "status": "A-eye visual direction accepted for ongoing development; distinct personality-dependent eye acting required. Body/accessory refinements and finished-model validation continue."
+}

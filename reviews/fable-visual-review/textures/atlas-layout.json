@@ -1,0 +1,31 @@
+{
+  "source": "atlas-source.png",
+  "runtime": "../../assets/world/world-surfaces.jpg",
+  "dimensions": [
+    1024,
+    1024
+  ],
+  "columns": 4,
+  "rows": 2,
+  "inset_pixels": 8,
+  "panels": [
+    "stone",
+    "plaster",
+    "timber",
+    "coral",
+    "sand",
+    "fabric",
+    "roof",
+    "rope"
+  ],
+  "brightness": {
+    "stone": 0.8624518001780791,
+    "plaster": 0.8829003726734834,
+    "timber": 0.8300344429764093,
+    "coral": 0.8535016527362899,
+    "sand": 0.855645123650046,
+    "fabric": 0.8505031510895373,
+    "roof": 0.8205143348843443,
+    "rope": 0.8093004712871477
+  }
+}

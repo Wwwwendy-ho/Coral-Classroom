@@ -1,0 +1,28 @@
+{
+  "portable": "/workspace/coral-classroom/build/coral-cove-claude.html",
+  "portableBytes": 16764617,
+  "limitBytes": 16777216,
+  "headroomBytes": 12599,
+  "portableSha256": "5137bac6d05667194a13ebb929c85383c67143b1973d86c17f781d8a3a3ef2c9",
+  "embeddedAssets": {
+    "REEF_TILE_SURFACE_URL": {
+      "imageSize": [
+        512,
+        512
+      ],
+      "jpegBytes": 53387,
+      "sha256": "b6084a0ec6616be952ba6e9071e6e9356920f2c04dee5d57822069dab6a0973a"
+    },
+    "REEF_WORLD_SURFACE_URL": {
+      "imageSize": [
+        512,
+        512
+      ],
+      "jpegBytes": 49426,
+      "sha256": "5df5fea665f2ceb7dbe47690c3b2246595bbb8c86c5ada44606c1d11e20a2438"
+    }
+  },
+  "tileSourceBytesUnchanged": true,
+  "portableWorldLoader512Test": "passed in world_surfaces_test.js",
+  "serviceWorkerCache": "coral-classroom-20261117-world-surfaces"
+}
