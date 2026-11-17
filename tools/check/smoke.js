@@ -132,6 +132,7 @@ async function newPage(browser) {
   check('Cancel goes back to the profiles', !!(await p.$('[data-profile="wendy"]')));
   await p.click('[data-profile="wendy"]'); await p.waitForTimeout(1200); await solveGate(p); await p.waitForTimeout(8000);
   check('the right answer opens the board', await p.evaluate(() => !!(window.__reef3dView && window.__reef3dView())));
+  await p.waitForFunction(() => { const v = window.__reef3dView(); return v && !v.moving && !v.flyIn; }, null, { timeout: 60000 }).catch(() => {});
   const b = await p.evaluate(() => {
     const v = window.__reef3dView(); if (!v) return { board: false };
     const g = v.guide.position, c = v.crab && v.crab.position;

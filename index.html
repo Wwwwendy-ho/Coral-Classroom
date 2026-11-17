@@ -28595,32 +28595,7 @@ body.reef-kid .choice-feedback.ok{ animation:reefYay .5s var(--reef-pop); }
 .reef-tip-face{ font-size:1.6rem; line-height:1; }
 body.reef-kid .tc-timer-row{ display:none; } /* no countdowns in her mode */
 
-/* ---------- round finished: the treasure chest ---------- */
-.reef-sum{ padding-top:6px; }
-.reef-sum-card{ border:none; border-radius:34px; padding:22px 18px 26px; overflow:hidden;
-  background:radial-gradient(100% 60% at 50% 0%, color-mix(in srgb, var(--reef-shallow) 60%, var(--reef-card)), var(--reef-card) 70%);
-  box-shadow:0 10px 0 var(--border), 0 20px 40px rgba(10,61,74,.18); }
-.reef-sum-deck{ font:800 .95rem 'Nunito',sans-serif; color:var(--reef-soft); }
-.reef-sum-card h2{ font-size:2rem; margin:6px 0 4px; }
-.reef-fact{ margin:0 auto; max-width:420px; font-weight:800; font-size:1.1rem; color:var(--reef-ink); }
-.reef-sum-note{ margin:6px 0 0; font-weight:700; color:var(--reef-soft); }
 .reef-sum-actions{ display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:20px; }
-.reef-chest{ position:relative; display:block; width:220px; height:210px; margin:6px auto 0; border:none; background:none; cursor:pointer; padding:0; -webkit-tap-highlight-color:transparent; }
-.reef-chest-rays{ position:absolute; left:50%; top:42%; width:300px; height:300px; margin:-150px 0 0 -150px; border-radius:50%; opacity:0;
-  background:repeating-conic-gradient(from 0deg, rgba(255,209,102,.55) 0 10deg, transparent 10deg 24deg);
-  -webkit-mask-image:radial-gradient(circle, #000 25%, transparent 68%); mask-image:radial-gradient(circle, #000 25%, transparent 68%);
-  animation:reefRaysIn .5s ease .55s forwards, reefSpin 14s linear .55s infinite; }
-@keyframes reefRaysIn{ to{ opacity:1; } }
-@keyframes reefSpin{ to{ transform:rotate(360deg); } }
-.reef-chest-box{ position:absolute; left:50%; bottom:6px; width:150px; height:96px; margin-left:-75px; }
-.reef-chest-box .body{ position:absolute; inset:34px 0 0; border-radius:10px 10px 18px 18px; background:linear-gradient(180deg,#b9732f,#8a4f1c); box-shadow:inset 0 0 0 5px #e8a716, 0 8px 0 #5e3410; }
-.reef-chest-box .body::after{ content:""; position:absolute; left:50%; top:6px; width:22px; height:26px; margin-left:-11px; border-radius:6px; background:#ffd166; box-shadow:0 2px 0 #a8770a; }
-.reef-chest-box .lid{ position:absolute; left:0; right:0; top:0; height:42px; border-radius:60px 60px 8px 8px; background:linear-gradient(180deg,#d08a3f,#a86224); box-shadow:inset 0 0 0 5px #e8a716;
-  transform-origin:50% 100%; animation:reefLid .5s var(--reef-pop) .35s both; z-index:2; }
-@keyframes reefLid{ from{ transform:rotateX(0) translateY(0); } to{ transform:translateY(-28px) rotate(-14deg); } }
-.reef-chest-friend{ position:absolute; left:50%; top:4%; font-size:5.2rem; line-height:1; transform:translate(-50%, 60px) scale(.2); opacity:0;
-  filter:drop-shadow(0 8px 10px rgba(0,0,0,.25)); animation:reefFriendUp .7s var(--reef-pop) .6s forwards, reefBob 3.4s ease-in-out 1.4s infinite; z-index:1; }
-@keyframes reefFriendUp{ to{ transform:translate(-50%, 0) scale(1); opacity:1; } }
 
 .reef-fact-box{ display:flex; align-items:center; gap:12px; margin:0 0 14px; padding:12px 16px; border-radius:20px; background:#fff; color:#0b2b33; font-weight:700; font-size:1.05rem; }
 .reef-fact-e{ font-size:2.6rem; line-height:1; }
@@ -28659,12 +28634,7 @@ body.reef-kid .tc-timer-row{ display:none; } /* no countdowns in her mode */
 @keyframes txIris{ 0%{ transform:scale(0); opacity:1; } 45%{ transform:scale(70); opacity:1; } 100%{ transform:scale(70); opacity:0; } }
 
 /* ---------- Calm motion: nothing moves ---------- */
-body.reef-calm .deck-card.kid, body.reef-calm .choice-btn, body.reef-calm .choice-feedback,
-body.reef-calm .reef-chest-rays, body.reef-calm .reef-chest-box .lid, body.reef-calm .reef-chest-friend{ animation:none !important; }
-
-body.reef-calm .reef-chest-rays{ opacity:1; }
-body.reef-calm .reef-chest-box .lid{ transform:translateY(-28px) rotate(-14deg); }
-body.reef-calm .reef-chest-friend{ transform:translate(-50%, 0); opacity:1; }
+body.reef-calm .deck-card.kid, body.reef-calm .choice-btn, body.reef-calm .choice-feedback{ animation:none !important; }
 
 /* ---------- round 2: drawn art, today's shells, Shelly on the study screen ---------- */
 
