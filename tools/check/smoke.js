@@ -138,8 +138,10 @@ async function newPage(browser) {
     const g = v.guide.position, c = v.crab && v.crab.position;
     const sc = v.schools[0], rc = v.renderer.domElement.getBoundingClientRect(), pt = sc.fish[0].position.clone().project(v.cam);
     const x = rc.left + (pt.x + 1) / 2 * rc.width, y = rc.top + (1 - pt.y) / 2 * rc.height;
+    const dice = v.dice; v.dice = null;   // while the dice is out a tap rolls it, so set it aside for this one tap
     v.renderer.domElement.dispatchEvent(new PointerEvent('pointerdown', { clientX: x, clientY: y, bubbles: true }));
     v.renderer.domElement.dispatchEvent(new MouseEvent('click', { clientX: x, clientY: y, bubbles: true }));
+    v.dice = dice;
     return { board: true, crabGap: c ? Math.hypot(c.x - g.x, c.z - g.z) : null, fled: !!sc.flee, warmed: v.warmed };
   });
   check('grown-up: the crab starts beside the guide', b.crabGap > 1 && b.crabGap < 5, 'gap ' + (b.crabGap || 0).toFixed(2));

@@ -1,5 +1,13 @@
 # Changelog
 
+## A plain deck library for child profiles (November 17, 2026)
+
+- A child profile now opens the plain deck library: the grid of flashcard decks with its subject tabs, studied by tapping a deck. It no longer gets the 3D board, dice, shop, minigames, the sea chart or the regions. Grown-up profiles keep everything.
+- Nothing is deleted: a child's decks, progress and collected sea friends are kept.
+- On a child profile, back buttons say "Decks", a finished deck shows the simple summary, and the board's music no longer plays.
+- The deck library's tabs, card counts and buttons use drawn icons, and the screen opens scrolled to the top.
+- Sideways, the study screen leaves room so the turtle no longer overlaps the back button.
+
 ## Richer islands and sailing (November 13, 2026)
 
 - Harbor Town has detailed shopfronts, rooflines, awnings, boats, timber piers and cargo. Other regions gain reeds and islets, cave walls and crystal formations, coral gardens, shoreline detail, lighthouse cliffs, and ship planks, ropes, railings and sails.
