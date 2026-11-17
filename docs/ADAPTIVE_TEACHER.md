@@ -12,6 +12,7 @@ Claims about learning are marked **[established]** or **[judgment]**, as in the 
 4. **Say what changed.** Every adjustment produces a short note in plain words, with an undo.
 5. **The learner outranks the teacher.** She can say "easier today" or "push me," pin any setting, or turn adjusting off.
 6. **Never punish absence.** Coming back after a gap is met with a lighter session, not a wall of overdue reviews.
+7. **No reminders.** The owner decided the game sends no notifications or reminders of any kind. It adjusts only when she opens it.
 
 ## 2. What the teacher watches
 
@@ -58,7 +59,6 @@ Each setting has a floor, a ceiling, a default and a step size, all in one table
 | Time limits in fluency tasks | scaled from her own median speed | she beats the limit comfortably | she misses it often |
 | Number of answer options and distractor closeness | 2–4, far → near | success above 90% | success under 75% |
 | Share of the interface in Korean | 0–100% | a label has been seen often and its word is known | she turns it back |
-| Reminders | off, or at her usual time | — | ignored three times in a row (then stop) |
 
 ## 4. When it adjusts: four timescales
 
@@ -176,4 +176,3 @@ Steps 1–3 don't depend on the content graph. Steps 4–7 work best after the l
 ## 11. Open questions for the owner
 
 - Should the child profile get the same teacher with gentler ranges, or stay as it is for now?
-- Should reminders exist at all? They would be on-device notifications at her usual time, and they stop after being ignored three times.
