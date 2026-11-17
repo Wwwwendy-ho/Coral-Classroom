@@ -94,7 +94,7 @@
   }
 
   // Coral Classroom, for the app: is it on for this profile, and which unit is she on (the earliest not finished)?
-  function reefCourseOn(){ var p = S.profile; if(!p) return false; return p.courseOn != null ? !!p.courseOn : /^wendy$/i.test(p.id || '') || /^wendy$/i.test(p.name || ''); }
+  function reefCourseOn(){ var p = S.profile; if(!p || p.mode === 'child') return false; return p.courseOn != null ? !!p.courseOn : /^wendy$/i.test(p.id || '') || /^wendy$/i.test(p.name || ''); }
   function reefCourseNow(){
     var co = reefCourseOn() && S.profile.course; if(!co || !co.units) return null;
     for(var i = 0; i < co.units.length; i++) if(!co.units[i].done) return { co: co, unit: co.units[i], i: i };

@@ -356,7 +356,7 @@
   }
   function reefStartDeck(id){
     var d = S.decks.find(function(x){ return x.id === id; });
-    R3.fromDeck = true;   // back on the board after this deck (finished or not): a cheer, then the dice
+    if(reefGame()) R3.fromDeck = true;   // back on the board after this deck (finished or not): a cheer, then the dice
     R3.lastDeckId = id;
     if(d && d.feedMode) startFeed(id);
     else if(d && d.storyMode) startStory(id);

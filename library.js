@@ -87,7 +87,7 @@
   /* ---------- the screen ---------- */
   var root = null, stack = [];
   var LIB = window.CoralLibrary = {
-    open: function(){ build(); root.hidden = false; document.body.classList.add('clib-open'); stack = []; go('home'); },
+    open: function(){ build(); var hb = root.querySelector('.clib-home'), me = CC() && CC().profile(); if(hb) hb.textContent = '⟵ ' + (me && me.child ? 'Decks' : 'Reef'); root.hidden = false; document.body.classList.add('clib-open'); stack = []; go('home'); },
     close: close, go: go, back: back, ask: ask, jsonFrom: jsonFrom, settings: settings, rec: rec, saveRec: saveRec, log: log,
     claudeReady: claudeReady, decks: decks, cards: cards, allCards: allCards, cardStateOf: cardStateOf,
     esc: esc, $: $, $$: $$, rnd: rnd, pick: pick, shuffle: shuffle, plain: plain, speak: speak, sound: sound, today: today,

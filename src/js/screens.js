@@ -400,6 +400,7 @@
   // gap is covered by renderProfileLoading so the old profile's screen never flashes stale data).
   function enterProfile(profile){
     S.activeProfileId = profile.id;
+    try { window.scrollTo(0, 0); } catch(e){}   // the profile screen may have been scrolled
     S.planDay = null; S.planRun = null; S.planSettings = null; S.planLoading = false;
     S.profile = profile;
     S.store.setActiveProfile(profile.id);
@@ -570,7 +571,7 @@
     }).join('');
     app.innerHTML = '' +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="exit-manage-profiles">⟵ Reef</button>' +
+        '<button class="back-btn" data-act="exit-manage-profiles">⟵ '+backHomeLabel()+'</button>' +
         '<span class="nav-title">🗂️ Manage Profiles</span>' +
       '</div>' +
       '<div class="stats-page">' +
@@ -1039,7 +1040,7 @@
         S.subjectFilter = 'all'; // the tagged deck we were filtered to is gone (archived/edited/deleted)
       }
       var subjFilter = S.subjectFilter || 'all';
-      var subjChips = '<button type="button" class="subject-tab'+(subjFilter==='all'?' active':'')+'" data-subject-filter="all">🌈 All <span class="filter-count">'+visibleDecks.length+'</span></button>' +
+      var subjChips = '<button type="button" class="subject-tab'+(subjFilter==='all'?' active':'')+'" data-subject-filter="all">'+ccIcon('cards')+' All <span class="filter-count">'+visibleDecks.length+'</span></button>' +
         subjectTabs.map(function(t){
           return '<button type="button" class="subject-tab'+(subjFilter===t.id?' active':'')+'" data-subject-filter="'+esc(t.id)+'">'+t.icon+' '+esc(t.label)+' <span class="filter-count">'+t.count+'</span></button>';
         }).join('');
@@ -1089,13 +1090,13 @@
                   : (dc.due > 0
                     ? (S.managingDecks || S.editMode ? '<span class="deck-badge due">'+dc.due+' due for review</span>' : '<span class="deck-badge due">🐚 Ready</span>')
                     : (S.managingDecks || S.editMode ? '<span class="deck-badge">Nothing due 🎉</span>' : '<span class="deck-badge">All done! 🎉</span>')))))))));
-      var diveLabel = isFeed ? '▶️ Watch & Listen' : (isStory ? '📜 Read the Story' : (isEquation ? '🧮 Solve & Listen' : (isLang ? '🌐 Learn Words' : (isReadAlong ? '🔤 Tap & Read' : (isFlash ? '🃏 Swipe & Flip' : (isMini ? '🎞️ Read the Pictures' : 'Dive In'))))));
+      var diveLabel = isFeed ? ccIcon('film')+' Watch & Listen' : (isStory ? ccIcon('story')+' Read the Story' : (isEquation ? ccIcon('maths')+' Solve & Listen' : (isLang ? ccIcon('globe')+' Learn Words' : (isReadAlong ? ccIcon('letters')+' Tap & Read' : (isFlash ? ccIcon('flip')+' Swipe & Flip' : (isMini ? ccIcon('film')+' Read the Pictures' : 'Dive In'))))));
       return '' +
       '<div class="deck-card'+(editMode && archived ? ' archived' : '')+(S.managingDecks || S.editMode ? '' : ' kid')+'" data-subj="'+esc(d.subject ? subjectMeta(d.subject).id : 'other')+'">' +
         (editMode && archived ? '<span class="archived-tag">📦 Archived</span>' : '') +
         '<div class="deck-emoji">'+d.emoji+'</div>' +
         '<h3 class="deck-name">'+esc(d.name)+'</h3>' +
-        '<div class="deck-meta">'+(S.managingDecks || S.editMode ? dc.total+' card'+(dc.total===1?'':'s') : '🃏 '+dc.total)+'</div>' +
+        '<div class="deck-meta">'+(S.managingDecks || S.editMode ? dc.total+' card'+(dc.total===1?'':'s') : ccIcon('cards')+' '+dc.total)+'</div>' +
         badge +
         '<div class="deck-actions">' +
           '<button class="btn btn-primary" data-act="study" data-deck="'+d.id+'" '+(dc.total===0?'disabled':'')+'>'+diveLabel+'</button>' +

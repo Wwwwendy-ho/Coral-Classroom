@@ -1068,7 +1068,7 @@
 
     app.innerHTML = '' +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="exit-study">⟵ Reef</button>' +
+        '<button class="back-btn" data-act="exit-study">⟵ '+backHomeLabel()+'</button>' +
         '<span class="nav-title">'+deck.emoji+' '+esc(deck.name)+'</span>' +
         ctrlRowHTML() +
       '</div>' +
@@ -1455,7 +1455,6 @@
   }
 
   function renderSummary(){
-    if(reefKid()) return reefSummary();
     var deck = deckOrMyWords(S.currentDeckId) || {name:'Deck', emoji:'🌊'};
     var t = S.roundTally || { again:0, hard:0, good:0, easy:0 };
     var total = S.sessionReviewed;

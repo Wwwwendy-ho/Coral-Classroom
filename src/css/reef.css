@@ -313,7 +313,7 @@ body.reef-calm .cc-nudge, body.reef-calm .feed-stage.cc-nudge::after{ animation-
   .nav-row .back-btn, .nav-row .icon-btn{ min-height:36px; height:36px; }
   .nav-row .icon-btn{ width:36px; min-width:36px; }
   .critter-label{ display:none; }
-  .critter-track{ margin:4px 60px 8px; }
+  .critter-track{ margin:16px 60px 8px; }
   body .stage.stage, body.reef-kid .stage.has-buddy, body .stage.has-buddy{ display:flex; flex-direction:column; flex-wrap:wrap; align-content:center; justify-content:center;
     column-gap:18px; height:var(--stage-h, auto); min-height:0; padding:10px 14px; box-sizing:border-box; }
   .stage > .flip-scene{ flex:none; width:56%; max-width:none; height:calc(100% - 4px); margin:0; display:flex; flex-direction:column; justify-content:center; }

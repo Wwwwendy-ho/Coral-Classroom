@@ -96,9 +96,10 @@
   // when "Calm motion" is on in Settings or the device asks for reduced motion -- the screen just
   // changes, the same as before.
   function reefKid(){ return !!(S.profile && S.profile.mode === 'child' && !S.managingDecks); }
-  // The game experience (3D board, transitions, music, praise) for every profile; grown-up tools stay
-  // reachable through Edit Mode. Child-only rules (no countdowns, the math question to leave) use reefKid().
-  function reefGame(){ return !!(S.profile && (S.profile.mode === 'adult' || reefKid())); }
+  // The game experience (3D board, sea chart and regions, transitions, board music, treasure, praise) is for
+  // grown-up profiles only. A child profile gets the plain deck library: the grid of flashcard decks, studied
+  // as before. Child-only rules (no countdowns, the math question to leave) use reefKid().
+  function reefGame(){ return !!(S.profile && S.profile.mode === 'adult'); }
   function reefCalm(){
     if(S.settings && S.settings.calmMotion) return true;
     try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e){ return false; }
@@ -222,6 +223,8 @@
     setTimeout(function(){ try { fn(); } catch(e){ console.error('[Coral Classroom] transition', e); } ov.style.pointerEvents = 'none'; }, mid);   // once the new screen is in, its buttons take taps while the water clears
     setTimeout(function(){ ov.remove(); reefBusy = false; window.__reefTx = false; }, end);
   }
+  // The back button's name on screens a deck or setting opens from: the reef for grown-up profiles, the deck list for a child.
+  function backHomeLabel(){ return reefGame() ? 'Reef' : 'Decks'; }
   function reefInDeck(){
     return ['study','summary','feed','story','equationFeed','langFeed','readAlong','flashFeed','miniStory','wordBank','lagoon','lagoonRead','town','townTalk','caves','patterns','beach','light','captain'].indexOf(S.view) !== -1;
   }
@@ -288,51 +291,6 @@
     have[pick.id] = (have[pick.id] || 0) + 1;
     newStats.collection = have;
     S.reefFind = { id: pick.id, again: !fresh.length };
-  }
-  function reefSummary(){
-    var deck = deckOrMyWords(S.currentDeckId) || { name:'Deck', emoji:'🌊' };
-    var find = S.reefFind ? reefFriend(S.reefFind.id) : null;
-    var earnedHTML = '';
-    if(S.justEarnedBadges && S.justEarnedBadges.length){
-      earnedHTML = '<div class="badge-earned-banner">' + BADGES.filter(function(b){ return S.justEarnedBadges.indexOf(b.id) !== -1; }).map(function(b){
-        return '<div class="badge-earned-item"><span class="badge-earned-icon">'+b.icon+'</span><span>New badge: <strong>'+esc(b.name)+'</strong></span></div>';
-      }).join('') + '</div>';
-    }
-    var head = find ? (S.reefFind.again ? 'Another ' + find.name + '!' : 'You found ' + (/^[AEIOU]/.test(find.name) ? 'an ' : 'a ') + find.name + '!') : 'Nice swimming!';
-    app.innerHTML = '' +
-      '<div class="reef-sum">' +
-        '<div class="summary-card reef-sum-card">' +
-          errorBannerHTML() +
-          '<div class="reef-sum-deck">'+deck.emoji+' '+esc(deck.name)+' · All done!</div>' +
-          (find ? '' +
-            '<button type="button" class="reef-chest" data-reef-friend="'+find.id+'" aria-label="'+esc(head+' '+find.fact)+'">' +
-              '<span class="reef-chest-rays" aria-hidden="true"></span>' +
-              '<span class="reef-chest-friend" aria-hidden="true">'+find.e+'</span>' +
-              '<span class="reef-chest-box" aria-hidden="true"><span class="lid"></span><span class="body"></span></span>' +
-            '</button>' : '') +
-          '<h2>'+esc(head)+'</h2>' +
-          (find ? '<p class="reef-fact">'+esc(find.fact)+'</p><p class="reef-sum-note">It\'s in your aquarium now.</p>' : '') +
-          earnedHTML +
-          planNextHTML() +
-          (S.planRun ? '' : '<div class="reef-sum-actions">' +
-            '<button class="btn btn-primary" data-act="play-again">🔁 Play Again</button>' +
-            '<button class="btn btn-ghost" data-act="back-home">'+(reefNight() ? '⚓ Back to the wreck' : '🪸 Back to the reef')+'</button>' +
-            '<button class="btn btn-ghost" data-act="reef-treasure">🐠 My Aquarium</button>' +
-          '</div>') +
-        '</div>' +
-      '</div>';
-    wireErrorBanner();
-    wirePlanNext();
-    var chest = app.querySelector('[data-reef-friend]');
-    if(chest){
-      var sayIt = function(){ try { Speech.speak(head + ' ' + find.fact); } catch(e){} };
-      chest.addEventListener('click', sayIt);
-      if(!S.reefSaid || S.reefSaid !== S.reefFind){ S.reefSaid = S.reefFind; setTimeout(sayIt, reefCalm() ? 200 : 900); }
-    }
-    if(S.planRun) return;
-    app.querySelector('[data-act="back-home"]').addEventListener('click', function(){ S.reefPlace = null; S.subjectFilter = 'all'; goHome(); });
-    app.querySelector('[data-act="play-again"]').addEventListener('click', function(){ reefGo('dive', null, function(){ startStudy(S.currentDeckId); }); });
-    app.querySelector('[data-act="reef-treasure"]').addEventListener('click', function(){ goHomeNow(); S.view = 'collection'; render(); });
   }
   /* ---------- My Aquarium: the sea friends she has found live in a glass tank ----------
      Swimmers cross the tank and turn at the glass, bottom-dwellers creep along the sand, jellyfish drift up and
@@ -526,6 +484,7 @@
   }
   function reefBoardMenuSync(){
     reefBoardMenuClose();
+    if(!reefGame()) return;   // a child profile has the plain deck library: its buttons stay in the top bar
     var bar = document.querySelector('.cv3-hero .topbar > :last-child') || document.querySelector('.rb-actions'); if(!bar || bar.querySelector('.r3-menubtn')) return;
     var b = document.createElement('button'); b.type = 'button'; b.className = 'icon-btn r3-menubtn'; b.setAttribute('aria-label', 'Menu'); b.setAttribute('aria-haspopup', 'menu'); b.setAttribute('aria-expanded', 'false'); b.title = 'Menu';
     b.innerHTML = ccIcon('menu'); b.addEventListener('click', function(){ reefBoardMenuOpen(b); });

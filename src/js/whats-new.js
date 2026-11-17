@@ -144,7 +144,7 @@
 
   // Shown on the board, once nothing else is on screen
   afterRender('whats new', function(){
-    if(!S.profile || S.view !== 'home' || reefWhatsNew.waiting) return;
+    if(!S.profile || S.profile.mode === 'child' || S.view !== 'home' || reefWhatsNew.waiting) return;
     try { if(localStorage.getItem('cc-tour-off')) return; } catch(e){}   // tests turn it off, then open it themselves
     var seen = whatsNewSeen();
     if(!REEF_WHATS_NEW.some(function(e){ return seen.indexOf(e.id) < 0 && whatsNewSteps([e]).length; })) return;

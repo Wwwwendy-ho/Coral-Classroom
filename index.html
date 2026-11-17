@@ -12,7 +12,7 @@
 <script src="seed-data.js?v=20261026"></script>
 <script src="audio-clips.js?v=20261026"></script>
 <script src="storage.js?v=20261026"></script>
-<script src="library.js?v=20261109" defer></script>
+<script src="library.js?v=20261117" defer></script>
 <script src="words.js?v=20261028" defer></script>
 <script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js?v=20261026').catch(function(){});});}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" media="print" id="coveperfFonts" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&family=Fredoka:wght@400;500;600;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&display=swap">
@@ -4223,6 +4223,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
   // gap is covered by renderProfileLoading so the old profile's screen never flashes stale data).
   function enterProfile(profile){
     S.activeProfileId = profile.id;
+    try { window.scrollTo(0, 0); } catch(e){}   // the profile screen may have been scrolled
     S.planDay = null; S.planRun = null; S.planSettings = null; S.planLoading = false;
     S.profile = profile;
     S.store.setActiveProfile(profile.id);
@@ -4393,7 +4394,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     }).join('');
     app.innerHTML = '' +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="exit-manage-profiles">⟵ Reef</button>' +
+        '<button class="back-btn" data-act="exit-manage-profiles">⟵ '+backHomeLabel()+'</button>' +
         '<span class="nav-title">🗂️ Manage Profiles</span>' +
       '</div>' +
       '<div class="stats-page">' +
@@ -4862,7 +4863,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
         S.subjectFilter = 'all'; // the tagged deck we were filtered to is gone (archived/edited/deleted)
       }
       var subjFilter = S.subjectFilter || 'all';
-      var subjChips = '<button type="button" class="subject-tab'+(subjFilter==='all'?' active':'')+'" data-subject-filter="all">🌈 All <span class="filter-count">'+visibleDecks.length+'</span></button>' +
+      var subjChips = '<button type="button" class="subject-tab'+(subjFilter==='all'?' active':'')+'" data-subject-filter="all">'+ccIcon('cards')+' All <span class="filter-count">'+visibleDecks.length+'</span></button>' +
         subjectTabs.map(function(t){
           return '<button type="button" class="subject-tab'+(subjFilter===t.id?' active':'')+'" data-subject-filter="'+esc(t.id)+'">'+t.icon+' '+esc(t.label)+' <span class="filter-count">'+t.count+'</span></button>';
         }).join('');
@@ -4912,13 +4913,13 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
                   : (dc.due > 0
                     ? (S.managingDecks || S.editMode ? '<span class="deck-badge due">'+dc.due+' due for review</span>' : '<span class="deck-badge due">🐚 Ready</span>')
                     : (S.managingDecks || S.editMode ? '<span class="deck-badge">Nothing due 🎉</span>' : '<span class="deck-badge">All done! 🎉</span>')))))))));
-      var diveLabel = isFeed ? '▶️ Watch & Listen' : (isStory ? '📜 Read the Story' : (isEquation ? '🧮 Solve & Listen' : (isLang ? '🌐 Learn Words' : (isReadAlong ? '🔤 Tap & Read' : (isFlash ? '🃏 Swipe & Flip' : (isMini ? '🎞️ Read the Pictures' : 'Dive In'))))));
+      var diveLabel = isFeed ? ccIcon('film')+' Watch & Listen' : (isStory ? ccIcon('story')+' Read the Story' : (isEquation ? ccIcon('maths')+' Solve & Listen' : (isLang ? ccIcon('globe')+' Learn Words' : (isReadAlong ? ccIcon('letters')+' Tap & Read' : (isFlash ? ccIcon('flip')+' Swipe & Flip' : (isMini ? ccIcon('film')+' Read the Pictures' : 'Dive In'))))));
       return '' +
       '<div class="deck-card'+(editMode && archived ? ' archived' : '')+(S.managingDecks || S.editMode ? '' : ' kid')+'" data-subj="'+esc(d.subject ? subjectMeta(d.subject).id : 'other')+'">' +
         (editMode && archived ? '<span class="archived-tag">📦 Archived</span>' : '') +
         '<div class="deck-emoji">'+d.emoji+'</div>' +
         '<h3 class="deck-name">'+esc(d.name)+'</h3>' +
-        '<div class="deck-meta">'+(S.managingDecks || S.editMode ? dc.total+' card'+(dc.total===1?'':'s') : '🃏 '+dc.total)+'</div>' +
+        '<div class="deck-meta">'+(S.managingDecks || S.editMode ? dc.total+' card'+(dc.total===1?'':'s') : ccIcon('cards')+' '+dc.total)+'</div>' +
         badge +
         '<div class="deck-actions">' +
           '<button class="btn btn-primary" data-act="study" data-deck="'+d.id+'" '+(dc.total===0?'disabled':'')+'>'+diveLabel+'</button>' +
@@ -6975,7 +6976,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
   function renderWordBank(){
     var wb = S.wb || { loading: true };
     var adult = !!(S.managingDecks || S.editMode || (S.profile && S.profile.mode === 'adult'));
-    var head = '<div class="nav-row"><button class="back-btn" data-act="wb-back">⟵ Reef</button><span class="nav-title">📒 Word Bank</span></div>';
+    var head = '<div class="nav-row"><button class="back-btn" data-act="wb-back">⟵ '+backHomeLabel()+'</button><span class="nav-title">📒 Word Bank</span></div>';
     if(wb.loading){ app.innerHTML = head + '<div class="empty-filter-note">Counting your words…</div>'; wbWire(); return; }
     var list = wb.list || [];
     var n = { 'new': 0, learning: 0, known: 0 }; list.forEach(function(e){ n[e.status]++; });
@@ -7375,7 +7376,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
       '</div>') : '';
     app.innerHTML = '' +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="plan-home">⟵ Reef</button>' +
+        '<button class="back-btn" data-act="plan-home">⟵ '+backHomeLabel()+'</button>' +
         '<span class="nav-title">📅 Daily Plan</span>' +
       '</div>' +
       '<div class="stats-page">' +
@@ -7491,7 +7492,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
         (topMissed.length ? '<div class="stats-section"><h3>📝 Most-missed words</h3><div class="plan-missed">'+topMissed.map(function(k){ return '<span class="plan-chip">'+esc(k)+(missCount[k] > 1 ? ' <b>×'+missCount[k]+'</b>' : '')+'</span>'; }).join('')+'</div></div>' : '');
     }
     app.innerHTML = '' +
-      '<div class="nav-row"><button class="back-btn" data-act="plan-home">⟵ Reef</button><span class="nav-title">🗓️ Monthly Summary</span></div>' +
+      '<div class="nav-row"><button class="back-btn" data-act="plan-home">⟵ '+backHomeLabel()+'</button><span class="nav-title">🗓️ Monthly Summary</span></div>' +
       '<div class="stats-page">' +
         '<div class="plan-tabs"><button type="button" class="subject-tab" data-act="plan-day">Day</button><button type="button" class="subject-tab active">🗓️ Month</button></div>' +
         body +
@@ -9187,7 +9188,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
 
     app.innerHTML = '' +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="exit-study">⟵ Reef</button>' +
+        '<button class="back-btn" data-act="exit-study">⟵ '+backHomeLabel()+'</button>' +
         '<span class="nav-title">'+deck.emoji+' '+esc(deck.name)+'</span>' +
         ctrlRowHTML() +
       '</div>' +
@@ -9574,7 +9575,6 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
   }
 
   function renderSummary(){
-    if(reefKid()) return reefSummary();
     var deck = deckOrMyWords(S.currentDeckId) || {name:'Deck', emoji:'🌊'};
     var t = S.roundTally || { again:0, hard:0, good:0, easy:0 };
     var total = S.sessionReviewed;
@@ -9852,7 +9852,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
 
     app.innerHTML = '' +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="exit-stats">⟵ Reef</button>' +
+        '<button class="back-btn" data-act="exit-stats">⟵ '+backHomeLabel()+'</button>' +
         '<span class="nav-title">📊 '+(managing ? 'Progress Overview' : 'Your Progress')+'</span>' +
       '</div>' +
       '<div class="stats-page">' +
@@ -10141,7 +10141,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
 
     app.innerHTML = '' +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="exit-settings">⟵ Reef</button>' +
+        '<button class="back-btn" data-act="exit-settings">⟵ '+backHomeLabel()+'</button>' +
         '<span class="nav-title">⚙️ Settings</span>' +
       '</div>' +
       '<div class="stats-page">' +
@@ -10449,7 +10449,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     app.innerHTML = '' +
       errorBannerHTML() +
       '<div class="nav-row">' +
-        '<button class="back-btn" data-act="exit-editor">⟵ Reef</button>' +
+        '<button class="back-btn" data-act="exit-editor">⟵ '+backHomeLabel()+'</button>' +
         ctrlRowHTML() +
       '</div>' +
       '<div class="editor-head">' +
@@ -11359,9 +11359,10 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   // when "Calm motion" is on in Settings or the device asks for reduced motion -- the screen just
   // changes, the same as before.
   function reefKid(){ return !!(S.profile && S.profile.mode === 'child' && !S.managingDecks); }
-  // The game experience (3D board, transitions, music, praise) for every profile; grown-up tools stay
-  // reachable through Edit Mode. Child-only rules (no countdowns, the math question to leave) use reefKid().
-  function reefGame(){ return !!(S.profile && (S.profile.mode === 'adult' || reefKid())); }
+  // The game experience (3D board, sea chart and regions, transitions, board music, treasure, praise) is for
+  // grown-up profiles only. A child profile gets the plain deck library: the grid of flashcard decks, studied
+  // as before. Child-only rules (no countdowns, the math question to leave) use reefKid().
+  function reefGame(){ return !!(S.profile && S.profile.mode === 'adult'); }
   function reefCalm(){
     if(S.settings && S.settings.calmMotion) return true;
     try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e){ return false; }
@@ -11485,6 +11486,8 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     setTimeout(function(){ try { fn(); } catch(e){ console.error('[Coral Classroom] transition', e); } ov.style.pointerEvents = 'none'; }, mid);   // once the new screen is in, its buttons take taps while the water clears
     setTimeout(function(){ ov.remove(); reefBusy = false; window.__reefTx = false; }, end);
   }
+  // The back button's name on screens a deck or setting opens from: the reef for grown-up profiles, the deck list for a child.
+  function backHomeLabel(){ return reefGame() ? 'Reef' : 'Decks'; }
   function reefInDeck(){
     return ['study','summary','feed','story','equationFeed','langFeed','readAlong','flashFeed','miniStory','wordBank','lagoon','lagoonRead','town','townTalk','caves','patterns','beach','light','captain'].indexOf(S.view) !== -1;
   }
@@ -11551,51 +11554,6 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     have[pick.id] = (have[pick.id] || 0) + 1;
     newStats.collection = have;
     S.reefFind = { id: pick.id, again: !fresh.length };
-  }
-  function reefSummary(){
-    var deck = deckOrMyWords(S.currentDeckId) || { name:'Deck', emoji:'🌊' };
-    var find = S.reefFind ? reefFriend(S.reefFind.id) : null;
-    var earnedHTML = '';
-    if(S.justEarnedBadges && S.justEarnedBadges.length){
-      earnedHTML = '<div class="badge-earned-banner">' + BADGES.filter(function(b){ return S.justEarnedBadges.indexOf(b.id) !== -1; }).map(function(b){
-        return '<div class="badge-earned-item"><span class="badge-earned-icon">'+b.icon+'</span><span>New badge: <strong>'+esc(b.name)+'</strong></span></div>';
-      }).join('') + '</div>';
-    }
-    var head = find ? (S.reefFind.again ? 'Another ' + find.name + '!' : 'You found ' + (/^[AEIOU]/.test(find.name) ? 'an ' : 'a ') + find.name + '!') : 'Nice swimming!';
-    app.innerHTML = '' +
-      '<div class="reef-sum">' +
-        '<div class="summary-card reef-sum-card">' +
-          errorBannerHTML() +
-          '<div class="reef-sum-deck">'+deck.emoji+' '+esc(deck.name)+' · All done!</div>' +
-          (find ? '' +
-            '<button type="button" class="reef-chest" data-reef-friend="'+find.id+'" aria-label="'+esc(head+' '+find.fact)+'">' +
-              '<span class="reef-chest-rays" aria-hidden="true"></span>' +
-              '<span class="reef-chest-friend" aria-hidden="true">'+find.e+'</span>' +
-              '<span class="reef-chest-box" aria-hidden="true"><span class="lid"></span><span class="body"></span></span>' +
-            '</button>' : '') +
-          '<h2>'+esc(head)+'</h2>' +
-          (find ? '<p class="reef-fact">'+esc(find.fact)+'</p><p class="reef-sum-note">It\'s in your aquarium now.</p>' : '') +
-          earnedHTML +
-          planNextHTML() +
-          (S.planRun ? '' : '<div class="reef-sum-actions">' +
-            '<button class="btn btn-primary" data-act="play-again">🔁 Play Again</button>' +
-            '<button class="btn btn-ghost" data-act="back-home">'+(reefNight() ? '⚓ Back to the wreck' : '🪸 Back to the reef')+'</button>' +
-            '<button class="btn btn-ghost" data-act="reef-treasure">🐠 My Aquarium</button>' +
-          '</div>') +
-        '</div>' +
-      '</div>';
-    wireErrorBanner();
-    wirePlanNext();
-    var chest = app.querySelector('[data-reef-friend]');
-    if(chest){
-      var sayIt = function(){ try { Speech.speak(head + ' ' + find.fact); } catch(e){} };
-      chest.addEventListener('click', sayIt);
-      if(!S.reefSaid || S.reefSaid !== S.reefFind){ S.reefSaid = S.reefFind; setTimeout(sayIt, reefCalm() ? 200 : 900); }
-    }
-    if(S.planRun) return;
-    app.querySelector('[data-act="back-home"]').addEventListener('click', function(){ S.reefPlace = null; S.subjectFilter = 'all'; goHome(); });
-    app.querySelector('[data-act="play-again"]').addEventListener('click', function(){ reefGo('dive', null, function(){ startStudy(S.currentDeckId); }); });
-    app.querySelector('[data-act="reef-treasure"]').addEventListener('click', function(){ goHomeNow(); S.view = 'collection'; render(); });
   }
   /* ---------- My Aquarium: the sea friends she has found live in a glass tank ----------
      Swimmers cross the tank and turn at the glass, bottom-dwellers creep along the sand, jellyfish drift up and
@@ -11789,6 +11747,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   }
   function reefBoardMenuSync(){
     reefBoardMenuClose();
+    if(!reefGame()) return;   // a child profile has the plain deck library: its buttons stay in the top bar
     var bar = document.querySelector('.cv3-hero .topbar > :last-child') || document.querySelector('.rb-actions'); if(!bar || bar.querySelector('.r3-menubtn')) return;
     var b = document.createElement('button'); b.type = 'button'; b.className = 'icon-btn r3-menubtn'; b.setAttribute('aria-label', 'Menu'); b.setAttribute('aria-haspopup', 'menu'); b.setAttribute('aria-expanded', 'false'); b.title = 'Menu';
     b.innerHTML = ccIcon('menu'); b.addEventListener('click', function(){ reefBoardMenuOpen(b); });
@@ -12711,7 +12670,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   }
   function reefStartDeck(id){
     var d = S.decks.find(function(x){ return x.id === id; });
-    R3.fromDeck = true;   // back on the board after this deck (finished or not): a cheer, then the dice
+    if(reefGame()) R3.fromDeck = true;   // back on the board after this deck (finished or not): a cheer, then the dice
     R3.lastDeckId = id;
     if(d && d.feedMode) startFeed(id);
     else if(d && d.storyMode) startStory(id);
@@ -12865,7 +12824,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   }
 
   // Coral Classroom, for the app: is it on for this profile, and which unit is she on (the earliest not finished)?
-  function reefCourseOn(){ var p = S.profile; if(!p) return false; return p.courseOn != null ? !!p.courseOn : /^wendy$/i.test(p.id || '') || /^wendy$/i.test(p.name || ''); }
+  function reefCourseOn(){ var p = S.profile; if(!p || p.mode === 'child') return false; return p.courseOn != null ? !!p.courseOn : /^wendy$/i.test(p.id || '') || /^wendy$/i.test(p.name || ''); }
   function reefCourseNow(){
     var co = reefCourseOn() && S.profile.course; if(!co || !co.units) return null;
     for(var i = 0; i < co.units.length; i++) if(!co.units[i].done) return { co: co, unit: co.units[i], i: i };
@@ -17677,7 +17636,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
 
   // Shown on the board, once nothing else is on screen
   afterRender('whats new', function(){
-    if(!S.profile || S.view !== 'home' || reefWhatsNew.waiting) return;
+    if(!S.profile || S.profile.mode === 'child' || S.view !== 'home' || reefWhatsNew.waiting) return;
     try { if(localStorage.getItem('cc-tour-off')) return; } catch(e){}   // tests turn it off, then open it themselves
     var seen = whatsNewSeen();
     if(!REEF_WHATS_NEW.some(function(e){ return seen.indexOf(e.id) < 0 && whatsNewSteps([e]).length; })) return;
@@ -28875,7 +28834,7 @@ body.reef-calm .cc-nudge, body.reef-calm .feed-stage.cc-nudge::after{ animation-
   .nav-row .back-btn, .nav-row .icon-btn{ min-height:36px; height:36px; }
   .nav-row .icon-btn{ width:36px; min-width:36px; }
   .critter-label{ display:none; }
-  .critter-track{ margin:4px 60px 8px; }
+  .critter-track{ margin:16px 60px 8px; }
   body .stage.stage, body.reef-kid .stage.has-buddy, body .stage.has-buddy{ display:flex; flex-direction:column; flex-wrap:wrap; align-content:center; justify-content:center;
     column-gap:18px; height:var(--stage-h, auto); min-height:0; padding:10px 14px; box-sizing:border-box; }
   .stage > .flip-scene{ flex:none; width:56%; max-width:none; height:calc(100% - 4px); margin:0; display:flex; flex-direction:column; justify-content:center; }

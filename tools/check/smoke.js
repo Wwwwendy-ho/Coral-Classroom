@@ -1,8 +1,9 @@
 /* Browser smoke test of the GitHub copy, both profiles. The site must be served on the port (run.sh does it).
    Checks, with no page errors anywhere:
    - the profile screen's super rare plastic bag: Shelly won't eat it, and a note asks to keep the ocean clean;
-   - each profile opens the 3D board (the grown-up profile through the maths question);
-   - the crab starts beside the guide, tapped fish escape, and a deck opens from the board;
+   - the grown-up profile opens the 3D board (through the maths question); the child profile opens the plain deck
+     grid, with no board, sea chart or board music, and a deck opens from the grid and returns to it;
+   - on the grown-up board the crab starts beside the guide, tapped fish escape, and a deck opens from the board;
    - the grown-up checks: a wrong answer gives a new question, Cancel goes back, the right answer opens; inside a
      grown-up profile nothing asks again (leaving a deck, Library settings, Edit Mode), while the child's Edit
      Mode and Library settings still ask; the Library's home has a tab per learning goal, with Next up and today's count;
@@ -61,28 +62,24 @@ async function newPage(browser) {
   check('profile screen: no page errors', !p.errors.length, p.errors.join(' / '));
   await p.context().close();
 
-  // Child: board, crab, fish, Ask Shelly offline, Library, a deck, leaving it early
+  // Child: the deck grid (no board), Ask Shelly offline, Library, a deck, leaving it early
   p = await newPage(browser);
   await enter(p, 'child', { port });
-  const b = await p.evaluate(() => {
-    const v = window.__reef3dView(); if (!v) return { board: false };
-    const g = v.guide.position, c = v.crab && v.crab.position;
-    const sc = v.schools[0], rc = v.renderer.domElement.getBoundingClientRect(), pt = sc.fish[0].position.clone().project(v.cam);
-    const x = rc.left + (pt.x + 1) / 2 * rc.width, y = rc.top + (1 - pt.y) / 2 * rc.height;
-    v.renderer.domElement.dispatchEvent(new PointerEvent('pointerdown', { clientX: x, clientY: y, bubbles: true }));
-    v.renderer.domElement.dispatchEvent(new MouseEvent('click', { clientX: x, clientY: y, bubbles: true }));
-    return { board: true, crabGap: c ? Math.hypot(c.x - g.x, c.z - g.z) : null, fled: !!sc.flee, warmed: v.warmed };
-  });
-  check('child: the 3D board opens', b.board);
-  check('What\'s new: every step points at something on the board', !(await p.evaluate(() => window.__whatsNewMissing())).length, (await p.evaluate(() => window.__whatsNewMissing())).join(', '));
-  await p.evaluate(() => window.__whatsNewShow()); await p.waitForTimeout(500);
-  const tourOn = await p.isVisible('.cc-tour .cc-tour-card');
-  await p.click('[data-tour-skip]').catch(() => {}); await p.waitForTimeout(500);
-  check('What\'s new: the walkthrough opens and Skip closes it', tourOn && !(await p.$('.cc-tour')));
+  // A child profile gets the plain deck library: the grid of flashcard decks, no 3D board, sea chart or regions
+  const home = await p.evaluate(() => ({
+    grid: document.querySelectorAll('.deck-grid .deck-card').length, decks: document.querySelectorAll('.deck-grid [data-act="study"]').length,
+    board: !!(document.querySelector('.r3') || document.querySelector('.r3 canvas') || window.__reef3dView && window.__reef3dView()),
+    boardUi: !!document.querySelector('.r3-menubtn, [data-r3-map], [data-r3-dice], .rw-scene, .rb-root, .r3-voybtn, [data-whats-new]'),
+    tabs: document.querySelectorAll('.subject-tabs .subject-tab').length,
+    gridShown: (() => { const g = document.querySelector('.deck-grid'); return !!g && !g.hidden && g.getBoundingClientRect().height > 100; })(),
+    ctrls: !!document.querySelector('[data-act="switch-profile"]') && !!document.querySelector('[data-act="toggle-sound"]') && !!document.querySelector('[data-act="open-library"]'),
+    full: document.body.classList.contains('r3-full')
+  }));
+  check('child: the home screen is the deck grid', home.gridShown && home.decks > 0, home.decks + ' decks');
+  check('child: no 3D board, sea chart or board buttons', !home.board && !home.boardUi && !home.full);
+  check('child: subject tabs, sound, switch profile and Library are on the home screen', home.tabs > 1 && home.ctrls, home.tabs + ' tabs');
+  check('child: no board music is chosen', await p.evaluate(() => { const m = window.__reefMusicState && window.__reefMusicState(); return !m || !m.target; }));
   check('the designed fonts are on (Fredoka, Nunito Sans)', await p.evaluate(async () => { await document.fonts.ready; return document.fonts.check('600 20px Fredoka') && [...document.fonts].some(f => f.family.replace(/"/g, '') === 'Fredoka' && f.status === 'loaded'); }));
-  check('child: the crab starts beside the guide', b.crabGap > 1 && b.crabGap < 5, 'gap ' + (b.crabGap || 0).toFixed(2));
-  check('child: tapped fish escape', b.fled);
-  check('child: effect shaders are prepared while loading', b.warmed > 0, b.warmed + ' shaders');
   await p.context().setOffline(true);
   await p.click('#askBtn');
   for (const [q, want] of [['turtle', /shell/], ['puppies', /form of “puppy”/], ['好', /hǎo/], ['火車', /train/], ['거북이', /geobuki/]]) {
@@ -102,9 +99,9 @@ async function newPage(browser) {
   await p.click('[data-view="settings"]'); await p.waitForTimeout(800);
   check('child: Library settings ask the maths question', await p.evaluate(() => !!document.getElementById('clibPin')));
   await closeLibrary(p);
-  await p.waitForFunction(() => { const v = window.__reef3dView(); if(v && v.dice) window.__reef3dGo(v.at); return v && !v.moving && !v.flyIn && !v.dice; }, null, { timeout:60000 });
-  const deck = await p.evaluate(nearestDeck); await p.waitForFunction(() => !document.querySelector('.r3 canvas'), null, { timeout:60000 });
-  check('child: a deck opens from the board', await p.evaluate(() => !document.querySelector('.r3 canvas')), deck);
+  const deck = await p.evaluate(() => { const b = document.querySelector('.deck-grid [data-act="study"]:not([disabled])'); const n = b.closest('.deck-card').querySelector('.deck-name').textContent; b.click(); return n; });
+  await p.waitForSelector('.stage, .feed-card-current, [data-act^="exit-"]', { timeout: 30000 });
+  check('child: a deck opens from the grid', await p.evaluate(() => !document.querySelector('.r3 canvas') && !document.querySelector('.deck-grid')), deck);
   await p.waitForSelector('[data-act^="exit-"], [data-act="back-home"], [aria-label^="Close"]');
   const exit = await p.$('[data-act^="exit-"], [data-act="back-home"], [aria-label^="Close"]');
   if (exit) { await exit.click(); await p.waitForTimeout(1200); }
@@ -113,7 +110,7 @@ async function newPage(browser) {
   if (sub.length === 2) {
     for (const d of String(+sub[0] - +sub[1])) await p.locator('button', { hasText: new RegExp('^' + d + '$') }).first().click();
     await p.locator('button', { hasText: /^(OK|Check|Done)$/ }).first().click().catch(() => {}); await p.waitForTimeout(4000);
-    check('child: the right answer returns to the board', await p.evaluate(() => !!document.querySelector('.r3 canvas')));
+    check('child: the right answer returns to the deck grid', await p.waitForSelector('.deck-grid .deck-card', { timeout: 15000 }).then(() => true, () => false) && await p.evaluate(() => !document.querySelector('.r3 canvas') && !document.querySelector('.r3')));
   }
   await menuPick(p, 'Edit decks'); await p.waitForTimeout(800);
   check('child: Edit Mode asks the maths question', !!(await p.$('.reef-gate')));
@@ -135,6 +132,18 @@ async function newPage(browser) {
   check('Cancel goes back to the profiles', !!(await p.$('[data-profile="wendy"]')));
   await p.click('[data-profile="wendy"]'); await p.waitForTimeout(1200); await solveGate(p); await p.waitForTimeout(8000);
   check('the right answer opens the board', await p.evaluate(() => !!(window.__reef3dView && window.__reef3dView())));
+  const b = await p.evaluate(() => {
+    const v = window.__reef3dView(); if (!v) return { board: false };
+    const g = v.guide.position, c = v.crab && v.crab.position;
+    const sc = v.schools[0], rc = v.renderer.domElement.getBoundingClientRect(), pt = sc.fish[0].position.clone().project(v.cam);
+    const x = rc.left + (pt.x + 1) / 2 * rc.width, y = rc.top + (1 - pt.y) / 2 * rc.height;
+    v.renderer.domElement.dispatchEvent(new PointerEvent('pointerdown', { clientX: x, clientY: y, bubbles: true }));
+    v.renderer.domElement.dispatchEvent(new MouseEvent('click', { clientX: x, clientY: y, bubbles: true }));
+    return { board: true, crabGap: c ? Math.hypot(c.x - g.x, c.z - g.z) : null, fled: !!sc.flee, warmed: v.warmed };
+  });
+  check('grown-up: the crab starts beside the guide', b.crabGap > 1 && b.crabGap < 5, 'gap ' + (b.crabGap || 0).toFixed(2));
+  check('grown-up: tapped fish escape', b.fled);
+  check('grown-up: effect shaders are prepared while loading', b.warmed > 0, b.warmed + ' shaders');
   await p.waitForFunction(() => { const v = window.__reef3dView(); if(v && v.dice) window.__reef3dGo(v.at); return v && !v.moving && !v.flyIn && !v.dice; }, null, { timeout:60000 });
   const d2 = await p.evaluate(nearestDeck); await p.waitForFunction(() => !document.querySelector('.r3 canvas'), null, { timeout:60000 });
   check('grown-up: a deck opens from the board', await p.evaluate(() => !document.querySelector('.r3 canvas')), d2);
@@ -154,6 +163,10 @@ async function newPage(browser) {
   check('grown-up: a missed Korean card goes in My words, and its tile appears on the board', !!missed && mw.tile && mw.due.some(e => e.from === 'missed' && e.ko && e.en),
     (missed || 'no card to miss') + ' → ' + mw.due.map(e => e.ko + ' = ' + e.en).join(', '));
   check('grown-up: What\'s new: every step points at something on the board', !(await p.evaluate(() => window.__whatsNewMissing())).length, (await p.evaluate(() => window.__whatsNewMissing())).join(', '));
+  await p.evaluate(() => window.__whatsNewShow()); await p.waitForTimeout(500);
+  const tourOn = await p.isVisible('.cc-tour .cc-tour-card');
+  await p.click('[data-tour-skip]').catch(() => {}); await p.waitForTimeout(500);
+  check('grown-up: What\'s new: the walkthrough opens and Skip closes it', tourOn && !(await p.$('.cc-tour')));
   // Story Lagoon: open from the sea chart, a story opens, and a tapped word shows its meaning
   await p.click('[data-r3-map]'); await p.waitForTimeout(1200);
   await p.click('.r3-map-tab[data-sea-tab="sea"]'); await p.waitForTimeout(400);
