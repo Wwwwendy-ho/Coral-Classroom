@@ -31,6 +31,8 @@ See `CHANGELOG.md` for what changed in each update, and `ARCHITECTURE.md` for ho
 | `tools/compose_music.py` | Makes the background songs |
 | `tools/claude-proxy-worker.js` | The optional Claude helper for the Library (see below) |
 | `ARCHITECTURE.md` | How the code is organised: where each part is and how they fit together |
+| `docs/LEARNING_DESIGN.md` | The plan for the teaching side: what the game should teach, how, and the order to build it (not built yet) |
+| `docs/ADAPTIVE_TEACHER.md` | The plan for how the game adjusts itself to the learner, like a teacher (not built yet) |
 | `CHANGELOG.md` | What changed in each version |
 
 ## Upload to GitHub
