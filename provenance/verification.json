@@ -1,0 +1,100 @@
+{
+  "python3 tools/build.py --check": {
+    "exit_code": 0,
+    "stdout": "build: index.html matches src/\n",
+    "stderr": ""
+  },
+  "node --check storage.js": {
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "node --check seed-data.js": {
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "node tools/check/region_expansion_test.js": {
+    "exit_code": 0,
+    "stdout": "Region    Plain      Learning   ?          Chance     Total\nlagoon    10 \u2192 13    12 \u2192 15    5 \u2192 7      2 \u2192 3      35 \u2192 44\ntown      10 \u2192 13    8 \u2192 10     5 \u2192 7      2 \u2192 3      31 \u2192 39\ncaves     12 \u2192 16    3 \u2192 4      7 \u2192 9      2 \u2192 3      30 \u2192 38\npatterns  10 \u2192 13    12 \u2192 15    5 \u2192 7      2 \u2192 3      35 \u2192 44\nbeach     10 \u2192 13    13 \u2192 16    5 \u2192 7      2 \u2192 3      36 \u2192 45\nlight     9 \u2192 12     18 \u2192 22    5 \u2192 7      2 \u2192 3      40 \u2192 50\ncaptain   12 \u2192 16    3 \u2192 4      7 \u2192 9      2 \u2192 3      30 \u2192 38\nExpanded circuits, tile clearance, branch identities, saved positions, learning sources, surprise depletion and Chance dispatch passed.\n",
+    "stderr": ""
+  },
+  "node tools/check/test_surprise_blocks.js": {
+    "exit_code": 0,
+    "stdout": "surprise block tests passed\n",
+    "stderr": ""
+  },
+  "html_classic_script_parse": {
+    "count": 10,
+    "files": [
+      {
+        "file": "game/index.html",
+        "script_index": 5
+      },
+      {
+        "file": "game/index.html",
+        "script_index": 6
+      },
+      {
+        "file": "game/index.html",
+        "script_index": 7
+      },
+      {
+        "file": "review-site/shelly.html",
+        "script_index": 0
+      },
+      {
+        "file": "review-site/shelly.html",
+        "script_index": 1
+      },
+      {
+        "file": "review-site/shelly.html",
+        "script_index": 2
+      },
+      {
+        "file": "review-site/shelly-options.html",
+        "script_index": 0
+      },
+      {
+        "file": "review-site/play/index.html",
+        "script_index": 0
+      },
+      {
+        "file": "review-site/play/index.html",
+        "script_index": 6
+      },
+      {
+        "file": "review-site/play/index.html",
+        "script_index": 7
+      }
+    ],
+    "passed": true
+  },
+  "html_reference_inventory": {
+    "checked": 109,
+    "unresolved": [],
+    "note": "Resolves the supplied local server shared-game-asset fallback; includes strings inside JS templates."
+  },
+  "credential_pattern_scan": {
+    "matched_files": [],
+    "scope": "Common HF/GitHub/Anthropic token and private-key formats; not a guarantee for every possible secret format."
+  },
+  "privacy": {
+    "seed_profile": "Fictional Demo Explorer only in both game and derived play preview",
+    "canonical_storage_namespace": "coralClassroom.geminiHandoff.demo.v1",
+    "excluded": [
+      ".git",
+      "node_modules",
+      ".openai",
+      ".env*",
+      "original personal seed"
+    ]
+  },
+  "not_run": [
+    "Browser execution / touch smoke",
+    "Current in-game screenshot capture",
+    "Physical iPhone XS performance profile",
+    "Blender rerender of character assets",
+    "Latest reference reconstruction"
+  ]
+}

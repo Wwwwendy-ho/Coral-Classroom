@@ -1,0 +1,25 @@
+{
+  "base_head": "7d9ecc211105d17ba9d15000e55d6714c11ba7f5",
+  "branch": "claude/board-fixes",
+  "changes_to_game_snapshot": {
+    "seed-data.js": "Replaced private seed with fictional Demo Explorer seed from isolated review",
+    "storage.js": "Changed coralCove.db.v1 to coralClassroom.geminiHandoff.demo.v1"
+  },
+  "fable_revision": "5fe853303572fef67d777c1eb77cf3567ca31d60",
+  "fable_blobs": {
+    "LEARNING_DESIGN.md": "cd880840d54b9f6058a0dd0ee59a35605dcb1054",
+    "ADAPTIVE_TEACHER.md": "75da90ae3b5272c95340a4b16f893a331320c1d6"
+  },
+  "omitted_file_patterns": [
+    ".git/",
+    "node_modules/",
+    "__pycache__/",
+    ".env*",
+    ".openai/",
+    "build/",
+    "*.blend1",
+    "*.blend2",
+    "*.zip",
+    "*.tar.gz"
+  ]
+}

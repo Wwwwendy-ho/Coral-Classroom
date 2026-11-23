@@ -1,0 +1,84 @@
+M .gitignore
+ M ARCHITECTURE.md
+ M CHANGELOG.md
+ M MUSIC_CREDITS.md
+ M index.html
+ M library.js
+ M region-beach-song.mp3
+ M region-captain-song.mp3
+ M region-caves-song.mp3
+ M region-lagoon-song.mp3
+ M region-light-song.mp3
+ M region-patterns-song.mp3
+ M region-town-song.mp3
+ M src/css/reef-3d.css
+ M src/css/reef.css
+ M src/css/region-boards.css
+ M src/js/boot.js
+ M src/js/data.js
+ M src/js/grown-up-screens.js
+ M src/js/learning.js
+ M src/js/library-api.js
+ M src/js/music.js
+ M src/js/reef.js
+ M src/js/reef3d/board.js
+ M src/js/reef3d/day-night.js
+ M src/js/reef3d/dice.js
+ M src/js/reef3d/lobby.js
+ M src/js/reef3d/party.js
+ M src/js/reef3d/region-scenery.js
+ M src/js/reef3d/scenes.js
+ M src/js/reef3d/seamap.js
+ M src/js/region-boards.js
+ M src/js/screens.js
+ M src/js/town.js
+ M src/js/whats-new.js
+ M src/page.html
+ M sw.js
+ M tools/build_claude.py
+ M tools/check/smoke.js
+ M tools/check/steps.js
+ M tools/compose_regions.py
+?? art-source/
+?? assets/
+?? docs/
+?? src/css/encounter-stage.css
+?? src/css/region-people.css
+?? src/js/reef3d/crafted-world.js
+?? src/js/reef3d/encounter-stage.js
+?? src/js/reef3d/region-people.js
+?? src/js/reef3d/resident-models.js
+?? src/js/reef3d/shelly.js
+?? src/js/reef3d/tile-art.js
+?? src/js/reef3d/world-detail.js
+?? src/js/reef3d/world-overview.js
+?? src/js/reef3d/world-routes.js
+?? src/js/reef3d/world-surfaces.js
+?? src/js/region-practice.js
+?? tools/art/
+?? tools/check/cafe_resident_asset_test.js
+?? tools/check/color_pipeline_test.js
+?? tools/check/encounter_quality_test.js
+?? tools/check/fixtures/
+?? tools/check/grown_up_password_test.js
+?? tools/check/npc_worlds_smoke.js
+?? tools/check/qblock_visual_test.js
+?? tools/check/region_expansion_test.js
+?? tools/check/region_people_actual_test.js
+?? tools/check/region_people_bounds_test.js
+?? tools/check/region_people_opening_test.js
+?? tools/check/region_reactions_test.js
+?? tools/check/region_resident_cast_test.js
+?? tools/check/region_resident_close_test.js
+?? tools/check/region_resident_mask_render_test.js
+?? tools/check/region_resident_models_test.js
+?? tools/check/region_scenery_geometry_test.js
+?? tools/check/resident_asset_test.js
+?? tools/check/resident_world_assets_test.js
+?? tools/check/shelly_mouth_asset_test.py
+?? tools/check/shelly_preview_source_test.js
+?? tools/check/shelly_smoke.js
+?? tools/check/speech_cancellation_test.js
+?? tools/check/test_surprise_blocks.js
+?? tools/check/test_travel.js
+?? tools/check/world_surfaces_test.js
