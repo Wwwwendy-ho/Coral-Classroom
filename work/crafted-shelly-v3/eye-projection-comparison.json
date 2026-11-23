@@ -1,0 +1,182 @@
+[
+  {
+    "file": "/workspace/work/crafted-shelly-v2/crafted-shelly.glb",
+    "scope": "Pupil vertex projection; no occlusion or GPU shading; not a perceptual score",
+    "views": [
+      {
+        "eye": "EyeL",
+        "elevation": 15,
+        "yaw": 0,
+        "dark_vertices": 260,
+        "projected_axis_ratio": 0.767
+      },
+      {
+        "eye": "EyeL",
+        "elevation": 15,
+        "yaw": 30,
+        "dark_vertices": 260,
+        "projected_axis_ratio": 0.398
+      },
+      {
+        "eye": "EyeL",
+        "elevation": 50,
+        "yaw": 0,
+        "dark_vertices": 260,
+        "projected_axis_ratio": 0.533
+      },
+      {
+        "eye": "EyeL",
+        "elevation": 50,
+        "yaw": 30,
+        "dark_vertices": 260,
+        "projected_axis_ratio": 0.371
+      },
+      {
+        "eye": "EyeL",
+        "elevation": 80,
+        "yaw": 0,
+        "dark_vertices": 260,
+        "projected_axis_ratio": 0.405
+      },
+      {
+        "eye": "EyeL",
+        "elevation": 80,
+        "yaw": 30,
+        "dark_vertices": 260,
+        "projected_axis_ratio": 0.354
+      },
+      {
+        "eye": "EyeR",
+        "elevation": 15,
+        "yaw": 0,
+        "dark_vertices": 260,
+        "projected_axis_ratio": 0.767
+      },
+      {
+        "eye": "EyeR",
+        "elevation": 15,
+        "yaw": 30,
+        "dark_vertices": 260,
+        "projected_axis_ratio": 0.714
+      },
+      {
+        "eye": "EyeR",
+        "elevation": 50,
+        "yaw": 0,
+        "dark_vertices": 260,
+        "projected_axis_ratio": 0.533
+      },
+      {
+        "eye": "EyeR",
+        "elevation": 50,
+        "yaw": 30,
+        "dark_vertices": 260,
+        "projected_axis_ratio": 0.621
+      },
+      {
+        "eye": "EyeR",
+        "elevation": 80,
+        "yaw": 0,
+        "dark_vertices": 260,
+        "projected_axis_ratio": 0.405
+      },
+      {
+        "eye": "EyeR",
+        "elevation": 80,
+        "yaw": 30,
+        "dark_vertices": 260,
+        "projected_axis_ratio": 0.443
+      }
+    ]
+  },
+  {
+    "file": "/workspace/work/crafted-shelly-v3/crafted-shelly.glb",
+    "scope": "Pupil vertex projection; no occlusion or GPU shading; not a perceptual score",
+    "views": [
+      {
+        "eye": "EyeL",
+        "elevation": 15,
+        "yaw": 0,
+        "dark_vertices": 289,
+        "projected_axis_ratio": 0.747
+      },
+      {
+        "eye": "EyeL",
+        "elevation": 15,
+        "yaw": 30,
+        "dark_vertices": 289,
+        "projected_axis_ratio": 0.589
+      },
+      {
+        "eye": "EyeL",
+        "elevation": 50,
+        "yaw": 0,
+        "dark_vertices": 289,
+        "projected_axis_ratio": 0.955
+      },
+      {
+        "eye": "EyeL",
+        "elevation": 50,
+        "yaw": 30,
+        "dark_vertices": 289,
+        "projected_axis_ratio": 0.883
+      },
+      {
+        "eye": "EyeL",
+        "elevation": 80,
+        "yaw": 0,
+        "dark_vertices": 289,
+        "projected_axis_ratio": 0.78
+      },
+      {
+        "eye": "EyeL",
+        "elevation": 80,
+        "yaw": 30,
+        "dark_vertices": 289,
+        "projected_axis_ratio": 0.756
+      },
+      {
+        "eye": "EyeR",
+        "elevation": 15,
+        "yaw": 0,
+        "dark_vertices": 289,
+        "projected_axis_ratio": 0.929
+      },
+      {
+        "eye": "EyeR",
+        "elevation": 15,
+        "yaw": 30,
+        "dark_vertices": 289,
+        "projected_axis_ratio": 0.775
+      },
+      {
+        "eye": "EyeR",
+        "elevation": 50,
+        "yaw": 0,
+        "dark_vertices": 289,
+        "projected_axis_ratio": 0.818
+      },
+      {
+        "eye": "EyeR",
+        "elevation": 50,
+        "yaw": 30,
+        "dark_vertices": 289,
+        "projected_axis_ratio": 0.85
+      },
+      {
+        "eye": "EyeR",
+        "elevation": 80,
+        "yaw": 0,
+        "dark_vertices": 289,
+        "projected_axis_ratio": 0.727
+      },
+      {
+        "eye": "EyeR",
+        "elevation": 80,
+        "yaw": 30,
+        "dark_vertices": 289,
+        "projected_axis_ratio": 0.759
+      }
+    ]
+  }
+]

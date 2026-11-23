@@ -1,0 +1,9 @@
+{
+  "pages_checked": 3,
+  "model_assets_sha256_verified": 3,
+  "matching_loading_avatar": true,
+  "runtime_model_and_six_clips": "runtime-audit.json",
+  "world_geometry_cases": 30,
+  "browser_tested": false,
+  "phone_measured": false
+}

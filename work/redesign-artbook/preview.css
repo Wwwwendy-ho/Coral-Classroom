@@ -1,0 +1,33 @@
+/* Crafted in-engine review surface: keeps the existing game readable and usable. */
+html,body{background:#d8eef0;color:#183b46}
+.r3-load-guide .crafted-guide-image{width:100%;height:auto;display:block;filter:drop-shadow(0 10px 14px #0a3d4a40)}
+body{--crafted-ink:#183b46;--crafted-navy:#173f59;--crafted-ivory:#fffdf6;--crafted-mint:#d9f0e4;--crafted-lilac:#eee3f5;--crafted-peach:#fae1d5}
+#craftedPreviewNotice{position:relative;z-index:100000;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px;box-sizing:border-box;padding:7px 16px;background:#fffdf6;color:#183b46;border-bottom:1px solid #d8cbaa;font:600 14px/1.3 system-ui,sans-serif}
+#craftedPreviewNotice strong{font-weight:800}
+#craftedPreviewNotice a{color:#173f59;text-underline-offset:3px;font-weight:800;white-space:nowrap}
+#craftedPreviewNotice .craftedPreviewActions{display:flex;align-items:center;gap:14px}
+#craftedPreviewNotice button{border:1px solid #c4d8ca;border-radius:999px;padding:6px 12px;background:#d9f0e4;color:#173f59;font:700 14px/1.2 system-ui,sans-serif;cursor:pointer}
+body.r3-full .r3{top:48px!important;height:calc(100dvh - 48px)!important}
+body.r3-full .cv3-hero{top:48px}
+body.r3-full .rw-head{top:calc(max(10px,env(safe-area-inset-top,0px)) + 138px)}
+body:has(#craftedPreviewNotice) .r3-hud span{background:#fffdf6!important;color:#183b46!important;border-color:#e3d7bd!important}
+body:has(#craftedPreviewNotice) .r3-btn{background:#f8f4fc;color:#173f59;box-shadow:0 4px 0 #baadc8}
+body:has(#craftedPreviewNotice) .r3-btn.main{background:linear-gradient(180deg,#ddf7ef,#a6dcd9);color:#173f59;box-shadow:0 4px 0 #80babc}
+body:has(#craftedPreviewNotice) .r3-gamesbtn,body:has(#craftedPreviewNotice) .r3-themebtn,body:has(#craftedPreviewNotice) .r3-musicbtn{background:#fffdf6;color:#173f59;box-shadow:0 4px 0 #b5bdce,0 8px 16px #173f591c}
+body:has(#craftedPreviewNotice) .r3-bubble,body:has(#craftedPreviewNotice) .r3-panel-card{background:#fffdf8;color:#173f59}
+body:has(#craftedPreviewNotice) .r3-mapbtn{background:linear-gradient(180deg,#eee3f5,#ded0eb)!important;color:#173f59!important;box-shadow:0 4px 0 #b8a5c8,0 8px 16px rgba(23,63,89,.16)!important}
+body:has(#craftedPreviewNotice) .r3-die-pick{background:#fffdf6!important;color:#173f59!important}
+body:has(#craftedPreviewNotice) .r3-die-pick[aria-pressed="true"]{background:#d9f0e4!important;color:#173f59!important}
+body:has(#craftedPreviewNotice) .r3-dice-tip{background:linear-gradient(180deg,#fffdf6,#d9f0e4)!important;color:#173f59!important;box-shadow:0 5px 0 #9fcdbc,0 10px 20px rgba(23,63,89,.17)!important}
+body:has(#craftedPreviewNotice) #coveMain{min-height:calc(100dvh - 41px)}
+body:has(#craftedPreviewNotice) #app .btn,
+body:has(#craftedPreviewNotice) #app button{border-radius:15px;box-shadow:0 3px 0 rgba(23,63,89,.12)}
+body:has(#craftedPreviewNotice) #app .btn-primary{background:linear-gradient(180deg,#d9f0e4,#bde3d4);border-color:#9fcdbc;color:#173f59}
+body:has(#craftedPreviewNotice) #app .btn-ghost{background:#fffdf6;border-color:#d8cbaa;color:#173f59}
+body:has(#craftedPreviewNotice) #app .deck-card,
+body:has(#craftedPreviewNotice) #app .home-card,
+body:has(#craftedPreviewNotice) #app .profile-card{border-color:#e3d7bd;background:#fffdf6;color:#183b46;box-shadow:0 8px 22px rgba(25,73,82,.11)}
+body:has(#craftedPreviewNotice) #app h1,
+body:has(#craftedPreviewNotice) #app h2,
+body:has(#craftedPreviewNotice) #app h3{color:#173f59}
+@media(max-width:520px){#craftedPreviewNotice{padding:7px 10px}#craftedPreviewNotice>span{display:none}#craftedPreviewNotice .craftedPreviewActions{gap:8px;width:100%;justify-content:space-between}#craftedPreviewNotice button{padding:6px 8px;font-size:14px}body:has(#craftedPreviewNotice) #coveMain{min-height:calc(100dvh - 48px)}}

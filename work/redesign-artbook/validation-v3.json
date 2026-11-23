@@ -1,0 +1,9 @@
+{
+  "pages": 3,
+  "model_and_loading_hashes": 3,
+  "comparison_image_decoded": true,
+  "viewer_top_control": true,
+  "six_animation_clips": "/workspace/work/crafted-shelly-v3/runtime-audit.json",
+  "world_builders_unchanged": true,
+  "browser_tested": false
+}

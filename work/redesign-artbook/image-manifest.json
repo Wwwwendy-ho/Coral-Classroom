@@ -1,0 +1,102 @@
+[
+  {
+    "id": "coral-cove",
+    "source": "/workspace/generated_images/exec-c5c0781d-ccec-4077-83d0-c86a1737c794.png",
+    "asset": "/workspace/sites/coral-classroom-redesign-artbook/dist/assets/coral-cove-anatomy-2.webp",
+    "dimensions": [
+      1670,
+      941
+    ],
+    "bytes": 343290
+  },
+  {
+    "id": "characters",
+    "source": "/workspace/generated_images/exec-79f14c49-7e47-42ff-8188-b71574bad748.png",
+    "asset": "/workspace/sites/coral-classroom-redesign-artbook/dist/assets/characters.webp",
+    "dimensions": [
+      1670,
+      941
+    ],
+    "bytes": 316922
+  },
+  {
+    "id": "encounter",
+    "source": "/workspace/generated_images/exec-6d607655-fe88-4915-b5a7-4701e0f3f151.png",
+    "asset": "/workspace/sites/coral-classroom-redesign-artbook/dist/assets/encounter.webp",
+    "dimensions": [
+      1671,
+      941
+    ],
+    "bytes": 228384
+  },
+  {
+    "id": "harbor",
+    "source": "/workspace/generated_images/exec-5832ecc9-6b11-41a8-83ed-d38c23fdd2ed.png",
+    "asset": "/workspace/sites/coral-classroom-redesign-artbook/dist/assets/harbor.webp",
+    "dimensions": [
+      1670,
+      941
+    ],
+    "bytes": 385880
+  },
+  {
+    "id": "lagoon-caves",
+    "source": "/workspace/generated_images/exec-aa179af6-bfc9-4c8c-8efc-182d1e464781.png",
+    "asset": "/workspace/sites/coral-classroom-redesign-artbook/dist/assets/lagoon-caves.webp",
+    "dimensions": [
+      1752,
+      897
+    ],
+    "bytes": 360120
+  },
+  {
+    "id": "patterns-beach",
+    "source": "/workspace/generated_images/exec-86ca3e04-57ab-4caa-b9d3-254e22d35d2f.png",
+    "asset": "/workspace/sites/coral-classroom-redesign-artbook/dist/assets/patterns-beach.webp",
+    "dimensions": [
+      1774,
+      887
+    ],
+    "bytes": 396356
+  },
+  {
+    "id": "lighthouse-captain",
+    "source": "/workspace/generated_images/exec-558c9835-33ef-40ee-84d3-75ac97be3f85.png",
+    "asset": "/workspace/sites/coral-classroom-redesign-artbook/dist/assets/lighthouse-captain.webp",
+    "dimensions": [
+      1774,
+      887
+    ],
+    "bytes": 380330
+  },
+  {
+    "id": "home",
+    "source": "/workspace/generated_images/exec-c408530a-e605-4ded-8bda-5903163ce671.png",
+    "asset": "/workspace/sites/coral-classroom-redesign-artbook/dist/assets/home-anatomy-2.webp",
+    "dimensions": [
+      1670,
+      942
+    ],
+    "bytes": 328332
+  },
+  {
+    "id": "world-map",
+    "source": "/workspace/generated_images/exec-4490a3d1-ebd9-4274-b144-ff28714fbe68.png",
+    "asset": "/workspace/sites/coral-classroom-redesign-artbook/dist/assets/world-map.webp",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "bytes": 382630
+  },
+  {
+    "id": "study-library",
+    "source": "/workspace/generated_images/exec-78b624a0-e19b-4379-95c0-607cf1991d5f.png",
+    "asset": "/workspace/sites/coral-classroom-redesign-artbook/dist/assets/study-library.webp",
+    "dimensions": [
+      1752,
+      897
+    ],
+    "bytes": 194424
+  }
+]

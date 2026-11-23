@@ -1,0 +1,31 @@
+{
+  "preview": "crafted in-engine demo",
+  "seedProfile": "Demo Explorer",
+  "storageKey": "coralCove.craftedPreview.db.v1",
+  "copiedRuntimeFiles": [
+    "audio-clips.js",
+    "library.js",
+    "words.js",
+    "words-data.js",
+    "three.min.js",
+    "reef-models.js",
+    "assets/models/shelly.glb",
+    "assets/models/shelly-view.glb",
+    "assets/world/world-surfaces.jpg",
+    "assets/world/shellstone-color.jpg",
+    "icon-180.png",
+    "icon-192.png",
+    "icon-512.png",
+    "manifest.webmanifest",
+    "day-song.mp3",
+    "lobby-song.mp3",
+    "game-song.mp3",
+    "deck-song.mp3",
+    "win.mp3",
+    "assets/models/crafted-shelly.glb",
+    "assets/models/crafted-shelly-view.glb",
+    "assets/models/crafted-shelly-loading.webp"
+  ],
+  "shellyVariant": "crafted-organic-3",
+  "serviceWorkerRegistrationRemoved": true
+}

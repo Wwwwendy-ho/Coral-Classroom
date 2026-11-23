@@ -1,0 +1,25 @@
+{
+  "artbook": {
+    "id": "appgdep_6affa127338c8191911e55144cd5f8e1",
+    "project_id": "appgprj_6aff9d1c53908191a4f2990af7d679bb",
+    "title": "Coral Classroom · Redesign Art Book",
+    "version_id": "appgprj_6aff9d1c53908191a4f2990af7d679bb~appgver_0a7165b1620081918dba25c6a27d72a1",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://coral-classroom-redesign-artbook.tangyelk25.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "release---6affa127338c8191911e55144cd5f8e1",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-11-20T01:23:57.366900+00:00"
+  },
+  "source": {
+    "project_id": "appgprj_6aff9d1c53908191a4f2990af7d679bb",
+    "commit_sha": "d3213c76dfe3f33a0f06a4493522b5a5a447afe9",
+    "archive": "/workspace/work/redesign-artbook/site.tar.gz",
+    "archive_bytes": 3284904
+  },
+  "anatomy_note": "Shelly home and cast illustration revised. Current live game loader source inspected with four flippers; reported six-limb screen not reproduced. No runtime model changes in this art-book release.",
+  "validation": "validation.json"
+}

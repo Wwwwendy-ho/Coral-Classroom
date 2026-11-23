@@ -1,0 +1,136 @@
+{
+  "actualGLBs": true,
+  "monotonicProportions": true,
+  "models": [
+    {
+      "id": 1,
+      "triangles": 11443,
+      "bytes": 788192,
+      "flippers": {
+        "FlipperFL": 336,
+        "FlipperRL": 210,
+        "FlipperFR": 336,
+        "FlipperRR": 210
+      },
+      "headToShellWidthRatio": 0.6822147842425402,
+      "clips": 6
+    },
+    {
+      "id": 2,
+      "triangles": 11443,
+      "bytes": 788216,
+      "flippers": {
+        "FlipperFL": 336,
+        "FlipperRL": 210,
+        "FlipperFR": 336,
+        "FlipperRR": 210
+      },
+      "headToShellWidthRatio": 0.7125206990730532,
+      "clips": 6
+    },
+    {
+      "id": 3,
+      "triangles": 11443,
+      "bytes": 788208,
+      "flippers": {
+        "FlipperFL": 336,
+        "FlipperRL": 210,
+        "FlipperFR": 336,
+        "FlipperRR": 210
+      },
+      "headToShellWidthRatio": 0.7426103261269769,
+      "clips": 6
+    },
+    {
+      "id": 4,
+      "triangles": 11443,
+      "bytes": 788196,
+      "flippers": {
+        "FlipperFL": 336,
+        "FlipperRL": 210,
+        "FlipperFR": 336,
+        "FlipperRR": 210
+      },
+      "headToShellWidthRatio": 0.772486099362916,
+      "clips": 6
+    },
+    {
+      "id": 5,
+      "triangles": 11443,
+      "bytes": 788212,
+      "flippers": {
+        "FlipperFL": 336,
+        "FlipperRL": 210,
+        "FlipperFR": 336,
+        "FlipperRR": 210
+      },
+      "headToShellWidthRatio": 0.8054332542775771,
+      "clips": 6
+    },
+    {
+      "id": 6,
+      "triangles": 11443,
+      "bytes": 788196,
+      "flippers": {
+        "FlipperFL": 336,
+        "FlipperRL": 210,
+        "FlipperFR": 336,
+        "FlipperRR": 210
+      },
+      "headToShellWidthRatio": 0.841377038246972,
+      "clips": 6
+    },
+    {
+      "id": 7,
+      "triangles": 11443,
+      "bytes": 788184,
+      "flippers": {
+        "FlipperFL": 336,
+        "FlipperRL": 210,
+        "FlipperFR": 336,
+        "FlipperRR": 210
+      },
+      "headToShellWidthRatio": 0.8802367129252628,
+      "clips": 6
+    },
+    {
+      "id": 8,
+      "triangles": 11443,
+      "bytes": 788216,
+      "flippers": {
+        "FlipperFL": 336,
+        "FlipperRL": 210,
+        "FlipperFR": 336,
+        "FlipperRR": 210
+      },
+      "headToShellWidthRatio": 0.9187346256172813,
+      "clips": 6
+    },
+    {
+      "id": 9,
+      "triangles": 11443,
+      "bytes": 788212,
+      "flippers": {
+        "FlipperFL": 336,
+        "FlipperRL": 210,
+        "FlipperFR": 336,
+        "FlipperRR": 210
+      },
+      "headToShellWidthRatio": 0.9568756122700205,
+      "clips": 6
+    },
+    {
+      "id": 10,
+      "triangles": 11443,
+      "bytes": 788184,
+      "flippers": {
+        "FlipperFL": 336,
+        "FlipperRL": 210,
+        "FlipperFR": 336,
+        "FlipperRR": 210
+      },
+      "headToShellWidthRatio": 0.9915289270962104,
+      "clips": 6
+    }
+  ]
+}

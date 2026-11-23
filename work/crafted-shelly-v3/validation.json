@@ -1,0 +1,394 @@
+[
+  {
+    "file": "crafted-shelly.glb",
+    "triangles": 23016,
+    "baseline_triangle_ceiling": 23836,
+    "bytes": 1717720,
+    "vertices": 12520,
+    "materials": 1,
+    "textures_px": [
+      [
+        2048,
+        2048
+      ],
+      [
+        512,
+        512
+      ]
+    ],
+    "bounds_xyz_m": [
+      [
+        -0.94973,
+        0.05574,
+        -1.07889
+      ],
+      [
+        0.94973,
+        1.17787,
+        1.05553
+      ]
+    ],
+    "carapace_bounds_xyz_m": [
+      [
+        -0.54481,
+        0.299,
+        -1.07889
+      ],
+      [
+        0.54481,
+        0.8407,
+        0.42799
+      ]
+    ],
+    "joints": [
+      "Root",
+      "Body",
+      "Neck",
+      "Head",
+      "EyeL",
+      "EyeR",
+      "FlipperFL",
+      "FlipperFR",
+      "FlipperRL",
+      "FlipperRR",
+      "Tail"
+    ],
+    "max_inverse_bind_matrix_error": 4.147669740994786e-08,
+    "anchors_xyz_m": {
+      "HatAnchor": [
+        0.0,
+        1.1809,
+        0.634
+      ],
+      "MouthAnchor": [
+        0.0,
+        0.8901,
+        1.027
+      ]
+    },
+    "appendages": {
+      "FlipperFL": {
+        "vertices_weight_gt_half": 638,
+        "vertex_weight_range_nonzero": [
+          0.1,
+          1.0
+        ],
+        "connected_surfaces_weight_gt_half": 1,
+        "bounds_xyz_weight_gt_half": [
+          [
+            -0.94973,
+            0.06833,
+            0.10574
+          ],
+          [
+            -0.34769,
+            0.49102,
+            0.59161
+          ]
+        ]
+      },
+      "FlipperFR": {
+        "vertices_weight_gt_half": 638,
+        "vertex_weight_range_nonzero": [
+          0.1,
+          1.0
+        ],
+        "connected_surfaces_weight_gt_half": 1,
+        "bounds_xyz_weight_gt_half": [
+          [
+            0.34769,
+            0.06833,
+            0.10574
+          ],
+          [
+            0.94973,
+            0.49102,
+            0.59161
+          ]
+        ]
+      },
+      "FlipperRL": {
+        "vertices_weight_gt_half": 435,
+        "vertex_weight_range_nonzero": [
+          0.1,
+          1.0
+        ],
+        "connected_surfaces_weight_gt_half": 1,
+        "bounds_xyz_weight_gt_half": [
+          [
+            -0.65198,
+            0.05574,
+            -0.878
+          ],
+          [
+            -0.24978,
+            0.349,
+            -0.42487
+          ]
+        ]
+      },
+      "FlipperRR": {
+        "vertices_weight_gt_half": 435,
+        "vertex_weight_range_nonzero": [
+          0.1,
+          1.0
+        ],
+        "connected_surfaces_weight_gt_half": 1,
+        "bounds_xyz_weight_gt_half": [
+          [
+            0.24978,
+            0.05574,
+            -0.878
+          ],
+          [
+            0.65198,
+            0.349,
+            -0.42487
+          ]
+        ]
+      },
+      "Tail": {
+        "vertices_weight_gt_half": 189,
+        "vertex_weight_range_nonzero": [
+          1.0,
+          1.0
+        ],
+        "connected_surfaces_weight_gt_half": 1,
+        "bounds_xyz_weight_gt_half": [
+          [
+            -0.068,
+            0.202,
+            -0.97
+          ],
+          [
+            0.068,
+            0.307,
+            -0.791
+          ]
+        ]
+      }
+    },
+    "animations": {
+      "Idle": {
+        "channels": 33,
+        "duration_s": 3.042
+      },
+      "Swim": {
+        "channels": 33,
+        "duration_s": 2.042
+      },
+      "Turn": {
+        "channels": 33,
+        "duration_s": 2.042
+      },
+      "Happy": {
+        "channels": 33,
+        "duration_s": 2.042
+      },
+      "Curious": {
+        "channels": 33,
+        "duration_s": 2.542
+      },
+      "Celebrate": {
+        "channels": 33,
+        "duration_s": 3.042
+      }
+    }
+  },
+  {
+    "file": "crafted-shelly-view.glb",
+    "triangles": 11443,
+    "baseline_triangle_ceiling": 11947,
+    "bytes": 788124,
+    "vertices": 6437,
+    "materials": 1,
+    "textures_px": [
+      [
+        1024,
+        1024
+      ],
+      [
+        512,
+        512
+      ]
+    ],
+    "bounds_xyz_m": [
+      [
+        -0.947,
+        0.05599,
+        -1.07767
+      ],
+      [
+        0.947,
+        1.17787,
+        1.0557
+      ]
+    ],
+    "carapace_bounds_xyz_m": [
+      [
+        -0.5454,
+        0.31502,
+        -1.07767
+      ],
+      [
+        0.5454,
+        0.84074,
+        0.43085
+      ]
+    ],
+    "joints": [
+      "Root",
+      "Body",
+      "Neck",
+      "Head",
+      "EyeL",
+      "EyeR",
+      "FlipperFL",
+      "FlipperFR",
+      "FlipperRL",
+      "FlipperRR",
+      "Tail"
+    ],
+    "max_inverse_bind_matrix_error": 4.147669740994786e-08,
+    "anchors_xyz_m": {
+      "HatAnchor": [
+        0.0,
+        1.1809,
+        0.634
+      ],
+      "MouthAnchor": [
+        0.0,
+        0.8901,
+        1.027
+      ]
+    },
+    "appendages": {
+      "FlipperFL": {
+        "vertices_weight_gt_half": 336,
+        "vertex_weight_range_nonzero": [
+          0.1,
+          1.0
+        ],
+        "connected_surfaces_weight_gt_half": 1,
+        "bounds_xyz_weight_gt_half": [
+          [
+            -0.947,
+            0.06847,
+            0.10587
+          ],
+          [
+            -0.344,
+            0.49364,
+            0.59115
+          ]
+        ]
+      },
+      "FlipperFR": {
+        "vertices_weight_gt_half": 336,
+        "vertex_weight_range_nonzero": [
+          0.1,
+          1.0
+        ],
+        "connected_surfaces_weight_gt_half": 1,
+        "bounds_xyz_weight_gt_half": [
+          [
+            0.344,
+            0.06847,
+            0.10587
+          ],
+          [
+            0.947,
+            0.49364,
+            0.59115
+          ]
+        ]
+      },
+      "FlipperRL": {
+        "vertices_weight_gt_half": 210,
+        "vertex_weight_range_nonzero": [
+          0.1,
+          1.0
+        ],
+        "connected_surfaces_weight_gt_half": 1,
+        "bounds_xyz_weight_gt_half": [
+          [
+            -0.65203,
+            0.05599,
+            -0.878
+          ],
+          [
+            -0.26184,
+            0.33542,
+            -0.44046
+          ]
+        ]
+      },
+      "FlipperRR": {
+        "vertices_weight_gt_half": 210,
+        "vertex_weight_range_nonzero": [
+          0.1,
+          1.0
+        ],
+        "connected_surfaces_weight_gt_half": 1,
+        "bounds_xyz_weight_gt_half": [
+          [
+            0.26184,
+            0.05599,
+            -0.878
+          ],
+          [
+            0.65203,
+            0.33542,
+            -0.44046
+          ]
+        ]
+      },
+      "Tail": {
+        "vertices_weight_gt_half": 105,
+        "vertex_weight_range_nonzero": [
+          1.0,
+          1.0
+        ],
+        "connected_surfaces_weight_gt_half": 1,
+        "bounds_xyz_weight_gt_half": [
+          [
+            -0.0663,
+            0.202,
+            -0.97
+          ],
+          [
+            0.0663,
+            0.307,
+            -0.791
+          ]
+        ]
+      }
+    },
+    "animations": {
+      "Idle": {
+        "channels": 33,
+        "duration_s": 3.042
+      },
+      "Swim": {
+        "channels": 33,
+        "duration_s": 2.042
+      },
+      "Turn": {
+        "channels": 33,
+        "duration_s": 2.042
+      },
+      "Happy": {
+        "channels": 33,
+        "duration_s": 2.042
+      },
+      "Curious": {
+        "channels": 33,
+        "duration_s": 2.542
+      },
+      "Celebrate": {
+        "channels": 33,
+        "duration_s": 3.042
+      }
+    }
+  }
+]

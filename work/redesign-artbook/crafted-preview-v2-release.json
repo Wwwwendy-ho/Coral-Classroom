@@ -1,0 +1,50 @@
+{
+  "deployment": {
+    "id": "appgdep_6affb7e978fc81919e5c62af2ff6947b",
+    "project_id": "appgprj_6aff9d1c53908191a4f2990af7d679bb",
+    "title": "Coral Classroom · Redesign Art Book",
+    "version_id": "appgprj_6aff9d1c53908191a4f2990af7d679bb~appgver_5a5d82a469348191a1a4617f0fff4876",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://coral-classroom-redesign-artbook.tangyelk25.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "release---6affa127338c8191911e55144cd5f8e1",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-11-20T03:01:03.248697+00:00"
+  },
+  "package": {
+    "project_id": "appgprj_6aff9d1c53908191a4f2990af7d679bb",
+    "commit_sha": "59b30007b9a253f1907721591e0d74a440229829",
+    "archive": "/workspace/work/redesign-artbook/site.tar.gz",
+    "archive_bytes": 18123892
+  },
+  "entry": "https://coral-classroom-redesign-artbook.tangyelk25.chatgpt.site/play/?art=crafted&shelly=storybook&v=crafted-2",
+  "characterViewer": "https://coral-classroom-redesign-artbook.tangyelk25.chatgpt.site/shelly.html?v=organic-2",
+  "character": {
+    "variant": "crafted-organic-2",
+    "mainTriangles": 23016,
+    "mobileTriangles": 11443,
+    "mainBytes": 1794716,
+    "mobileBytes": 822092,
+    "flippers": 4,
+    "rigJoints": 11,
+    "clips": 6,
+    "loadingAvatarBytes": 12910
+  },
+  "world": {
+    "tileGardenTriangles": 28866,
+    "tileGardenMergedDraws": 8,
+    "textureAtlases": 1,
+    "geometryCases": 30
+  },
+  "verification": {
+    "runtimeLoaderAndAnimation": "/workspace/work/crafted-shelly-v2/runtime-audit.json",
+    "assetAnatomy": "/workspace/work/crafted-shelly-v2/validation.json",
+    "site": "validation-v2.json",
+    "offlineWorldProof": "scene-proof-v2c/world.png",
+    "browser": false,
+    "physicalPhone": false
+  }
+}

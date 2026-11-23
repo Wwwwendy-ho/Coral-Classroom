@@ -1,0 +1,388 @@
+{
+  "scope": "Ten actual 3D proportion studies; live game unchanged",
+  "options": [
+    {
+      "id": 1,
+      "title": "Option 1",
+      "description": "A subtle softening of the current Shelly, with a slightly rounder face.",
+      "level": 0.05,
+      "model": "/workspace/work/shelly-cuteness-survey/01/shelly.glb",
+      "bytes": 788192,
+      "parameters": {
+        "head_width_factor": 1.028,
+        "eye_size_relative_to_head": 1.008,
+        "neck_lowering": 0.008,
+        "shell_length_factor": 0.993,
+        "paddle_length_factor": 0.995
+      },
+      "bounds": [
+        [
+          -0.9444490265693664,
+          0.0552817006788254,
+          -1.0717759049129487
+        ],
+        [
+          0.9444490265693664,
+          1.1741026663780214,
+          1.0669268768429756
+        ]
+      ],
+      "triangles": 11443,
+      "flippers": 4,
+      "clips": [
+        "Idle",
+        "Swim",
+        "Turn",
+        "Happy",
+        "Curious",
+        "Celebrate"
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Option 2",
+      "description": "A little more cheek fullness and a gently larger head.",
+      "level": 0.14,
+      "model": "/workspace/work/shelly-cuteness-survey/02/shelly.glb",
+      "bytes": 788216,
+      "parameters": {
+        "head_width_factor": 1.077,
+        "eye_size_relative_to_head": 1.024,
+        "neck_lowering": 0.022,
+        "shell_length_factor": 0.98,
+        "paddle_length_factor": 0.986
+      },
+      "bounds": [
+        [
+          -0.9398572263290405,
+          0.05400186138038637,
+          -1.0611582046089172
+        ],
+        [
+          0.9398572263290405,
+          1.1673304147720336,
+          1.0871314926862716
+        ]
+      ],
+      "triangles": 11443,
+      "flippers": 4,
+      "clips": [
+        "Idle",
+        "Swim",
+        "Turn",
+        "Happy",
+        "Curious",
+        "Celebrate"
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Option 3",
+      "description": "Rounder eyes and a softer, shorter-necked silhouette.",
+      "level": 0.23,
+      "model": "/workspace/work/shelly-cuteness-survey/03/shelly.glb",
+      "bytes": 788208,
+      "parameters": {
+        "head_width_factor": 1.127,
+        "eye_size_relative_to_head": 1.039,
+        "neck_lowering": 0.036,
+        "shell_length_factor": 0.968,
+        "paddle_length_factor": 0.977
+      },
+      "bounds": [
+        [
+          -0.9352654260887145,
+          0.05272202208194732,
+          -1.0505405043048859
+        ],
+        [
+          0.9352654260887145,
+          1.1605581631660462,
+          1.1073361085295677
+        ]
+      ],
+      "triangles": 11443,
+      "flippers": 4,
+      "clips": [
+        "Idle",
+        "Swim",
+        "Turn",
+        "Happy",
+        "Curious",
+        "Celebrate"
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Option 4",
+      "description": "A fuller head with more noticeable baby proportions.",
+      "level": 0.32,
+      "model": "/workspace/work/shelly-cuteness-survey/04/shelly.glb",
+      "bytes": 788196,
+      "parameters": {
+        "head_width_factor": 1.176,
+        "eye_size_relative_to_head": 1.054,
+        "neck_lowering": 0.05,
+        "shell_length_factor": 0.955,
+        "paddle_length_factor": 0.968
+      },
+      "bounds": [
+        [
+          -0.9306736258483886,
+          0.05144218278350829,
+          -1.0399228040008546
+        ],
+        [
+          0.9306736258483886,
+          1.1537859115600586,
+          1.127540724372864
+        ]
+      ],
+      "triangles": 11443,
+      "flippers": 4,
+      "clips": [
+        "Idle",
+        "Swim",
+        "Turn",
+        "Happy",
+        "Curious",
+        "Celebrate"
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Option 5",
+      "description": "A balanced baby-turtle look with larger eyes and compact proportions.",
+      "level": 0.42,
+      "model": "/workspace/work/shelly-cuteness-survey/05/shelly.glb",
+      "bytes": 788212,
+      "parameters": {
+        "head_width_factor": 1.231,
+        "eye_size_relative_to_head": 1.071,
+        "neck_lowering": 0.065,
+        "shell_length_factor": 0.941,
+        "paddle_length_factor": 0.958
+      },
+      "bounds": [
+        [
+          -0.9255716255813597,
+          0.050020139118576085,
+          -1.0281253592185975
+        ],
+        [
+          0.9255716255813597,
+          1.146261187553406,
+          1.1499902975320817
+        ]
+      ],
+      "triangles": 11443,
+      "flippers": 4,
+      "clips": [
+        "Idle",
+        "Swim",
+        "Turn",
+        "Happy",
+        "Curious",
+        "Celebrate"
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Option 6",
+      "description": "An increasingly round face and shorter, softer paddles.",
+      "level": 0.53,
+      "model": "/workspace/work/shelly-cuteness-survey/06/shelly.glb",
+      "bytes": 788196,
+      "parameters": {
+        "head_width_factor": 1.292,
+        "eye_size_relative_to_head": 1.09,
+        "neck_lowering": 0.082,
+        "shell_length_factor": 0.926,
+        "paddle_length_factor": 0.947
+      },
+      "bounds": [
+        [
+          -0.9199594252876282,
+          0.048455891087150565,
+          -1.0151481699581146
+        ],
+        [
+          0.9199594252876282,
+          1.1379839911460876,
+          1.174684828007221
+        ]
+      ],
+      "triangles": 11443,
+      "flippers": 4,
+      "clips": [
+        "Idle",
+        "Swim",
+        "Turn",
+        "Happy",
+        "Curious",
+        "Celebrate"
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Option 7",
+      "description": "A large, gentle face with a compact hatchling body.",
+      "level": 0.65,
+      "model": "/workspace/work/shelly-cuteness-survey/07/shelly.glb",
+      "bytes": 788184,
+      "parameters": {
+        "head_width_factor": 1.357,
+        "eye_size_relative_to_head": 1.111,
+        "neck_lowering": 0.101,
+        "shell_length_factor": 0.909,
+        "paddle_length_factor": 0.935
+      },
+      "bounds": [
+        [
+          -0.9138370249671937,
+          0.0467494386892319,
+          -1.0009912362194062
+        ],
+        [
+          0.9138370249671937,
+          1.1289543223381042,
+          1.2016243157982827
+        ]
+      ],
+      "triangles": 11443,
+      "flippers": 4,
+      "clips": [
+        "Idle",
+        "Swim",
+        "Turn",
+        "Happy",
+        "Curious",
+        "Celebrate"
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Option 8",
+      "description": "Very baby-like cheeks and eyes, with a smaller-looking shell.",
+      "level": 0.77,
+      "model": "/workspace/work/shelly-cuteness-survey/08/shelly.glb",
+      "bytes": 788216,
+      "parameters": {
+        "head_width_factor": 1.423,
+        "eye_size_relative_to_head": 1.131,
+        "neck_lowering": 0.119,
+        "shell_length_factor": 0.892,
+        "paddle_length_factor": 0.923
+      },
+      "bounds": [
+        [
+          -0.9077146246467589,
+          0.045042986291313175,
+          -0.9868343024806976
+        ],
+        [
+          0.9077146246467589,
+          1.1199246535301208,
+          1.2285638035893438
+        ]
+      ],
+      "triangles": 11443,
+      "flippers": 4,
+      "clips": [
+        "Idle",
+        "Swim",
+        "Turn",
+        "Happy",
+        "Curious",
+        "Celebrate"
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Option 9",
+      "description": "A pronounced big-head hatchling design with broad, sweet eyes.",
+      "level": 0.89,
+      "model": "/workspace/work/shelly-cuteness-survey/09/shelly.glb",
+      "bytes": 788212,
+      "parameters": {
+        "head_width_factor": 1.49,
+        "eye_size_relative_to_head": 1.151,
+        "neck_lowering": 0.138,
+        "shell_length_factor": 0.875,
+        "paddle_length_factor": 0.911
+      },
+      "bounds": [
+        [
+          -0.9015922243263245,
+          0.04333653389339451,
+          -0.9726773687419891
+        ],
+        [
+          0.9015922243263245,
+          1.1108949847221374,
+          1.2555032913804054
+        ]
+      ],
+      "triangles": 11443,
+      "flippers": 4,
+      "clips": [
+        "Idle",
+        "Swim",
+        "Turn",
+        "Happy",
+        "Curious",
+        "Celebrate"
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Option 10",
+      "description": "The most baby-like option: the fullest head, largest eyes and most compact body.",
+      "level": 1.0,
+      "model": "/workspace/work/shelly-cuteness-survey/10/shelly.glb",
+      "bytes": 788184,
+      "parameters": {
+        "head_width_factor": 1.55,
+        "eye_size_relative_to_head": 1.17,
+        "neck_lowering": 0.155,
+        "shell_length_factor": 0.86,
+        "paddle_length_factor": 0.9
+      },
+      "bounds": [
+        [
+          -0.8959800240325927,
+          0.04177228586196896,
+          -0.9597001794815063
+        ],
+        [
+          0.8959800240325927,
+          1.1026177883148194,
+          1.2801978218555452
+        ]
+      ],
+      "triangles": 11443,
+      "flippers": 4,
+      "clips": [
+        "Idle",
+        "Swim",
+        "Turn",
+        "Happy",
+        "Curious",
+        "Celebrate"
+      ]
+    }
+  ],
+  "source_model": "/workspace/work/shelly-cuteness-survey/base-shelly-view.glb",
+  "source_sha256": "4c94360000524cdd9a0bbc055eb15601b5d3497602c92d39434e7319c7ce4cb2",
+  "render": {
+    "engine": "Cycles CPU",
+    "samples": 48,
+    "adaptive_threshold": 0.065,
+    "width": 512,
+    "height": 512,
+    "normal_yaw": -32,
+    "normal_elevation": 15,
+    "top_elevation": 90,
+    "orthographic_scale": 2.8
+  }
+}

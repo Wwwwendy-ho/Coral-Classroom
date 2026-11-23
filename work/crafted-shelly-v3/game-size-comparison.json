@@ -1,0 +1,61 @@
+{
+  "render_scope": "Reimported 64-sample GLBs at 1280\u00d7780. Top row uses the exported opening perspective, fitted models, relaxed idle orientation and static board scenery. Bottom row keeps the same viewport and camera distance and points straight down. All panels preserve native pixels.",
+  "crops": {
+    "v2_board": {
+      "silhouette_bbox_px": [
+        518,
+        457,
+        664,
+        573
+      ],
+      "comparison_crop_px": [
+        473,
+        428,
+        709,
+        602
+      ]
+    },
+    "v3_board": {
+      "silhouette_bbox_px": [
+        518,
+        457,
+        664,
+        573
+      ],
+      "comparison_crop_px": [
+        473,
+        428,
+        709,
+        602
+      ]
+    },
+    "v2_top": {
+      "silhouette_bbox_px": [
+        566,
+        318,
+        699,
+        465
+      ],
+      "comparison_crop_px": [
+        514,
+        304,
+        750,
+        478
+      ]
+    },
+    "v3_top": {
+      "silhouette_bbox_px": [
+        566,
+        318,
+        699,
+        465
+      ],
+      "comparison_crop_px": [
+        514,
+        304,
+        750,
+        478
+      ]
+    }
+  }
+}

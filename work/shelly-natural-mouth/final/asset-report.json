@@ -1,0 +1,50 @@
+[
+  {
+    "source": "/workspace/coral-classroom/assets/models/shelly.glb",
+    "output": "/workspace/work/shelly-natural-mouth/final/shelly.glb",
+    "triangles": 23836,
+    "replaced_triangles": 963,
+    "new_mouth_triangles": 800,
+    "trim_vertices": 34,
+    "bytes": 3118368,
+    "clip_names": [
+      "Idle",
+      "Swim",
+      "Turn",
+      "Happy",
+      "Curious",
+      "Celebrate"
+    ],
+    "skin_joints": 11,
+    "atlas_slot": [
+      916,
+      130,
+      102,
+      61
+    ]
+  },
+  {
+    "source": "/workspace/coral-classroom/assets/models/shelly-view.glb",
+    "output": "/workspace/work/shelly-natural-mouth/final/shelly-view.glb",
+    "triangles": 11947,
+    "replaced_triangles": 452,
+    "new_mouth_triangles": 401,
+    "trim_vertices": 22,
+    "bytes": 1257572,
+    "clip_names": [
+      "Idle",
+      "Swim",
+      "Turn",
+      "Happy",
+      "Curious",
+      "Celebrate"
+    ],
+    "skin_joints": 11,
+    "atlas_slot": [
+      460,
+      68,
+      50,
+      25
+    ]
+  }
+]

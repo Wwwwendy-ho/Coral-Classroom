@@ -1,0 +1,9 @@
+{
+  "options": 10,
+  "normal_and_top_images": 20,
+  "images_decoded": 20,
+  "unique_renders": 20,
+  "choice_buttons": 10,
+  "current_game_unchanged": true,
+  "browser_tested": false
+}
