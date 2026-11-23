@@ -1,0 +1,260 @@
+{
+  "character": "pip",
+  "species": "Royal gramma",
+  "status": "authored candidate; awaiting root visual review and activation",
+  "selectedConcept": "Pip2",
+  "builder": "tools/art/build_echo_pip.py",
+  "builderSha256": "962262528176f8a135c246e6b1961f59423e2fb2e02cde05dda9e12107024222",
+  "sourceBlend": "pip-authored.blend",
+  "artDirection": "A-eye appeal, natural species mouth; personality-specific independent eye aim",
+  "eyeControls": "Eye.L / Eye.R; concentrated holds and quick puzzle shifts, no blink track",
+  "lods": {
+    "board": {
+      "file": "pip-board.glb",
+      "bytes": 460992,
+      "triangles": 5648,
+      "draws": 1,
+      "materials": 1,
+      "bones": 9,
+      "textureImages": [
+        {
+          "name": "painted-color-1024",
+          "width": 1024,
+          "height": 1024,
+          "mime": "image/jpeg",
+          "bytes": 178752
+        },
+        {
+          "name": "painted-surface-256",
+          "width": 256,
+          "height": 256,
+          "mime": "image/png",
+          "bytes": 19324
+        }
+      ],
+      "clips": [
+        {
+          "name": "Idle",
+          "duration": 2.4333,
+          "animatedBones": [
+            "Body",
+            "Dorsal",
+            "Eye.L",
+            "Eye.R",
+            "Float",
+            "Head",
+            "Pectoral.L",
+            "Pectoral.R",
+            "Tail"
+          ],
+          "channels": 27
+        },
+        {
+          "name": "Listen",
+          "duration": 2.1667,
+          "animatedBones": [
+            "Body",
+            "Dorsal",
+            "Eye.L",
+            "Eye.R",
+            "Float",
+            "Head",
+            "Pectoral.L",
+            "Pectoral.R",
+            "Tail"
+          ],
+          "channels": 27
+        },
+        {
+          "name": "React",
+          "duration": 1.4333,
+          "animatedBones": [
+            "Body",
+            "Dorsal",
+            "Eye.L",
+            "Eye.R",
+            "Float",
+            "Head",
+            "Pectoral.L",
+            "Pectoral.R",
+            "Tail"
+          ],
+          "channels": 27
+        }
+      ],
+      "exportedSkinWeights": {
+        "verticesAfterUVSplits": 3435,
+        "unweighted": 0,
+        "maxSumError": 2.9802322387695312e-08,
+        "maxInfluences": 2
+      },
+      "eyeMotionFromActualGLB": {
+        "Idle": {
+          "Eye.L": {
+            "samples": 73,
+            "maxDegreesFromFirst": 11.449
+          },
+          "Eye.R": {
+            "samples": 73,
+            "maxDegreesFromFirst": 9.438
+          }
+        },
+        "Listen": {
+          "Eye.L": {
+            "samples": 65,
+            "maxDegreesFromFirst": 4.742
+          },
+          "Eye.R": {
+            "samples": 65,
+            "maxDegreesFromFirst": 6.04
+          }
+        },
+        "React": {
+          "Eye.L": {
+            "samples": 43,
+            "maxDegreesFromFirst": 10.73
+          },
+          "Eye.R": {
+            "samples": 43,
+            "maxDegreesFromFirst": 14.403
+          }
+        }
+      },
+      "skinWeights": {
+        "vertices": 3348,
+        "unweighted": 0,
+        "maxInfluences": 2,
+        "maxSumError": 2.9802322387695312e-08
+      },
+      "character": "pip",
+      "species": "royal gramma",
+      "validation": "Offline CPU, exported GLB reimported before review rendering; no browser/device FPS claim."
+    },
+    "close": {
+      "file": "pip-close.glb",
+      "bytes": 1209004,
+      "triangles": 16548,
+      "draws": 1,
+      "materials": 1,
+      "bones": 9,
+      "textureImages": [
+        {
+          "name": "painted-color-2048",
+          "width": 2048,
+          "height": 2048,
+          "mime": "image/jpeg",
+          "bytes": 512913
+        },
+        {
+          "name": "painted-surface-512",
+          "width": 512,
+          "height": 512,
+          "mime": "image/png",
+          "bytes": 65086
+        }
+      ],
+      "clips": [
+        {
+          "name": "Idle",
+          "duration": 2.4333,
+          "animatedBones": [
+            "Body",
+            "Dorsal",
+            "Eye.L",
+            "Eye.R",
+            "Float",
+            "Head",
+            "Pectoral.L",
+            "Pectoral.R",
+            "Tail"
+          ],
+          "channels": 27
+        },
+        {
+          "name": "Listen",
+          "duration": 2.1667,
+          "animatedBones": [
+            "Body",
+            "Dorsal",
+            "Eye.L",
+            "Eye.R",
+            "Float",
+            "Head",
+            "Pectoral.L",
+            "Pectoral.R",
+            "Tail"
+          ],
+          "channels": 27
+        },
+        {
+          "name": "React",
+          "duration": 1.4333,
+          "animatedBones": [
+            "Body",
+            "Dorsal",
+            "Eye.L",
+            "Eye.R",
+            "Float",
+            "Head",
+            "Pectoral.L",
+            "Pectoral.R",
+            "Tail"
+          ],
+          "channels": 27
+        }
+      ],
+      "exportedSkinWeights": {
+        "verticesAfterUVSplits": 9254,
+        "unweighted": 0,
+        "maxSumError": 2.9802322387695312e-08,
+        "maxInfluences": 2
+      },
+      "eyeMotionFromActualGLB": {
+        "Idle": {
+          "Eye.L": {
+            "samples": 73,
+            "maxDegreesFromFirst": 11.449
+          },
+          "Eye.R": {
+            "samples": 73,
+            "maxDegreesFromFirst": 9.438
+          }
+        },
+        "Listen": {
+          "Eye.L": {
+            "samples": 65,
+            "maxDegreesFromFirst": 4.742
+          },
+          "Eye.R": {
+            "samples": 65,
+            "maxDegreesFromFirst": 6.04
+          }
+        },
+        "React": {
+          "Eye.L": {
+            "samples": 43,
+            "maxDegreesFromFirst": 10.73
+          },
+          "Eye.R": {
+            "samples": 43,
+            "maxDegreesFromFirst": 14.403
+          }
+        }
+      },
+      "skinWeights": {
+        "vertices": 9106,
+        "unweighted": 0,
+        "maxInfluences": 2,
+        "maxSumError": 2.9802322387695312e-08
+      },
+      "character": "pip",
+      "species": "royal gramma",
+      "validation": "Offline CPU, exported GLB reimported before review rendering; no browser/device FPS claim."
+    }
+  },
+  "glbSha256": {
+    "board": "7ad59ca60ddabe874cc3921898e956c2a144bdf46648dfcf4b521a417c817693",
+    "close": "71183b8a2b50718d58b87e77ea3a944039994df958dda58e282cc082f0f9627e"
+  },
+  "validation": "CPU renders of exported, reimported GLBs. No runtime, browser or device FPS claim."
+}
