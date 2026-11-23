@@ -1,0 +1,23 @@
+{
+  "variant": "crafted-organic-3",
+  "assets": [
+    {
+      "path": "assets/models/crafted-shelly.glb",
+      "bytes": 1717720,
+      "sha256": "db46a6706c520867c1fe49a25ee9d801af986ff29e0e2913d55c4bbd72fa8bcb"
+    },
+    {
+      "path": "assets/models/crafted-shelly-view.glb",
+      "bytes": 788124,
+      "sha256": "4c94360000524cdd9a0bbc055eb15601b5d3497602c92d39434e7319c7ce4cb2"
+    },
+    {
+      "path": "assets/models/crafted-shelly-loading.webp",
+      "bytes": 11986,
+      "sha256": "1ce644514ee2e2f95c551db7509bda77737627a674fbf6529337951fd0886ec6"
+    }
+  ],
+  "browserTested": false,
+  "physicalPhoneMeasured": false,
+  "change": "Rounder upward-readable pupils and softer head for elevated cameras"
+}

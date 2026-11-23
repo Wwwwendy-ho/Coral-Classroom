@@ -1,0 +1,22 @@
+{
+  "variant": "crafted-organic-2",
+  "assets": [
+    {
+      "path": "assets/models/crafted-shelly.glb",
+      "bytes": 1794716,
+      "sha256": "0b63653ee5ec47536d2eb53ef0f65261aada990adb40a7ae0d82cae6e940711a"
+    },
+    {
+      "path": "assets/models/crafted-shelly-view.glb",
+      "bytes": 822092,
+      "sha256": "ea95a0a5c727735950123625140520461b9ac3af8a9fe4631b0d776394b34535"
+    },
+    {
+      "path": "assets/models/crafted-shelly-loading.webp",
+      "bytes": 12910,
+      "sha256": "0be1cb5a60e355cf39a52bd4985db8d63beaa7a9259de01fe260ce3b3141cec2"
+    }
+  ],
+  "browserTested": false,
+  "physicalPhoneMeasured": false
+}
