@@ -1,0 +1,72 @@
+{
+  "name": "TaxiSquid",
+  "source": "art-source/npcs/taxi-squid/source-reconstruction.glb",
+  "triangles": 7999,
+  "primitive_count": 1,
+  "materials": 1,
+  "textures": [
+    {
+      "source": "Image_0",
+      "role": [
+        "Base Color"
+      ],
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "bytes": 381890,
+      "format": "JPEG",
+      "alpha_preserved": false,
+      "surface_calibrated": false
+    },
+    {
+      "source": "Image_1",
+      "role": [
+        "Metallic",
+        "Roughness"
+      ],
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 281920,
+      "format": "PNG",
+      "alpha_preserved": false,
+      "surface_calibrated": true
+    }
+  ],
+  "embedded_images": [
+    {
+      "name": "texture-0",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "bytes": 381890,
+      "mime_type": "image/jpeg"
+    },
+    {
+      "name": "texture-1",
+      "dimensions": [
+        512,
+        512
+      ],
+      "bytes": 281920,
+      "mime_type": "image/png"
+    }
+  ],
+  "clips": [
+    "Idle",
+    "React"
+  ],
+  "bones": 2,
+  "forward": "+Z glTF",
+  "ground": "y=0 glTF",
+  "skin_mask": null,
+  "surface_calibration": {
+    "roughness_floor": 0.58,
+    "metallic_scale": 0.1
+  },
+  "bytes": 1257900,
+  "review": "Inspect geometry, UV seams, orientation, animation and skin mask visually."
+}
