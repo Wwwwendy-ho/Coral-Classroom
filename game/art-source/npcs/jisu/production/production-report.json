@@ -1,0 +1,293 @@
+{
+  "status": "Candidate for root visual review; no active assets or runtime changed",
+  "builder": "tools/art/build_jisu.py",
+  "authoring": "Original parametric organic surfaces and painted atlases, with reusable cafe MeshBuilder/material/export helpers. No raw million-triangle source reused.",
+  "anatomy": {
+    "walkingLegs": 6,
+    "chelipeds": 2,
+    "naturalMouthparts": "Paired maxillipeds; no human mouth, teeth, lips or hands",
+    "shell": "Continuous tapered gastropod surface with helical shoulders, rolled lip and inner bowl",
+    "postalKit": "Tangerine canvas pouch and strap; cream envelope with orange sculpted scallop-shell seal"
+  },
+  "rig": {
+    "bones": 14,
+    "skin": "One rigid influence per vertex, connected by a common armature",
+    "acting": "Independent quick stalk focus with lateral lean, settled Listen and quick React; subtle antenna/claw/body response",
+    "clips": [
+      "Idle",
+      "Listen",
+      "React"
+    ]
+  },
+  "levels": {
+    "board": {
+      "file": "jisu-board.glb",
+      "bytes": 663688,
+      "triangles": 7658,
+      "draws": 1,
+      "materials": 1,
+      "bones": 14,
+      "textureImages": [
+        {
+          "name": "jisu-color-1024",
+          "width": 1024,
+          "height": 1024,
+          "mime": "image/jpeg",
+          "bytes": 301845
+        },
+        {
+          "name": "jisu-surface-256",
+          "width": 256,
+          "height": 256,
+          "mime": "image/png",
+          "bytes": 925
+        }
+      ],
+      "clips": [
+        {
+          "name": "Idle",
+          "duration": 2.4333,
+          "animatedBones": [
+            "Antenna.L",
+            "Antenna.R",
+            "Body",
+            "Claw.L",
+            "Claw.R",
+            "Eye.L",
+            "Eye.R",
+            "Leg1.L",
+            "Leg1.R",
+            "Leg2.L",
+            "Leg2.R",
+            "Leg3.L",
+            "Leg3.R",
+            "Root"
+          ],
+          "channels": 42
+        },
+        {
+          "name": "Listen",
+          "duration": 1.5667,
+          "animatedBones": [
+            "Antenna.L",
+            "Antenna.R",
+            "Body",
+            "Claw.L",
+            "Claw.R",
+            "Eye.L",
+            "Eye.R",
+            "Leg1.L",
+            "Leg1.R",
+            "Leg2.L",
+            "Leg2.R",
+            "Leg3.L",
+            "Leg3.R",
+            "Root"
+          ],
+          "channels": 42
+        },
+        {
+          "name": "React",
+          "duration": 1.0333,
+          "animatedBones": [
+            "Antenna.L",
+            "Antenna.R",
+            "Body",
+            "Claw.L",
+            "Claw.R",
+            "Eye.L",
+            "Eye.R",
+            "Leg1.L",
+            "Leg1.R",
+            "Leg2.L",
+            "Leg2.R",
+            "Leg3.L",
+            "Leg3.R",
+            "Root"
+          ],
+          "channels": 42
+        }
+      ],
+      "weightedVertices": 4672,
+      "unweightedVertices": 0,
+      "maxInfluences": 1,
+      "bounds": [
+        [
+          -1.0662591457366943,
+          -1.0329563617706299,
+          0.05558408051729202
+        ],
+        [
+          1.0662591457366943,
+          0.9300000071525574,
+          1.7767256498336792
+        ]
+      ],
+      "exportedVertices": 4738,
+      "unweightedExportVertices": 0,
+      "maxSerializedInfluences": 1,
+      "weightSumRange": [
+        1.0,
+        1.0
+      ],
+      "weightedBoneNames": [
+        "Body",
+        "Eye.L",
+        "Antenna.L",
+        "Claw.L",
+        "Leg1.L",
+        "Leg2.L",
+        "Leg3.L",
+        "Eye.R",
+        "Antenna.R",
+        "Claw.R",
+        "Leg1.R",
+        "Leg2.R",
+        "Leg3.R"
+      ]
+    },
+    "close": {
+      "file": "jisu-close.glb",
+      "bytes": 1771084,
+      "triangles": 21318,
+      "draws": 1,
+      "materials": 1,
+      "bones": 14,
+      "textureImages": [
+        {
+          "name": "jisu-color-2048",
+          "width": 2048,
+          "height": 2048,
+          "mime": "image/jpeg",
+          "bytes": 939854
+        },
+        {
+          "name": "jisu-surface-512",
+          "width": 512,
+          "height": 512,
+          "mime": "image/png",
+          "bytes": 3791
+        }
+      ],
+      "clips": [
+        {
+          "name": "Idle",
+          "duration": 2.4333,
+          "animatedBones": [
+            "Antenna.L",
+            "Antenna.R",
+            "Body",
+            "Claw.L",
+            "Claw.R",
+            "Eye.L",
+            "Eye.R",
+            "Leg1.L",
+            "Leg1.R",
+            "Leg2.L",
+            "Leg2.R",
+            "Leg3.L",
+            "Leg3.R",
+            "Root"
+          ],
+          "channels": 42
+        },
+        {
+          "name": "Listen",
+          "duration": 1.5667,
+          "animatedBones": [
+            "Antenna.L",
+            "Antenna.R",
+            "Body",
+            "Claw.L",
+            "Claw.R",
+            "Eye.L",
+            "Eye.R",
+            "Leg1.L",
+            "Leg1.R",
+            "Leg2.L",
+            "Leg2.R",
+            "Leg3.L",
+            "Leg3.R",
+            "Root"
+          ],
+          "channels": 42
+        },
+        {
+          "name": "React",
+          "duration": 1.0333,
+          "animatedBones": [
+            "Antenna.L",
+            "Antenna.R",
+            "Body",
+            "Claw.L",
+            "Claw.R",
+            "Eye.L",
+            "Eye.R",
+            "Leg1.L",
+            "Leg1.R",
+            "Leg2.L",
+            "Leg2.R",
+            "Leg3.L",
+            "Leg3.R",
+            "Root"
+          ],
+          "channels": 42
+        }
+      ],
+      "weightedVertices": 12028,
+      "unweightedVertices": 0,
+      "maxInfluences": 1,
+      "bounds": [
+        [
+          -1.0690890550613403,
+          -1.0320546627044678,
+          0.0555170513689518
+        ],
+        [
+          1.0690890550613403,
+          0.9300000071525574,
+          1.7755810022354126
+        ]
+      ],
+      "exportedVertices": 12135,
+      "unweightedExportVertices": 0,
+      "maxSerializedInfluences": 1,
+      "weightSumRange": [
+        1.0,
+        1.0
+      ],
+      "weightedBoneNames": [
+        "Body",
+        "Eye.L",
+        "Antenna.L",
+        "Claw.L",
+        "Leg1.L",
+        "Leg2.L",
+        "Leg3.L",
+        "Eye.R",
+        "Antenna.R",
+        "Claw.R",
+        "Leg1.R",
+        "Leg2.R",
+        "Leg3.R"
+      ]
+    }
+  },
+  "verification": {
+    "renderer": "Offline Blender 4.3 CPU Cycles, importing exported GLBs, no browser or server",
+    "closeTurntable": "640 px, 24 samples, front/quarter/side/back",
+    "boardTurntable": "384 px, 16 samples, front/quarter/side/back",
+    "poses": "512 px, 16 samples; Listen frame 17, React frame 9, Idle shift frame 21",
+    "weights": "Audited actual serialized WEIGHTS_0/JOINTS_0; all weights sum to 1; no unweighted export vertices"
+  },
+  "limitations": [
+    "One bone per leg/cheliped gives restrained gestures; no multi-joint walking IK or pincer-opening clip.",
+    "Opaque single shared atlas material; shell growth grooves and canvas weave combine modeled relief with painted shading.",
+    "World size and delivery/electrical runtime cues belong to the existing resident adapter; candidate is not activated."
+  ],
+  "sha256": {
+    "jisu-board.glb": "022703f01cbd5c686885de042f044d6da4e24c8050618bd9df306f236b2b8582",
+    "jisu-close.glb": "308d4eacf2e5906bdf002e435481644be78fb12f244c5bde9911a2ca9e877db2",
+    "jisu-production.blend": "289fa797279840428470e7bf8300d57aed7c14cb6df41efb9831b86e475a275a"
+  }
+}
