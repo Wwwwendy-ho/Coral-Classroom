@@ -1,0 +1,37 @@
+{
+  "version": "cast-refinement-2026-11-16",
+  "status": "Concept review only. Mira3 Coastal adventurer selected. Distinct silhouette/proportion direction received positive feedback; biological-color-lineup is the latest six-character palette proposal, pending review.",
+  "sheets": [
+    {
+      "id": "mira-teen-options",
+      "path": "/workspace/generated_images/exec-a29bf0bd-2dbd-429d-8d34-48169fab5802.png",
+      "source": "/workspace/coral-classroom/art-source/cast-review/mira-teen-options-2026-11-16.png"
+    },
+    {
+      "id": "grounded-cast-1",
+      "path": "/workspace/generated_images/exec-76c0ffe1-efd4-409b-99a2-5f8a9af78ca7.png",
+      "source": "/workspace/coral-classroom/art-source/cast-review/grounded-cast-1-2026-11-16.png"
+    },
+    {
+      "id": "grounded-cast-2",
+      "path": "/workspace/generated_images/exec-5a539fdd-248f-43d6-a7dd-a66fb1648754.png",
+      "source": "/workspace/coral-classroom/art-source/cast-review/grounded-cast-2-2026-11-16.png"
+    },
+    {
+      "id": "grounded-cast-3",
+      "path": "/workspace/generated_images/exec-ddfd13dd-6bcb-4788-95d2-117dcc1fa2db.png",
+      "source": "/workspace/coral-classroom/art-source/cast-review/grounded-cast-3-2026-11-16.png"
+    }
+  ],
+  "miraOptions": {
+    "1": "Jade explorer — jade skin, coral shell, canvas messenger bag and woven band",
+    "2": "Coral reader — coral skin, teal shell and patched story pouch",
+    "3": "Coastal adventurer — seafoam skin, slate shell, forehead goggles and map satchel"
+  },
+  "castDirection": "Grounded role-specific textures and expressions within the same sculpted storybook art style. Natural light retained mainly for Lumi and Hana.",
+  "selectedMira": "3",
+  "rejectedForUniformity": "grounded-cast-2",
+  "shapeReference": "/workspace/coral-classroom/art-source/cast-review/distinct-silhouettes-lineup-2026-11-16.png",
+  "latestPaletteReference": "/workspace/coral-classroom/art-source/cast-review/biological-color-lineup-2026-11-16.png",
+  "paletteRationale": "/workspace/coral-classroom/art-source/cast-review/biological-palettes-2026-11-16.json"
+}

@@ -1,0 +1,172 @@
+{
+  "board": {
+    "file": "cafe-seahorse-board.glb",
+    "bytes": 530432,
+    "triangles": 7880,
+    "draws": 1,
+    "materials": 1,
+    "bones": 11,
+    "textureImages": [
+      {
+        "name": "painted-color-1024",
+        "width": 1024,
+        "height": 1024,
+        "mime": "image/jpeg",
+        "bytes": 155584
+      },
+      {
+        "name": "painted-surface-256",
+        "width": 256,
+        "height": 256,
+        "mime": "image/png",
+        "bytes": 10261
+      }
+    ],
+    "clips": [
+      {
+        "name": "Idle",
+        "duration": 3.5,
+        "animatedBones": [
+          "Body",
+          "Dorsal fin",
+          "Eye.L",
+          "Eye.R",
+          "Float",
+          "Head",
+          "Neck",
+          "Pectoral.L",
+          "Pectoral.R",
+          "Tail base",
+          "Tail curl"
+        ],
+        "channels": 33
+      },
+      {
+        "name": "Listen",
+        "duration": 2.7,
+        "animatedBones": [
+          "Body",
+          "Dorsal fin",
+          "Eye.L",
+          "Eye.R",
+          "Float",
+          "Head",
+          "Neck",
+          "Pectoral.L",
+          "Pectoral.R",
+          "Tail base",
+          "Tail curl"
+        ],
+        "channels": 33
+      },
+      {
+        "name": "React",
+        "duration": 1.3667,
+        "animatedBones": [
+          "Body",
+          "Dorsal fin",
+          "Eye.L",
+          "Eye.R",
+          "Float",
+          "Head",
+          "Neck",
+          "Pectoral.L",
+          "Pectoral.R",
+          "Tail base",
+          "Tail curl"
+        ],
+        "channels": 33
+      }
+    ],
+    "beforeBytes": 593224,
+    "candidateGzipBytes": 331277,
+    "candidateSha256": "885d71a3d2dd12ba63f8fd6c1a91227f54105706b0f5c6fc1920141a1f7016e3",
+    "sameUvs": true,
+    "trianglesWithChangedIndices": 2
+  },
+  "close": {
+    "file": "cafe-seahorse-close.glb",
+    "bytes": 1246092,
+    "triangles": 20848,
+    "draws": 1,
+    "materials": 1,
+    "bones": 11,
+    "textureImages": [
+      {
+        "name": "painted-color-2048",
+        "width": 2048,
+        "height": 2048,
+        "mime": "image/jpeg",
+        "bytes": 415003
+      },
+      {
+        "name": "painted-surface-512",
+        "width": 512,
+        "height": 512,
+        "mime": "image/png",
+        "bytes": 26087
+      }
+    ],
+    "clips": [
+      {
+        "name": "Idle",
+        "duration": 3.5,
+        "animatedBones": [
+          "Body",
+          "Dorsal fin",
+          "Eye.L",
+          "Eye.R",
+          "Float",
+          "Head",
+          "Neck",
+          "Pectoral.L",
+          "Pectoral.R",
+          "Tail base",
+          "Tail curl"
+        ],
+        "channels": 33
+      },
+      {
+        "name": "Listen",
+        "duration": 2.7,
+        "animatedBones": [
+          "Body",
+          "Dorsal fin",
+          "Eye.L",
+          "Eye.R",
+          "Float",
+          "Head",
+          "Neck",
+          "Pectoral.L",
+          "Pectoral.R",
+          "Tail base",
+          "Tail curl"
+        ],
+        "channels": 33
+      },
+      {
+        "name": "React",
+        "duration": 1.3667,
+        "animatedBones": [
+          "Body",
+          "Dorsal fin",
+          "Eye.L",
+          "Eye.R",
+          "Float",
+          "Head",
+          "Neck",
+          "Pectoral.L",
+          "Pectoral.R",
+          "Tail base",
+          "Tail curl"
+        ],
+        "channels": 33
+      }
+    ],
+    "beforeBytes": 1426968,
+    "candidateGzipBytes": 799611,
+    "candidateSha256": "dcdc16985c896d0d65c7fdd3e57a0e772affb24ee2bbfed5d8a4b4bd2b34cb76",
+    "sameUvs": true,
+    "trianglesWithChangedIndices": 4
+  }
+}

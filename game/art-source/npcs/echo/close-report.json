@@ -1,0 +1,118 @@
+{
+  "file": "echo-close.glb",
+  "bytes": 886952,
+  "triangles": 16736,
+  "draws": 1,
+  "materials": 1,
+  "bones": 8,
+  "textureImages": [
+    {
+      "name": "painted-color-2048",
+      "width": 2048,
+      "height": 2048,
+      "mime": "image/jpeg",
+      "bytes": 186756
+    },
+    {
+      "name": "painted-surface-512",
+      "width": 512,
+      "height": 512,
+      "mime": "image/png",
+      "bytes": 68057
+    }
+  ],
+  "clips": [
+    {
+      "name": "Idle",
+      "duration": 3.2333,
+      "animatedBones": [
+        "Body",
+        "Eye.L",
+        "Eye.R",
+        "Float",
+        "Head",
+        "Pectoral.L",
+        "Pectoral.R",
+        "Tail"
+      ],
+      "channels": 24
+    },
+    {
+      "name": "Listen",
+      "duration": 2.8333,
+      "animatedBones": [
+        "Body",
+        "Eye.L",
+        "Eye.R",
+        "Float",
+        "Head",
+        "Pectoral.L",
+        "Pectoral.R",
+        "Tail"
+      ],
+      "channels": 24
+    },
+    {
+      "name": "React",
+      "duration": 1.7667,
+      "animatedBones": [
+        "Body",
+        "Eye.L",
+        "Eye.R",
+        "Float",
+        "Head",
+        "Pectoral.L",
+        "Pectoral.R",
+        "Tail"
+      ],
+      "channels": 24
+    }
+  ],
+  "exportedSkinWeights": {
+    "verticesAfterUVSplits": 9223,
+    "unweighted": 0,
+    "maxSumError": 2.9802322387695312e-08,
+    "maxInfluences": 2
+  },
+  "eyeMotionFromActualGLB": {
+    "Idle": {
+      "Eye.L": {
+        "samples": 97,
+        "maxDegreesFromFirst": 1.6
+      },
+      "Eye.R": {
+        "samples": 97,
+        "maxDegreesFromFirst": 2.191
+      }
+    },
+    "Listen": {
+      "Eye.L": {
+        "samples": 85,
+        "maxDegreesFromFirst": 3.496
+      },
+      "Eye.R": {
+        "samples": 85,
+        "maxDegreesFromFirst": 2.832
+      }
+    },
+    "React": {
+      "Eye.L": {
+        "samples": 53,
+        "maxDegreesFromFirst": 3.858
+      },
+      "Eye.R": {
+        "samples": 53,
+        "maxDegreesFromFirst": 5.108
+      }
+    }
+  },
+  "skinWeights": {
+    "vertices": 8930,
+    "unweighted": 0,
+    "maxInfluences": 2,
+    "maxSumError": 2.9802322387695312e-08
+  },
+  "character": "echo",
+  "species": "beluga",
+  "validation": "Offline CPU, exported GLB reimported before review rendering; no browser/device FPS claim."
+}

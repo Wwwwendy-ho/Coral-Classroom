@@ -1,0 +1,29 @@
+{
+  "openedSuccessfully": true,
+  "meshObjects": 1,
+  "rigObjects": 1,
+  "bones": 8,
+  "images": [
+    {
+      "name": "painted-color-2048.jpg",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "packed": true
+    },
+    {
+      "name": "painted-surface-512.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "packed": true
+    }
+  ],
+  "actions": [
+    "Idle",
+    "Listen",
+    "React"
+  ]
+}

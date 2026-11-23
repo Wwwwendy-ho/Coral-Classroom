@@ -1,0 +1,485 @@
+{
+  "version": "cast-v1",
+  "characters": [
+    {
+      "id": "lumi",
+      "name": "Lumi",
+      "role": "Night guide",
+      "species": "Anglerfish",
+      "sheet": "companions",
+      "row": 0,
+      "options": [
+        {
+          "id": "A",
+          "label": "Golden glow",
+          "description": "Round turquoise body, warm gold lure and an open happy face."
+        },
+        {
+          "id": "B",
+          "label": "Purple explorer",
+          "description": "Sleeker lavender body, lively eyes and tall flowing fins."
+        },
+        {
+          "id": "C",
+          "label": "Quiet sparkle",
+          "description": "Seafoam speckles, broad fan fins and a gentle closed smile."
+        }
+      ]
+    },
+    {
+      "id": "bok",
+      "name": "Bok",
+      "role": "Recurring shopkeeper",
+      "species": "Pufferfish",
+      "sheet": "companions",
+      "row": 1,
+      "options": [
+        {
+          "id": "A",
+          "label": "Golden merchant",
+          "description": "Butter-gold body, cream belly, soft cheeks and a little apron."
+        },
+        {
+          "id": "B",
+          "label": "Peach trader",
+          "description": "Peach freckles, a teal merchant sash and a delighted expression."
+        },
+        {
+          "id": "C",
+          "label": "Lilac pearl",
+          "description": "Lilac-and-gold skin, short spines and a softer knowing smile."
+        }
+      ]
+    },
+    {
+      "id": "kiko-mochi",
+      "name": "Kiko · Mochi",
+      "role": "Crab companion",
+      "species": "Crab",
+      "sheet": "companions",
+      "row": 2,
+      "options": [
+        {
+          "id": "A",
+          "label": "Peach delight",
+          "description": "Rounded pink carapace, big eyes and little warm coral claws."
+        },
+        {
+          "id": "B",
+          "label": "Coral explorer",
+          "description": "Wider scalloped shell, bright face and seafoam claw details."
+        },
+        {
+          "id": "C",
+          "label": "Shy lavender",
+          "description": "Pale blush shell, lilac claws and a quieter sweet expression."
+        }
+      ],
+      "form": "Pink crab form"
+    },
+    {
+      "id": "kiko-hermit",
+      "name": "Kiko · Hermit",
+      "role": "Crab companion",
+      "species": "Hermit crab",
+      "sheet": "companions",
+      "row": 3,
+      "options": [
+        {
+          "id": "A",
+          "label": "Spiral shell",
+          "description": "Lavender spiral shell, fine golden seams and a bright pink crab."
+        },
+        {
+          "id": "B",
+          "label": "Seafoam conch",
+          "description": "Sculpted teal shell and peach crab with curious eyebrows."
+        },
+        {
+          "id": "C",
+          "label": "Pearl shell",
+          "description": "Frilled cream-and-lilac conch and a softly smiling coral crab."
+        }
+      ],
+      "form": "Shell-carrying form"
+    },
+    {
+      "id": "mira",
+      "name": "Mira",
+      "role": "Story Lagoon storyteller",
+      "species": "Sea turtle",
+      "sheet": "reef-hosts",
+      "row": 0,
+      "options": [
+        {
+          "id": "A",
+          "label": "Sage storyteller",
+          "description": "Sage skin, a broad gentle face and an ornate teal shell."
+        },
+        {
+          "id": "B",
+          "label": "Coral traveler",
+          "description": "Turquoise-and-peach scales, curious eyes and a small story satchel."
+        },
+        {
+          "id": "C",
+          "label": "Lavender guide",
+          "description": "Longer natural neck, lilac shell and a calm reassuring smile."
+        }
+      ]
+    },
+    {
+      "id": "echo",
+      "name": "Echo",
+      "role": "Echo Caves host",
+      "species": "Nautilus",
+      "sheet": "reef-hosts",
+      "row": 1,
+      "options": [
+        {
+          "id": "A",
+          "label": "Coral spiral",
+          "description": "Warm pearl-and-coral shell, peach face and curious soft tentacles."
+        },
+        {
+          "id": "B",
+          "label": "Lilac chambers",
+          "description": "Lavender chambered shell, seafoam face and attentive bright eyes."
+        },
+        {
+          "id": "C",
+          "label": "Teal pearl",
+          "description": "Cream-and-gold shell, teal spots and a quieter listening expression."
+        }
+      ]
+    },
+    {
+      "id": "pip",
+      "name": "Pip",
+      "role": "Pattern Reef host",
+      "species": "Cuttlefish",
+      "sheet": "reef-hosts",
+      "row": 2,
+      "options": [
+        {
+          "id": "A",
+          "label": "Rose frills",
+          "description": "Rose-and-cream mantle, scalloped fins and a broad happy expression."
+        },
+        {
+          "id": "B",
+          "label": "Lavender waves",
+          "description": "Longer lavender mantle, seafoam fin edges and inquisitive eyes."
+        },
+        {
+          "id": "C",
+          "label": "Peach ripples",
+          "description": "Peach mantle, teal pattern bands and warm expressive eyes."
+        }
+      ]
+    },
+    {
+      "id": "jisu",
+      "name": "Jisu",
+      "role": "Bottle Beach pen pal",
+      "species": "Hermit crab",
+      "sheet": "reef-hosts",
+      "row": 3,
+      "options": [
+        {
+          "id": "A",
+          "label": "Letter shell",
+          "description": "Pink crab, cream-and-blush shell and a little letter at the side."
+        },
+        {
+          "id": "B",
+          "label": "Seafoam garden",
+          "description": "Teal shell with coral details and curious pink-and-lilac features."
+        },
+        {
+          "id": "C",
+          "label": "Lilac ribbon",
+          "description": "Pearl-lavender conch, a shell ribbon and a gently smiling rose crab."
+        }
+      ]
+    },
+    {
+      "id": "hana",
+      "name": "Keeper Hana",
+      "role": "Lighthouse keeper",
+      "species": "Jellyfish",
+      "sheet": "keepers-town",
+      "row": 0,
+      "options": [
+        {
+          "id": "A",
+          "label": "Seafoam lantern",
+          "description": "Pearl seafoam bell, warm glow and softly curled arms."
+        },
+        {
+          "id": "B",
+          "label": "Lavender glow",
+          "description": "Scalloped lilac bell, gold luminous edge and a welcoming face."
+        },
+        {
+          "id": "C",
+          "label": "Pearl keeper",
+          "description": "Peach-and-ivory ruffles, teal oral arms and a calm little smile."
+        }
+      ]
+    },
+    {
+      "id": "captain-bay",
+      "name": "Captain Bay",
+      "role": "Captain’s Deck host",
+      "species": "Walrus",
+      "sheet": "keepers-town",
+      "row": 1,
+      "options": [
+        {
+          "id": "A",
+          "label": "Cocoa captain",
+          "description": "Warm cocoa fur, rounded muzzle, short tusks and a navy cap."
+        },
+        {
+          "id": "B",
+          "label": "Blue navigator",
+          "description": "Slate-blue fur, cheerful eyes and a gold-trimmed sailing sash."
+        },
+        {
+          "id": "C",
+          "label": "Warm elder",
+          "description": "Muted mauve fur, kindly older expression and a small captain’s hat."
+        }
+      ]
+    },
+    {
+      "id": "cafe-seahorse",
+      "name": "Cafe owner",
+      "role": "Harbor Town resident",
+      "species": "Seahorse",
+      "sheet": "keepers-town",
+      "row": 2,
+      "options": [
+        {
+          "id": "A",
+          "label": "Peach barista",
+          "description": "Peach-and-gold seahorse, bright eyes and a small cream apron."
+        },
+        {
+          "id": "B",
+          "label": "Seafoam welcome",
+          "description": "Frilled seafoam crest, coral scarf and an open friendly face."
+        },
+        {
+          "id": "C",
+          "label": "Lilac charm",
+          "description": "Lavender shell-like ridges, soft eyelids and a teal cafe apron."
+        }
+      ]
+    },
+    {
+      "id": "restaurant-otter",
+      "name": "Restaurant server",
+      "role": "Harbor Town resident",
+      "species": "Sea otter",
+      "sheet": "keepers-town",
+      "row": 3,
+      "options": [
+        {
+          "id": "A",
+          "label": "Cozy server",
+          "description": "Warm cocoa fur, soft muzzle, little teal scarf and kind eyes."
+        },
+        {
+          "id": "B",
+          "label": "Playful host",
+          "description": "Taupe-and-peach fur, happy brows and a tiny shell saucer."
+        },
+        {
+          "id": "C",
+          "label": "Calm welcome",
+          "description": "Golden-brown fur, quieter reassuring face and a seafoam sash."
+        }
+      ]
+    },
+    {
+      "id": "shop-octopus",
+      "name": "Town shopkeeper",
+      "role": "Harbor Town resident · separate from Bok",
+      "species": "Octopus",
+      "sheet": "harbor-residents",
+      "row": 0,
+      "options": [
+        {
+          "id": "A",
+          "label": "Lilac merchant",
+          "description": "Lilac skin, curled arms, bright eyes and a gold sash."
+        },
+        {
+          "id": "B",
+          "label": "Seafoam seller",
+          "description": "Broad seafoam head, peach arms and a little cream apron."
+        },
+        {
+          "id": "C",
+          "label": "Coral charm",
+          "description": "Soft coral skin, visible suction cups and gentle wise eyelids."
+        }
+      ]
+    },
+    {
+      "id": "taxi-squid",
+      "name": "Taxi driver",
+      "role": "Harbor Town resident",
+      "species": "Squid",
+      "sheet": "harbor-residents",
+      "row": 1,
+      "options": [
+        {
+          "id": "A",
+          "label": "Golden driver",
+          "description": "Gold-and-cream mantle, happy eyes and a little driver’s cap."
+        },
+        {
+          "id": "B",
+          "label": "Seafoam pilot",
+          "description": "Teal-speckled mantle, warm scarf and playful expression."
+        },
+        {
+          "id": "C",
+          "label": "Lilac cabbie",
+          "description": "Lavender-and-peach body, luminous eyes and a small taxi badge."
+        }
+      ]
+    },
+    {
+      "id": "subway-ray",
+      "name": "Subway guide",
+      "role": "Harbor Town resident",
+      "species": "Ray",
+      "sheet": "harbor-residents",
+      "row": 2,
+      "options": [
+        {
+          "id": "A",
+          "label": "Seafoam guide",
+          "description": "Broad rounded seafoam wings, ivory underside and kind eyes."
+        },
+        {
+          "id": "B",
+          "label": "Lavender navigator",
+          "description": "More angular lilac wings, lively eyes and a compass badge."
+        },
+        {
+          "id": "C",
+          "label": "Blush delight",
+          "description": "Blush-teal speckles, a very broad smile and a coral scarf."
+        }
+      ]
+    },
+    {
+      "id": "hotel-whale",
+      "name": "Hotel clerk",
+      "role": "Harbor Town resident",
+      "species": "Whale",
+      "sheet": "harbor-residents",
+      "row": 3,
+      "options": [
+        {
+          "id": "A",
+          "label": "Lilac concierge",
+          "description": "Periwinkle body, cream underside and softly welcoming eyes."
+        },
+        {
+          "id": "B",
+          "label": "Seafoam greeter",
+          "description": "Pearly seafoam skin, expressive brows and a small scarf."
+        },
+        {
+          "id": "C",
+          "label": "Slate host",
+          "description": "Muted blue-and-cream whale with a calm, more mature expression."
+        }
+      ]
+    },
+    {
+      "id": "pharmacy-shrimp",
+      "name": "Pharmacist",
+      "role": "Harbor Town resident",
+      "species": "Shrimp",
+      "sheet": "harbor-friends",
+      "row": 0,
+      "options": [
+        {
+          "id": "A",
+          "label": "Coral pharmacist",
+          "description": "Coral-and-cream segments, curious eyes and a tiny teal badge."
+        },
+        {
+          "id": "B",
+          "label": "Lilac helper",
+          "description": "Pearl pink-and-lilac segments, delicate antennae and a seafoam scarf."
+        },
+        {
+          "id": "C",
+          "label": "Wise apricot",
+          "description": "Apricot segments, a kind older expression and little round glasses."
+        }
+      ]
+    },
+    {
+      "id": "friend-seal",
+      "name": "Friend",
+      "role": "Harbor Town resident",
+      "species": "Seal",
+      "sheet": "harbor-friends",
+      "row": 1,
+      "options": [
+        {
+          "id": "A",
+          "label": "Mauve friend",
+          "description": "Silvery-mauve seal, happy warm eyes and a small coral scarf."
+        },
+        {
+          "id": "B",
+          "label": "Seafoam explorer",
+          "description": "Sleeker seafoam seal, curious brows and a tiny shell pendant."
+        },
+        {
+          "id": "C",
+          "label": "Blush smile",
+          "description": "Blush-taupe seal, broad sweet muzzle and gently feminine eyelids."
+        }
+      ]
+    }
+  ],
+  "sheets": {
+    "companions": {
+      "source": "/workspace/coral-classroom/art-source/cast-review/companions.png",
+      "rows": 4,
+      "cols": 3
+    },
+    "reef-hosts": {
+      "source": "/workspace/coral-classroom/art-source/cast-review/reef-hosts.png",
+      "rows": 4,
+      "cols": 3
+    },
+    "keepers-town": {
+      "source": "/workspace/coral-classroom/art-source/cast-review/keepers-town.png",
+      "rows": 4,
+      "cols": 3
+    },
+    "harbor-residents": {
+      "source": "/workspace/coral-classroom/art-source/cast-review/harbor-residents.png",
+      "rows": 4,
+      "cols": 3
+    },
+    "harbor-friends": {
+      "source": "/workspace/coral-classroom/art-source/cast-review/harbor-friends.png",
+      "rows": 2,
+      "cols": 3
+    }
+  },
+  "approval": "Concepts for preference review only. Shelly remains unchanged. No choices have been made and no character replacements are approved."
+}

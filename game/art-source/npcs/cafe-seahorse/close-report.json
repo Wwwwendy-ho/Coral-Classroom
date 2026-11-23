@@ -1,0 +1,80 @@
+{
+  "file": "cafe-seahorse-close.glb",
+  "bytes": 1426968,
+  "triangles": 20848,
+  "draws": 1,
+  "materials": 1,
+  "bones": 11,
+  "textureImages": [
+    {
+      "name": "painted-color-2048",
+      "width": 2048,
+      "height": 2048,
+      "mime": "image/jpeg",
+      "bytes": 568648
+    },
+    {
+      "name": "painted-surface-512",
+      "width": 512,
+      "height": 512,
+      "mime": "image/png",
+      "bytes": 53317
+    }
+  ],
+  "clips": [
+    {
+      "name": "Idle",
+      "duration": 3.5,
+      "animatedBones": [
+        "Body",
+        "Dorsal fin",
+        "Eye.L",
+        "Eye.R",
+        "Float",
+        "Head",
+        "Neck",
+        "Pectoral.L",
+        "Pectoral.R",
+        "Tail base",
+        "Tail curl"
+      ],
+      "channels": 33
+    },
+    {
+      "name": "Listen",
+      "duration": 2.7,
+      "animatedBones": [
+        "Body",
+        "Dorsal fin",
+        "Eye.L",
+        "Eye.R",
+        "Float",
+        "Head",
+        "Neck",
+        "Pectoral.L",
+        "Pectoral.R",
+        "Tail base",
+        "Tail curl"
+      ],
+      "channels": 33
+    },
+    {
+      "name": "React",
+      "duration": 1.3667,
+      "animatedBones": [
+        "Body",
+        "Dorsal fin",
+        "Eye.L",
+        "Eye.R",
+        "Float",
+        "Head",
+        "Neck",
+        "Pectoral.L",
+        "Pectoral.R",
+        "Tail base",
+        "Tail curl"
+      ],
+      "channels": 33
+    }
+  ]
+}
