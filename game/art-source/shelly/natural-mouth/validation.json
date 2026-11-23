@@ -1,0 +1,210 @@
+{
+  "audit": "Shelly natural mouth candidate GLB before/after",
+  "pass": true,
+  "tiers": [
+    {
+      "tier": "shelly",
+      "before": "/workspace/work/phase2-before-models/shelly.glb",
+      "after": "/workspace/work/shelly-natural-mouth/final/shelly.glb",
+      "before_bytes": 3258932,
+      "after_bytes": 3118368,
+      "clips": [
+        "Celebrate",
+        "Curious",
+        "Happy",
+        "Idle",
+        "Swim",
+        "Turn"
+      ],
+      "bones": 11,
+      "inverse_bind_matrices_identical": true,
+      "animation_accessors_identical": 204,
+      "images": [
+        {
+          "name": "pearl-color-runtime",
+          "mime": "image/jpeg",
+          "width": 2048,
+          "height": 2048,
+          "bytes": 1408272
+        },
+        {
+          "name": "pearl-surface-512",
+          "mime": "image/png",
+          "width": 512,
+          "height": 512,
+          "bytes": 322273
+        }
+      ],
+      "before_triangles": 23999,
+      "after_triangles": 23836,
+      "before_vertices": 22750,
+      "after_vertices": 22347,
+      "retained_triangles_identical": 23036,
+      "removed_triangles": 963,
+      "added_triangles": 800,
+      "mouth_patch_center_mesh_local": [
+        0.0,
+        1.0,
+        0.73
+      ],
+      "mouth_patch_radius_mesh_local": 0.34,
+      "unmatched_triangle_max_distance_from_patch_center": 0.300831,
+      "unmatched_triangle_examples": [
+        {
+          "kind": "removed",
+          "distance": 0.241265,
+          "count": 1,
+          "centroid": [
+            -0.225192,
+            1.074564,
+            0.685983
+          ]
+        },
+        {
+          "kind": "removed",
+          "distance": 0.232014,
+          "count": 1,
+          "centroid": [
+            -0.204939,
+            0.893667,
+            0.707116
+          ]
+        },
+        {
+          "kind": "removed",
+          "distance": 0.252775,
+          "count": 1,
+          "centroid": [
+            -0.236479,
+            0.914522,
+            0.704179
+          ]
+        },
+        {
+          "kind": "removed",
+          "distance": 0.259049,
+          "count": 1,
+          "centroid": [
+            -0.226439,
+            0.879788,
+            0.692838
+          ]
+        },
+        {
+          "kind": "removed",
+          "distance": 0.183129,
+          "count": 1,
+          "centroid": [
+            -0.129063,
+            0.870432,
+            0.720464
+          ]
+        }
+      ],
+      "geometry_retention_pass": true,
+      "pass": true
+    },
+    {
+      "tier": "shelly-view",
+      "before": "/workspace/work/phase2-before-models/shelly-view.glb",
+      "after": "/workspace/work/shelly-natural-mouth/final/shelly-view.glb",
+      "before_bytes": 1297924,
+      "after_bytes": 1257572,
+      "clips": [
+        "Celebrate",
+        "Curious",
+        "Happy",
+        "Idle",
+        "Swim",
+        "Turn"
+      ],
+      "bones": 11,
+      "inverse_bind_matrices_identical": true,
+      "animation_accessors_identical": 204,
+      "images": [
+        {
+          "name": "shelly-view-color",
+          "mime": "image/jpeg",
+          "width": 1024,
+          "height": 1024,
+          "bytes": 311660
+        },
+        {
+          "name": "shelly-view-surface",
+          "mime": "image/png",
+          "width": 256,
+          "height": 256,
+          "bytes": 96021
+        }
+      ],
+      "before_triangles": 11998,
+      "after_triangles": 11947,
+      "before_vertices": 13610,
+      "after_vertices": 13374,
+      "retained_triangles_identical": 11546,
+      "removed_triangles": 452,
+      "added_triangles": 401,
+      "mouth_patch_center_mesh_local": [
+        0.0,
+        1.0,
+        0.73
+      ],
+      "mouth_patch_radius_mesh_local": 0.34,
+      "unmatched_triangle_max_distance_from_patch_center": 0.30601,
+      "unmatched_triangle_examples": [
+        {
+          "kind": "removed",
+          "distance": 0.236984,
+          "count": 1,
+          "centroid": [
+            -0.220874,
+            1.075231,
+            0.68857
+          ]
+        },
+        {
+          "kind": "removed",
+          "distance": 0.214903,
+          "count": 1,
+          "centroid": [
+            -0.190803,
+            1.084331,
+            0.67837
+          ]
+        },
+        {
+          "kind": "removed",
+          "distance": 0.257377,
+          "count": 1,
+          "centroid": [
+            -0.228181,
+            0.88673,
+            0.693312
+          ]
+        },
+        {
+          "kind": "removed",
+          "distance": 0.158657,
+          "count": 1,
+          "centroid": [
+            -0.09426,
+            0.872417,
+            0.73309
+          ]
+        },
+        {
+          "kind": "removed",
+          "distance": 0.229731,
+          "count": 1,
+          "centroid": [
+            -0.165196,
+            0.845911,
+            0.688247
+          ]
+        }
+      ],
+      "geometry_retention_pass": true,
+      "pass": true
+    }
+  ]
+}
