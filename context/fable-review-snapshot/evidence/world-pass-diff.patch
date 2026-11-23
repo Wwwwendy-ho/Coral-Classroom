@@ -1,0 +1,496 @@
+--- before/src/js/reef3d/board.js
++++ after/src/js/reef3d/board.js
+@@ -704,10 +704,11 @@
+         g.applyMatrix4(m.matrixWorld);
+         if(!g.attributes.normal) g.computeVertexNormals();
+         reef3dBakeGeo(g, pc.mat, rig);
+-        Object.keys(g.attributes).forEach(function(n){ if(n !== 'position' && n !== 'color' && !(n === 'uv' && pc.mat.map)) g.deleteAttribute(n); });
++        var surfaced = typeof reef3dSurfaceGeometry === 'function' && reef3dSurfaceGeometry(g, m, pc.mat);
++        Object.keys(g.attributes).forEach(function(n){ if(n !== 'position' && n !== 'color' && !(n === 'uv' && (pc.mat.map || surfaced)) && !(n === 'reefSurface' && surfaced)) g.deleteAttribute(n); });
+         g.morphAttributes = {}; g.groups = [];
+         g.computeBoundingBox(); g.boundingBox.getCenter(ctr);
+-        var mat = reef3dBakedMat(cache, pc.mat), key = mat.uuid + '@' + Math.floor(ctr.z / REEF3D_CHUNK) + ',' + Math.floor(ctr.x / REEF3D_CHUNK);
++        var mat = surfaced ? reef3dSurfaceMaterial(cache, pc.mat) : reef3dBakedMat(cache, pc.mat), key = mat.uuid + '@' + Math.floor(ctr.z / REEF3D_CHUNK) + ',' + Math.floor(ctr.x / REEF3D_CHUNK);
+         (buckets[key] = buckets[key] || { mat: mat, geos: [] }).geos.push(g);
+       });
+     });
+--- before/src/js/reef3d/region-scenery.js
++++ after/src/js/reef3d/region-scenery.js
+@@ -6,17 +6,50 @@
+     var id = config && config.id, allowed = { town: 1, lagoon: 1, caves: 1, patterns: 1, beach: 1, light: 1, captain: 1 };
+     if(!allowed[id] || !view || !view.kit || !view.spaces) return;
+     var T = window.THREE, M = view.kit.M, mesh = view.kit.mesh, sp = view.spaces,
+-        main = sp.slice(0, sp.mainN || sp.length), root = new T.Group(), geos = {};
++        main = sp.slice(0, sp.mainN || sp.length), root = new T.Group(), geos = {}, owned = new Set();
+     root.name = 'region-' + id;
+-    function box(w,h,d){ var k = ['b',w,h,d].join(':'); return geos[k] || (geos[k] = new T.BoxGeometry(w,h,d)); }
+-    function cyl(rt,rb,h,n){ var k = ['c',rt,rb,h,n || 10].join(':'); return geos[k] || (geos[k] = new T.CylinderGeometry(rt,rb,h,n || 10)); }
++    function own(g){ owned.add(g); return g; }
++    function box(w,h,d){ var k = ['b',w,h,d].join(':'); return geos[k] || (geos[k] = own(new T.BoxGeometry(w,h,d))); }
++    function cyl(rt,rb,h,n){ var k = ['c',rt,rb,h,n || 10].join(':'); return geos[k] || (geos[k] = own(new T.CylinderGeometry(rt,rb,h,n || 10))); }
+     function cone(r,h,n){ return cyl(0,r,h,n || 7); }
+-    function ball(r,n){ var k = ['s',r,n || 10].join(':'); return geos[k] || (geos[k] = new T.SphereGeometry(r,n || 10,7)); }
+-    function torus(r,t){ var k = ['t',r,t].join(':'); return geos[k] || (geos[k] = new T.TorusGeometry(r,t,6,16)); }
+-    function add(g,col,x,y,z,rx,ry,rz){ var o = mesh(g,M(col),x,y,z); if(rx) o.rotation.x=rx; if(ry) o.rotation.y=ry; if(rz) o.rotation.z=rz; root.add(o); return o; }
+-    function block(w,h,d,col,x,y,z,ry){ return add(box(w,h,d),col,x,y,z,0,ry); }
+-    function post(r,h,col,x,y,z){ return add(cyl(r,r,h,8),col,x,y+h/2,z); }
+-    function orb(r,col,x,y,z){ return add(ball(r,10),col,x,y,z); }
++    function ball(r,n){ var k = ['s',r,n || 8].join(':'); return geos[k] || (geos[k] = own(new T.SphereGeometry(r,n || 8,5))); }
++    function torus(r,t){ var k = ['t',r,t].join(':'); return geos[k] || (geos[k] = own(new T.TorusGeometry(r,t,5,12))); }
++    function finish(o,kind,scale){
++      if(kind && typeof window.reef3dSurface==='function') window.reef3dSurface(o,kind,{scale:scale||2,seed:Math.abs(o.position.x*.37+o.position.z*.71)%7});
++      return o;
++    }
++    function add(g,col,x,y,z,rx,ry,rz,kind){ var o = mesh(g,M(col,g.attributes.color?{vertexColors:true}:undefined),x,y,z); if(rx) o.rotation.x=rx; if(ry) o.rotation.y=ry; if(rz) o.rotation.z=rz; root.add(o); return finish(o,kind===false?false:kind||'stone'); }
++    function block(w,h,d,col,x,y,z,ry,kind){ return add(box(w,h,d),col,x,y,z,0,ry,0,kind); }
++    function post(r,h,col,x,y,z){ return add(cyl(r*.87,r,h,8),col,x,y+h/2,z,0,0,0,'timber'); }
++    function orb(r,col,x,y,z,kind){ return add(ball(r),col,x,y,z,0,0,0,kind===false?false:kind||'coral'); }
++    // Worn corners catch the baked sky light; one cached extrusion replaces a
++    // sharp box, without adding trim pieces or individual masonry blocks.
++    function wornBox(w,h,d,col,x,y,z,kind){
++      var k=['w',w,h,d].join(':'), g=geos[k];
++      if(!g){
++        var b=Math.min(.12,w*.07,h*.07,d*.07), hw=w/2-b, hh=h/2-b, sh=new T.Shape();
++        sh.moveTo(-hw+b,-hh); sh.lineTo(hw-b,-hh); sh.lineTo(hw,-hh+b); sh.lineTo(hw,hh-b);
++        sh.lineTo(hw-b,hh); sh.lineTo(-hw+b,hh); sh.lineTo(-hw,hh-b); sh.lineTo(-hw,-hh+b); sh.closePath();
++        g=own(new T.ExtrudeGeometry(sh,{depth:d-2*b,steps:1,bevelEnabled:true,bevelSegments:1,bevelSize:b,bevelThickness:b,curveSegments:1}));
++        g.translate(0,0,-d/2+b); geos[k]=g;
++      }
++      return add(g,col,x,y,z,0,0,0,kind);
++    }
++    // Irregular horizontal ledges and broad fracture faces, rather than smooth
++    // ellipsoids. Four profiles share their source geometry across the region.
++    function contour(seed){
++      var k='strata:'+seed, g=geos[k]; if(g) return g;
++      var p=[], colors=[], idx=[], n=9, radii=[.79,1,.88,.56], heights=[-.55,-.28,.2,.55];
++      for(var ring=0;ring<4;ring++) for(var a=0;a<n;a++){
++        var ang=a*Math.PI*2/n, wobble=.87+.08*Math.sin(a*2.7+seed)+.04*Math.cos(a*4.3+seed*2), r=radii[ring]*wobble;
++        p.push(Math.cos(ang)*r+.01*Math.sin(ring+seed),heights[ring]+.055*Math.sin(a*2+seed+ring*.8),Math.sin(ang)*r);
++        var shade=[.81,.93,.84,1][ring]*(1+.025*Math.sin(a+seed)); colors.push(shade,shade,shade);
++      }
++      for(ring=0;ring<3;ring++) for(a=0;a<n;a++){ var b=ring*n+a,c=ring*n+(a+1)%n; idx.push(b,b+n,c,c,b+n,c+n); }
++      for(a=1;a<n-1;a++) idx.push(0,a,a+1,3*n,3*n+a+1,3*n+a);
++      g=own(new T.BufferGeometry()); g.setAttribute('position',new T.Float32BufferAttribute(p,3)); g.setAttribute('color',new T.Float32BufferAttribute(colors,3)); g.setIndex(idx);
++      var flat=own(g.toNonIndexed()); flat.computeVertexNormals(); geos[k]=flat; return flat;
++    }
+     var cx=0, cz=0;
+     main.forEach(function(s){ cx+=s.x; cz+=s.z; }); cx/=main.length; cz/=main.length;
+     function frame(s){
+@@ -33,16 +66,16 @@
+     }
+     function lantern(x,y,z,col){
+       post(.07,2.2,'#50445d',x,y,z); add(cyl(.42,.24,.52,6),'#744f64',x,y+2.16,z);
+-      orb(.24,col,x,y+2.16,z); add(cone(.48,.24,6),'#4c5367',x,y+2.55,z);
++      orb(.24,col,x,y+2.16,z,false); add(cone(.48,.24,6),'#4c5367',x,y+2.55,z,0,0,0,'roof');
+     }
+     function crystal(x,y,z,scale,col){
+       add(cyl(0,.43*scale,1.8*scale,5),col,x,y+.9*scale,z,0,(x+z)*.2,.16);
+       add(cone(.23*scale,.72*scale,5),'#d8f7fb',x+.27*scale,y+.4*scale,z+.17*scale,0,0,-.32);
+     }
+     function coral(x,y,z,k,col){
+-      post(.13*k,1.5*k,col,x,y,z);
++      finish(post(.13*k,1.5*k,col,x,y,z),'coral');
+       for(var a=0;a<3;a++){ var ang=a*2.094+.3, bx=x+Math.cos(ang)*.45*k, bz=z+Math.sin(ang)*.45*k;
+-        add(cyl(.04*k,.1*k,1.15*k,5),col,bx,y+.85*k,bz,Math.sin(ang)*.42,0,Math.cos(ang)*-.42);
++        add(cyl(.04*k,.1*k,1.15*k,5),col,bx,y+.85*k,bz,Math.sin(ang)*.42,0,Math.cos(ang)*-.42,'coral');
+         orb(.12*k,'#ffe3d5',bx+Math.cos(ang)*.15*k,y+1.48*k,bz+Math.sin(ang)*.15*k);
+       }
+     }
+@@ -52,44 +85,73 @@
+     }
+     function seaGrass(x,y,z,k,col){
+       for(var j=0;j<4;j++){
+-        var q=(j-1.5)*.19, blade=add(cone(.09*k,(.65+(j%3)*.19)*k,5),col,x+q,y+.39*k,z+(j%2)*.16);
++        var q=(j-1.5)*.19, blade=add(cone(.09*k,(.65+(j%3)*.19)*k,5),col,x+q,y+.39*k,z+(j%2)*.16,0,0,0,false);
+         blade.rotation.z=q*.9;
+       }
+     }
+-    function organicRock(x,y,z,sx,sy,sz,col){
+-      var o=add(new T.DodecahedronGeometry(1,1),col,x,y+sy*.55,z);
+-      o.scale.set(sx,sy,sz); o.rotation.set(.1,Math.sin(z)*.22,.08); return o;
+-    }
++    function organicRock(x,y,z,sx,sy,sz,col,kind){
++      var seed=Math.abs(Math.floor(x*.7+z*.3))%4, o=add(contour(seed),col,x,y+sy*.55,z,0,Math.sin(z)*.22,0,kind||'stone');
++      o.scale.set(sx,sy,sz); return o;
++    }
++    var propSources={};
+     function kitProp(kind,x,y,z,size,rot){
+       var o=null, names={rock:'rock1',plant:'plant',clam:'clam'};
+       if(view.models && names[kind]) o=reef3dModel(view.models,names[kind],size,view.kit.grad);
+-      if(!o && view.kit.B[kind]){ o=view.kit.B[kind](function(){ return .43; }); o.scale.setScalar(size); }
+-      if(o){ o.position.set(x,y,z); o.rotation.y=rot||0; root.add(o); }
++      if(!o && kind==='brain'){
++        // Most of this coral's identity is the meandering pore finish. A broad
++        // lobed dome replaces the old detail-4 icosahedron at every garden.
++        if(!propSources.brain){
++          var g=own(new T.SphereGeometry(1,16,8)), p=g.attributes.position;
++          for(var i=0;i<p.count;i++){ var ax=p.getX(i),ay=p.getY(i),az=p.getZ(i), r=1+.045*Math.sin(ax*10+az*5)*Math.cos(ay*8); p.setXYZ(i,ax*r,ay*r,az*r); }
++          g.computeVertexNormals(); var dome=mesh(g,M('#ef9a86'),0,.55,0); dome.scale.set(1.1,.78,1.1); propSources.brain=new T.Group(); propSources.brain.add(dome);
++        }
++        o=propSources.brain.clone(); o.scale.multiplyScalar(size);
++      }
++      if(!o && view.kit.B && view.kit.B[kind]){
++        if(!propSources[kind]){ propSources[kind]=view.kit.B[kind](function(){ return .43; }); propSources[kind].traverse(function(p){ if(p.geometry) own(p.geometry); }); }
++        o=propSources[kind].clone(); o.scale.multiplyScalar(size);
++      }
++      if(o){ o.position.set(x,y,z); o.rotation.y=rot||0; root.add(o); o.traverse(function(p){ if(p.isMesh) finish(p,'coral'); }); }
+       return o;
+     }
+     function ropeCoil(x,y,z){
+-      for(var j=0;j<3;j++) add(torus(.38+j*.09,.045),'#dcc28a',x,y+j*.065,z,Math.PI/2);
++      for(var j=0;j<3;j++) add(torus(.38+j*.09,.045),'#dcc28a',x,y+j*.065,z,Math.PI/2,0,0,'rope');
++    }
++    function canvasPanel(x,y,z){
++      // A shallow wind-filled belly reads as heavy sailcloth even at a distance.
++      // Closed edges retain the single opaque front-sided surface material.
++      var p=[], idx=[], side,u,v,n=4;
++      for(side=0;side<2;side++) for(v=0;v<=n;v++) for(u=0;u<=n;u++)
++        p.push((u/n-.5)*2.5,(v/n-.5)*4,.32*Math.sin(u*Math.PI/n)*Math.sin(v*Math.PI/n)+(side?-.055:.055));
++      for(side=0;side<2;side++) for(v=0;v<n;v++) for(u=0;u<n;u++){
++        var a=side*25+v*5+u,b=a+5;
++        if(side) idx.push(a,b,a+1,b,b+1,a+1); else idx.push(a,a+1,b,b,a+1,b+1);
++      }
++      var edge=[0,1,2,3,4,9,14,19,24,23,22,21,20,15,10,5];
++      for(u=0;u<edge.length;u++){ var edgeA=edge[u],edgeB=edge[(u+1)%edge.length]; idx.push(edgeA,edgeB,edgeA+25,edgeB,edgeB+25,edgeA+25); }
++      var g=own(new T.BufferGeometry()); g.setAttribute('position',new T.Float32BufferAttribute(p,3)); g.setIndex(idx); g.computeVertexNormals();
++      return add(g,'#f3dfb1',x,y,z,0,0,0,'fabric');
+     }
+     function harborBoat(x,z,n){
+       var sh=new T.Shape(); sh.moveTo(-.67,-1.4); sh.lineTo(.67,-1.4);
+       sh.lineTo(1,0); sh.lineTo(.67,1.4); sh.lineTo(-.67,1.4); sh.lineTo(-1,0); sh.closePath();
+-      var hull=new T.ExtrudeGeometry(sh,{depth:.42,bevelEnabled:false}); hull.rotateX(-Math.PI/2);
+-      add(hull,n%2?'#c66f56':'#487e89',x,-.42,z);
+-      block(1.38,.08,2.25,'#d8be8c',x,-.03,z);
+-      [-1,1].forEach(function(sd){ block(.12,.12,2.6,'#f5e7be',x+sd*.72,.08,z); });
++      var hull=own(new T.ExtrudeGeometry(sh,{depth:.42,bevelEnabled:false})); hull.rotateX(-Math.PI/2);
++      add(hull,n%2?'#c66f56':'#487e89',x,-.42,z,0,0,0,'timber');
++      block(1.38,.08,2.25,'#d8be8c',x,-.03,z,0,'timber');
++      [-1,1].forEach(function(sd){ block(.12,.12,2.6,'#f5e7be',x+sd*.72,.08,z,0,'timber'); });
+       post(.055,2.6,'#795d49',x,-.02,z);
+-      var sail=new T.BufferGeometry(); sail.setAttribute('position',new T.Float32BufferAttribute([
++      var sail=own(new T.BufferGeometry()); sail.setAttribute('position',new T.Float32BufferAttribute([
+         0,.35,0, 0,2.35,0, .9,.35,0,
+         0,.35,0, -.68,.35,0, 0,1.65,0
+       ],3)); sail.computeVertexNormals();
+-      root.add(mesh(sail,M(n%2?'#fff1cf':'#f7d9bf',{side:T.DoubleSide}),x,-.02,z));
++      var canvas=mesh(sail,M(n%2?'#fff1cf':'#f7d9bf',{side:T.DoubleSide}),x,-.02,z); root.add(canvas); finish(canvas,'fabric',1.8);
+       block(.1,.07,.36,'#efb665',x,.55,z+.95);
+     }
+     // A water plane is below every region. Land follows the route, with real edges
+     // instead of the same rectangular floor in seven colours.
+     var bounds=sp.bounds || {minX:-30,maxX:30,minZ:-30,maxZ:30};
+     if(view.floor) view.floor.visible=false;
+-    block(bounds.maxX-bounds.minX+35,.08,bounds.maxZ-bounds.minZ+35,{town:'#419fb8',lagoon:'#45bdb9',caves:'#395d83',patterns:'#5c9bd0',beach:'#64cbd3',light:'#5aaec0',captain:'#438fba'}[id],(bounds.minX+bounds.maxX)/2,id==='captain'?-1.1:-.66,(bounds.minZ+bounds.maxZ)/2);
++    block(bounds.maxX-bounds.minX+35,.08,bounds.maxZ-bounds.minZ+35,{town:'#419fb8',lagoon:'#45bdb9',caves:'#395d83',patterns:'#5c9bd0',beach:'#64cbd3',light:'#5aaec0',captain:'#438fba'}[id],(bounds.minX+bounds.maxX)/2,id==='captain'?-1.1:-.66,(bounds.minZ+bounds.maxZ)/2,0,false);
+     if(view.wrap) view.wrap.classList.add('region-'+id);
+     function strip(left,right,top,edge,depth){
+       // A joined ring follows the local path normals, including the closing leg.
+@@ -117,41 +179,10 @@
+           if(!filled) block(.22,.12,2.8,edge,q[0],deckY+.03,q[2],angle);
+         }
+       }
+-      var geo=new T.BufferGeometry(); geo.setAttribute('position',new T.Float32BufferAttribute(pos,3)); geo.setIndex(idx); geo.computeVertexNormals();
+-      var surfaceMaterial=null;
+-      if(id==='town' || id==='captain'){
+-        // One small repeating, opaque texture is baked into the existing static bins.
+-        var canvas=document.createElement('canvas'); canvas.width=canvas.height=256;
+-        var ctx=canvas.getContext('2d'), wood=id==='captain';
+-        ctx.fillStyle=wood?'#ad8057':'#c5bba5'; ctx.fillRect(0,0,256,256);
+-        if(wood){
+-          for(var row=0;row<8;row++){
+-            var y=row*32; ctx.fillStyle=row%2?'#a77850':'#b58a61'; ctx.fillRect(0,y,256,31);
+-            ctx.fillStyle='#78553d'; ctx.fillRect(0,y,256,2);
+-            ctx.fillStyle='#c59a70'; ctx.fillRect(0,y+4,256,1);
+-            for(var x=(row%2)*64;x<256;x+=128){ ctx.fillStyle='#815d42'; ctx.fillRect(x,y,2,32); }
+-            ctx.fillStyle='rgba(91,58,38,.18)';
+-            for(var g=0;g<3;g++) ctx.fillRect((row*43+g*79)%256,y+9+g*6,35+(row*11+g*13)%55,1);
+-          }
+-        } else {
+-          ctx.strokeStyle='#9f988b'; ctx.lineWidth=2;
+-          for(var stoneRow=0;stoneRow<8;stoneRow++){
+-            var stoneY=stoneRow*32; ctx.beginPath(); ctx.moveTo(0,stoneY); ctx.lineTo(256,stoneY); ctx.stroke();
+-            for(var stoneX=(stoneRow%2)*32;stoneX<256;stoneX+=64){ ctx.beginPath(); ctx.moveTo(stoneX,stoneY); ctx.lineTo(stoneX,stoneY+32); ctx.stroke(); }
+-          }
+-          ctx.fillStyle='rgba(244,235,211,.22)';
+-          for(var speck=0;speck<45;speck++) ctx.fillRect((speck*71)%256,(speck*47)%256,3+speck%4,2);
+-        }
+-        var texture=new T.CanvasTexture(canvas); texture.wrapS=texture.wrapT=T.RepeatWrapping;
+-        surfaceMaterial=new T.MeshToonMaterial({color:'#ffffff',map:texture,gradientMap:view.kit.grad});
+-      }
++      var geo=own(new T.BufferGeometry()); geo.setAttribute('position',new T.Float32BufferAttribute(pos,3)); geo.setIndex(idx); geo.computeVertexNormals();
+       function surface(g,y){
+-        if(surfaceMaterial){
+-          var p=g.attributes.position, uv=[];
+-          for(var k=0;k<p.count;k++) uv.push(p.getX(k)/8,p.getZ(k)/8);
+-          g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));
+-          root.add(mesh(g,surfaceMaterial,0,y,0));
+-        } else add(g,top,0,y,0);
++        var o=add(g,top,0,y,0,0,0,0,id==='captain'?'timber':id==='beach'?'sand':'stone');
++        if(typeof window.reef3dSurface==='function') window.reef3dSurface(o,id==='captain'?'timber':id==='beach'?'sand':'stone',{scale:id==='captain'?3.2:4,projection:'xz'});
+       }
+       surface(geo,0);
+       if(filled){
+@@ -160,7 +191,7 @@
+         var shape=new T.Shape();
+         inner.forEach(function(p,i){ if(i) shape.lineTo(p[0],-p[1]); else shape.moveTo(p[0],-p[1]); });
+         shape.closePath();
+-        var fill=new T.ShapeGeometry(shape); fill.rotateX(-Math.PI/2);
++        var fill=own(new T.ShapeGeometry(shape)); fill.rotateX(-Math.PI/2);
+         surface(fill,deckY);
+       }
+     }
+@@ -179,15 +210,15 @@
+       for(var boat=1;boat<main.length;boat+=9) placed(main[boat],-1,6.5,0,function(x,y,z){ harborBoat(x,z,boat); });
+       function shop(x,y,z,n){
+         var wall=n%3===0?'#f5dbc1':n%3===1?'#d8e6dd':'#e8d5d5', roof=n%2?'#335b72':'#aa4e58';
+-        block(4.05,2.9,4.25,wall,x,y+1.45,z);
+-        block(4.4,.2,4.45,roof,x,y+2.98,z);
+-        // Sloped, deep eaves and narrow tiles make a recognizable harbor street.
+-        block(4.55,.17,2.55,roof,x,y+3.36,z-1.05,0); root.children[root.children.length-1].rotation.x=-.31;
+-        block(4.55,.17,2.55,roof,x,y+3.36,z+1.05,0); root.children[root.children.length-1].rotation.x=.31;
+-        block(4.7,.14,.16,'#243d50',x,y+3.76,z);
+-        for(var rt=-1;rt<=1;rt++) block(.08,.08,4.35,'#e8b887',x+rt*1.6,y+3.52,z);
++        wornBox(4.05,2.9,4.25,wall,x,y+1.45,z,'plaster');
++        wornBox(4.4,.2,4.45,roof,x,y+2.98,z,'timber');
++        // Sloped roofs and deep eaves make a recognizable harbor street.
++        block(4.55,.17,2.55,roof,x,y+3.36,z-1.05,0,'roof'); root.children[root.children.length-1].rotation.x=-.31;
++        block(4.55,.17,2.55,roof,x,y+3.36,z+1.05,0,'roof'); root.children[root.children.length-1].rotation.x=.31;
++        block(4.7,.14,.16,'#243d50',x,y+3.76,z,0,'roof');
++        // Broad roof courses live in the atlas; deep eaves carry the silhouette.
+         block(4.45,.18,.25,'#e7b889',x,y+2.68,z+2.18);
+-        block(.95,1.68,.12,'#7c5245',x,y+.83,z+2.16);
++        wornBox(.95,1.68,.12,'#7c5245',x,y+.83,z+2.16,'timber');
+         block(.25,.15,.13,'#eacb80',x+.29,y+.84,z+2.25);
+         [-1,1].forEach(function(sd){
+           block(.69,.78,.13,'#47758a',x+sd*1.25,y+1.75,z+2.17);
+@@ -196,7 +227,7 @@
+           block(.65,.3,.12,'#78968c',x+sd*1.25,y+.47,z+2.24);
+         });
+         block(2.1,.42,.14,n%2?'#b84e65':'#547c87',x,y+2.36,z+2.27);
+-        for(var aw=-1;aw<=1;aw++) block(.67,.12,.88,aw===0?'#f7e2b7':roof,x+aw*.72,y+2.13,z+2.65);
++        for(var aw=-1;aw<=1;aw++) block(.67,.12,.88,aw===0?'#f7e2b7':roof,x+aw*.72,y+2.13,z+2.65,0,'fabric');
+         block(3.8,.12,.9,'#ad9e84',x,y+.07,z+2.53);
+         lantern(x+2.7,y,z+1.3,'#ffd58c');
+       }
+@@ -205,24 +236,24 @@
+         pebble(x,y,z,.5,'#eee1c8'); pebble(x-.55,y,z-.6,.36,'#e3d5be');
+       }); });
+       for(var k=4;k<main.length;k+=9) placed(main[k],1,5.7,0,function(x,y,z){
+-        block(3.1,.18,2.2,'#936443',x,y+.1,z); for(var j=-1;j<=1;j++) block(.14,.12,2.2,'#c39161',x+j*.95,y+.23,z);
++        wornBox(3.1,.18,2.2,'#936443',x,y+.1,z,'timber');
+         post(.12,2.5,'#754c38',x-1.3,y,z); post(.12,2.5,'#754c38',x+1.3,y,z);
+         block(2.8,.16,.14,'#e8cc9c',x,y+2.45,z);
+-        block(.8,.73,.8,'#b8784e',x-.75,y+.55,z-.2);
+-        add(cyl(.44,.49,.85,8),'#987052',x+.65,y+.53,z+.2);
++        wornBox(.8,.73,.8,'#b8784e',x-.75,y+.55,z-.2,'timber');
++        add(cyl(.44,.49,.85,8),'#987052',x+.65,y+.53,z+.2,0,0,0,'timber');
+         ropeCoil(x,y+.26,z+.9);
+       });
+     }
+     function lagoon(){
+       foundations('#7fbdad');
+       function reeds(x,y,z){ for(var j=0;j<5;j++){ var dx=(j-2)*.25, h=1.7+(j%3)*.37;
+-        add(cyl(.025,.05,h,5),'#408970',x+dx,y+h/2,z+(j%2)*.18,0,0,dx*.23);
+-        add(cyl(.075,.09,.37,6),'#ac8251',x+dx+dx*.12,y+h-.1,z+(j%2)*.18);
++        add(cyl(.025,.05,h,5),'#408970',x+dx,y+h/2,z+(j%2)*.18,0,0,dx*.23,false);
++        add(cyl(.075,.09,.37,6),'#ac8251',x+dx+dx*.12,y+h-.1,z+(j%2)*.18,0,0,0,false);
+       } }
+       main.forEach(function(s,i){ if(i%3!==0) return; var sd=pathSide(s,i);
+         placed(s,sd,4.4,0,function(x,y,z){
+-          add(cyl(1.2,1.35,.22,10),'#8cb9a4',x,y+.07,z);
+-          add(cyl(.83,.91,.17,10),'#e4d7a8',x+.35,y+.2,z+.35);
++          organicRock(x,y-.04,z,1.35,.24,1.2,'#8cb9a4');
++          organicRock(x+.35,y+.15,z+.35,.91,.18,.83,'#e4d7a8','sand');
+           reeds(x-1.3,y,z-.5);
+           seaGrass(x+.8,y+.12,z-.6,.75,'#52957f');
+           pebble(x-.6,y+.1,z+.8,.3,'#f0d8a8');
+@@ -232,8 +263,8 @@
+       });
+       for(var lp=2;lp<main.length;lp+=5){ var ls=main[lp], d=pathSide(ls,lp);
+         placed(ls,d,7.6,-1.3,function(x,y,z){
+-          add(cyl(1.9,2.2,.28,9),'#c2cda9',x,y+.09,z);
+-          add(cyl(1.35,1.48,.12,9),'#f2dbb4',x,y+.29,z);
++          organicRock(x,y-.07,z,2.2,.3,1.9,'#c2cda9');
++          organicRock(x,y+.22,z,1.48,.13,1.35,'#f2dbb4','sand');
+           coral(x+.6,y+.36,z-.25,.8,'#e38b91');
+           seaGrass(x-.8,y+.33,z+.45,1.1,'#3f997f');
+         });
+@@ -245,7 +276,7 @@
+       placed(main[2],1,7,0,function(x,y,z){
+         add(cyl(2.1,2.45,.27,10),'#dfd5ae',x,y,z);
+         [-1,1].forEach(function(sd){ post(.14,2.5,'#987456',x+sd*1.35,y,z+sd*.7); });
+-        add(cone(2.2,1.2,8),'#d58a72',x,y+2.9,z);
++        add(cone(2.2,1.2,8),'#d58a72',x,y+2.9,z,0,0,0,'fabric');
+       });
+     }
+     function caves(){
+@@ -266,8 +297,8 @@
+     }
+     function patterns(){
+       function garden(x,y,z,i){
+-        organicRock(x,y-.2,z,2.2,.75,1.6,'#669f9d');
+-        organicRock(x-.9,y+.3,z-.6,1,.45,.8,'#a8c4ad');
++        organicRock(x,y-.2,z,2.2,.75,1.6,'#669f9d','coral');
++        organicRock(x-.9,y+.3,z-.6,1,.45,.8,'#a8c4ad','coral');
+         kitProp('brain',x-.55,y+.35,z+.45,1.2);
+         kitProp('staghorn',x+.8,y+.23,z-.45,1.2);
+         var fan=kitProp('fan',x-1.3,y+.32,z-.35,1.3); if(fan) fan.rotation.y=.25;
+@@ -282,24 +313,24 @@
+       foundations('#f2dcad');
+       function palm(x,y,z,i,small){
+         var scale=small||1, h=(3.8+(i%3)*.45)*scale;
+-        add(cyl(.16,.25,h,8),'#a77b54',x,y+h/2,z,0,0,.11);
++        add(cyl(.16,.25,h,8),'#a77b54',x,y+h/2,z,0,0,.11,'timber');
+         orb(.38*scale,'#c79c68',x+.22*scale,y+h,z);
+         for(var j=0;j<6;j++){ var a=j*Math.PI/3;
+-          var leaf=add(cone(.45*scale,2.3*scale,5),j%2?'#5eaa76':'#3a9277',x+.22*scale+Math.cos(a)*1.05*scale,y+h-.2*scale,z+Math.sin(a)*1.05*scale);
++          var leaf=add(cone(.45*scale,2.3*scale,5),j%2?'#5eaa76':'#3a9277',x+.22*scale+Math.cos(a)*1.05*scale,y+h-.2*scale,z+Math.sin(a)*1.05*scale,0,0,0,false);
+           leaf.rotation.z=Math.cos(a)*1.18; leaf.rotation.x=-Math.sin(a)*1.18;
+         }
+         for(var c=0;c<3;c++) orb(.16*scale,'#9a7045',x+.22*scale+(c-1)*.2*scale,y+h-.38*scale,z+.18*scale);
+       }
+       function bottle(x,y,z){
+-        add(cyl(.27,.33,.75,10),'#8fc9bb',x,y+.45,z,0,0,.36);
+-        add(cyl(.11,.11,.32,10),'#addbd0',x-.15,y+.91,z,0,0,.36);
+-        add(cyl(.12,.12,.12,8),'#b98754',x-.2,y+1.09,z,0,0,.36);
+-        block(.42,.3,.06,'#fff0d0',x,y+.48,z+.27,.36);
++        add(cyl(.27,.33,.75,10),'#8fc9bb',x,y+.45,z,0,0,.36,false);
++        add(cyl(.11,.11,.32,10),'#addbd0',x-.15,y+.91,z,0,0,.36,false);
++        add(cyl(.12,.12,.12,8),'#b98754',x-.2,y+1.09,z,0,0,.36,'timber');
++        block(.42,.3,.06,'#fff0d0',x,y+.48,z+.27,.36,'fabric');
+       }
+       main.forEach(function(s,i){ if(i%4!==0) return; var sd=1;
+         placed(s,sd,5.5,0,function(x,y,z){ palm(x,y,z,i); bottle(x+1.3,y,z+.8); });
+         placed(s,-sd,4.7,1,function(x,y,z){
+-          add(cyl(1.5,1.7,.36,10),'#eac991',x,y+.12,z);
++          organicRock(x,y-.05,z,1.7,.38,1.5,'#eac991','sand');
+           for(var j=0;j<3;j++) orb(.22,['#e58f87','#f7e3bc','#e8ad78'][j],x-.6+j*.52,y+.39,z+.4);
+           seaGrass(x-1.3,y+.2,z-.7,.72,'#7dac77');
+         });
+@@ -316,8 +347,8 @@
+       foundations('#b9b8aa');
+       function cliff(x,y,z,i){
+         var h=2.5+(i%3)*.75;
+-        add(cyl(2.1,2.55,h,8),'#7d8d8d',x,y+h/2,z);
+-        add(cyl(2.25,2.3,.32,8),'#b7b8a5',x,y+h+.08,z);
++        organicRock(x,y-.05,z,2.55,h*.87,2.1,'#7d8d8d');
++        organicRock(x,y+h-.04,z,2.3,.3,2.25,'#b7b8a5');
+         for(var j=0;j<3;j++) add(cone(.46,1.1,6),'#5f8584',x+(j-1)*1.1,y+h+.63,z+.7);
+       }
+       main.forEach(function(s,i){ if(i%5!==1) return; placed(s,-1,6.1,0,function(x,y,z){ cliff(x,y,z,i); }); });
+@@ -338,9 +369,9 @@
+         }
+         for(var l=0;l<5;l++) add(cyl(l%2?1.1:1.18,l%2?1.12:1.2,1.08,12),l%2?'#d75d5d':'#fff0dc',x,y+4.1+l*1.07,z);
+         add(cyl(1.5,1.5,.26,12),'#384f5c',x,y+9.55,z);
+-        add(cyl(1.05,1.05,1.15,12),'#ffe09b',x,y+10.24,z);
++        add(cyl(1.05,1.05,1.15,12),'#ffe09b',x,y+10.24,z,0,0,0,false);
+         for(var k=0;k<6;k++){ var a=k*Math.PI/3; post(.06,1.08,'#354e60',x+Math.cos(a)*1.06,y+9.65,z+Math.sin(a)*1.06); }
+-        add(cone(1.68,.83,12),'#c9545e',x,y+11.22,z);
++        add(cone(1.68,.83,12),'#c9545e',x,y+11.22,z,0,0,0,'roof');
+         var tower=new T.Group(), origin=new T.Vector3(x,y,z);
+         root.children.slice(first).forEach(function(part){ part.position.sub(origin); tower.add(part); });
+         tower.position.copy(origin); tower.scale.setScalar(.54); root.add(tower);
+@@ -355,14 +386,17 @@
+       });
+       // Keep the mast in the open deck interior and clear of the perimeter tiles.
+       post(.25,7,'#6e5139',cx,-.12,cz);
+-      block(3,.12,.12,'#b99866',cx+1,5.88,cz);
+-      block(2.5,4,.12,'#f3dfb1',cx+1.1,3.68,cz);
++      block(3,.12,.12,'#b99866',cx+1,5.88,cz,0,'timber');
++      canvasPanel(cx+1.1,3.68,cz);
+     }
+     ({ town:town, lagoon:lagoon, caves:caves, patterns:patterns, beach:beach, light:light, captain:captain })[id]();
+     if(view.scene.fog && view.scene.background && view.scene.background.isColor)
+       view.scene.background.copy(view.scene.fog.color);
+     // Chunked baked meshes use the same fast path and fog as the original board scenery.
+     var merged = reef3dMerge(root,view.rig,view.bake);
++    // The bake clones its inputs. Release only geometries created here; kit and
++    // imported model geometry belongs to their own caches. Fallback keeps root.
++    if(merged!==root && !root.parent) owned.forEach(function(g){ g.dispose(); });
+     merged.name = root.name; view.scene.add(merged);
+     view.regionScenery = merged;
+   };
+--- before/src/js/reef3d/world-detail.js
++++ after/src/js/reef3d/world-detail.js
+@@ -12,8 +12,8 @@
+  * uncluttered replacement; this generator does not mutate those systems.
+  *
+  * Maximum: three garden groups, shell pavilion, coral gateway and central
+- * reef crown, under 15,000 triangles in total. No texture, double-sided material,
+- * animation or raycasting.
++ * reef crown, under15,000 triangles in total. One shared opaque surface atlas
++ * adds pores/growth marks; no extra lighting, animation or raycasting.
+  * Positions are deterministic and reject all route spaces and deck props.
+  */
+ function reef3dCoveDetail(o){
+@@ -27,7 +27,7 @@
+ 
+   // Parametric meshes carry their color variation in vertices so the existing
+   // light bake can give all of them the same merged material as the board.
+-  function surface(uCount, vCount, point, color, flip){
++  function surface(uCount, vCount, point, color, flip, kind){
+     var p = [], c = [], idx = [], col = colors[color], u, v;
+     for(v = 0; v <= vCount; v++) for(u = 0; u <= uCount; u++){
+       var s = u / uCount, t = v / vCount, q = point(s, t);
+@@ -43,17 +43,23 @@
+     g.setAttribute('position', new T.Float32BufferAttribute(p, 3));
+     g.setAttribute('color', new T.Float32BufferAttribute(c, 3));
+     g.setIndex(idx); g.computeVertexNormals();
+-    var m = new T.Mesh(g, mat); m.raycast = function(){}; return m;
++    var m = new T.Mesh(g, mat); m.raycast = function(){};
++    if(typeof reef3dSurface==='function') reef3dSurface(m,kind || 'coral',{scale:kind==='stone'?1.65:1.1,seed:color});
++    return m;
+   }
+   // Asymmetrical, scalloped stones with strata in the vertex colors. Their
+   // lower half is buried, keeping the silhouette soft rather than spherical.
+   function rock(seed, sx, sy, sz){
+     var m = surface(16, 10, function(u, v){
+-      var a = u * Math.PI * 2, b = v * Math.PI, h = Math.cos(b), ring = Math.sin(b);
+-      var wobble = 1 + .09 * Math.sin(3 * a + seed) * ring + .045 * Math.cos(5 * a - 2 * b + seed);
+-      var band = .94 + .045 * Math.sin(h * 15 + Math.sin(a * 3 + seed));
+-      return [Math.cos(a) * ring * sx * wobble, h * sy, Math.sin(a) * ring * sz * wobble, band];
+-    }, seed % 2 ? 0 : 1, true);
++      var a = u * Math.PI * 2, b = v * Math.PI, h = Math.cos(b), ring = Math.pow(Math.sin(b),.78);
++      // A broad broken shoulder and offset strata change the silhouette, while
++      // the atlas supplies pores and fine mineral detail without more vertices.
++      var ledge=.035*Math.sin(h*13+seed), shoulder=.075*Math.sin(3*a+seed)*ring;
++      var wobble=1+shoulder+.045*Math.cos(5*a-2*b+seed)+ledge;
++      var yy=h+.07*Math.sin(3*a+seed)*ring*ring;
++      var band=.94+.035*Math.sin(h*15+Math.sin(a*3+seed));
++      return [Math.cos(a)*ring*sx*wobble,yy*sy,Math.sin(a)*ring*sz*wobble,band];
++    }, seed % 2 ? 0 : 1, true,'stone');
+     m.position.y = sy * .43; return m;
+   }
+   // A thick folded coral blade. A closed cross-section and rippled edge make
+@@ -126,6 +132,7 @@
+     }
+     backGeo.computeVertexNormals();
+     var back = new T.Mesh(backGeo, mat); back.position.z = -.13; back.raycast = function(){}; pavilion.add(back);
++    if(typeof reef3dSurface==='function') reef3dSurface(back,'coral',{scale:1.1,seed:3});
+     var pearl = new T.Mesh(new T.SphereGeometry(.43, 16, 10), o.M('#f4e8df'));
+     pearl.position.set(0, .62, .48); pearl.raycast = function(){}; pavilion.add(pearl);
+     root.add(pavilion); landmarkFeet.push([x, z]);
+@@ -177,6 +184,7 @@
+     }
+     geo.setAttribute('color', new T.Float32BufferAttribute(cs, 3)); geo.computeVertexNormals();
+     var branch = new T.Mesh(geo, mat); branch.raycast = function(){}; arch.add(branch);
++    if(typeof reef3dSurface==='function') reef3dSurface(branch,'coral',{scale:1.2,seed:5});
+     // Tapered, curving antler-like branches and pale polyp clusters turn the
+     // broad arch into living coral, with shapes readable in silhouette.
+     function horn(x, y, z, lean, height, color){
+@@ -193,6 +201,7 @@
+       }
+       g.setAttribute('color', new T.Float32BufferAttribute(cols, 3)); g.computeVertexNormals();
+       var m = new T.Mesh(g, mat); m.raycast = function(){}; arch.add(m);
++      if(typeof reef3dSurface==='function') reef3dSurface(m,'coral',{scale:.9,seed:color});
+     }
+     [[-3.9,2.8,-.08,-.55,.85,2],[-3.0,3.65,-.15,-.4,1.05,5],[-1.9,4.13,-.20,-.33,.72,2],
+      [1.4,4.27,-.16,.36,.75,2],[2.65,3.8,-.08,.55,1.02,5],[3.65,3.05,.04,.6,.8,2]].forEach(function(h){ horn.apply(null,h); });
+@@ -255,6 +264,7 @@
+     for(var q = 0; q < ix.count; q += 3){ var t = ix.getX(q+1); ix.setX(q+1,ix.getX(q+2)); ix.setX(q+2,t); }
+     reverse.computeVertexNormals();
+     var fanBack = new T.Mesh(reverse,mat); fanBack.position.z = -.15; fanBack.raycast = function(){}; crown.add(fanBack);
++    if(typeof reef3dSurface==='function') reef3dSurface(fanBack,'coral',{scale:1.15,seed:1});
+     var left = leaf(41,.75,1.75,.16,2); left.position.set(-1.42,.5,.35); left.rotation.z = .2; crown.add(left);
+     var right = leaf(42,.7,1.55,.16,4); right.position.set(1.35,.48,.38); right.rotation.z = -.2; crown.add(right);
+     root.add(crown); landmarkFeet.push([x,z,5.7]);

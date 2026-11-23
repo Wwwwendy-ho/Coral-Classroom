@@ -1,0 +1,56 @@
+{
+  "checked_date": "2026-11-19",
+  "decision": "Do not enable RWKV in learner-facing Coral Classroom yet. Strong recall-prediction evidence warrants local shadow evaluation once licensing, event-log availability, causal feature parity and iPhone XS runtime requirements are resolved.",
+  "inspected_repository": {
+    "url": "https://github.com/JSchoreels/anki-rwkv",
+    "commit": "89370fd0f16710a8761aac3c2fdbea76a6737559",
+    "readme_blob": "2bd11c5dc6d4fd5304745977c2e8b64eb3915152"
+  },
+  "current_app": {
+    "main_scheduler_default": "sm2_speed",
+    "other_main_choices": [
+      "sm2_plain",
+      "leitner"
+    ],
+    "learner_memory_model": "FSRS-4.5 default weights, text x skill channel",
+    "grade_entry": "src/js/card-types.js:1298",
+    "learner_module": "src/js/learner.js",
+    "fsrs_module": "src/js/fsrs.js",
+    "data_limit": "Latest card/skill state and aggregates are persisted; ordered per-review rating, exact duration and timestamps are not durably retained."
+  },
+  "upstream_benchmark": {
+    "url": "https://github.com/open-spaced-repetition/srs-benchmark#without-same-day-reviews",
+    "readme_blob": "9d7ffded9c53c1cf788856a75d3e97000a6883b7",
+    "collections": 9999,
+    "evaluated_reviews": 349923850,
+    "metric": "Reported mean log loss, excluding same-day reviews. Lower is better. Not measured on Coral Classroom.",
+    "scores": {
+      "FSRS-4.5": 0.3625,
+      "FSRS-6": 0.346,
+      "FSRS-7 recency": 0.337,
+      "RWKV-Curve": 0.3193,
+      "RWKV-Instant": 0.2773
+    },
+    "limits": [
+      "RWKV uses extra contextual features and a different held-out-user protocol.",
+      "Instant prediction at review time and Curve ahead prediction solve different deployment tasks.",
+      "Predictive log loss reduction does not directly imply proportional review workload reduction or improved learning outcomes."
+    ]
+  },
+  "deployment": {
+    "training_vs_inference": "README 6.68x headline is desktop GPU training throughput. It is not an iPhone inference or recall improvement.",
+    "licensing_issue": "https://github.com/open-spaced-repetition/srs-benchmark/issues/353",
+    "licensing_state": "Issue remains open; project README states MIT applies to its new code, not the unlicensed imported srs-benchmark/expertium portions; checkpoint redistribution terms unresolved.",
+    "compression": "Current Expertium report describes 332922-parameter d64 and quantized 403-bit/card, 214-bit/note state; compressed variants are credible prospects and are different checkpoints/protocols from the top baseline benchmark.",
+    "compression_source": "https://github.com/Expertium/rwkv-anki-autoresearch/blob/main/optimization/LOGLOSS_BREAKDOWN.md",
+    "phone_limit": "No physical iPhone XS or Safari/WASM measurements performed."
+  },
+  "evaluation_gate": [
+    "Clear rights for exact source and checkpoint.",
+    "Durable ordered review events and stable card/note/deck/preset identities, with assistance and skill-mode context.",
+    "Chronological held-out comparison against a unified current FSRS implementation using only features available at decision time; calibration, log loss, retention/workload and cohort checks.",
+    "Offline browser inference parity, bounded intervals and fallback, measured iPhone XS latency/frame pacing/memory.",
+    "Shadow evaluation before changing due dates; preserve existing progress."
+  ],
+  "work_performed": "Read-only research and source audit; no scheduler changes, no private learner data read/uploaded, no model training, no upstream messages sent."
+}

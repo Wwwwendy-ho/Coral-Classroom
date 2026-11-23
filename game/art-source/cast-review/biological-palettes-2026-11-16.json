@@ -1,0 +1,95 @@
+{
+  "version": "biological-palettes-2026-11-16",
+  "status": "Biological palette direction accepted with later accessory, camouflage, size and facial-expression refinements; first production batch in development.",
+  "designRule": "Keep the improved silhouettes, proportions, poses and facial acting. Base animal pigmentation on a real species reference, and use clothing/accessories to signal occupation. Use neutral daylight so a common warm grade does not turn the cast yellow/brown.",
+  "scope": [
+    "echo",
+    "pip",
+    "jisu",
+    "shop-octopus",
+    "taxi-squid",
+    "subway-ray"
+  ],
+  "characters": [
+    {
+      "id": "echo",
+      "referenceSpecies": "Delphinapterus leucas",
+      "biologicalBasis": "Adult beluga whales are white to pale gray, with a rounded melon forehead, no dorsal fin and horizontal tail flukes. Keep the fictional face expressive while preserving this recognizable body plan.",
+      "animalPalette": [
+        "pearl white",
+        "pale cool gray",
+        "soft cream underside"
+      ],
+      "occupationAccent": "Small cobalt-blue note satchel for the attentive Echo Caves sound explorer.",
+      "source": "https://www.fisheries.noaa.gov/species/beluga-whale",
+      "earlierReferenceSpecies": "Nautilus pompilius"
+    },
+    {
+      "id": "pip",
+      "referenceSpecies": "Gramma loreto",
+      "biologicalBasis": "Royal gramma coloration transitions from violet-purple at the head/anterior body to golden yellow at the posterior body and tail. Preserve its natural fish silhouette and use its clear color division for the pattern-host design.",
+      "animalPalette": [
+        "violet-purple front half",
+        "golden-yellow rear and tail",
+        "small magenta transition flecks"
+      ],
+      "occupationAccent": "Mint/cream puzzle notebook; lively mischievous expression, with no human limbs.",
+      "source": "https://nas.er.usgs.gov/Queries/FactSheet.aspx?SpeciesID=723",
+      "earlierReferenceSpecies": "Metasepia pfefferi",
+      "additionalSource": "https://biogeodb.stri.si.edu/caribbean/en/thefishes/species/3566"
+    },
+    {
+      "id": "jisu",
+      "referenceSpecies": "Calcinus elegans",
+      "biologicalBasis": "Electric-blue bands on dark limbs, pale-speckled claws and orange antennae provide the reference. The carried gastropod shell has its own neutral natural markings.",
+      "animalPalette": [
+        "near-black/navy",
+        "electric cobalt-blue bands",
+        "orange antennae",
+        "weathered pale shell"
+      ],
+      "occupationAccent": "Tangerine-orange postal pouch; cream envelope with a tangerine-orange scallop-shell seal.",
+      "source": "https://museum.wa.gov.au/sites/default/files/SuppWAMuseum_2009_77_145to176_TITELIUSetal_0.pdf",
+      "sourceNote": "Western Australian Museum reef-crustacean survey, species photo caption on printed page160."
+    },
+    {
+      "id": "shop-octopus",
+      "referenceSpecies": "Octopus rubescens",
+      "biologicalBasis": "A naturally red/reddish-brown octopus can change its color and mottling. Select a rich brick-red state with pale mottles, rather than inventing a uniformly blue animal.",
+      "animalPalette": [
+        "brick/ruby red",
+        "pale cream mottles",
+        "light suckers"
+      ],
+      "occupationAccent": "Indigo denim work apron with restrained stitching and a stock crate for a practical shopkeeper.",
+      "source": "https://www.montereybayaquarium.org/animals-the-ocean/animals-a-to-z/red-octopus"
+    },
+    {
+      "id": "taxi-squid",
+      "referenceSpecies": "Doryteuthis pealeii",
+      "biologicalBasis": "Longfin squid have a translucent base and reddish/pink/purple chromatophore patterning that can change. Pale silver is treated as a reflective highlight, not a fixed metallic pigment.",
+      "animalPalette": [
+        "cool ivory/silver-gray",
+        "rose/reddish-purple mottles",
+        "lavender-gray fin edges"
+      ],
+      "occupationAccent": "Cab-yellow/navy checked scarf and a small driver badge; yellow is kept on work accessories rather than the whole body.",
+      "source": "https://www.fisheries.noaa.gov/species/longfin-squid/science",
+      "additionalSource": "https://txmarspecies.tamug.edu/invertdetails.cfm?scinameID=Doryteuthis+pealeii",
+      "expression": "Bored half-lidded eyes, relaxed brows and a flat closed mouth."
+    },
+    {
+      "id": "subway-ray",
+      "referenceSpecies": "Aetobatus narinari",
+      "biologicalBasis": "The Atlantic spotted eagle ray has a dark/black upper surface with white spots, rings or dashes and a white underside.",
+      "animalPalette": [
+        "charcoal/blue-black dorsal surface",
+        "white spots",
+        "ivory/white underside"
+      ],
+      "occupationAccent": "A burgundy route-guide scarf and pale transit badge contrast with the animal's dark wings.",
+      "source": "https://biogeodb.stri.si.edu/caribbean/en/thefishes/species/263"
+    }
+  ],
+  "limits": "These are species-informed fictional character palettes. Their expressive faces, relative sizes, clothing and poses remain stylized. Cephalopod display states are not fixed species colors. No ecology or learning-content changes are implied."
+}

@@ -1,0 +1,373 @@
+# Coral Classroom — Magical Storybook Visual Overhaul
+
+You are already familiar with Coral Classroom, its architecture, characters, existing assets, and development workflow. Continue working in the current repository and session.
+
+Do not repeat the general project introduction, rediscover the entire architecture, or summarize functionality you already understand. Use your existing knowledge and inspect specific files only when necessary.
+
+Your new priority is to substantially improve the game's **art direction, character quality, animation, materials, and overall visual cohesion**.
+
+I want Coral Classroom to look like a professionally art-directed, magical underwater storybook adventure rather than a game assembled from basic geometric shapes.
+
+## 1. Target visual direction
+
+**Art style:** Whimsical, handcrafted 3D storybook.
+
+**Atmosphere:** Magical, enchanting, colorful, immersive, and welcoming.
+
+**Character design:** You have permission to redesign characters substantially while preserving their identities and personalities.
+
+**Animation:** A combination of natural underwater movement and expressive, playful reactions.
+
+**Performance:** Balanced. Maintain smooth performance on iPads and iPhones while providing higher-quality visuals on more powerful devices.
+
+**Asset creation:** Prefer original assets created procedurally with Blender, Python scripting, and custom modeling techniques. Avoid paid assets or services unless I approve them.
+
+### Visual characteristics
+
+- Beautifully sculpted, organic character shapes.
+- Soft curves and refined silhouettes rather than visibly assembled spheres, cylinders, and boxes.
+- Expressive faces and appealing proportions.
+- Detailed but cohesive shells, fins, tails, eyes, and other character features.
+- Hand-painted-looking textures and carefully controlled materials.
+- Soft underwater lighting, subtle bioluminescence, and atmospheric depth.
+- Rich coral gardens, sea plants, shells, rocks, and environmental details.
+- Harmonious turquoise, lavender, seafoam, coral pink, peach, and warm gold.
+- Distinctive environments that share one consistent artistic identity.
+
+Avoid photorealism, excessively shiny plastic materials, crude low-poly geometry, harsh lighting, overwhelming bloom, and excessive visual clutter.
+
+The objective is not maximum geometric complexity. It is professional artistic quality.
+
+## 2. Verify your actual tool capabilities
+
+You previously told me that you have all the tools needed to develop this game.
+
+I want you to distinguish between tools sufficient to write and run the game and tools sufficient to produce professional 3D artwork.
+
+Verify, rather than assume, whether your current environment supports:
+
+- Blender installation and command-line execution.
+- Blender Python scripting and procedural modeling.
+- Exporting valid GLB files with materials and animations.
+- Inspecting and modifying existing 3D models.
+- Creating skeletal rigs and animation clips.
+- Capturing actual gameplay screenshots.
+- Inspecting rendered animation frames.
+- Running the existing build and automated tests.
+
+For example:
+
+```bash
+command -v blender
+blender --version
+```
+
+If Blender is unavailable, determine whether installation is possible in your environment.
+
+Report which capabilities are verified, unavailable, or blocked, and identify any limitations that would prevent the intended visual quality.
+
+Do not claim that procedural Three.js primitives are equivalent to professionally modeled characters.
+
+Do not switch to Unreal Engine or Unity. Continue using the existing Three.js architecture.
+
+## 3. Priorities
+
+Use this visual assessment as your baseline:
+
+| Category | Current | Target |
+|---|---:|---:|
+| Character silhouettes | 5/5 | Maintain or improve |
+| Materials and textures | 3/5 | 4.5/5 |
+| Lighting and rendering | 3/5 | 4.5/5 |
+| Animation | 2/5 | 4.5/5 |
+| Visual cohesion | 2/5 | 4.5/5 |
+
+Prioritize improvements in this order:
+
+1. Visual cohesion and consistent art direction.
+2. Natural, expressive, high-quality character animation.
+3. Character model refinement and redesign where needed.
+4. Materials, textures, and surface detail.
+5. Lighting, atmosphere, and rendering.
+
+Although silhouettes currently score well, you may redesign them when necessary to achieve better organic modeling and overall artistic quality.
+
+Do not spend time adding unnecessary decorative effects while fundamental animation or modeling issues remain.
+
+## 4. Establish a professional asset-creation workflow
+
+Prefer Blender and procedural modeling scripts for original character and environmental assets.
+
+Procedural generation should be an authoring technique, not a visible limitation of the finished artwork.
+
+Where appropriate, use:
+
+- Organic surface generation and custom curves.
+- Subdivision and smooth topology.
+- UV mapping and procedural textures.
+- Carefully controlled stylized materials.
+- Skeletal rigs and shape keys.
+- Reusable animation clips.
+- GLB exports compatible with the existing Three.js renderer.
+- Optimized meshes, textures, and draw calls.
+
+Maintain editable source files or reproducible scripts for new assets.
+
+Do not replace every model automatically. Evaluate existing assets and redesign the ones that most undermine the desired storybook aesthetic.
+
+Avoid introducing incompatible GLB features, unnecessary dependencies, or a significantly heavier runtime.
+
+Preserve the game's offline functionality and existing asset-loading workflow unless an alternative is demonstrably better.
+
+## 5. Phase A — Art direction and technical preparation
+
+Using your existing knowledge of Coral Classroom:
+
+1. Verify the actual modeling, animation, and visual-testing tools available.
+2. Identify the most important visual weaknesses in the current game.
+3. Establish a unified storybook art-direction specification.
+4. Define the modeling and animation pipeline.
+5. Identify which existing characters and environments need redesign.
+6. Capture representative baseline screenshots if browser tools are available.
+7. Record relevant performance baselines.
+
+Focus on the visual system rather than repeating a broad architectural audit.
+
+**Deliverable:** A concise technical capability report, art-direction specification, and prioritized visual improvement plan.
+
+## 6. Phase B — Redesign Shelly as the visual-quality benchmark
+
+Before changing the entire game, create one polished hero-character prototype using Shelly.
+
+The redesigned Shelly should have:
+
+- Refined, organic turtle anatomy.
+- A beautifully designed shell with subtle sculptural details.
+- Expressive eyes and appealing facial proportions.
+- Smooth connections between the head, body, fins, and shell.
+- A recognizable personality and distinctive storybook silhouette.
+- Materials with subtle painted variation and appropriate surface response.
+- Geometry optimized for the existing browser renderer.
+
+### Animation requirements
+
+Implement or refine:
+
+- Gentle idle floating or breathing.
+- Fluid swimming or locomotion.
+- Smooth turning and directional changes.
+- Happy reactions.
+- Curiosity or surprise.
+- Celebrations and playful interactions.
+
+Use skeletal animation, procedural secondary motion, shape keys, or a combination, depending on which approach produces the best result.
+
+Movement must feel natural, expressive, and fluid.
+
+Avoid stiff body movement, disconnected limbs, abrupt transitions, repetitive mechanical motion, and visible clipping.
+
+### Visual validation
+
+Render Shelly at the actual gameplay camera distance, not only in a close-up preview.
+
+Provide comparable before-and-after screenshots and animation evidence where available.
+
+Evaluate whether the redesign genuinely improves the character's appearance.
+
+**Stop after the Shelly prototype and request my approval before redesigning the remaining characters.**
+
+## 7. Phase C — Animation and character personality
+
+After the prototype is approved, establish consistent animation quality across the major characters.
+
+Prioritize:
+
+- Smooth animation blending.
+- Natural acceleration and deceleration.
+- Character-specific swimming and movement.
+- Subtle buoyancy.
+- Secondary motion in fins, tails, claws, and other appendages.
+- Expressive facial and body reactions.
+- Responsive interactions and celebrations.
+
+Preserve Calm Motion and reduced-motion behavior.
+
+Animations should be charming and lively without becoming distracting during educational activities.
+
+## 8. Phase D — Cohesive environments
+
+Apply the approved storybook aesthetic to the existing seven-region world.
+
+Keep each region distinctive while maintaining a consistent design language.
+
+Examples:
+
+- Coral Cove: vibrant, welcoming coral gardens.
+- Story Lagoon: dreamy, softly glowing scenery.
+- Harbor Town: charming underwater buildings and warm lighting.
+- Echo Caves: mysterious luminous formations.
+- Pattern Reef: rhythmic coral structures and repeating motifs.
+- Bottle Beach: gentle currents, shells, soft sand, and floating bottles.
+- Lighthouse and Captain's Deck: adventurous maritime details and a sense of achievement.
+
+Standardize materials, color relationships, environmental proportions, lighting, particles, and UI integration.
+
+Avoid visually overcrowding educational content or obscuring interactive elements.
+
+## 9. Phase E — Materials and rendering
+
+Refine the existing rendering system rather than indiscriminately adding more post-processing.
+
+Improve:
+
+- Material consistency.
+- Surface detail and texture variation.
+- Soft lighting and contact shadows.
+- Underwater atmosphere and depth.
+- Gentle caustics and bioluminescence.
+- Balanced exposure and color grading.
+- Day/night visual consistency.
+- Separation between characters and scenery.
+
+Avoid excessive blur, bloom, saturation, and expensive effects with little visual benefit.
+
+Preserve adaptive quality settings.
+
+## 10. Performance and compatibility
+
+Maintain the existing Three.js game and its iPad/iPhone support.
+
+Aim for:
+
+- Approximately 60 FPS on capable modern devices.
+- At least 30 FPS on supported older devices, including the existing iPhone XS reference target.
+- Responsive interactions.
+- Reasonable loading times.
+- Stable memory usage during region transitions.
+- Attractive lower-quality rendering modes.
+
+Use mesh optimization, shared materials, instancing, texture management, and appropriate detail levels.
+
+Measure actual performance when possible. Do not claim physical-device results without testing physical devices.
+
+## 11. Development and validation rules
+
+Continue following the repository's established build and test workflow.
+
+After relevant source changes:
+
+```bash
+python3 tools/build.py
+sh tools/check/run.sh
+```
+
+Use the existing screenshot, browser smoke-test, and regional validation tools as appropriate.
+
+Preserve:
+
+- Educational functionality and learning progress.
+- Profiles and stored data.
+- Existing navigation and gameplay mechanics.
+- Offline operation.
+- The Claude viewing build.
+- Reduced-motion accessibility.
+- Responsive layouts.
+- Existing character identities and personalities.
+
+Keep changes modular and reversible.
+
+Do not edit generated `index.html` directly.
+
+Do not change unrelated educational functionality.
+
+## 12. Visual acceptance criteria
+
+Judge results using both technical tests and actual visual evidence.
+
+### Character quality
+
+- Characters look organically sculpted rather than assembled from primitives.
+- Faces communicate personality and emotion.
+- Materials are visually rich but stylistically consistent.
+- Character designs remain readable at gameplay scale.
+
+### Animation quality
+
+- Smooth transitions without snapping.
+- Natural, appealing movement.
+- Expressive, character-specific reactions.
+- No persistent clipping or unnatural deformation.
+- Appropriate movement speed and timing.
+
+### World quality
+
+- All regions share one coherent artistic identity.
+- Lighting and materials complement the character designs.
+- Environments feel magical, layered, and thoughtfully composed.
+- Important gameplay elements remain readable.
+
+### Technical quality
+
+- No broken models or materials.
+- No regressions in educational functionality.
+- No major performance degradation.
+- Offline and reduced-motion modes continue working.
+- Automated tests pass, or failures are explicitly documented.
+
+The target visual scores are subjective review goals, not something that can be proven by automated tests alone.
+
+## 13. Approval checkpoints
+
+Work incrementally.
+
+**Checkpoint 1 — Preparation**
+
+Verify the tools, establish the art direction, and propose the implementation approach.
+
+**Checkpoint 2 — Shelly prototype**
+
+Present the redesigned Shelly with screenshots, animation evidence, and performance results.
+
+Wait for my approval.
+
+**Checkpoint 3 — Character animation system**
+
+After approval, establish consistent animation quality and character behavior.
+
+**Checkpoint 4 — Environment and rendering rollout**
+
+Apply the approved style across the remaining characters and regions.
+
+Do not redesign the entire game before I approve the initial character prototype.
+
+## 14. Progress reporting
+
+At each checkpoint, report:
+
+- What you changed or propose to change.
+- Which tools were actually used.
+- Which source files and assets were affected.
+- What visual improvements are observable.
+- Before-and-after evidence.
+- Tests performed and results.
+- Performance impact.
+- Limitations or unresolved issues.
+- Decisions requiring my approval.
+
+Distinguish completed work from proposed work.
+
+Do not describe artwork as professional-quality solely because the code runs successfully.
+
+## 15. Your immediate task
+
+**Begin with Checkpoint 1 only.**
+
+You already understand Coral Classroom, so do not spend time re-explaining the project.
+
+Verify your modeling and rendering tools, identify the highest-impact visual weaknesses, and establish a concrete art direction and implementation plan for the redesigned Shelly prototype.
+
+Tell me specifically whether Blender is available and whether you can actually use it to create, rig, animate, export, and integrate original 3D models.
+
+Do not start redesigning all the characters or environments yet.
+
+The objective is a magical, cohesive, professionally polished underwater storybook game—not merely a technically functional 3D game.

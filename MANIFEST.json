@@ -1,0 +1,4301 @@
+{
+  "format": 1,
+  "created_date_pacific": "2026-11-22",
+  "files": [
+    {
+      "path": "EXCLUSIONS.md",
+      "bytes": 1917,
+      "sha256": "26a04cf792b289d8d4bdb84e022080b72429fbf9cdfb43ecec9a2cceafe57ea9"
+    },
+    {
+      "path": "GEMINI-HANDOFF.md",
+      "bytes": 8026,
+      "sha256": "172096b6ca84bbb970e60ec66cddff6a2cc2cd0a91ee0f4fe9a541851f091989"
+    },
+    {
+      "path": "README.md",
+      "bytes": 1058,
+      "sha256": "c2b84c75f32e144e92b4eb0763135ed2cc47a4f32a9a36189e7b5935e3b28083"
+    },
+    {
+      "path": "START-HERE.md",
+      "bytes": 3287,
+      "sha256": "927438e9ff9448d56f577c545c14423c0a355f3bc446d46bd75b310bdf5fc7fd"
+    },
+    {
+      "path": "context/fable-advice/ADAPTIVE_TEACHER.md",
+      "bytes": 11757,
+      "sha256": "ba153d3ef3ebe84dfb6436ffb4131d18770a6102eee97d18e4aa104d53497ad5"
+    },
+    {
+      "path": "context/fable-advice/LEARNING_DESIGN.md",
+      "bytes": 18412,
+      "sha256": "7d744ea45aa5d9d6736661d4785f00d6dbfce2c69b7b476b65e6c495fa0b8834"
+    },
+    {
+      "path": "context/fable-review-snapshot/FABLE-NOTES-READ.md",
+      "bytes": 1370,
+      "sha256": "93c7de4e31243a6308efcbcf3637eb4055f3867ed43318f9ef291090eaeee8a1"
+    },
+    {
+      "path": "context/fable-review-snapshot/FABLE-PROMPT.md",
+      "bytes": 3435,
+      "sha256": "dc31dacd52794facca707e2632901076c13829896dffc528400a490a23c5d626"
+    },
+    {
+      "path": "context/fable-review-snapshot/GAME-CAPTURES.md",
+      "bytes": 2013,
+      "sha256": "d293259eda3fa22ed3be6bab480c7aa0d756220c3922c45cfbf3fabfc85eee78"
+    },
+    {
+      "path": "context/fable-review-snapshot/PLANNED-WORK.md",
+      "bytes": 5671,
+      "sha256": "08c626b422d225c2f81eaf3c1be28c3b8f8f42e061b5d1a794dfcfbed5e2a52d"
+    },
+    {
+      "path": "context/fable-review-snapshot/README.md",
+      "bytes": 5765,
+      "sha256": "b2fbe19befcc557968a5f0234b4bcfad2f08cd3f7a9ef6d70b78c4e68b5a1ce6"
+    },
+    {
+      "path": "context/fable-review-snapshot/SOURCE-GUIDE.md",
+      "bytes": 2192,
+      "sha256": "c1b3dda960f9565b966013dd1e47a46006714da6b2d666b23831ca325721ec1a"
+    },
+    {
+      "path": "context/fable-review-snapshot/WORLD-COMPARISONS.md",
+      "bytes": 3796,
+      "sha256": "dd340e14d77fde59cf5f6a283a308d98239953ffd4ecdeec901a0551c4d0d235"
+    },
+    {
+      "path": "context/fable-review-snapshot/characters/CAST-DIRECTION.md",
+      "bytes": 8350,
+      "sha256": "677e2c00e33845d740c8806eb273191958d099f872eebd4829e7b2d8df779267"
+    },
+    {
+      "path": "context/fable-review-snapshot/characters/biological-palettes.json",
+      "bytes": 5180,
+      "sha256": "35ae035cecbf55c7f12eee63fa824bb18bb8efd26b17c6cfb553a5aadcb2665e"
+    },
+    {
+      "path": "context/fable-review-snapshot/characters/expression-manifest.json",
+      "bytes": 9076,
+      "sha256": "742a1cadd9299022e9cef21500455f699d90447e14ead87b427c344a6e7f14a5"
+    },
+    {
+      "path": "context/fable-review-snapshot/characters/preferences.json",
+      "bytes": 7333,
+      "sha256": "9ae18c78418e0f441f867707e257c40f1a40b353199c526f3609f404a53f4cba"
+    },
+    {
+      "path": "context/fable-review-snapshot/evidence/CPU-AUDIT.md",
+      "bytes": 3954,
+      "sha256": "013de29386fef7e1ed7bc18506723dde3db7fad73f0750f65bc06a91d78f2af7"
+    },
+    {
+      "path": "context/fable-review-snapshot/evidence/OFFLINE-RENDER-METHOD.md",
+      "bytes": 1411,
+      "sha256": "fd6595c10adca96bc71530994d938300a020221516606b3e34957fd70727faae"
+    },
+    {
+      "path": "context/fable-review-snapshot/evidence/audit-before-after.json",
+      "bytes": 19942,
+      "sha256": "76a1fb318cde5aaf54cda4eebb84cb36d0502b425513a4d7bd9df6d6bbf2fb24"
+    },
+    {
+      "path": "context/fable-review-snapshot/evidence/integration-verification.json",
+      "bytes": 847,
+      "sha256": "ad1b7455b630830c8210845ec80dccb46581bd60d48658464c3bb056ac64b23a"
+    },
+    {
+      "path": "context/fable-review-snapshot/evidence/render-manifest.json",
+      "bytes": 68592,
+      "sha256": "8969a4e76c0317e989d6b0a152ef5bb6dc05e3d59acd16c561ca00f415b18c9f"
+    },
+    {
+      "path": "context/fable-review-snapshot/evidence/source-provenance.json",
+      "bytes": 2130,
+      "sha256": "25c9f1a6abc045e40bb3fd46c6185a70ca758efe0338683e3b0698cd82f982b9"
+    },
+    {
+      "path": "context/fable-review-snapshot/evidence/world-pass-diff.patch",
+      "bytes": 31532,
+      "sha256": "fed138e503946c20fdf9194c848f72e9706aa40878855074a52f646fb5a133f6"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/concepts/captain.jpg",
+      "bytes": 485761,
+      "sha256": "b4760a9e9da47ada9d656ad25ef25201119a0b8de9f32e77b86af8e8d68b808b"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/concepts/sheet-01.jpg",
+      "bytes": 581150,
+      "sha256": "dc21691e39fd8ae4cf054fd8df94c597228de9ce350c3c11b626482cb4f3675a"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/concepts/sheet-02.jpg",
+      "bytes": 622550,
+      "sha256": "930f20540ecbe8b9b2cf9b2a3939667e7a9e36ad42448b0a312a0580099de65c"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/game-nov15/beach-overview.jpg",
+      "bytes": 168643,
+      "sha256": "b735eb613f333a6781878c9d6b9def23896b144f8cede0e2a0a806d1ef306bb2"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/game-nov15/beach-play.jpg",
+      "bytes": 136719,
+      "sha256": "570f8f814690b508aa324b5601cdcae243019cd6bf4bce66a398d71f86fd7baa"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/game-nov15/captain-overview.jpg",
+      "bytes": 154068,
+      "sha256": "66ac2c248ac8d8b220fb3ee85950737d19e76049575ee79285d287d9f3216b82"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/game-nov15/captain-play.jpg",
+      "bytes": 137858,
+      "sha256": "38d9b9f71356b6a28f5506f6d5be4b004a404dc207b2fe486d53ffe2d333b17c"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/game-nov15/caves-overview.jpg",
+      "bytes": 118789,
+      "sha256": "4db3ad7e503a3423764cfe4aefef52f0aeb42fee8b1a6e8d7bf4065bf68537d0"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/game-nov15/caves-play.jpg",
+      "bytes": 107904,
+      "sha256": "0f63b7728d18be1198eb18d54cfa89366e4cc931a6efa20ed0c24716e4e4910e"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/game-nov15/cove-overview.jpg",
+      "bytes": 237592,
+      "sha256": "fbaa77d3953bdaee7d16fbea367b1591cbfc62edbbf1ba83de2a24d4de55add1"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/game-nov15/cove-play.jpg",
+      "bytes": 149548,
+      "sha256": "a424f4842a73bd2cacbdbe2d2be10196b99621f23622747a733335bd62e631a8"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/game-nov15/lagoon-overview.jpg",
+      "bytes": 163533,
+      "sha256": "26a6951323fcbcf6d54bd6ce45e06176df8376b883ea32be35d7e7b45bddd01b"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/game-nov15/lagoon-play.jpg",
+      "bytes": 147562,
+      "sha256": "84b3441fbf89ea60d2836b7c64f53ef133a9031c2dff4160b4bf554a923284bf"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/game-nov15/light-overview.jpg",
+      "bytes": 133400,
+      "sha256": "4fc05867184c53ae569d0e12525af4f38a3773dd206c33fcdac9b496806c88e3"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/game-nov15/light-play.jpg",
+      "bytes": 132652,
+      "sha256": "bb4d130266cb47c4d271cd43c2d502473055c8376ae10a2724d7e96b32fdd723"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/game-nov15/patterns-overview.jpg",
+      "bytes": 125715,
+      "sha256": "fc00b392690630f3d55a9f177dbec994bc2508e5254fb72b3991781aca9e128c"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/game-nov15/patterns-play.jpg",
+      "bytes": 126384,
+      "sha256": "2efbbcd539a4bd07b123662b32a50e2b6b9865cd698616461e11311401f7b84b"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/game-nov15/phone.jpg",
+      "bytes": 77362,
+      "sha256": "2c114885d28a8c2d352c4f2d761e4a5452103fed916933aee1564964ae087be4"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/game-nov15/tile-close.jpg",
+      "bytes": 162715,
+      "sha256": "60019a3d5e9c73aa58c0c841fa656ee542f6479f62b04fb3b83c2fe22ebf2d25"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/game-nov15/town-overview.jpg",
+      "bytes": 189388,
+      "sha256": "5600ca0d235044a7cfda47804b21d9d6c3d656ed3832411c1f4e97512b550875"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/game-nov15/town-play.jpg",
+      "bytes": 157420,
+      "sha256": "414d1518b3b3efe6a0cd8f4b516097a2068c46521592d5f5241cb3dc08a49c68"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/models/shelly-back.jpg",
+      "bytes": 117678,
+      "sha256": "f089a6ba186af9145bdbd759907ed375da78c38f3399c70ac53f48f5c9720580"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/models/shelly-front.jpg",
+      "bytes": 113632,
+      "sha256": "e8c6a0e6e673aea2ad86b00d232e34e01cdc6f887490589647633927684df0f5"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/models/shelly-quarter.jpg",
+      "bytes": 119516,
+      "sha256": "c9b628f09a5913c17cb172afe202b611547c0d98af1cfa82515749c48d34ef73"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/models/taxi-front.jpg",
+      "bytes": 17709,
+      "sha256": "17af20ab3edace9e060488e9982caacb9db52a57d84ef4fafc5af83ef9b7cce1"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/beach-close-after.jpg",
+      "bytes": 169062,
+      "sha256": "1fa972b5a242f4ced91ecc5f85d0371300815d27421fc5dd1848aa05eb81dce0"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/beach-close-before.jpg",
+      "bytes": 108076,
+      "sha256": "aed55f814950134f55091dc01a8c701da6f3a9ae75658f4b4b67e070e88fc44e"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/beach-overview-after.jpg",
+      "bytes": 146725,
+      "sha256": "0cb27b52acbcba85e33d3b3cf6df8225977987a8c3a9474cbe77d73c00d8899f"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/beach-overview-before.jpg",
+      "bytes": 108580,
+      "sha256": "c84551b246ab6504d51b76f08f265c6af90a48f63e3851eec9454735a88eea05"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/captain-close-after.jpg",
+      "bytes": 138267,
+      "sha256": "b1382909a665046fca877c92d2530cc19f9f8a84a343c64c1ca6075c17d86cba"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/captain-close-before.jpg",
+      "bytes": 176532,
+      "sha256": "e29d50eea907c16cf59988374732b40a23a8c4cd7c89325e084fb0caf4ccc662"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/captain-overview-after.jpg",
+      "bytes": 133976,
+      "sha256": "bc0ce82984d6f7427315c4e1f9716678ff3ca86a82cdc556a378f16a058218fa"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/captain-overview-before.jpg",
+      "bytes": 185801,
+      "sha256": "3a6937dbc64b78dd6f3c450be0400c93d994fca02aeb3964b8123ee308c6d869"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/caves-close-after.jpg",
+      "bytes": 132212,
+      "sha256": "ee1c2a2b73ad5c1abdb5d140f69ae1cffe98a593f1b789288843a5f4d861327c"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/caves-close-before.jpg",
+      "bytes": 71052,
+      "sha256": "66ad856b58a99d9e56b1f14bc8bf153a747949a0d0a0f6100c88188be6882094"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/caves-overview-after.jpg",
+      "bytes": 103051,
+      "sha256": "1e82dfc46aac8c350ce55a5676f69f57c7fcf56ed73c6923e8ea6cb84bfaab6e"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/caves-overview-before.jpg",
+      "bytes": 69725,
+      "sha256": "e1714ec2dd73f663f08dce2b0ef107af7be14591dcdf481b766407f8f605d98c"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/cove-close-after.jpg",
+      "bytes": 50279,
+      "sha256": "bb12d4fdc89e6f27854fadf8bef11ddd857cfd3850906a22db4761d1148615ff"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/cove-close-before.jpg",
+      "bytes": 46443,
+      "sha256": "c085e6fc7087c7236d0251777c5b6d1be68ffc4e165b813ec5a61d2728ff7d51"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/cove-overview-after.jpg",
+      "bytes": 51987,
+      "sha256": "5f11266b24d8250ed7d6fbe23001a81e10fb50692614b3033759d6a7c6e69ba3"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/cove-overview-before.jpg",
+      "bytes": 50376,
+      "sha256": "d6685bab9efaf950d93c99ae579ac4757c3be76a91700703167b0a010e5c50e6"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/lagoon-close-after.jpg",
+      "bytes": 164247,
+      "sha256": "98b8f4e6d45c714a93587537e44c9d95d900059c4397eacd04bafaa4eb727e95"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/lagoon-close-before.jpg",
+      "bytes": 148633,
+      "sha256": "f30cf73ce2f29531af72f65add7093c5e620d42574445304a04cabe970f51802"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/lagoon-overview-after.jpg",
+      "bytes": 141374,
+      "sha256": "65cc8e89c68115bed9c9a584bc9b6e82afcd769084a9692cb67ec2114ef9c3d6"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/lagoon-overview-before.jpg",
+      "bytes": 135745,
+      "sha256": "8862ff311ec03942e30c27f0d75d708234f121be943442ff1fc41773a007a690"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/light-close-after.jpg",
+      "bytes": 175143,
+      "sha256": "a7520dc3f2c82fe3ca9f4f7aaa1f974222ec11d6d3115877c034883761ef0526"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/light-close-before.jpg",
+      "bytes": 74788,
+      "sha256": "29b5c33814c03ee6721df70fa17e573b58672b4236483796014c6227c4c5db23"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/light-overview-after.jpg",
+      "bytes": 145359,
+      "sha256": "45779795cb547ef75e04c41c9b90a85640537a484f2fb3e22d9dc658b90f2104"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/light-overview-before.jpg",
+      "bytes": 81264,
+      "sha256": "836027aee7789e012afb5a37fc4a48dbae37c47d8126fe28041ff1ec710e2a71"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/patterns-close-after.jpg",
+      "bytes": 132648,
+      "sha256": "7a8dfcf8ed46fa18cd298e657f7555028fab6c37112bf649d5cf386f5b7523e6"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/patterns-close-before.jpg",
+      "bytes": 59874,
+      "sha256": "f4427329596105c65cc16d818fecf2cfa5defd0bf23fb7e1d8ce94ba892c9b49"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/patterns-overview-after.jpg",
+      "bytes": 133038,
+      "sha256": "6308fd90abd732e63ec203a460503961fc9ccdcfb5a445d1b807b5bd15d4055e"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/patterns-overview-before.jpg",
+      "bytes": 77302,
+      "sha256": "affba5294ae4f87f140a0409b63de3e27d0ceb998380207c0db0bbf004293f9c"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/town-close-after.jpg",
+      "bytes": 187324,
+      "sha256": "d4e0b3e25aa0508c8f979d73bbcf9de5bab53955cc71b41f21bca6e3b0bc2a05"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/town-close-before.jpg",
+      "bytes": 193204,
+      "sha256": "f4eddbdd90979c89a7f74edd79816975e197cc13cfe8b131232ce48f8b7e20b7"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/town-overview-after.jpg",
+      "bytes": 167586,
+      "sha256": "a1e19db0a49c3094b77b9c22ae49f5bed834509b01e38da7acc3cd910a762d1f"
+    },
+    {
+      "path": "context/fable-review-snapshot/images/world-pass/town-overview-before.jpg",
+      "bytes": 183849,
+      "sha256": "aff0d101e38711912c893f20af0144b475dfedf1326410e20568c1464359a5fe"
+    },
+    {
+      "path": "context/fable-review-snapshot/manifest.json",
+      "bytes": 50613,
+      "sha256": "f1566469fc20c18e7c0ce19d8b233cfa2b0a76918fe0660629175f756669981c"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/src/css/encounter-stage.css",
+      "bytes": 4442,
+      "sha256": "3ba98125df8e2136a66680ee14d60edc8a0569aff8e53a4a303dda98f3d769b1"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/src/css/reef-3d.css",
+      "bytes": 79244,
+      "sha256": "206b5dbd1b0d68e815e12c553a116e91c1648bac8cc477fc1c29f6f78cff6454"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/src/css/region-boards.css",
+      "bytes": 4498,
+      "sha256": "c5ada1d67ba4df772e1c0bdb5d6aebcf5ecfaa8e19f756e96d994d0c1365e584"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/src/css/region-people.css",
+      "bytes": 3139,
+      "sha256": "559c6da033039d869cab4d0ebab617da22f64fc223babf2013a1ed30f89029ad"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/src/js/reef.js",
+      "bytes": 86541,
+      "sha256": "69a09ce3c551e18638f6ede76d180bedfc9168b7068f60a773bac3937f7552ac"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/src/js/reef3d/board.js",
+      "bytes": 120347,
+      "sha256": "b386804b98087aa97c9753572f0d400e71234448be35c353ce2f8a239a924654"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/src/js/reef3d/day-night.js",
+      "bytes": 28237,
+      "sha256": "8bdc504826ccb131d841c420527e2f58998cd85f9557f1953ad93143cf1e289c"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/src/js/reef3d/encounter-stage.js",
+      "bytes": 11028,
+      "sha256": "138ff98247f14433a014069332ac7797bcf84b1f89c565a4144ecc87da49bb30"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/src/js/reef3d/post.js",
+      "bytes": 8606,
+      "sha256": "b80a5e4ffd59ea2dc8d58cc6c5763f8ef182552ed9aef8190a45c923b129ddd9"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/src/js/reef3d/region-people.js",
+      "bytes": 55534,
+      "sha256": "1ae97aadc8e0c03b51f8c5569e37ff4edbd913f792e61acee7c4c3a385787b9c"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/src/js/reef3d/region-scenery.js",
+      "bytes": 23867,
+      "sha256": "43280c1770c6bc8cac8746104995d93d6dfd13898ed56e1f0a87eb5c626f463c"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/src/js/reef3d/resident-models.js",
+      "bytes": 24109,
+      "sha256": "c54906dd1c2ddf86d64e0570a6ecdc2f95ad32a149f9716d4052ff45900a1762"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/src/js/reef3d/scenes.js",
+      "bytes": 64291,
+      "sha256": "4f608d40a801314c6d624e5e59e1d0cc2352b5b2b30fd4499167bf6b54cd18f5"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/src/js/reef3d/shelly.js",
+      "bytes": 12629,
+      "sha256": "0ea7b60978fe84e80da724ecef9cb46697c19535359c8e982ec5da8b81128b04"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/src/js/reef3d/tile-art.js",
+      "bytes": 11908,
+      "sha256": "938242aa065eea14efc0163638d004321bc55b8455f1908f9d112dcc0f26be5f"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/src/js/reef3d/world-detail.js",
+      "bytes": 17002,
+      "sha256": "9b87493d0ff54332c4e69888475b2f7d95eb9417a327601b0175a001c00d8778"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/src/js/reef3d/world-overview.js",
+      "bytes": 9554,
+      "sha256": "8f49251cc49d329f9ea9f7b27e8f08bd1adedc25c4133369adfd644712d59994"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/src/js/reef3d/world-routes.js",
+      "bytes": 3385,
+      "sha256": "b0bfe4ec02c5454cb60b832b5f09fb2d57381018cdb6c7a49e7718586ab64f90"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/src/js/reef3d/world-surfaces.js",
+      "bytes": 9782,
+      "sha256": "a2cfea65147c2867d926822000feec70bfccb131eb18251e45a9245004eeac2c"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/src/js/region-boards.js",
+      "bytes": 13122,
+      "sha256": "9e63178aaacb0b5e4c19f071146d601b95069f1ebd1c634ae4595cc68d62b46b"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/tools/art/audit_world_scenery.cjs",
+      "bytes": 14443,
+      "sha256": "b3bf49f4d8fbfc11d4a664eb1ad669009e9d3636c9dd9b5cce98624522205917"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/tools/art/render_world_scenery.py",
+      "bytes": 13672,
+      "sha256": "693756c63bcf380b39e95b1dbd92eed7970a03e71f0bd141f00f744c02ba8227"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/tools/check/color_pipeline_test.js",
+      "bytes": 6484,
+      "sha256": "2b20b228921c5c3be4abb518fcd6cf836ae741ea4d54571390208682acc53e09"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/tools/check/region_scenery_geometry_test.js",
+      "bytes": 4150,
+      "sha256": "df9266025e87088e22c137edab0ec5fcae360a2ea342cfd792e2103bd9ffe316"
+    },
+    {
+      "path": "context/fable-review-snapshot/source-snapshot/tools/check/world_surfaces_test.js",
+      "bytes": 11236,
+      "sha256": "d419c2c9ab97cbf20d197abbf5f9dfc6d5815322ea285a8be3bc12b259cd49b2"
+    },
+    {
+      "path": "context/fable-review-snapshot/textures/atlas-layout.json",
+      "bytes": 590,
+      "sha256": "22c514535b4560dd7804973e8947293eee0241d3e0e811c7489bb3ca0d9f4651"
+    },
+    {
+      "path": "context/fable-review-snapshot/textures/shellstone-color.jpg",
+      "bytes": 53387,
+      "sha256": "b6084a0ec6616be952ba6e9071e6e9356920f2c04dee5d57822069dab6a0973a"
+    },
+    {
+      "path": "context/fable-review-snapshot/textures/world-surfaces.jpg",
+      "bytes": 360915,
+      "sha256": "9e40e1c575d643a1db0ce7daf866340869111bde7f967273a3eb519f2b3b2523"
+    },
+    {
+      "path": "context/historical-inputs/original-handoff.md",
+      "bytes": 14652,
+      "sha256": "63224cb30f18ab7e914e80f0fc12e6d3f88664a9c2e9607fb28e3d75d329d396"
+    },
+    {
+      "path": "context/historical-inputs/storybook-overhaul-request.txt",
+      "bytes": 14290,
+      "sha256": "705761bfa8c447e2127ff2f40758af67b98b91cf29202a14e685aa75ff0c6a55"
+    },
+    {
+      "path": "context/review-site-historical-README.md",
+      "bytes": 4030,
+      "sha256": "d9f9b4fdf6871ba9b00a391da4bf92fdec9cbfe9631a7447c0100c7171abc64b"
+    },
+    {
+      "path": "context/rwkv-review/evidence.json",
+      "bytes": 3544,
+      "sha256": "c44665e1ab8cb0d16fae0bcda93ec30ff3e222dfec3d93521ed69b33df178353"
+    },
+    {
+      "path": "context/world-realism/CPU-AUDIT.md",
+      "bytes": 3954,
+      "sha256": "013de29386fef7e1ed7bc18506723dde3db7fad73f0750f65bc06a91d78f2af7"
+    },
+    {
+      "path": "context/world-realism/FABLE-PASS-STATUS.md",
+      "bytes": 1385,
+      "sha256": "da1c95efd1e3d249cc872bf07c7388ddb399a6013108c51db34af19279027f31"
+    },
+    {
+      "path": "docs/CROSS-ASSISTANT-COLLABORATION.md",
+      "bytes": 2391,
+      "sha256": "8066366b02532b14b6e270331273f88ab1ece28482b9e69f0b5039f4cd10bcbd"
+    },
+    {
+      "path": "docs/CURRENT-ART-DIRECTION.md",
+      "bytes": 5528,
+      "sha256": "ff83717788799e9f41680fc2fc3d5d169d1bebe1b0c321e6b43d504eff203974"
+    },
+    {
+      "path": "docs/ENGINE-AND-VALIDATION.md",
+      "bytes": 5618,
+      "sha256": "234ef52ef729ee84f44ae72ef8f1668ed94048af64f80391d36ef2d2aa1cb44d"
+    },
+    {
+      "path": "docs/ROADMAP-AND-LEARNING.md",
+      "bytes": 5132,
+      "sha256": "baccdeae670abde626f715cdaf0748333dea19549324db5a24495acdf742e7bb"
+    },
+    {
+      "path": "game/.gitignore",
+      "bytes": 170,
+      "sha256": "5db1dfc72308da1a2ba2c1459a6cd743f3be672964c579222d94e8f9c36880a8"
+    },
+    {
+      "path": "game/.nojekyll",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "game/ARCHITECTURE.md",
+      "bytes": 26831,
+      "sha256": "db51869261d6536abf304000bd8d24af473d0b1e9eb52293e2afc27ab565a1b1"
+    },
+    {
+      "path": "game/CHANGELOG.md",
+      "bytes": 75556,
+      "sha256": "9d910c8594be8f213f57759c9fa64682e213b16bcfb82a101d8dd7b10706b574"
+    },
+    {
+      "path": "game/LICENSE",
+      "bytes": 1065,
+      "sha256": "8a7a2c6fd43b67ceabcc9b1f7e403c908ee9173419616ebbf41fd066d4036525"
+    },
+    {
+      "path": "game/MUSIC_CREDITS.md",
+      "bytes": 1680,
+      "sha256": "487929d8dbfeb6ae101cd34b413b687f92905e00d7b2928a9b45eca1d7ec7602"
+    },
+    {
+      "path": "game/README.md",
+      "bytes": 9487,
+      "sha256": "da63e5e648aa3d3bff623a16e80db42db3c900b7f8edb29d6d297f9407fb1f3c"
+    },
+    {
+      "path": "game/art-source/cast-review/ANATOMY-REVIEW.md",
+      "bytes": 4435,
+      "sha256": "17e0043fbb0971be49a50f9982d74cf5a550b84cd6af293c3eec7774aec40d79"
+    },
+    {
+      "path": "game/art-source/cast-review/CAST-DIRECTION.md",
+      "bytes": 8676,
+      "sha256": "86013b5ec3c74590febfdbbb56f95d90a4673b8848fed3f00ee61c3bae961743"
+    },
+    {
+      "path": "game/art-source/cast-review/README.md",
+      "bytes": 1248,
+      "sha256": "09de1f786094423b3e0f5a17b26498def77454880b5f3af7c2bf30aefb358b77"
+    },
+    {
+      "path": "game/art-source/cast-review/biological-color-lineup-2026-11-16.png",
+      "bytes": 2334183,
+      "sha256": "f4c78d9d32077e43ce9b223c5b7ba4452524f0b7026e47c50490240d839b1029"
+    },
+    {
+      "path": "game/art-source/cast-review/biological-palettes-2026-11-16.json",
+      "bytes": 5180,
+      "sha256": "35ae035cecbf55c7f12eee63fa824bb18bb8efd26b17c6cfb553a5aadcb2665e"
+    },
+    {
+      "path": "game/art-source/cast-review/companions.png",
+      "bytes": 2325767,
+      "sha256": "5ce44845961cde93f1168c773bafe96c6ac670e9456f443b5ac307a25c75d4d6"
+    },
+    {
+      "path": "game/art-source/cast-review/distinct-silhouettes-lineup-2026-11-16.png",
+      "bytes": 2222148,
+      "sha256": "ebe87f7bbad751abc50aa0a1164a968644b0d38b12a64b4a5a31ae66a9a68425"
+    },
+    {
+      "path": "game/art-source/cast-review/echo-pip-vertebrate-options-2026-11-16.png",
+      "bytes": 2388082,
+      "sha256": "a9322f31eba213df23a6842115ad76c309cf055e6693e6a41c8f4e1cf96dcce9"
+    },
+    {
+      "path": "game/art-source/cast-review/expression-review/captain.png",
+      "bytes": 2920367,
+      "sha256": "a6dca5324b0f03815d46db7ea8d63a87b483015e1fff3d83ea25365180c0599e"
+    },
+    {
+      "path": "game/art-source/cast-review/expression-review/manifest.json",
+      "bytes": 9076,
+      "sha256": "742a1cadd9299022e9cef21500455f699d90447e14ead87b427c344a6e7f14a5"
+    },
+    {
+      "path": "game/art-source/cast-review/expression-review/sheet-01.png",
+      "bytes": 2610148,
+      "sha256": "8257707996d01380ada83ddd3ce6147a8c80d519c10cdee4bb53cc667062dad8"
+    },
+    {
+      "path": "game/art-source/cast-review/expression-review/sheet-02.png",
+      "bytes": 2809206,
+      "sha256": "3af8fc5acd9f63086936a5a2b5ba7b62eb3dae2c47c87383def0f19af2c00a25"
+    },
+    {
+      "path": "game/art-source/cast-review/grounded-cast-1-2026-11-16.png",
+      "bytes": 2391989,
+      "sha256": "f62332937ffccaec0bbfd8d2505b86565bc626bbcc7858e44c0e3bde0f754a07"
+    },
+    {
+      "path": "game/art-source/cast-review/grounded-cast-2-2026-11-16.png",
+      "bytes": 2356962,
+      "sha256": "a32fd7f22215e548f171e3f790a9aaf15638a249bc973b7e375278fa8dde2850"
+    },
+    {
+      "path": "game/art-source/cast-review/grounded-cast-3-2026-11-16.png",
+      "bytes": 2038144,
+      "sha256": "b04bdeb01142596626dd292079afec7f1a4724df5ca611a5861ec8d34741564e"
+    },
+    {
+      "path": "game/art-source/cast-review/harbor-friends.png",
+      "bytes": 1912615,
+      "sha256": "96dae54332c64af41c457872ac732fff15e3f62aa42668c04a73cc4a42143efd"
+    },
+    {
+      "path": "game/art-source/cast-review/harbor-residents.png",
+      "bytes": 2206042,
+      "sha256": "ed7aefe4a29790695dfa3bac32e50c1b63e8f866805f25937a9e3f5fe456531d"
+    },
+    {
+      "path": "game/art-source/cast-review/jisu-orange-speed-2026-11-16.png",
+      "bytes": 2171832,
+      "sha256": "862c7977231216739310ea1a1d212c4a7b7e3a7f5320e363a86ef0df58bda5d6"
+    },
+    {
+      "path": "game/art-source/cast-review/keepers-town.png",
+      "bytes": 2284799,
+      "sha256": "ceec126dd81e42bb770fe3ce44ce8d872b4f17d84933e30c0d4aaf1bce786de4"
+    },
+    {
+      "path": "game/art-source/cast-review/mira-teen-options-2026-11-16.png",
+      "bytes": 2226942,
+      "sha256": "03b557bf84902ffe64a05f14d9a736b71aa0dcd0642c0a35ecd485489c9b68d2"
+    },
+    {
+      "path": "game/art-source/cast-review/natural-survey/sheet-01.png",
+      "bytes": 2129600,
+      "sha256": "c5d0fe3cc51dc7207f209daa558195ab21306da4c575733a75a2e0ebb0e6c89e"
+    },
+    {
+      "path": "game/art-source/cast-review/natural-survey/sheet-02.png",
+      "bytes": 2375462,
+      "sha256": "00ed09a86464c0cdcd7f0114202f2964192cb8e87092d962f199d5cdde1aaa78"
+    },
+    {
+      "path": "game/art-source/cast-review/natural-survey/sheet-03.png",
+      "bytes": 2343280,
+      "sha256": "e4ba996efd6f2ade90fc6f498e22b6505b57738229d193d6898422f5e0a94106"
+    },
+    {
+      "path": "game/art-source/cast-review/natural-survey/sheet-04.png",
+      "bytes": 2449932,
+      "sha256": "c7776f0f97a506badfe0aeb672ac1cf5d72392bbe10fa01bb35aa3da3cd149ed"
+    },
+    {
+      "path": "game/art-source/cast-review/natural-survey/sheet-05.png",
+      "bytes": 2207018,
+      "sha256": "ebd72205cf05e85c2d215f1337faee8e7c8ab896aad934d5ac0b03b688a47ecc"
+    },
+    {
+      "path": "game/art-source/cast-review/natural-survey/sheet-06.png",
+      "bytes": 2199108,
+      "sha256": "8811614b7874ae7c349d8e3b318194d8236be1614cb78bf99da0d6b8b568d81e"
+    },
+    {
+      "path": "game/art-source/cast-review/natural-survey/sheet-07.png",
+      "bytes": 2278690,
+      "sha256": "710a0e56d37e9fe5d359a48e37d0ca86bf0d0987020143e7936ee9478ed7b147"
+    },
+    {
+      "path": "game/art-source/cast-review/octopus-color-states-2026-11-16.png",
+      "bytes": 2630166,
+      "sha256": "7c32f77610b9b8a1b75d947f42a937080158e7337896a113ced26a8cfe328f3b"
+    },
+    {
+      "path": "game/art-source/cast-review/preferences-2026-11-16.json",
+      "bytes": 7333,
+      "sha256": "9ae18c78418e0f441f867707e257c40f1a40b353199c526f3609f404a53f4cba"
+    },
+    {
+      "path": "game/art-source/cast-review/reef-hosts.png",
+      "bytes": 2394273,
+      "sha256": "1c10ae5d1003f678486ec46cdecafc4d870996edfd346e4baf7c8757878d623b"
+    },
+    {
+      "path": "game/art-source/cast-review/refinement-manifest-2026-11-16.json",
+      "bytes": 2095,
+      "sha256": "1ea914d79de3c0a964dea9a7e45895ad26b5fe1518bc33dc5ad4a2ddc8a2e26c"
+    },
+    {
+      "path": "game/art-source/cast-review/survey-manifest.json",
+      "bytes": 13743,
+      "sha256": "009553a3e170bc8b701f586c885fbbfe7e90f61423a752b0707fab737b8b8335"
+    },
+    {
+      "path": "game/art-source/npcs/README.md",
+      "bytes": 2562,
+      "sha256": "539095206cd27cd8097b348eb6337e681c6f2d4ee1872badb1003fd0143d022c"
+    },
+    {
+      "path": "game/art-source/npcs/cafe-seahorse/README.md",
+      "bytes": 2212,
+      "sha256": "fca7befe1531e35bbf586e13ae0e25389e8ade1061542e34be83b5b4910cf851"
+    },
+    {
+      "path": "game/art-source/npcs/cafe-seahorse/board-report.json",
+      "bytes": 1413,
+      "sha256": "73870e357b3a322a50ceed6a5426285c708d5f9cdccc28a0c88792d8ae691793"
+    },
+    {
+      "path": "game/art-source/npcs/cafe-seahorse/cafe-seahorse.blend",
+      "bytes": 1166117,
+      "sha256": "b8f76edc0ae40d40f9bca93da8dd9691ceaf9f08da8ded11aee4af539761c0cd"
+    },
+    {
+      "path": "game/art-source/npcs/cafe-seahorse/close-report.json",
+      "bytes": 1415,
+      "sha256": "46d16342f6be5b233ebde0a82d21c55a509c8851d31421ee2a11dda36bf9be92"
+    },
+    {
+      "path": "game/art-source/npcs/cafe-seahorse/concept-input.png",
+      "bytes": 2173415,
+      "sha256": "255a7bfb2f08b8abd18ee0b76dce70e6de77a11068ddbe0ed5e0c37ee33f33db"
+    },
+    {
+      "path": "game/art-source/npcs/cafe-seahorse/motion.png",
+      "bytes": 327532,
+      "sha256": "d2412bee88ccece7daa1c2c48cc5ea8904c3f260a5c2c8b7820a71f1f8637cb4"
+    },
+    {
+      "path": "game/art-source/npcs/cafe-seahorse/polish/README.md",
+      "bytes": 1098,
+      "sha256": "9703c981e96dcb679ea91d2c0d9d3e27f9dcad74a861febe9a33f74c4fe0593a"
+    },
+    {
+      "path": "game/art-source/npcs/cafe-seahorse/polish/board-report.json",
+      "bytes": 1413,
+      "sha256": "4646dc77dc9f5b6d89fad62de647213c9815ad48a6a06ab454a998c6d3b42483"
+    },
+    {
+      "path": "game/art-source/npcs/cafe-seahorse/polish/body-comparison.png",
+      "bytes": 203107,
+      "sha256": "1f2152ec6d8a2396e7660e1e11b9430b43989ed22fda10c5d8470ba8fdde7854"
+    },
+    {
+      "path": "game/art-source/npcs/cafe-seahorse/polish/build_candidate.py",
+      "bytes": 6528,
+      "sha256": "6c26836bbb32d92002423b88d28d4e4a640ddb066dd952122f462f60bada882e"
+    },
+    {
+      "path": "game/art-source/npcs/cafe-seahorse/polish/cafe-seahorse.blend",
+      "bytes": 970038,
+      "sha256": "7d55e81e31da04d5f27c29c09db9dd380cda554f2db5368bdaa0f60ccd7b33ad"
+    },
+    {
+      "path": "game/art-source/npcs/cafe-seahorse/polish/close-report.json",
+      "bytes": 1415,
+      "sha256": "dcbdcfd2071ce0e3853185860202803b85cd230ec4e2d90c22117a1792a2e4b7"
+    },
+    {
+      "path": "game/art-source/npcs/cafe-seahorse/polish/face-comparison.png",
+      "bytes": 467579,
+      "sha256": "3b54ee334eb3ed6a82e6b683c8753307584e8d876a8d6cd8ffe4bcb7050f3af4"
+    },
+    {
+      "path": "game/art-source/npcs/cafe-seahorse/polish/idle-comparison.png",
+      "bytes": 366853,
+      "sha256": "3cfc252d32f284547c39ed7d93836af2bdf93d7db0fb9c087cfbec53c5fe02e6"
+    },
+    {
+      "path": "game/art-source/npcs/cafe-seahorse/polish/validation.json",
+      "bytes": 3594,
+      "sha256": "f6648b6665d9a8ba976740b6322cb26788ba906258dcebdc061a8f1cbbd5c64d"
+    },
+    {
+      "path": "game/art-source/npcs/cafe-seahorse/turntable.png",
+      "bytes": 150059,
+      "sha256": "246e6c96c120ed48ccbcb5231273cf0bc768d8eb16160a38e6c2c666b0e2dfde"
+    },
+    {
+      "path": "game/art-source/npcs/echo/README.md",
+      "bytes": 1667,
+      "sha256": "4624c36cbf71e68328b1399170a14355864b9f9f1d889c8142902d11f1cb7cb9"
+    },
+    {
+      "path": "game/art-source/npcs/echo/blend-check.json",
+      "bytes": 425,
+      "sha256": "1a00243642a6eb52d652d58fa2823d6bfef350a2b1cbe63266575c0ad0d4ab31"
+    },
+    {
+      "path": "game/art-source/npcs/echo/board-report.json",
+      "bytes": 2270,
+      "sha256": "42e027a86954ea6807d540c2b3558a83a9b7be46d9082ed9350e0d4c44769034"
+    },
+    {
+      "path": "game/art-source/npcs/echo/close-report.json",
+      "bytes": 2272,
+      "sha256": "d5da543b73b3197979caacff96e0cc3a4014f2c69406c77cbe34ef42cac92b73"
+    },
+    {
+      "path": "game/art-source/npcs/echo/echo-authored.blend",
+      "bytes": 605643,
+      "sha256": "d490373b5c9ec53d019c8422aef9009468494ca4f78a5f0d711fc469029bc7c4"
+    },
+    {
+      "path": "game/art-source/npcs/echo/echo-board.glb",
+      "bytes": 357788,
+      "sha256": "810a7c834a12d17ddf665bb4491f36421ba07fbf8b3681b9ce52fb4a7a0f4c60"
+    },
+    {
+      "path": "game/art-source/npcs/echo/echo-close.glb",
+      "bytes": 886952,
+      "sha256": "369a123afb8adc668355483c029d3b2f3db36266bc98e3f26df639643fa53871"
+    },
+    {
+      "path": "game/art-source/npcs/echo/manifest.json",
+      "bytes": 6319,
+      "sha256": "280276620cec9a24bccfc0218635754af885c7b330664b748dc59c37fa36b43a"
+    },
+    {
+      "path": "game/art-source/npcs/echo/review/board-back.png",
+      "bytes": 376173,
+      "sha256": "16241a0376060390284eb1a5f629f017719c0b16cc78b3fd1bd76b144e027d8a"
+    },
+    {
+      "path": "game/art-source/npcs/echo/review/board-front.png",
+      "bytes": 357382,
+      "sha256": "a88c7f845c8abd8acf1fc7a4e86c6823094970faba2d43fac2c4882cfffa433a"
+    },
+    {
+      "path": "game/art-source/npcs/echo/review/board-quarter.png",
+      "bytes": 372445,
+      "sha256": "6143c1b88518d298eba93681226d28d645553fe8855950f99118001b019a7fbb"
+    },
+    {
+      "path": "game/art-source/npcs/echo/review/board-side.png",
+      "bytes": 391132,
+      "sha256": "af7b329663651f3ec2c0a8375649980fc1b3cc7d57edd5dc857811f2848887fa"
+    },
+    {
+      "path": "game/art-source/npcs/echo/review/board-turntable.png",
+      "bytes": 1450729,
+      "sha256": "e9a6ed090853e3f2ad4c71f6639176a5f34aefd0d8d9da629e2ff4eb2ff97ff0"
+    },
+    {
+      "path": "game/art-source/npcs/echo/textures/painted-color-1024.jpg",
+      "bytes": 62715,
+      "sha256": "e0e28f2e95eaf62f4df14a161a44e2e764b580100132ad047e49975d71d53868"
+    },
+    {
+      "path": "game/art-source/npcs/echo/textures/painted-color-1024.png",
+      "bytes": 358216,
+      "sha256": "89a2e82c76b38eb746263b347bcd68e5347c639e5e3cbe90891b23f729c14d1c"
+    },
+    {
+      "path": "game/art-source/npcs/echo/textures/painted-color-2048.jpg",
+      "bytes": 186756,
+      "sha256": "f5dbf879c19875d65d0cdb83c8e98a78b30a9dc1551b2d6a27ae4133f6f70a96"
+    },
+    {
+      "path": "game/art-source/npcs/echo/textures/painted-color-2048.png",
+      "bytes": 955135,
+      "sha256": "d229b52a346c5e4d7e1876f9420ae7d9f4cc91441caa8e6ca7dd85826a33e5d7"
+    },
+    {
+      "path": "game/art-source/npcs/echo/textures/painted-surface-256.png",
+      "bytes": 24930,
+      "sha256": "b9f6ca781d386bb6aba664da2b73ab9a5e3bc96fb7e3cef9f252d42c4c65a589"
+    },
+    {
+      "path": "game/art-source/npcs/echo/textures/painted-surface-512.png",
+      "bytes": 68057,
+      "sha256": "27e0274e7c7fc1865d221106f664174680abeb06f144aacee0082940f64e6a2c"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/concept-input.png",
+      "bytes": 2209281,
+      "sha256": "97619fc0bcebca40556ce61ab54d3f95420f93be8b693827ba1f75196bfa1c2d"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/README.md",
+      "bytes": 3038,
+      "sha256": "0539111782cb3dd98de95e26f184cdd97d2149cbc3bf854becc3671f8558614d"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/board-report.json",
+      "bytes": 2165,
+      "sha256": "05e03a8f540056fd29f9fd59830dce4ef399c95431a72d1221ae1570f4df8bf6"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/close-report.json",
+      "bytes": 2169,
+      "sha256": "c5da8e2995612b6769a1b08162ea9c3bd16c91f44bd0cd7999561b6c9a85279d"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/eye-acting.jpg",
+      "bytes": 235078,
+      "sha256": "60a776b36456505002c4c989999d2831a4ef2168b928e710a954ded831e7b845"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/jisu-board.glb",
+      "bytes": 663688,
+      "sha256": "022703f01cbd5c686885de042f044d6da4e24c8050618bd9df306f236b2b8582"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/jisu-close.glb",
+      "bytes": 1771084,
+      "sha256": "308d4eacf2e5906bdf002e435481644be78fb12f244c5bde9911a2ca9e877db2"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/jisu-color-1024.jpg",
+      "bytes": 301845,
+      "sha256": "d212aa4a6802fd43c293659379e4b67ea0ebecf89d3af27e40db12a9633606c2"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/jisu-color-1024.png",
+      "bytes": 1356297,
+      "sha256": "4821bbce4901ce3a3b88e95cc136381e11336b46d213f147101bad8fe9a2ca68"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/jisu-color-2048.jpg",
+      "bytes": 939854,
+      "sha256": "5973b52c9c9abf9df76d6d0cbd30231b8091abf44104657f9ab87dd81bb53e05"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/jisu-color-2048.png",
+      "bytes": 4533767,
+      "sha256": "21a0d6fd4548fbb3f9211e1a405720ba61b6105bd0acd4855c41ce71b7375a81"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/jisu-production.blend",
+      "bytes": 1408225,
+      "sha256": "289fa797279840428470e7bf8300d57aed7c14cb6df41efb9831b86e475a275a"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/jisu-surface-256.png",
+      "bytes": 925,
+      "sha256": "a4a4872c0efe87c19637372600e447d645bc0d89890537595734a815ee4c4bef"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/jisu-surface-512.png",
+      "bytes": 3791,
+      "sha256": "2cafeb365194d919645ce25de9bb4ccee21ee9c5b00025b3db31e63063744046"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/pose-idle-shift/front.png",
+      "bytes": 296934,
+      "sha256": "1230d5ac0dd3897f83201526dd2320443168d0ff43386dcbdd62e9ceb534b613"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/pose-listen/front.png",
+      "bytes": 297403,
+      "sha256": "c4aec04e36979c946e2a165a51b50bd686b278ca7599a1ec8004533aa16ee53c"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/pose-react/front.png",
+      "bytes": 298030,
+      "sha256": "1e0d55ff7bcd1ace8da02d09ee6263f6d152e600fed6fb3202f39856435a8463"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/production-report.json",
+      "bytes": 7487,
+      "sha256": "9cfe74576c7cf59df3d8bebda3761f527c1054fb4ae3a343511acf4772f9c5e7"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/render-review.py",
+      "bytes": 4017,
+      "sha256": "9ac5f7c19b94b21ddda97a4bcc7bba6a5fb155afc7d98c6073d5e6fc0a83d740"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/review-board/back.png",
+      "bytes": 145015,
+      "sha256": "478dab7e356310ba877327c8a42687698feceeb3a8181d6e67eb1fafb7a726d6"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/review-board/front.png",
+      "bytes": 171861,
+      "sha256": "d97f78d8bd17dd388d4151bc2f3cf5ef9a4bacedeabeac47efa02ccff32243bb"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/review-board/quarter.png",
+      "bytes": 167708,
+      "sha256": "73bc833c6a9845f95baa1c36cdc2319f3b554831b370d687c570d28cbe9b4f10"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/review-board/side.png",
+      "bytes": 149506,
+      "sha256": "bc69f7f89172d68fbfecff1ec21859eb1c56a5ac2af254698becfe233ba09f40"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/review-close/back.png",
+      "bytes": 377254,
+      "sha256": "48bef0d6d8008de6f67e9fc73d98100365b3434ae1b5ea0ef718c161b63a34ce"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/review-close/front.png",
+      "bytes": 451349,
+      "sha256": "606f3170cec10321985cf6f43ee6a7e3b3dcd7c1df6e710b5c8633493cfac99d"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/review-close/quarter.png",
+      "bytes": 438020,
+      "sha256": "6cd24d454aec4ef58210983cb7356e7b10a3f18e13df22c06f9e642e386193f4"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/review-close/side.png",
+      "bytes": 393507,
+      "sha256": "fece029942c55b09ba99c7e755e43bc67b315f20cebf85d7c09f81cea8ae6f51"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/turntable-board.jpg",
+      "bytes": 116256,
+      "sha256": "6a63cc8ef14f8f39437aad96e995227ed042ffdfa208ce221a41a485cfde6f35"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/production/turntable-close.jpg",
+      "bytes": 269848,
+      "sha256": "07c8039f101f8d44dd59c92c91b3a36837c123653a5e7b4fbef13c9264513807"
+    },
+    {
+      "path": "game/art-source/npcs/jisu/source-shape.glb",
+      "bytes": 20267276,
+      "sha256": "eb3dd23568f1116ac33cc6de1fdc9f5b537d215d4af3499918db40d26aef01bf"
+    },
+    {
+      "path": "game/art-source/npcs/mira/README.md",
+      "bytes": 3024,
+      "sha256": "b74303703a2e9125f59b34e9fb224835e963da968c024a5f66aa1f86e4dc6d6d"
+    },
+    {
+      "path": "game/art-source/npcs/mira/production/asset-report.json",
+      "bytes": 1307,
+      "sha256": "ebb6e02f7d0634e981084f4d975d5eb002bb684e31abbf73073ab12708a47cd6"
+    },
+    {
+      "path": "game/art-source/npcs/mira/production/mira-board.glb",
+      "bytes": 1121280,
+      "sha256": "f5278b798c29e986b19c2859c8106732791dbecba8d53aa918863e9f73ddd3e3"
+    },
+    {
+      "path": "game/art-source/npcs/mira/production/mira-close.glb",
+      "bytes": 2375784,
+      "sha256": "e740ff7653affd017a0514a6039e11ae26134958751bd63714e4108a0cc5e6b0"
+    },
+    {
+      "path": "game/art-source/npcs/mira/production/mira-color-1024.jpg",
+      "bytes": 327720,
+      "sha256": "86dc4329b362cde35bdf9f905b65f5d95c59c45d7d774353c4c247ec969e4ad6"
+    },
+    {
+      "path": "game/art-source/npcs/mira/production/mira-color-2048.jpg",
+      "bytes": 1013255,
+      "sha256": "c29dd5c9c938a0c289037bc0be7d9e1a611b395342de6fb2597571743b921823"
+    },
+    {
+      "path": "game/art-source/npcs/mira/production/mira-surface-256.png",
+      "bytes": 2127,
+      "sha256": "bb5a8c795057ee81ff01c71085258efd881a6d363faf2b2baf5f60363efac315"
+    },
+    {
+      "path": "game/art-source/npcs/mira/production/mira-surface-512.png",
+      "bytes": 5680,
+      "sha256": "673ccac42c5ab43169dce48ef7a204a98826e1ffb08266ee9a9835430f37c878"
+    },
+    {
+      "path": "game/art-source/npcs/mira/production/mira.blend",
+      "bytes": 4928653,
+      "sha256": "8347f311a23040d3dab34ab84b20d2a8148d531295e765b6c1c3756387dd5ab7"
+    },
+    {
+      "path": "game/art-source/npcs/mira/production/validation.json",
+      "bytes": 7052,
+      "sha256": "e76434a7f648f8ec8fcfa789393faa7577d552030def090fd3cf51cabac10306"
+    },
+    {
+      "path": "game/art-source/npcs/mira/validate.py",
+      "bytes": 3541,
+      "sha256": "a4f42c42a02902a063f1d1c110a8c05b8f7177041abe86ba0446ce95bbef7786"
+    },
+    {
+      "path": "game/art-source/npcs/pip/README.md",
+      "bytes": 1749,
+      "sha256": "d6582a1db21f6cf6d59c19221afb38243f23aeb9d38785f2796438b9c570bd50"
+    },
+    {
+      "path": "game/art-source/npcs/pip/blend-check.json",
+      "bytes": 425,
+      "sha256": "e752fabf02f66b8edbdc6b1452e939f68d973e0116d929eaaada9545a05f2c27"
+    },
+    {
+      "path": "game/art-source/npcs/pip/board-report.json",
+      "bytes": 2332,
+      "sha256": "ca038a8c2dfc2bcab77528ed2a0e9653d9399d0a5347b5412e175005d6f14ffd"
+    },
+    {
+      "path": "game/art-source/npcs/pip/close-report.json",
+      "bytes": 2334,
+      "sha256": "158a8267f776e3c9fe9f7bc78968c5382125b08175d48f7cfb3c13fe062481df"
+    },
+    {
+      "path": "game/art-source/npcs/pip/manifest.json",
+      "bytes": 6479,
+      "sha256": "559f38af7bcee2580a9a5d488ca1fad26aeafa707378b848e8877f46c02e6091"
+    },
+    {
+      "path": "game/art-source/npcs/pip/pip-authored.blend",
+      "bytes": 950154,
+      "sha256": "a7eb4bc197b9c255b39d8fb6dcc2eeca0938baee4a8a21591404099110a8152d"
+    },
+    {
+      "path": "game/art-source/npcs/pip/pip-board.glb",
+      "bytes": 460992,
+      "sha256": "7ad59ca60ddabe874cc3921898e956c2a144bdf46648dfcf4b521a417c817693"
+    },
+    {
+      "path": "game/art-source/npcs/pip/pip-close.glb",
+      "bytes": 1209004,
+      "sha256": "71183b8a2b50718d58b87e77ea3a944039994df958dda58e282cc082f0f9627e"
+    },
+    {
+      "path": "game/art-source/npcs/pip/review/board-back.png",
+      "bytes": 432549,
+      "sha256": "a1b2411573063ecf8725b32c9f85066014a6518a8d7367954e86d175599c729c"
+    },
+    {
+      "path": "game/art-source/npcs/pip/review/board-front.png",
+      "bytes": 407791,
+      "sha256": "7e809bd2bb520f47084ecc525280aa21b2a5bf1f9c3028e1e1a90e9345086a92"
+    },
+    {
+      "path": "game/art-source/npcs/pip/review/board-quarter.png",
+      "bytes": 450812,
+      "sha256": "1853466535a878a05f2454637a2132c5169eb4e24350f8fee3252ffb10acfc9d"
+    },
+    {
+      "path": "game/art-source/npcs/pip/review/board-side.png",
+      "bytes": 476853,
+      "sha256": "2a369632ddf3a3e290b0abae2e1bf7a40d3956c1a8fb3c5ca898431ebfa87f49"
+    },
+    {
+      "path": "game/art-source/npcs/pip/review/board-turntable.png",
+      "bytes": 1575138,
+      "sha256": "75a50dcd159c910de5005e7b335c4d279fc238d8777867e86d76e3630651eadf"
+    },
+    {
+      "path": "game/art-source/npcs/pip/textures/painted-color-1024.jpg",
+      "bytes": 178752,
+      "sha256": "10f943c49f5a2895ccfc593bfd9f34a0834a8e3cd9e283fbf9286f95c29ba09c"
+    },
+    {
+      "path": "game/art-source/npcs/pip/textures/painted-color-1024.png",
+      "bytes": 823350,
+      "sha256": "f15a7b8b72ed3fab93f72b8f64a3e305ea995474353daf331f4d89eb67ead903"
+    },
+    {
+      "path": "game/art-source/npcs/pip/textures/painted-color-2048.jpg",
+      "bytes": 512913,
+      "sha256": "6eb8f8fbcb1e97eea1ad4f61ec9c53602b8eb2510b4af68355f5ea0adc01d281"
+    },
+    {
+      "path": "game/art-source/npcs/pip/textures/painted-color-2048.png",
+      "bytes": 2332078,
+      "sha256": "c2d6a4cd3cbc4a13d14f3cdb3f9ccc2397d8a3a732219a976a35abe00dde760b"
+    },
+    {
+      "path": "game/art-source/npcs/pip/textures/painted-surface-256.png",
+      "bytes": 19324,
+      "sha256": "4cae7877e4d1a5c0158ba40356b9b597837593563cd37a8c3a142754d1280932"
+    },
+    {
+      "path": "game/art-source/npcs/pip/textures/painted-surface-512.png",
+      "bytes": 65086,
+      "sha256": "15c481f83c66b64be4f2bfa32a5462fbbbc5a40a9e244404728732424a9fa60e"
+    },
+    {
+      "path": "game/art-source/npcs/production-status-2026-11-16.json",
+      "bytes": 6981,
+      "sha256": "9788dd4b4c718f6089e58291a28a94caf20827c1d514218953855e03fdcfa7dc"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/concept-before-anatomy-fix.png",
+      "bytes": 2542777,
+      "sha256": "8535f2a7d1b29720f6d676b126ca85147864b55bc460ee5d409fa5767abff688"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/concept-input.png",
+      "bytes": 2704955,
+      "sha256": "53c351c5ec670384a4abf0bbd3e0e05c81efe42549b393bf31efc1b7e7cc61b6"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/README.md",
+      "bytes": 3691,
+      "sha256": "a540be6a796abdee23f7a39b31ffa8bc74b3b829fa2e79e59421c3ad54f02115"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/board-anatomy.json",
+      "bytes": 39367,
+      "sha256": "8c17bbcbb18b9e4de3e41ec75e6fe85e50d1fd91db3b37351120f4513952f815"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/board-report.json",
+      "bytes": 1542,
+      "sha256": "26b904b57a2640e9649bf920a51991737a49fbb39968596fef40ca7dec1953ee"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/close-anatomy.json",
+      "bytes": 53353,
+      "sha256": "c5cf45522dd57a8bb4675a5b8ba1e39f1e3fae80ec640b8a84799602f2b97e86"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/close-report.json",
+      "bytes": 1545,
+      "sha256": "bd8d694279438c13fe3a92378364b0ca9c8cdbb11e41c5c38a019723fce83406"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/delivery.json",
+      "bytes": 1572,
+      "sha256": "534a84667def412b90de8458561482866b531bc1ca7a2c3aeecf3aa1172aa3c7"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/painted-color-1024.png",
+      "bytes": 451887,
+      "sha256": "74c5bf0d710e8aa6604bed22103a595eae43ade1f2d22c5d19aea19ad94f0fa7"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/painted-color-2048.png",
+      "bytes": 1338996,
+      "sha256": "fc88cd15f68788a21cfb4a609b7e148c244895c1c3c967bacb1fea921a68b468"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/painted-surface-256.png",
+      "bytes": 12966,
+      "sha256": "c909f24850a8495fdce45d80ff9d45f18bb96bf68dc877d514df4528e503db2d"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/painted-surface-512.png",
+      "bytes": 36698,
+      "sha256": "0140b2a8c1d0be65b1e4ab966bafec8f076d73903a0a8e971dfe43b0894ff793"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/review-board/front.png",
+      "bytes": 399776,
+      "sha256": "20ca547584ea92b49930db741a2d2b065a0704259e73ada3abced340c6a78e68"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/review-board/quarter.png",
+      "bytes": 366958,
+      "sha256": "dcf8572d71a0f9e4ca4e5ff62d734e069cc79f453feb66363b6cba0ec328a743"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/review-close/back.png",
+      "bytes": 527693,
+      "sha256": "4bcf06bb34bda0561d7d4fab36691e803af846882cafbb8dd585b04f2dcc44ba"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/review-close/front.png",
+      "bytes": 582080,
+      "sha256": "775af2dd4272734f5259887ce6691a6537da99b6027a48f63ecea6a439b90582"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/review-close/listen-front.png",
+      "bytes": 581933,
+      "sha256": "493ebc906b678c6b2f5393ea3b63fa57198838841843c90697b71150e51ac4e9"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/review-close/listen-quarter.png",
+      "bytes": 532935,
+      "sha256": "c6c6b017518475e890005e2f43ab621ebd00a60624da0063531f19d90c64c60b"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/review-close/quarter.png",
+      "bytes": 532522,
+      "sha256": "2b4bafb5f89b284e3f07603ffab6f80c1b35401a14d2afd01f1d11ac295bdfe5"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/review-close/react-front.png",
+      "bytes": 581668,
+      "sha256": "4fe261d42871a38236368e700ceb6867dabc944265636843b71f8f41b302dfd2"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/review-close/react-quarter.png",
+      "bytes": 532869,
+      "sha256": "978acdb2e791d3f685ba4e33c7c58e140c5c22a821fd546b8413148e7bcc07f4"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/review-close/side.png",
+      "bytes": 456106,
+      "sha256": "24c2f5ecb32f8089e9ab273b69e8f310918dac7945b8b65d2fee942897c7c839"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/shop-octopus-board-reimport-proof.json",
+      "bytes": 26818,
+      "sha256": "4046d027e548c89c1d2c264f3a5c9c1ece8b41fa3a39453ccb02cfda28683c6e"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/shop-octopus-board.glb",
+      "bytes": 933684,
+      "sha256": "877be107fd4ed4eccc5ddbee1b4ee3e63c172cebecdb4affad5263f584478931"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/shop-octopus-close-reimport-proof.json",
+      "bytes": 26818,
+      "sha256": "d209142675455ac32187ac136c2a6aab0fb3e8c356181fac10af4b99b01b20ee"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/shop-octopus-close.glb",
+      "bytes": 2375644,
+      "sha256": "5775a989d262573cd20e76e202d5005e0af8b6623664585874a90e550d6e45e4"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/shop-octopus.blend",
+      "bytes": 1899260,
+      "sha256": "25edcd15119b9c46a810cd9cbd66296edf0238be79860c1be5c1ca34f52fb927"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/skin-mask-1024.json",
+      "bytes": 1232,
+      "sha256": "9c30e0328bffb180afefe4b880bacc9d2376c088953814b1a04f498124d86a2b"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/production/skin-mask-2048.json",
+      "bytes": 1232,
+      "sha256": "9c30e0328bffb180afefe4b880bacc9d2376c088953814b1a04f498124d86a2b"
+    },
+    {
+      "path": "game/art-source/npcs/shop-octopus/source-shape.glb",
+      "bytes": 19339640,
+      "sha256": "b2ee31e429037018e3848d24142981dac86b1fd85fcba676803f02c88b555c07"
+    },
+    {
+      "path": "game/art-source/npcs/taxi-squid/concept-input.png",
+      "bytes": 1987338,
+      "sha256": "3d2f2b5b7f224bdae293c965ccfe5fdad4cb3c93fdcaa4ad5b3dfe40354cfd1b"
+    },
+    {
+      "path": "game/art-source/npcs/taxi-squid/review/back-before-surface-calibration.png",
+      "bytes": 115249,
+      "sha256": "989e383b7d1c58bb7584a2b821d0309199b0f6f7e0760551df447b5da236f3d6"
+    },
+    {
+      "path": "game/art-source/npcs/taxi-squid/review/close-back.png",
+      "bytes": 151752,
+      "sha256": "73bbf565f7ca5a0098ddd35876bc4ac2eade890a0887f246e55f7c06ec010c9c"
+    },
+    {
+      "path": "game/art-source/npcs/taxi-squid/review/close-front.png",
+      "bytes": 162544,
+      "sha256": "b259a1132dc6fdfad4d751a9b5b35d20f66232b7c56d1817fd9689d90a63a204"
+    },
+    {
+      "path": "game/art-source/npcs/taxi-squid/review/close-quarter.png",
+      "bytes": 152793,
+      "sha256": "5c50cc00d9ba520d32b56683973618b53bc9c9e19766723c84ccd5ebf2150042"
+    },
+    {
+      "path": "game/art-source/npcs/taxi-squid/review/close-side.png",
+      "bytes": 145118,
+      "sha256": "8d21e27396798fc88754a84b44be49aa1b30c67f224b45a39819b59ca37b84c9"
+    },
+    {
+      "path": "game/art-source/npcs/taxi-squid/review/front.png",
+      "bytes": 163099,
+      "sha256": "18fb6aabbb89ad5df0930bdb15d8df2e79cc6dbcc53a455e3553904ba6d33d8c"
+    },
+    {
+      "path": "game/art-source/npcs/taxi-squid/review/idle-midpoint.png",
+      "bytes": 163115,
+      "sha256": "23c68b40a9b95789c32d32dd80705e605eea999ca96c1470eccf17806ca2f09f"
+    },
+    {
+      "path": "game/art-source/npcs/taxi-squid/review/quarter.png",
+      "bytes": 153343,
+      "sha256": "b3d50fd300d81d4704827ae3f48854fa668b94a06767386f4b7a703e6de4edd0"
+    },
+    {
+      "path": "game/art-source/npcs/taxi-squid/review/react-midpoint.png",
+      "bytes": 164231,
+      "sha256": "29541ff344f42484d4d57db0d9fd0332cdbcea62198ff6d958d38e33f790b8fb"
+    },
+    {
+      "path": "game/art-source/npcs/taxi-squid/review/side-before-surface-calibration.png",
+      "bytes": 110102,
+      "sha256": "6ce00b028731a28842db31561948168eb96493b3e12138ec924d4eb1552f3716"
+    },
+    {
+      "path": "game/art-source/npcs/taxi-squid/source-reconstruction.glb",
+      "bytes": 14019468,
+      "sha256": "39a9755758bc42e3fd6e5c16413b56f3708b5d4a55f2324d00ea06b9ce528a2f"
+    },
+    {
+      "path": "game/art-source/npcs/taxi-squid/taxi-close.blend",
+      "bytes": 6045733,
+      "sha256": "5a0fc3e37555f8c1e1b93690019824a93d0404b8994de9080bbb7b67ead4db26"
+    },
+    {
+      "path": "game/art-source/npcs/taxi-squid/taxi.blend",
+      "bytes": 3213857,
+      "sha256": "531bc663728a61c3292199b8a47a0e470d3bd49e0d0f6606fb9437c6af8d39e6"
+    },
+    {
+      "path": "game/art-source/shelly/PAUSED.md",
+      "bytes": 1841,
+      "sha256": "510322f59d51572634f720b257839132608c671a9fb2f35d2670b01d19a738ed"
+    },
+    {
+      "path": "game/art-source/shelly/README.md",
+      "bytes": 4904,
+      "sha256": "32b5ef19f989718611da44d693e30d0b4395efaa8dd7abeb6e3c9cbff2a1b647"
+    },
+    {
+      "path": "game/art-source/shelly/concept-input.png",
+      "bytes": 1199968,
+      "sha256": "0fd6f39f74704452237e2b433d35455d88c1b74dc51d19011587f094fbe882d4"
+    },
+    {
+      "path": "game/art-source/shelly/crafted/README.md",
+      "bytes": 2528,
+      "sha256": "7b1e3a7bd69506dca70353da2d1acde030f9df2227737c12220f2dd4f47500e8"
+    },
+    {
+      "path": "game/art-source/shelly/crafted/eye-projection-comparison.json",
+      "bytes": 4017,
+      "sha256": "f1adc805566f07b6bf7fb540020f0597ef30418c68d56a2a08c6e41f7065cd08"
+    },
+    {
+      "path": "game/art-source/shelly/crafted/game-size-comparison.json",
+      "bytes": 1125,
+      "sha256": "d4af514bae5fcb1aba54a477839f70b3ebc54bb7527c87024e8a3cccd2368fa9"
+    },
+    {
+      "path": "game/art-source/shelly/crafted/manifest-v2.json",
+      "bytes": 636,
+      "sha256": "e0096d79a9323887235fa2d7a57d095c4ebf6b545af5ac700ab324f795a599ad"
+    },
+    {
+      "path": "game/art-source/shelly/crafted/manifest.json",
+      "bytes": 719,
+      "sha256": "7f5bdd13ac51eb41cf58a893a03d1250978c4aee5032809d74dfb9f13ba3a425"
+    },
+    {
+      "path": "game/art-source/shelly/crafted/runtime-audit.json",
+      "bytes": 3294,
+      "sha256": "88d9e8eac746d5645236c120a8d7e9a5ad084158d24c4d58d5a2da3886aa2895"
+    },
+    {
+      "path": "game/art-source/shelly/crafted/validation.json",
+      "bytes": 7328,
+      "sha256": "a14528149fe44c9fc113decffcaddd0f804ba7fbaedda38cb66549d2ac627859"
+    },
+    {
+      "path": "game/art-source/shelly/natural-mouth/README.md",
+      "bytes": 1642,
+      "sha256": "b3b9cd25df2a8e81789f4bd5326ebc5ec864c31274fd019db21e95de71cc0085"
+    },
+    {
+      "path": "game/art-source/shelly/natural-mouth/asset-report.json",
+      "bytes": 997,
+      "sha256": "4d0e82dbc7fde2033745c46c7c150f61e6180926f3fb5659f6934a9e5f4fe279"
+    },
+    {
+      "path": "game/art-source/shelly/natural-mouth/face-views.jpg",
+      "bytes": 68970,
+      "sha256": "87929e0e6015ae81b9294128318b10d55ac4366c6584149f71fd2755d0b30011"
+    },
+    {
+      "path": "game/art-source/shelly/natural-mouth/shelly.blend",
+      "bytes": 6589189,
+      "sha256": "7e298b947dbcca8282a376c9fd3fd2642decb011ec8657089300a23017e7abf1"
+    },
+    {
+      "path": "game/art-source/shelly/natural-mouth/validation.json",
+      "bytes": 4933,
+      "sha256": "1aef80d76027f83a64cde7a03120338768a48f52d053be5e3bd71ac2775eb6e2"
+    },
+    {
+      "path": "game/art-source/shelly/natural-mouth/whole-views.jpg",
+      "bytes": 63789,
+      "sha256": "13850fcf9e082d83b69b5f3457c6a6ddb99e3b6a80010c5d8fba26f5033039d6"
+    },
+    {
+      "path": "game/art-source/shelly/pearl-color-runtime.jpg",
+      "bytes": 1450259,
+      "sha256": "48eff86283815f26a0d329146414b692bab123fd51d4b959747ea31b7cbdf909"
+    },
+    {
+      "path": "game/art-source/shelly/pearl-color.png",
+      "bytes": 5022864,
+      "sha256": "8da803830fd6049bcf08f9c352f4906d0ed803e233bdfa1dfaa5c0c06bad838b"
+    },
+    {
+      "path": "game/art-source/shelly/pearl-source.glb",
+      "bytes": 9380912,
+      "sha256": "cd8e396d2630faba70a462e7eb896a4d9fb97df36df59fac33e5e38ec6d447ed"
+    },
+    {
+      "path": "game/art-source/shelly/pearl-surface-512.png",
+      "bytes": 398913,
+      "sha256": "307ac82f2414b5d90dd06f37b043b13649e5226eb47abdf3e386bdba744eb5e6"
+    },
+    {
+      "path": "game/art-source/shelly/pearl-surface.png",
+      "bytes": 3125191,
+      "sha256": "4547fa0184852728c0d438adc970bca1dddb9fb94f72e6b673001ed8bbd996a1"
+    },
+    {
+      "path": "game/art-source/shelly/rejected-sage-draft/shelly.blend",
+      "bytes": 3817136,
+      "sha256": "7465b4d8d74844f1db221f7bdde33f1d0bef9865cc76af4b71d3b48fbca9706a"
+    },
+    {
+      "path": "game/art-source/shelly/rejected-sage-draft/shelly.glb",
+      "bytes": 1061876,
+      "sha256": "a773a0771974a27780924e38b86beeac360f16710ebead99377119263f4ae686"
+    },
+    {
+      "path": "game/art-source/shelly/rejected-sage-draft/shelly.py",
+      "bytes": 23016,
+      "sha256": "4b20f1b23201d4eacc26d145fbc3ec3fba90d5dfd72010b80878a2c97926d4d3"
+    },
+    {
+      "path": "game/art-source/shelly/shelly-atlas.png",
+      "bytes": 281013,
+      "sha256": "e5dfa04b827a5714b684cb468d76e40a617653d8346113256e6c12a6687a9980"
+    },
+    {
+      "path": "game/art-source/shelly/shelly-body-color.png",
+      "bytes": 343030,
+      "sha256": "e850877fd62b3fd28179d8307e8afb16b07302ba4e13ea6f4b192f6014ed9f4f"
+    },
+    {
+      "path": "game/art-source/shelly/shelly-face-color.png",
+      "bytes": 740412,
+      "sha256": "eaf39412cc86f0124e6534aa775a253f60ae168219ccef679380ff6a4292ee0b"
+    },
+    {
+      "path": "game/art-source/shelly/shelly-sculpt.blend",
+      "bytes": 8406028,
+      "sha256": "9ffd9270841063e9286910fa63379257c2eafab8f2cf36b3661cfd033525ed73"
+    },
+    {
+      "path": "game/art-source/shelly/shelly.blend",
+      "bytes": 5284189,
+      "sha256": "eef1fa762cd95d5abc7f41f51562045a4b26e20362ded6812bd8037c97e62d4b"
+    },
+    {
+      "path": "game/art-source/tiles/README.md",
+      "bytes": 1313,
+      "sha256": "6f602c31135684e97235d54c319aa7973801aa296c2adabd287306d8c49c1edc"
+    },
+    {
+      "path": "game/art-source/tiles/shellstone-source.png",
+      "bytes": 3259885,
+      "sha256": "976b63131529e36b3952ba123b8e0ba7b1f109b524185f62a8ee82e9c7d4ceae"
+    },
+    {
+      "path": "game/art-source/world-surfaces/atlas-layout.json",
+      "bytes": 794,
+      "sha256": "b2c2284ff74230addb9392ff8feb52f4d85a39f77bf7e796022e18b15985bee4"
+    },
+    {
+      "path": "game/art-source/world-surfaces/atlas-runtime-source-1024.jpg",
+      "bytes": 360915,
+      "sha256": "9e40e1c575d643a1db0ce7daf866340869111bde7f967273a3eb519f2b3b2523"
+    },
+    {
+      "path": "game/art-source/world-surfaces/atlas-source.png",
+      "bytes": 3427542,
+      "sha256": "3312e0c30506015aee92d14b9df2d0e08bddb7edcefd04795b9f2f10b041d298"
+    },
+    {
+      "path": "game/assets/models/cafe-seahorse-close.glb",
+      "bytes": 1246092,
+      "sha256": "dcdc16985c896d0d65c7fdd3e57a0e772affb24ee2bbfed5d8a4b4bd2b34cb76"
+    },
+    {
+      "path": "game/assets/models/cafe-seahorse.glb",
+      "bytes": 530432,
+      "sha256": "885d71a3d2dd12ba63f8fd6c1a91227f54105706b0f5c6fc1920141a1f7016e3"
+    },
+    {
+      "path": "game/assets/models/crafted-shelly-loading.webp",
+      "bytes": 11986,
+      "sha256": "1ce644514ee2e2f95c551db7509bda77737627a674fbf6529337951fd0886ec6"
+    },
+    {
+      "path": "game/assets/models/crafted-shelly-view.glb",
+      "bytes": 788124,
+      "sha256": "4c94360000524cdd9a0bbc055eb15601b5d3497602c92d39434e7319c7ce4cb2"
+    },
+    {
+      "path": "game/assets/models/crafted-shelly.glb",
+      "bytes": 1717720,
+      "sha256": "db46a6706c520867c1fe49a25ee9d801af986ff29e0e2913d55c4bbd72fa8bcb"
+    },
+    {
+      "path": "game/assets/models/jisu-close.glb",
+      "bytes": 1771084,
+      "sha256": "308d4eacf2e5906bdf002e435481644be78fb12f244c5bde9911a2ca9e877db2"
+    },
+    {
+      "path": "game/assets/models/jisu.glb",
+      "bytes": 663688,
+      "sha256": "022703f01cbd5c686885de042f044d6da4e24c8050618bd9df306f236b2b8582"
+    },
+    {
+      "path": "game/assets/models/shelly-view.glb",
+      "bytes": 1257572,
+      "sha256": "69130fd46c13ab06a8fc6b05f093fc35191aae0800743ed057cb7bddc320124f"
+    },
+    {
+      "path": "game/assets/models/shelly.glb",
+      "bytes": 3118368,
+      "sha256": "bd59faae74094cbf889529a2b957fc415a4ed547f061dcc9426aa057a6bdd7c6"
+    },
+    {
+      "path": "game/assets/models/shop-octopus-close.glb",
+      "bytes": 2375644,
+      "sha256": "5775a989d262573cd20e76e202d5005e0af8b6623664585874a90e550d6e45e4"
+    },
+    {
+      "path": "game/assets/models/shop-octopus.glb",
+      "bytes": 933684,
+      "sha256": "877be107fd4ed4eccc5ddbee1b4ee3e63c172cebecdb4affad5263f584478931"
+    },
+    {
+      "path": "game/assets/models/taxi-squid-close-report.json",
+      "bytes": 1586,
+      "sha256": "ee8043336d14a24998ac639eb92477b1158d2ecaf309c40affad7a6ab06efd16"
+    },
+    {
+      "path": "game/assets/models/taxi-squid-close.glb",
+      "bytes": 2946048,
+      "sha256": "186e5e5cce853982dfa3ab5d321091de83c5adecf779a64c2d17eaf023a565a0"
+    },
+    {
+      "path": "game/assets/models/taxi-squid-report.json",
+      "bytes": 1358,
+      "sha256": "5957e32845f0d726eb877cde58c568c98a34c7c4599bb436bef0049274f9f522"
+    },
+    {
+      "path": "game/assets/models/taxi-squid-view-report.json",
+      "bytes": 1354,
+      "sha256": "cfa088636c317b00f6def1fa1a4c8d1210bdad969055605b7b0de15f8c5306cf"
+    },
+    {
+      "path": "game/assets/models/taxi-squid-view.glb",
+      "bytes": 1000244,
+      "sha256": "75cee25609135d57969e45f78a8439dd0e4eb64c9bfb716713567ea48b3a8e6a"
+    },
+    {
+      "path": "game/assets/models/taxi-squid.glb",
+      "bytes": 1257900,
+      "sha256": "4eef829ebcbf4ca26bdaef9ec5623e4153a7f15f845c9f08f1fedcdb05983aac"
+    },
+    {
+      "path": "game/assets/world/shellstone-color.jpg",
+      "bytes": 53387,
+      "sha256": "b6084a0ec6616be952ba6e9071e6e9356920f2c04dee5d57822069dab6a0973a"
+    },
+    {
+      "path": "game/assets/world/world-surfaces.jpg",
+      "bytes": 66143,
+      "sha256": "b78e9e1701e05a8751c7244435a965cd6753f731ba8c77270f3cf4d384fde362"
+    },
+    {
+      "path": "game/audio-clips.js",
+      "bytes": 679033,
+      "sha256": "57c29ca530aa43e17caa0a788533ddc444edc285e6600525327455049e7484da"
+    },
+    {
+      "path": "game/day-song.mp3",
+      "bytes": 2795949,
+      "sha256": "c98ca9764ae2aaf5fb32b96875472c5ccb9b4408859e4a0c8b9b3eca62f9ec34"
+    },
+    {
+      "path": "game/deck-song.mp3",
+      "bytes": 960932,
+      "sha256": "b22790bbf6a546b9bfba541ced8eb85658c6083fe2fb0f0e939b2d3a350f69d7"
+    },
+    {
+      "path": "game/docs/DEVELOPMENT-ORDER.md",
+      "bytes": 1744,
+      "sha256": "7ebc4eef7d54f69126866c52f980f91ca37fb68c6513fb3958b324b1e24f6027"
+    },
+    {
+      "path": "game/friend-pics/bluewhale.webp",
+      "bytes": 5596,
+      "sha256": "3bd51267acc64f5c5e60dc2f23e4387020a13972f91ef1ac6a53bd3caa46bfc1"
+    },
+    {
+      "path": "game/friend-pics/coral.webp",
+      "bytes": 8814,
+      "sha256": "08e3a14be344df33b8e542a4a07a69a57a03b6a5bc04a1859c51d2d31c7d9a19"
+    },
+    {
+      "path": "game/friend-pics/crab.webp",
+      "bytes": 7730,
+      "sha256": "fdd7eeebd3458d8e28705b5ad3dd9e54c9029605e2a31b48d8b8ca80dfbe6ec4"
+    },
+    {
+      "path": "game/friend-pics/dolphin.webp",
+      "bytes": 5246,
+      "sha256": "271620745547d7bbb90984456fc1ca1dbff85ab4b95ff26d5ec814a6ded43212"
+    },
+    {
+      "path": "game/friend-pics/fish.webp",
+      "bytes": 5342,
+      "sha256": "5ffa7b8037b63fef343811cd2a947286662d42053cee5204ad2b2c3877da8a97"
+    },
+    {
+      "path": "game/friend-pics/humpback.webp",
+      "bytes": 7466,
+      "sha256": "c2edbe7e2b0f534067d37b2dc49e5dab5fc5f0cb358af6dd3724128304b7f95a"
+    },
+    {
+      "path": "game/friend-pics/jelly.webp",
+      "bytes": 7018,
+      "sha256": "1cabac35cc0254f5b0d47d1be825b866c8bb6e2b5859fc3102434cfaa1129084"
+    },
+    {
+      "path": "game/friend-pics/lobster.webp",
+      "bytes": 9428,
+      "sha256": "35d3cd152c80a08a8d3f1c8e82c8aefd5ca75f5c72494ff9fae1dc32f928631f"
+    },
+    {
+      "path": "game/friend-pics/octopus.webp",
+      "bytes": 5224,
+      "sha256": "a65da293d0163179c7ac82e24245ffb504444bc93abbb9ee32b73e5af4a93c0d"
+    },
+    {
+      "path": "game/friend-pics/otter.webp",
+      "bytes": 4856,
+      "sha256": "0843cc73d1d455604a7ec33eebe11a8385ec8f26ba2cdc028203e805c3d173d2"
+    },
+    {
+      "path": "game/friend-pics/oyster.webp",
+      "bytes": 5460,
+      "sha256": "8ecfe4c82d8f2be733cdd5cd51c2bc91b2a83906c5d3ddc4d009c3a14becb720"
+    },
+    {
+      "path": "game/friend-pics/penguin.webp",
+      "bytes": 4670,
+      "sha256": "866294fc3c788b0763d402a4c9e14e414431f7e6473b8a9e4cd95452ac17b015"
+    },
+    {
+      "path": "game/friend-pics/puffer.webp",
+      "bytes": 4572,
+      "sha256": "77b45f73dd53fef965087c5675a8ae43894e896819062a43a81978d11b01d94d"
+    },
+    {
+      "path": "game/friend-pics/seal.webp",
+      "bytes": 4110,
+      "sha256": "cd579d2d33d790c0e524ca116da353fd633574e0e4ad11ff4b4138bc52e43c22"
+    },
+    {
+      "path": "game/friend-pics/shark.webp",
+      "bytes": 4942,
+      "sha256": "2d566007e28ff8f3f6fe13d6ea9c7256c7e91f720e2b1728cf9e78a59af4735f"
+    },
+    {
+      "path": "game/friend-pics/shell.webp",
+      "bytes": 3638,
+      "sha256": "d6c2f368ed179635155992a5b3a3616480dd68f4c5397bbfe20982e2e57b929f"
+    },
+    {
+      "path": "game/friend-pics/shrimp.webp",
+      "bytes": 8042,
+      "sha256": "c1691a7aa2aa456395c91f86c0168ec3309b10375146625b1a6504b749c50382"
+    },
+    {
+      "path": "game/friend-pics/squid.webp",
+      "bytes": 8592,
+      "sha256": "bbe58db1de46d2d57d6c9c38d4ba3056002daddad01bbe024221d4526cea72fa"
+    },
+    {
+      "path": "game/friend-pics/tropical.webp",
+      "bytes": 4148,
+      "sha256": "c5a77f8f8b2e8759f03b49073298aaa27044d1fc609b8ae1b253009f5e70180b"
+    },
+    {
+      "path": "game/friend-pics/turtle.webp",
+      "bytes": 3660,
+      "sha256": "9c1414d2510a5b6074082da70451c3b08739132b580c04f1c088586b271c9d3b"
+    },
+    {
+      "path": "game/game-song.mp3",
+      "bytes": 1182450,
+      "sha256": "741f136bf6ea5675af12ee211123ce375fb888c2ad3c25277e5e3157c8077bc9"
+    },
+    {
+      "path": "game/icon-180.png",
+      "bytes": 9010,
+      "sha256": "bfaebbed47658038f6597459f90ebde7df1a95d17c7eb26057ad48f51dd9fa26"
+    },
+    {
+      "path": "game/icon-192.png",
+      "bytes": 9576,
+      "sha256": "49e4d4220bc8117ec35d416ced459598fd5cfa89426cbede20eeb966b1ad80f5"
+    },
+    {
+      "path": "game/icon-512.png",
+      "bytes": 24940,
+      "sha256": "93333e752b6c11031309783cd5693f170a00b9060bb87f17b6c2bc2a0f318ae8"
+    },
+    {
+      "path": "game/index.html",
+      "bytes": 2344615,
+      "sha256": "4103428228686fb953dc3255895a0e7d1dda0e7ecb59eeb42104023298dab966"
+    },
+    {
+      "path": "game/library.js",
+      "bytes": 273168,
+      "sha256": "dd02252c56e672288888cd5e6e4be0387f0be7a6a5384e2cd6b3ca9324355f9f"
+    },
+    {
+      "path": "game/lobby-song.mp3",
+      "bytes": 1098022,
+      "sha256": "32f3e20f271bfd6d2275c69312d3e6989660f97c78d2d99aae333b262a6c419e"
+    },
+    {
+      "path": "game/manifest.webmanifest",
+      "bytes": 473,
+      "sha256": "7893ae48d9f8ef8664dd8501b0827fdd9678674d3ac44c3e0b0cf8aa4f5373fe"
+    },
+    {
+      "path": "game/night-song.mp3",
+      "bytes": 3077805,
+      "sha256": "64e2e2ba70cc1be11134cacaf72a20770e9d157daeeb97df85665a5bb80a0de6"
+    },
+    {
+      "path": "game/reef-models.js",
+      "bytes": 1621025,
+      "sha256": "3811c068e811fcc70e57dd44b6505aa5fd5e6bf5b1b93012498a13fee50a0492"
+    },
+    {
+      "path": "game/region-beach-song.mp3",
+      "bytes": 1308255,
+      "sha256": "d153a66096ced07f7f886d42ac87fba85f625e3fe1fa971a91d91f59980b6dad"
+    },
+    {
+      "path": "game/region-captain-song.mp3",
+      "bytes": 1078795,
+      "sha256": "73d67057d95edcf301430609a070b649f273d7b70e054fd14721a2021e2f6e97"
+    },
+    {
+      "path": "game/region-caves-song.mp3",
+      "bytes": 1366351,
+      "sha256": "cf7b4635051e6690425e8b4b4bbbd3ab7c7344bc718400e024bc525b3aa16c2d"
+    },
+    {
+      "path": "game/region-lagoon-song.mp3",
+      "bytes": 1308255,
+      "sha256": "2126bbc84549602580dd311d4d372c0f28cb010da1a92ba694a986041194c913"
+    },
+    {
+      "path": "game/region-light-song.mp3",
+      "bytes": 1048284,
+      "sha256": "ec334726971bae58e6b56c1aed701600ea2477ab2a7024eda053d3dc838a1430"
+    },
+    {
+      "path": "game/region-patterns-song.mp3",
+      "bytes": 1138981,
+      "sha256": "cf57b7456589cefd326415803f1ed3644098aee57a48971c090d73d6c35c8754"
+    },
+    {
+      "path": "game/region-town-song.mp3",
+      "bytes": 1160297,
+      "sha256": "5d70ef6d08c8454e7e26010cec2a3b1121fd390ffaacfaf94ebe05b869fa0367"
+    },
+    {
+      "path": "game/seed-data.js",
+      "bytes": 4286,
+      "sha256": "6581f83ebf3aebd9abf016a756ef4f54d5cf56640641cc5500db5b173480f221"
+    },
+    {
+      "path": "game/src/css/ask.css",
+      "bytes": 3651,
+      "sha256": "f5349c5535d3d0ea8106c6dfe3ab439ec70689ac98b5c7f508b0cce02af316fc"
+    },
+    {
+      "path": "game/src/css/base.css",
+      "bytes": 67052,
+      "sha256": "022bdfad6ce54544c38c9c1aef605964049b647269434ee4f03890120832e811"
+    },
+    {
+      "path": "game/src/css/encounter-stage.css",
+      "bytes": 4433,
+      "sha256": "c3eddeda732b00169d4e9c7ea63d955ec77b98a0d15403efd14897df81952236"
+    },
+    {
+      "path": "game/src/css/fixes-and-refresh.css",
+      "bytes": 64253,
+      "sha256": "861960fb581ce8661161a0dd5f7fa8647a3a5741f0e00f999a88b3bb3161ac53"
+    },
+    {
+      "path": "game/src/css/reef-3d.css",
+      "bytes": 79244,
+      "sha256": "206b5dbd1b0d68e815e12c553a116e91c1648bac8cc477fc1c29f6f78cff6454"
+    },
+    {
+      "path": "game/src/css/reef.css",
+      "bytes": 81076,
+      "sha256": "08a842a03b4fee3728bea6cb0ba43865ed1cd654d3bfdcaac0aa832d69d4e4e2"
+    },
+    {
+      "path": "game/src/css/region-boards.css",
+      "bytes": 5175,
+      "sha256": "8d4b08d2f53bc86b0fb4d0efe484ebee8b764556a9fc23ca509d25cad98e1fc8"
+    },
+    {
+      "path": "game/src/css/region-people.css",
+      "bytes": 3139,
+      "sha256": "559c6da033039d869cab4d0ebab617da22f64fc223babf2013a1ed30f89029ad"
+    },
+    {
+      "path": "game/src/css/region-travel.css",
+      "bytes": 5498,
+      "sha256": "f185c5f39b697a447fbd4142c97deaef7a0798929923dcb1eb623ac4252721c4"
+    },
+    {
+      "path": "game/src/css/swim.css",
+      "bytes": 15450,
+      "sha256": "fbbd7a78004fd9e4afed537fd6438858da5c11723f9d352d9c052b48aaafc77f"
+    },
+    {
+      "path": "game/src/js/ask.js",
+      "bytes": 11090,
+      "sha256": "86d3c76a6a9a14a2d2f4a5883c0c15a776b4cdf8821bc66f02634400d8c49049"
+    },
+    {
+      "path": "game/src/js/beach-data.js",
+      "bytes": 21291,
+      "sha256": "262730a7df9db5892cae09e145687e724cebbe722be1f2fe371272f558e1e27e"
+    },
+    {
+      "path": "game/src/js/beach.js",
+      "bytes": 21585,
+      "sha256": "6392b4fc1eb30fb3373a85b6a4af1b08667376dd4b51104502f0119840b1cb7e"
+    },
+    {
+      "path": "game/src/js/boot.js",
+      "bytes": 2924,
+      "sha256": "0d198aadbabbd10f3a0af1be8ea2b0e1242a9493220b899008bb1c7e2430587f"
+    },
+    {
+      "path": "game/src/js/card-types.js",
+      "bytes": 94740,
+      "sha256": "2574231150a41f814eaeb354a5b2697900286e69cb1a0274fe085ed2e0ca4b41"
+    },
+    {
+      "path": "game/src/js/caves-sounds.js",
+      "bytes": 13213,
+      "sha256": "9608c0cf14d35e5fcbcfc9776fd478a558b42420b56ced572a98fa20d823a42a"
+    },
+    {
+      "path": "game/src/js/caves.js",
+      "bytes": 37570,
+      "sha256": "d9f47ce4d6d1c32e7b14db3a4a5477e0b25ffbc38cc884a70a40711ba1ded745"
+    },
+    {
+      "path": "game/src/js/daily-plan.js",
+      "bytes": 30008,
+      "sha256": "d17554d3c20795e42744b63837543da11a28cd8c18179de6decde874f17a4662"
+    },
+    {
+      "path": "game/src/js/data.js",
+      "bytes": 62346,
+      "sha256": "fb356f9f22fe92db540de4d0f884b58e62767ece06620c949d067cf0f107e4d6"
+    },
+    {
+      "path": "game/src/js/deck-plan.js",
+      "bytes": 11252,
+      "sha256": "a92c0e8d2abec54ab0cbf51d19ba941e58eb38eb3645bcc6ccc5045167821574"
+    },
+    {
+      "path": "game/src/js/deck.js",
+      "bytes": 31441,
+      "sha256": "aca27f3bb4bc8991c9fc17f97729fc3223220c060a142b4dc2bc650aa728a2e5"
+    },
+    {
+      "path": "game/src/js/fsrs.js",
+      "bytes": 3117,
+      "sha256": "8c868bf90488dd1116a141c70905825cd4727936897ac293756fcb3961d6dc28"
+    },
+    {
+      "path": "game/src/js/grown-up-screens.js",
+      "bytes": 80054,
+      "sha256": "36bcb0ee005a11cc62f4f33f31c2f64de931724268bf804f9dc19c0de6900072"
+    },
+    {
+      "path": "game/src/js/lagoon-stories.js",
+      "bytes": 22693,
+      "sha256": "61afb7cbd199d38719a19aba8269a3a0975357941bd8f2b0bb199e78ac2e8f4d"
+    },
+    {
+      "path": "game/src/js/lagoon.js",
+      "bytes": 20152,
+      "sha256": "0055860d6d9c77695b73f8141fe44d19108fdbbe1732d3709b2a6c451a924fe2"
+    },
+    {
+      "path": "game/src/js/learner.js",
+      "bytes": 9002,
+      "sha256": "713fcc37acd5b27b5a4b5211511f7ea32f77fcc172170d222196ca54935a383a"
+    },
+    {
+      "path": "game/src/js/learning.js",
+      "bytes": 64111,
+      "sha256": "26f4445e7f937db2b5cb1e76a9d42881c4a4cf480b50ec8dd04b0244726bd0fa"
+    },
+    {
+      "path": "game/src/js/library-api.js",
+      "bytes": 7943,
+      "sha256": "2f99d88c0b823d481a90aa03f0f8ebcb2cbc43d818b210dc59307e2b21b67bc1"
+    },
+    {
+      "path": "game/src/js/light-data.js",
+      "bytes": 15650,
+      "sha256": "222b230a4f95231a009b5b9ab7fad61049e07f8d1649bbd30bb870eb1093cf01"
+    },
+    {
+      "path": "game/src/js/light.js",
+      "bytes": 13123,
+      "sha256": "323b3cd743511f23ba14678eb039132dc36836deab053d77cd1a24ec22ff34e7"
+    },
+    {
+      "path": "game/src/js/music.js",
+      "bytes": 20796,
+      "sha256": "1f2fc0686357fad48c213c15d058ea20a6116f353dea3575e03e684ed531d13b"
+    },
+    {
+      "path": "game/src/js/my-words.js",
+      "bytes": 14462,
+      "sha256": "6c3fafdea1b159792d289c70b272eaadc4eb793dab6256c493a5dcbd10edad7b"
+    },
+    {
+      "path": "game/src/js/ocean-theme.js",
+      "bytes": 39986,
+      "sha256": "90cccde575197198827db68f3d630e3be8f9c3e900fe6b34383a6710cee18d75"
+    },
+    {
+      "path": "game/src/js/patterns-data.js",
+      "bytes": 36707,
+      "sha256": "10adae82f2f755ba83aae8c104da4fe8785741fbd8adb91e25685dd641eafd30"
+    },
+    {
+      "path": "game/src/js/patterns.js",
+      "bytes": 22891,
+      "sha256": "a94ed726e2861953fb99c0d16b696ed79e7c42a8363af06e8add6bd14844adc4"
+    },
+    {
+      "path": "game/src/js/reef-world.js",
+      "bytes": 35937,
+      "sha256": "a6e37215796b620dc468c9e5f250edb942b026deb0c8da921b8e2391ca3f661b"
+    },
+    {
+      "path": "game/src/js/reef.js",
+      "bytes": 87089,
+      "sha256": "13fd54e84586fc01a0afa9e23b9a9464e11757d75057a3c65f7b5fa714b62a24"
+    },
+    {
+      "path": "game/src/js/reef3d/aquarium.js",
+      "bytes": 26552,
+      "sha256": "d338664462938d2f6d9964b29d26b85c4970dfda5f380577d08d08191757d35a"
+    },
+    {
+      "path": "game/src/js/reef3d/board.js",
+      "bytes": 123055,
+      "sha256": "51f7385eae04ed866cf60367baf679576dd495df30cadb8713ce5bf6ed222010"
+    },
+    {
+      "path": "game/src/js/reef3d/crafted-world.js",
+      "bytes": 25647,
+      "sha256": "8a3f84d779f4db4a5d6ecb166d25715592882ca139a84539c87c15093993237e"
+    },
+    {
+      "path": "game/src/js/reef3d/critters.js",
+      "bytes": 20279,
+      "sha256": "ce2a75807178f35e32662042f7fc4c7f4ea6e0fa054c4f40c7bcbc44c69d791d"
+    },
+    {
+      "path": "game/src/js/reef3d/day-night.js",
+      "bytes": 28237,
+      "sha256": "8bdc504826ccb131d841c420527e2f58998cd85f9557f1953ad93143cf1e289c"
+    },
+    {
+      "path": "game/src/js/reef3d/dice.js",
+      "bytes": 14187,
+      "sha256": "7982f8e80ccffeae0ae0c65b496236d12300019f4d8d7f4f071371c1b21bd3f6"
+    },
+    {
+      "path": "game/src/js/reef3d/encounter-stage.js",
+      "bytes": 11028,
+      "sha256": "138ff98247f14433a014069332ac7797bcf84b1f89c565a4144ecc87da49bb30"
+    },
+    {
+      "path": "game/src/js/reef3d/games-adult.js",
+      "bytes": 22361,
+      "sha256": "af44017a18ecc308e69d740642b7699feef523c2bf51bf58e5b6190db051c088"
+    },
+    {
+      "path": "game/src/js/reef3d/life.js",
+      "bytes": 10237,
+      "sha256": "da0a754ba5d3e8bc813e91249d236df0f5f05329e0b7142660b4f46957102d89"
+    },
+    {
+      "path": "game/src/js/reef3d/lobby.js",
+      "bytes": 19886,
+      "sha256": "87ae9704600ab92bfecd1d68bc80b15cc7f9970aa98312fb1cc357f354269306"
+    },
+    {
+      "path": "game/src/js/reef3d/party.js",
+      "bytes": 77415,
+      "sha256": "476b50b62180d943c774024d54b26ce9c6241fe72e67615a296d6177b2ae3fad"
+    },
+    {
+      "path": "game/src/js/reef3d/post.js",
+      "bytes": 8606,
+      "sha256": "b80a5e4ffd59ea2dc8d58cc6c5763f8ef182552ed9aef8190a45c923b129ddd9"
+    },
+    {
+      "path": "game/src/js/reef3d/region-people.js",
+      "bytes": 58944,
+      "sha256": "4520f1fc9d56be3041ee9d1ed759c146445cbe8db01ff66441a6e2b2a976e121"
+    },
+    {
+      "path": "game/src/js/reef3d/region-scenery.js",
+      "bytes": 30687,
+      "sha256": "a7a500c9e11040cc33b674df7decb0181a0087363967f79d087423846f69f1ea"
+    },
+    {
+      "path": "game/src/js/reef3d/resident-models.js",
+      "bytes": 24878,
+      "sha256": "72d76f5b9d87c5b5768d32b4ff5343e0e29fe89a536da82e15f69ff05d4e5ad1"
+    },
+    {
+      "path": "game/src/js/reef3d/scenes.js",
+      "bytes": 64920,
+      "sha256": "686e2b0f7d474a6d493c722afda56f094b7974492e42573002774e86a0f5147e"
+    },
+    {
+      "path": "game/src/js/reef3d/seamap.js",
+      "bytes": 10079,
+      "sha256": "462da5572fd19f5fce1a7bdc09137dda078a363dafc759e80828ef0ad70fa38f"
+    },
+    {
+      "path": "game/src/js/reef3d/shelly.js",
+      "bytes": 13435,
+      "sha256": "974e23713f55861f7f6a82956878be33533b6185d20b3e44ad103186d1211ecf"
+    },
+    {
+      "path": "game/src/js/reef3d/tile-art.js",
+      "bytes": 11908,
+      "sha256": "938242aa065eea14efc0163638d004321bc55b8455f1908f9d112dcc0f26be5f"
+    },
+    {
+      "path": "game/src/js/reef3d/world-detail.js",
+      "bytes": 17002,
+      "sha256": "9b87493d0ff54332c4e69888475b2f7d95eb9417a327601b0175a001c00d8778"
+    },
+    {
+      "path": "game/src/js/reef3d/world-overview.js",
+      "bytes": 9554,
+      "sha256": "8f49251cc49d329f9ea9f7b27e8f08bd1adedc25c4133369adfd644712d59994"
+    },
+    {
+      "path": "game/src/js/reef3d/world-routes.js",
+      "bytes": 5642,
+      "sha256": "94063153e35083c4e2031690d0637e437ebdabbcc90de607a740c5d5e602dc1c"
+    },
+    {
+      "path": "game/src/js/reef3d/world-surfaces.js",
+      "bytes": 12670,
+      "sha256": "8bdf3cfabf57088debb8fe68392e288f80df0016125981ab197aec4deee51041"
+    },
+    {
+      "path": "game/src/js/region-boards.js",
+      "bytes": 14271,
+      "sha256": "0a3677ce6e871a483d44f86a8ace53e4552dc8e64c6c291a6d685c7e0ecb1c26"
+    },
+    {
+      "path": "game/src/js/region-practice.js",
+      "bytes": 9762,
+      "sha256": "fb2ee6c075d6e1a575ac8d33f78159460240d1a0acf06ed6a0fe78aeeef6650f"
+    },
+    {
+      "path": "game/src/js/region-travel.js",
+      "bytes": 5491,
+      "sha256": "cd4bbc53529ea64bbd7870b1aa97d7ae48b98779684a77ebae654b388a580cdc"
+    },
+    {
+      "path": "game/src/js/screens.js",
+      "bytes": 91036,
+      "sha256": "101885c251c731c2db53144a4a71bfd2f68f1bd2f9cfa1c4f73f90c552ba1666"
+    },
+    {
+      "path": "game/src/js/stories.js",
+      "bytes": 60892,
+      "sha256": "261999717d0a79022ad8e5db0e78085dd3ed14bdfef76c42e4b281f8c1276c72"
+    },
+    {
+      "path": "game/src/js/study-and-feeds.js",
+      "bytes": 58003,
+      "sha256": "ba20ecc625763ab5531ea7aabdd7f1d468f597caaa377218d201724d9e835b85"
+    },
+    {
+      "path": "game/src/js/swim.js",
+      "bytes": 60967,
+      "sha256": "3b8709f3cdf419295f69a80bdac66eedd1315059cc2389b481b7b714f077fd97"
+    },
+    {
+      "path": "game/src/js/town-talks.js",
+      "bytes": 43956,
+      "sha256": "4362c623a35097dbf6c5a6893d2f287e702972bfc655f37c687c88f4ed4f6ee9"
+    },
+    {
+      "path": "game/src/js/town.js",
+      "bytes": 26951,
+      "sha256": "6f777bc3877efca029994e3f30135a69f2828baaa169fb9ab457b0214b6defb2"
+    },
+    {
+      "path": "game/src/js/ui-icons.js",
+      "bytes": 6484,
+      "sha256": "3276c9ed91b9d3b687d2c9528ffefe5f349bd35510d01e2ad945d3e726c2f0a0"
+    },
+    {
+      "path": "game/src/js/vendor/three-gltfloader.js",
+      "bytes": 132358,
+      "sha256": "e81bba8d25f5a100c5b21af9213fdae334f4983f915359ed13df09992b15f246"
+    },
+    {
+      "path": "game/src/js/whats-new.js",
+      "bytes": 13466,
+      "sha256": "1a219e68e15cdd1bc6e3b7bf70657e37c9c06cbb750aea034bfc91386a4709ca"
+    },
+    {
+      "path": "game/src/page.html",
+      "bytes": 11284,
+      "sha256": "76a51c2e12403b93d44f8ce5c8b1580f237ba8a4e1b387d6e665877a9b4d413e"
+    },
+    {
+      "path": "game/storage.js",
+      "bytes": 9657,
+      "sha256": "c9fdd352234ed8e8d1d9fb49e057fc3edd86f39447eb95e692489f8108d5ea1a"
+    },
+    {
+      "path": "game/sw.js",
+      "bytes": 4538,
+      "sha256": "91be9db0d3a0e45db8028c209f671373c4d3fe6a9c5fe193690fbeb520c84fcc"
+    },
+    {
+      "path": "game/three.min.js",
+      "bytes": 603445,
+      "sha256": "9274bbcec8d96168626c732b5d31c775aa8cfb7eaa0599bec0c175908a2c1ce2"
+    },
+    {
+      "path": "game/timer-song.mp3",
+      "bytes": 512879,
+      "sha256": "f8a9b8412588e84417f180509ae495642ef516f6dedb2ad98c432c8e0dbb2f54"
+    },
+    {
+      "path": "game/tools/art/audit_world_scenery.cjs",
+      "bytes": 14573,
+      "sha256": "6eb2e5155fba077680cd8e078473fb835878326f5a57b14ec34a60492126afb3"
+    },
+    {
+      "path": "game/tools/art/build_cafe_seahorse.py",
+      "bytes": 36684,
+      "sha256": "e544093687eb513a09fcf326476ae74d471e2705a824694c56239356b6d49c2c"
+    },
+    {
+      "path": "game/tools/art/build_crafted_shelly.py",
+      "bytes": 21409,
+      "sha256": "4a7a076463b37e72add114e7c4e7371b62b5bb5fb8a12da3749f16d382cd856f"
+    },
+    {
+      "path": "game/tools/art/build_crafted_shelly_options.py",
+      "bytes": 8432,
+      "sha256": "13992b1942e5757bf5755544465cf8f0e79192f11e50da2423dfc32836cbe50d"
+    },
+    {
+      "path": "game/tools/art/build_echo_pip.py",
+      "bytes": 30871,
+      "sha256": "50cba983d563dbe39b11471b9865868bca3e0f2550b4824a8cdd0f57b20d910b"
+    },
+    {
+      "path": "game/tools/art/build_jisu.py",
+      "bytes": 19178,
+      "sha256": "abf880d8eeed1becef61c0267057b9f88a762461ad5fa2a388c9fd3c05735ce9"
+    },
+    {
+      "path": "game/tools/art/build_kiko_cast.py",
+      "bytes": 18024,
+      "sha256": "8620250c4e588f08dde2534f3a0b9bbbee6f3fa8187d58fe396e0aec3496be89"
+    },
+    {
+      "path": "game/tools/art/build_mira.py",
+      "bytes": 26103,
+      "sha256": "a0928faba2beba736e0d4e9b98d91d02ce5facbc7adafb5d737607e95df6e136"
+    },
+    {
+      "path": "game/tools/art/build_resident_preview.py",
+      "bytes": 4689,
+      "sha256": "6d438ae832701ed29fe2b2b4be37098fb51812d6e501077476fad9f06a77449c"
+    },
+    {
+      "path": "game/tools/art/build_shelly_preview.py",
+      "bytes": 5647,
+      "sha256": "27f5685eb435999743ebe637f0426b53859960b5abb3b1872390fed1480e6270"
+    },
+    {
+      "path": "game/tools/art/build_shop_octopus.py",
+      "bytes": 36986,
+      "sha256": "5acd318b243de65288fc6912c3265bd7ae39c10d20e4d8cbf3f0e14226380f68"
+    },
+    {
+      "path": "game/tools/art/build_supporting_hosts.py",
+      "bytes": 30170,
+      "sha256": "c68b1741c97acecb9247fc770faa2e220a18dc40486e8827416088cfbc2e1544"
+    },
+    {
+      "path": "game/tools/art/prepare_npc_reconstruction.py",
+      "bytes": 16574,
+      "sha256": "b36bcc8de54dd9e4d6f70d07bae36cf34b54507bdcdf19cd61c39884c745240e"
+    },
+    {
+      "path": "game/tools/art/prepare_shelly.py",
+      "bytes": 14278,
+      "sha256": "e109951b47bfc06736504c59bb89c77b10226ca68c598385ef6957c1c89edc48"
+    },
+    {
+      "path": "game/tools/art/refine_shelly_mouth.py",
+      "bytes": 23915,
+      "sha256": "d8ee2a18efa1bc8efb1bfb03535bb907fcdb5c0c4a09caac5480cce6da4c441e"
+    },
+    {
+      "path": "game/tools/art/render_npc_turntable.py",
+      "bytes": 4008,
+      "sha256": "866da3917d0355a6aa3210ed6b9c85f91cc82256a7c7bc00e6ab7474366e7440"
+    },
+    {
+      "path": "game/tools/art/render_shelly_motion.cjs",
+      "bytes": 2034,
+      "sha256": "d0950bb00b2b2fea7042a2384469b74f68c1c010a906f42c622f34a826df1dea"
+    },
+    {
+      "path": "game/tools/art/render_world_scenery.py",
+      "bytes": 14989,
+      "sha256": "51f17fff483fe09159b18863cbc0334a045bf06f02c8a5ad65ac35d9bf0d6eb7"
+    },
+    {
+      "path": "game/tools/art/resident_preview.js",
+      "bytes": 6882,
+      "sha256": "0c2cb840921e4cee19a9ee1dec38d6aa12190ab8d27b693aeb6d046d0f488e8b"
+    },
+    {
+      "path": "game/tools/art/shelly.py",
+      "bytes": 33760,
+      "sha256": "99fe99f7a7299c5ff66ec728ac2329acd2c539c4722334a418a1d062e94ddffd"
+    },
+    {
+      "path": "game/tools/art/shelly_preview.js",
+      "bytes": 8686,
+      "sha256": "3244fa756824ab2e587f30c05c06733a2a5cb3676c475cf45e5b47d0d214dbea"
+    },
+    {
+      "path": "game/tools/build.py",
+      "bytes": 4035,
+      "sha256": "1bfd4e74c0f9013d77c59289faef820f006c771b33fc15e56d31fb533dafeb8e"
+    },
+    {
+      "path": "game/tools/build_claude.py",
+      "bytes": 8800,
+      "sha256": "a9310ec05d508b777444ce5dd4db9ca6272271560d9827597a7374c39e09a98f"
+    },
+    {
+      "path": "game/tools/check/.eslintrc.json",
+      "bytes": 1261,
+      "sha256": "652bec77b752b214a8c894c3edf580cc1f5e4fc2039368c92e8e3687ec81c8c6"
+    },
+    {
+      "path": "game/tools/check/README.md",
+      "bytes": 2857,
+      "sha256": "32bfa446a4382dd097327841d688eb742baf97aecc41cc639d9dca142787ed9b"
+    },
+    {
+      "path": "game/tools/check/cafe_resident_asset_test.js",
+      "bytes": 3713,
+      "sha256": "159c685bddcd63160d63b25284a0a329dc98b5c4e4945c4929e079bc3bed9ee7"
+    },
+    {
+      "path": "game/tools/check/color_pipeline_test.js",
+      "bytes": 6484,
+      "sha256": "2b20b228921c5c3be4abb518fcd6cf836ae741ea4d54571390208682acc53e09"
+    },
+    {
+      "path": "game/tools/check/compare.py",
+      "bytes": 2317,
+      "sha256": "0d87c8d89564ba02fa3686125a1ab432c17c0e025a54b2575f1a31c66cac5f0d"
+    },
+    {
+      "path": "game/tools/check/css_audit.py",
+      "bytes": 2359,
+      "sha256": "8611176156c64fade52cd61ce5a134257a4c1db13aea8f5c06d9083a5df6f3f3"
+    },
+    {
+      "path": "game/tools/check/cssedit.py",
+      "bytes": 10877,
+      "sha256": "d8a444a1775673920f69e2299c6b36fea160c5d955c473f326cbfcf7ef3378bb"
+    },
+    {
+      "path": "game/tools/check/encounter_quality_test.js",
+      "bytes": 1749,
+      "sha256": "49a89c0ff36ffe3dddbfe657462dcda90385c569c97a2e59e720f416431eabd4"
+    },
+    {
+      "path": "game/tools/check/fixtures/color-bake-before-20261116.json",
+      "bytes": 1183,
+      "sha256": "09a54eedac4164ad64332a4ce993de24c101e071862482a83b200709bd98cc78"
+    },
+    {
+      "path": "game/tools/check/grown_up_password_test.js",
+      "bytes": 7202,
+      "sha256": "4dde1407c59252c52db64a8df54ae7d9931ba5de8330d78c275ee51c5140cfee"
+    },
+    {
+      "path": "game/tools/check/lint.js",
+      "bytes": 3762,
+      "sha256": "18296e80c4a711caa2ecf0e3d85464e1aeca7225152dfedd101167eb9e629a29"
+    },
+    {
+      "path": "game/tools/check/npc_worlds_smoke.js",
+      "bytes": 9507,
+      "sha256": "7ba1970d00fca3a691f4174ff04ae834557f706d6e8cc6f36af202032a003cab"
+    },
+    {
+      "path": "game/tools/check/package.json",
+      "bytes": 412,
+      "sha256": "d50f3975aec0031029e6a1c44e7578cbde50dabe092d68732d017a4f9731ab8d"
+    },
+    {
+      "path": "game/tools/check/qblock_visual_test.js",
+      "bytes": 2678,
+      "sha256": "84746b04cd2935d2d44b3c14a4a3cc669ac326967fc28a78da2086f5c5ee3ebb"
+    },
+    {
+      "path": "game/tools/check/region_boards_smoke.js",
+      "bytes": 15515,
+      "sha256": "7f7c8e5c2f94ab5b69e88df2da22fc247264a7e1130baf1efe4baf79f5c9e802"
+    },
+    {
+      "path": "game/tools/check/region_expansion_test.js",
+      "bytes": 8715,
+      "sha256": "7042f9cef9b0ab377baf1c99b57bb7412febd95bed73544092ce307cba5cba65"
+    },
+    {
+      "path": "game/tools/check/region_people_actual_test.js",
+      "bytes": 6316,
+      "sha256": "a93e5254b47f24ce7a4dcf5526592159607132792ad3cb419814566217d4d25d"
+    },
+    {
+      "path": "game/tools/check/region_people_bounds_test.js",
+      "bytes": 2427,
+      "sha256": "d08bd778457fc2d2c7b395be6ca43261a7decb1edf01b255a8f927b18de76303"
+    },
+    {
+      "path": "game/tools/check/region_people_opening_test.js",
+      "bytes": 7833,
+      "sha256": "62177d4221acb1ca0984928d3f256a282353effe079755449e32ebaa9374fc6f"
+    },
+    {
+      "path": "game/tools/check/region_reactions_test.js",
+      "bytes": 4531,
+      "sha256": "b9277a29dbb3ecc6e4f5cac523e377101813520b48b3151adb0b727083e5f2ea"
+    },
+    {
+      "path": "game/tools/check/region_resident_cast_test.js",
+      "bytes": 12301,
+      "sha256": "3a3eb33fbe2bdd8d321910ec7f21b14c659d71bb3952fa6507ae01138a8eae72"
+    },
+    {
+      "path": "game/tools/check/region_resident_close_test.js",
+      "bytes": 11561,
+      "sha256": "795d8800d503475bf5e90d3cee293440890ce22dd5ab46823ae7b9d5005ca7d4"
+    },
+    {
+      "path": "game/tools/check/region_resident_mask_render_test.js",
+      "bytes": 3892,
+      "sha256": "2911c4246a05bbe4c4d97d109d3d632c0a1a63a605ab9d2539992364a67f7ad6"
+    },
+    {
+      "path": "game/tools/check/region_resident_models_test.js",
+      "bytes": 9149,
+      "sha256": "002069e2fc8fa2e42883aa92e3d8b3de1fc34c4337e8d520f221c5af00208db7"
+    },
+    {
+      "path": "game/tools/check/region_scenery_geometry_test.js",
+      "bytes": 4150,
+      "sha256": "df9266025e87088e22c137edab0ec5fcae360a2ea342cfd792e2103bd9ffe316"
+    },
+    {
+      "path": "game/tools/check/resident_asset_test.js",
+      "bytes": 11326,
+      "sha256": "3cee9d07cb9b9fc71ffc1bb4fc2f09b4d25ef3e95685915f4a27888a474be477"
+    },
+    {
+      "path": "game/tools/check/resident_world_assets_test.js",
+      "bytes": 8600,
+      "sha256": "1a3c01af60f180c49f22cf24c629575db6e94405ef2537c9f35fc31eb5e8df15"
+    },
+    {
+      "path": "game/tools/check/run.sh",
+      "bytes": 1886,
+      "sha256": "e5f828a30eb4b21358ebebe2b981c24906def9c8336f1378577e3c233dfd9395"
+    },
+    {
+      "path": "game/tools/check/shelly_mouth_asset_test.py",
+      "bytes": 14156,
+      "sha256": "3dadd5f3f6f158566ba46a6ac19ce79e7dfc2cd8094f3054817f66638d8cb898"
+    },
+    {
+      "path": "game/tools/check/shelly_preview_source_test.js",
+      "bytes": 4211,
+      "sha256": "0b465b2d117f889076392abb6a56abc5aa23fa0d9da8e24a61ab83ef04f3afe0"
+    },
+    {
+      "path": "game/tools/check/shelly_smoke.js",
+      "bytes": 17219,
+      "sha256": "dfbd5395e0a9ef853811de9f5ac7365dcd39bd0ee5b66bcb665e6642f02ac2fb"
+    },
+    {
+      "path": "game/tools/check/smoke.js",
+      "bytes": 34312,
+      "sha256": "9260ae314a1cf3f448b3206de122c5fbb7de8300b8825606c925be6c84fc12b6"
+    },
+    {
+      "path": "game/tools/check/snapshots.js",
+      "bytes": 5318,
+      "sha256": "b0a7596bb72fa56e64b245f71abda229c169a3a9b9c55c1590bfa6710ccf1d7d"
+    },
+    {
+      "path": "game/tools/check/speech_cancellation_test.js",
+      "bytes": 7454,
+      "sha256": "2b2ad49688899c42c1cde208150ffd45815e55ee04167886ead842c05894af8c"
+    },
+    {
+      "path": "game/tools/check/steps.js",
+      "bytes": 1758,
+      "sha256": "f314940e2758b4a1bb6e80897fa1c3f442fd89682ddbf302b2f94fa907bdb6ea"
+    },
+    {
+      "path": "game/tools/check/test_beach.js",
+      "bytes": 5607,
+      "sha256": "d727cd1ea32b5c2cabfab2532c5175dcfb986284ba7a961633d92672e7a6adc2"
+    },
+    {
+      "path": "game/tools/check/test_caves.js",
+      "bytes": 4777,
+      "sha256": "21e2f55ca171af01bf505534596fa33c31b3a634a0c42ce52baadb1ec2bc4504"
+    },
+    {
+      "path": "game/tools/check/test_deck.js",
+      "bytes": 7908,
+      "sha256": "ff5bcd3ee85c95d1f54c584ff2bbe5a275833ab69c9000015f2bf2e09561bdc3"
+    },
+    {
+      "path": "game/tools/check/test_fsrs.js",
+      "bytes": 2940,
+      "sha256": "17fba62a2324fdcb59b716bec296015fd5ea4641a49eeb4c4376b4678444f7d0"
+    },
+    {
+      "path": "game/tools/check/test_patterns.js",
+      "bytes": 6506,
+      "sha256": "442f6f7327498230b8788cda7b6ba1a947f18a92ab1bd6f7fed8465fc37aa236"
+    },
+    {
+      "path": "game/tools/check/test_surprise_blocks.js",
+      "bytes": 5028,
+      "sha256": "4d77661a25c661ded5f7dae43a9f45b00af61bc2d598bd5c72138f65d0e25459"
+    },
+    {
+      "path": "game/tools/check/test_town.js",
+      "bytes": 2193,
+      "sha256": "751abb966faf2214a5e821cc253c088ce963c8e632ec60b42d1854a9fef98eba"
+    },
+    {
+      "path": "game/tools/check/test_travel.js",
+      "bytes": 3573,
+      "sha256": "17a625da7d65f33cf2dd902b6a630222e44b25fbf52ac3341de04eb345cb63d2"
+    },
+    {
+      "path": "game/tools/check/world_surfaces_test.js",
+      "bytes": 15830,
+      "sha256": "53572ec3ce13fb40edb9f1638fc3e5a01362783db33f7bff34c0e80920558c41"
+    },
+    {
+      "path": "game/tools/claude-proxy-worker.js",
+      "bytes": 5946,
+      "sha256": "d253c3328bba026e13635fb81ab6e6637b7f390266dc930b49b43a466a6abecf"
+    },
+    {
+      "path": "game/tools/compose_music.py",
+      "bytes": 14133,
+      "sha256": "fbc811156666b2e37cfd4c60973626038ec667b52fcc4b1f5d66e92a369f0f6e"
+    },
+    {
+      "path": "game/tools/compose_regions.py",
+      "bytes": 19384,
+      "sha256": "ba37638abf1a8ae68f1e5f157d92096308ceaa32a719819344cd6a43f9e36d46"
+    },
+    {
+      "path": "game/tools/export_seed.py",
+      "bytes": 3567,
+      "sha256": "548ae6879fa76aa0ce4798d3ea0d06a84be8cbb6680da0aef5c8f3ab3de3b049"
+    },
+    {
+      "path": "game/tools/vocab-pics/map.py",
+      "bytes": 2025,
+      "sha256": "5c18b31607ef0436fc3e8c9a0d243a81fb415cff55cc38befeb1f0c695f62872"
+    },
+    {
+      "path": "game/tools/voice/README.md",
+      "bytes": 2320,
+      "sha256": "7a3c9c5103f2adaaa5df5737ba4e335cb485b88f057b032c22d1a9f1667f6796"
+    },
+    {
+      "path": "game/tools/voice/gen.py",
+      "bytes": 1731,
+      "sha256": "7ded6eb548fad1644ba4119fa7e88ecf4082b8c3f87e20036ca45772d6b076ef"
+    },
+    {
+      "path": "game/tools/voice/gen_ko.py",
+      "bytes": 2810,
+      "sha256": "83e468267518ec937c4c39cc1db45c801615087f9254bba456f44027d7f8d8ed"
+    },
+    {
+      "path": "game/tools/voice/harvest.py",
+      "bytes": 4657,
+      "sha256": "49ee6f42fdbca8b933362a5186dc531e1fa38b55ce499bc51b2870b3bb33b81a"
+    },
+    {
+      "path": "game/tools/voice/ko_g2p.py",
+      "bytes": 2318,
+      "sha256": "a5ec217f671859d4273d50fd19c9fe2e00ec786693ee40a437ce3c291c046066"
+    },
+    {
+      "path": "game/tools/voice/pack.py",
+      "bytes": 1989,
+      "sha256": "e5b3e23225c2d093a69519acd64e979dc49c0982609bea8e805e5283469a09ee"
+    },
+    {
+      "path": "game/tools/voice/regen_ko_all.py",
+      "bytes": 1282,
+      "sha256": "91c91aaa5aeb2c1591b5dcb21779cee766efdbb8709a4653a246a21800865814"
+    },
+    {
+      "path": "game/tools/words/README.md",
+      "bytes": 1396,
+      "sha256": "98ff3310384a6af939ba4f816ef6646cd8f17ed95f22c49891166cad5ae024d2"
+    },
+    {
+      "path": "game/tools/words/batches/b0.json",
+      "bytes": 4411,
+      "sha256": "1f1d60860026d8d2672e598a323248049f4106d267e60203b140155edcec9871"
+    },
+    {
+      "path": "game/tools/words/batches/b1.json",
+      "bytes": 4992,
+      "sha256": "b40dd7874d3239daa58ca01f66ef4db20966755e05336cbd529fd855c322d5ef"
+    },
+    {
+      "path": "game/tools/words/batches/b2.json",
+      "bytes": 5141,
+      "sha256": "32b92f5be38d7fa6eb1fdd12901a8eca525b4fa46caf619a7914cbdec9e3024f"
+    },
+    {
+      "path": "game/tools/words/batches/b3.json",
+      "bytes": 5269,
+      "sha256": "66f244b8d0127d111f2da4394308c01d9655c7cf1d044d41c025b7ea8363fd98"
+    },
+    {
+      "path": "game/tools/words/batches/b4.json",
+      "bytes": 5367,
+      "sha256": "643fedcc85af98b6eba9e216af5be5d7d6c82859a95d2e9e8e1e8565c6239068"
+    },
+    {
+      "path": "game/tools/words/batches/b5.json",
+      "bytes": 5350,
+      "sha256": "56d21859703cc2e585ec839cf99c173f6c3f2244f094d6f8d80747f76f3742ba"
+    },
+    {
+      "path": "game/tools/words/batches/b6.json",
+      "bytes": 5440,
+      "sha256": "f56b5eec4fe2ceb22fbd05fd3e265b89a282717bd56078ab5542843cc5331fb0"
+    },
+    {
+      "path": "game/tools/words/batches/b7.json",
+      "bytes": 5503,
+      "sha256": "29eb1e3f1281c29a7df2e36bbe35a5e780063ec3fc8da0f6c76d8fca2db8616d"
+    },
+    {
+      "path": "game/tools/words/batches/b8.json",
+      "bytes": 5404,
+      "sha256": "2b5066de4754f0ac6c5e6dcfa5b27af17de65f0920daff97a2ef61c581fdf864"
+    },
+    {
+      "path": "game/tools/words/batches/b9.json",
+      "bytes": 5215,
+      "sha256": "50ee5bd51637a6b119b68bb8eb03208521fc61b6f52f36d11fa2117385c63f0c"
+    },
+    {
+      "path": "game/tools/words/build_data.py",
+      "bytes": 2665,
+      "sha256": "e09fdd946e6172ecfaf221cd6e64d2c32d5e27603e5fa144fe7ccd47b9e529a5"
+    },
+    {
+      "path": "game/tools/words/defs/d0.json",
+      "bytes": 56363,
+      "sha256": "4842f574547fb3d4c08d12d60ccd8b73386a25d6b8a27fe802bcda6c51a9790a"
+    },
+    {
+      "path": "game/tools/words/defs/d1.json",
+      "bytes": 59871,
+      "sha256": "3b8dd91578c72f1f73d585883d6ec268452ab697993f7fa35e191227ab6623a9"
+    },
+    {
+      "path": "game/tools/words/defs/d2.json",
+      "bytes": 69235,
+      "sha256": "014c842fd90d514aba282bcbba3ec8f2d9f26404e3d4a5e458c39fea8b81824f"
+    },
+    {
+      "path": "game/tools/words/defs/d3.json",
+      "bytes": 59522,
+      "sha256": "1912499752233eb200c17db06ee79d7a3b6b887f0662d5b0f3a51a319e9a8704"
+    },
+    {
+      "path": "game/tools/words/defs/d4.json",
+      "bytes": 67670,
+      "sha256": "d732a6392e03eaec526d1c3649f6103743c39c54ef366bedbfb4fd73afc32227"
+    },
+    {
+      "path": "game/tools/words/defs/d5.json",
+      "bytes": 65157,
+      "sha256": "3b4d296bab116115ee92001ad7061a14ecac0669d60cf3bc64fc94c0025b30b3"
+    },
+    {
+      "path": "game/tools/words/defs/d6.json",
+      "bytes": 55470,
+      "sha256": "443d006af38879a0e0fd8c038b56dc87b48bda2c3facf5fdf91cf2cfc0e78bcd"
+    },
+    {
+      "path": "game/tools/words/defs/d7.json",
+      "bytes": 64864,
+      "sha256": "17aa29775200d37aa48fb9738d07e01f1a56074af0a825182957fc223800221c"
+    },
+    {
+      "path": "game/tools/words/defs/d8.json",
+      "bytes": 65891,
+      "sha256": "8b7e3d55ae67ce05d35d1ec3de701cfaac630439f4adf98ad88daa0b4e52e657"
+    },
+    {
+      "path": "game/tools/words/defs/d9.json",
+      "bytes": 53022,
+      "sha256": "e66494128b4d9eaca885118cb276fe56609e272fe2e7706494976b46aa87168f"
+    },
+    {
+      "path": "game/tools/words/enwn.py",
+      "bytes": 2236,
+      "sha256": "5b2eb159dbf2b1e799a6505635a588ef3fb9e7efd603ab474f8f58e51a4faceb"
+    },
+    {
+      "path": "game/tools/words/lists.py",
+      "bytes": 1551,
+      "sha256": "aeaf1f25cbe83e63573547b4ac4c9efccf9903cf4648a90c150a945fa8a889c7"
+    },
+    {
+      "path": "game/tools/words/overrides.json",
+      "bytes": 1845,
+      "sha256": "0c307515548a8fa11f2b26a47d2c794d2c30c30aa694eae1c3ca9dfdf53810f7"
+    },
+    {
+      "path": "game/tools/words/test_words.js",
+      "bytes": 3707,
+      "sha256": "af3e19e8f67339ed78c8175971bf34cf6189719004dc16071badd77b167cda3b"
+    },
+    {
+      "path": "game/tools/words/zh.py",
+      "bytes": 7325,
+      "sha256": "086b7f1bb0d3ce254bec72e8cc7a59ebfc23df6f07977f1e40d6c370f64dee35"
+    },
+    {
+      "path": "game/vocab-pics/after.webp",
+      "bytes": 3892,
+      "sha256": "2973b4333540d7aba3a720305685bd1fe17ed624bc5232357228176b258c711d"
+    },
+    {
+      "path": "game/vocab-pics/afternoon.webp",
+      "bytes": 9308,
+      "sha256": "ebbe5b258d590bedc6997c9fa6b30af813ec1dfd57c45fdab6d42178645f364f"
+    },
+    {
+      "path": "game/vocab-pics/already.webp",
+      "bytes": 3906,
+      "sha256": "4b39f86686539eb88dbfd272c49ff356f55f5499304982256084c47b0887feba"
+    },
+    {
+      "path": "game/vocab-pics/always.webp",
+      "bytes": 10502,
+      "sha256": "2b35c247f14137513c62e6b78ba9bf33033895fbe878bd9d3c334a0b59fb153a"
+    },
+    {
+      "path": "game/vocab-pics/aquarium.webp",
+      "bytes": 8276,
+      "sha256": "0319ee327fb94bac21a0d741e2e69254df792a20cf66d02c02f051b6e1474631"
+    },
+    {
+      "path": "game/vocab-pics/around.webp",
+      "bytes": 4524,
+      "sha256": "ba76d517194d20e7d835fd5a3ab9dcffac5c8b131d1e40aa2627bd55fe021f5f"
+    },
+    {
+      "path": "game/vocab-pics/arrive.webp",
+      "bytes": 4908,
+      "sha256": "81155e8fe2169422e73fccdbff282e0b7ca8270c1e85ab96cc59ec3ea3365617"
+    },
+    {
+      "path": "game/vocab-pics/because.webp",
+      "bytes": 6916,
+      "sha256": "9649a47cc99236c8783498fc76b841c5eb22b4b314c7d21218e758521b09aacd"
+    },
+    {
+      "path": "game/vocab-pics/before.webp",
+      "bytes": 3938,
+      "sha256": "4d71e0df36e057dfea7ce869ec3a5e9489314b850c959166b96c5b59ad68905a"
+    },
+    {
+      "path": "game/vocab-pics/bought.webp",
+      "bytes": 12850,
+      "sha256": "8fcda100156449c70d07051464543cdd0cc7cc57eff2372a961af554c0bead43"
+    },
+    {
+      "path": "game/vocab-pics/bounce-house.webp",
+      "bytes": 9760,
+      "sha256": "3204f0fb52a051b18fa5313c940c7cbbaeb993afabae458ec63cf3958d3094f8"
+    },
+    {
+      "path": "game/vocab-pics/bright.webp",
+      "bytes": 11536,
+      "sha256": "091f685cd6235b3f2c3f1c32b5b4a16b97eb90f008808050b46cd7ba702c2d75"
+    },
+    {
+      "path": "game/vocab-pics/bring.webp",
+      "bytes": 8146,
+      "sha256": "24bab67e9956e3c1e63f7b5d4c4ed40d960a09c6b5792e3af0a5c317c7101961"
+    },
+    {
+      "path": "game/vocab-pics/bucket.webp",
+      "bytes": 6942,
+      "sha256": "d19ef8d5283e2334c7a62ddf65de7d4d9560a2ce7ee4d5376b2c5171b27346b0"
+    },
+    {
+      "path": "game/vocab-pics/bumpy.webp",
+      "bytes": 6910,
+      "sha256": "d4a059ef99f1eb88731f1fe6883a42cee9dd35fd4ee6f0a1f5b5bad9e42b8b42"
+    },
+    {
+      "path": "game/vocab-pics/campfire.webp",
+      "bytes": 10234,
+      "sha256": "97ce7486fe5964214933cc936e4bbaddade7d64a801fdf1ebe1c41b4f13be5ab"
+    },
+    {
+      "path": "game/vocab-pics/carefully.webp",
+      "bytes": 6496,
+      "sha256": "1e63341d8df2aad7c27623c39e979a084da4b02772c7b6502081e25876504117"
+    },
+    {
+      "path": "game/vocab-pics/catch.webp",
+      "bytes": 8292,
+      "sha256": "d0f54d26dae20fef0e5682ce190de74cc2a045565ff5d4c40d054157f102a7c1"
+    },
+    {
+      "path": "game/vocab-pics/check-out.webp",
+      "bytes": 5754,
+      "sha256": "5334bfc53c8203c4591857711485be03e5b688b8ce54eb3972aa53b41f77cdd8"
+    },
+    {
+      "path": "game/vocab-pics/chocolate.webp",
+      "bytes": 6432,
+      "sha256": "fe86c2ecc0be5ddd66ebad7ad2a9a418dbe6e2c4e9f258738895ddb999048a0b"
+    },
+    {
+      "path": "game/vocab-pics/clown.webp",
+      "bytes": 11968,
+      "sha256": "0f5ddf4288d9bae3701e8c004e9902a401be6bb44b19c03a3a869c67542a8105"
+    },
+    {
+      "path": "game/vocab-pics/coach.webp",
+      "bytes": 6642,
+      "sha256": "36105a0eaeb334d92d8a9f9a7355d97439899de4ef2c5ac5e5c717026f81ded1"
+    },
+    {
+      "path": "game/vocab-pics/cones.webp",
+      "bytes": 5782,
+      "sha256": "225e05df3aa4806d566b82832cef73b31460a410d87fe62bebdcf102167834d1"
+    },
+    {
+      "path": "game/vocab-pics/counts.webp",
+      "bytes": 4998,
+      "sha256": "9af0fc9beb4d85c6cf06b928572baf3824ac700aa6155c5e9d8041cef1ea40ee"
+    },
+    {
+      "path": "game/vocab-pics/cover.webp",
+      "bytes": 9830,
+      "sha256": "c70df68fe4cd61ef7371db710b0d07ab6f2611a8b2c8c5c622501c86d09a9c37"
+    },
+    {
+      "path": "game/vocab-pics/covered.webp",
+      "bytes": 4518,
+      "sha256": "a0e0d5c1b7c81a66e90e3fe75c979c3c3db5186875d1d3c86b9ae49565fe6f95"
+    },
+    {
+      "path": "game/vocab-pics/crackling.webp",
+      "bytes": 8796,
+      "sha256": "a681e1d15739df909ec4567fced018738cb5ed64aedfa3306a9121c15f90b745"
+    },
+    {
+      "path": "game/vocab-pics/crunch.webp",
+      "bytes": 7704,
+      "sha256": "f106e38e954e57e435439549fc9e7d0e10d7baec1ec65418867451aaa8ffd917"
+    },
+    {
+      "path": "game/vocab-pics/decided.webp",
+      "bytes": 11132,
+      "sha256": "7b1e596224943c8dde419b88985402e9dc88022ca408f684f1770e3964af4502"
+    },
+    {
+      "path": "game/vocab-pics/deep.webp",
+      "bytes": 9168,
+      "sha256": "05e5348c97cc66505cc0a5cc0d6666d6e8a6eaa1c5831872efe27c858ac754ff"
+    },
+    {
+      "path": "game/vocab-pics/dig.webp",
+      "bytes": 7150,
+      "sha256": "ee7019d685c299057219020ec68a6154e2083bec4a2233a2c8d0a875106cf7c5"
+    },
+    {
+      "path": "game/vocab-pics/digging.webp",
+      "bytes": 5274,
+      "sha256": "1b55536782df46c7798bb10a7efe4c4b2b5be1a77cf5544db9ac77d914a1f5b9"
+    },
+    {
+      "path": "game/vocab-pics/distance.webp",
+      "bytes": 11636,
+      "sha256": "dc8f537aa38ef8fdad93b16421bce2c1a9e1fef3f1a148674cc3b5ca1b9c1a0d"
+    },
+    {
+      "path": "game/vocab-pics/earthworm.webp",
+      "bytes": 9644,
+      "sha256": "7aaccb4af4cb56beea06f4f1a6138cc84b8075dca5d58acf7ec6b395ce29712b"
+    },
+    {
+      "path": "game/vocab-pics/evening.webp",
+      "bytes": 4604,
+      "sha256": "dc7c2db5259b00027c4dd88b4060e362227a2d0d2014e581b1be954ce6530fc6"
+    },
+    {
+      "path": "game/vocab-pics/everyone.webp",
+      "bytes": 16112,
+      "sha256": "54578f118e64c5ed4aaeebf7c8e6a7da40f6be36e0ef648b5b8c9ca4600619be"
+    },
+    {
+      "path": "game/vocab-pics/extra.webp",
+      "bytes": 4620,
+      "sha256": "5249f8475b915f423227150d6106612a6d97f4f248180e6a617e663ed30a6462"
+    },
+    {
+      "path": "game/vocab-pics/feels.webp",
+      "bytes": 7374,
+      "sha256": "83a44cdb252f5dd543c2bc81c5582cf9e85391ef0fdef650b786bf2fbae8120e"
+    },
+    {
+      "path": "game/vocab-pics/field-trip.webp",
+      "bytes": 7738,
+      "sha256": "3a1392b575c0f5fb6cc7f6da204c642db311658cbcfe6715fb02219151687441"
+    },
+    {
+      "path": "game/vocab-pics/finds.webp",
+      "bytes": 8934,
+      "sha256": "6f27328a0d1ed2cc4860282b6cd6c1b6102157740320b058c24bda49f861496f"
+    },
+    {
+      "path": "game/vocab-pics/finish.webp",
+      "bytes": 2436,
+      "sha256": "e7bce385e1234325e95996dbfc5e334aa3383825e3a52c83cf73ed8354c088e6"
+    },
+    {
+      "path": "game/vocab-pics/first.webp",
+      "bytes": 8472,
+      "sha256": "107b4ffc0f0964e85630720f75226c33cac072ee76100c8332d62d50fdea3bfe"
+    },
+    {
+      "path": "game/vocab-pics/flour.webp",
+      "bytes": 8410,
+      "sha256": "ad852c55a047ceffb58623d2be2e1026b56474202f58972c69bc63c6fd40c327"
+    },
+    {
+      "path": "game/vocab-pics/fluffy.webp",
+      "bytes": 7594,
+      "sha256": "bb1ef070d8eb3a76076ca19d4f366166baf791f2e78909a37cb56e64c44cf7de"
+    },
+    {
+      "path": "game/vocab-pics/fresh.webp",
+      "bytes": 10488,
+      "sha256": "6221be524942a1d3f60ec5c1e273498911662113f07ff744983a0365341b7d6e"
+    },
+    {
+      "path": "game/vocab-pics/friend.webp",
+      "bytes": 15622,
+      "sha256": "b1c17420059b23599a4e082d3d26db398c1886834156a1510903eadb033e26a8"
+    },
+    {
+      "path": "game/vocab-pics/fuzzy.webp",
+      "bytes": 10460,
+      "sha256": "9058fa69571ba2e0f87a88eebc1fffe7b7196a2d2452f1a43f1e38b1259ba1ce"
+    },
+    {
+      "path": "game/vocab-pics/gently.webp",
+      "bytes": 7304,
+      "sha256": "82e831485be363ad3e0a3adcd8bb6dc8ed9edce16098458f8b4727fd2191a14a"
+    },
+    {
+      "path": "game/vocab-pics/glowing.webp",
+      "bytes": 11536,
+      "sha256": "091f685cd6235b3f2c3f1c32b5b4a16b97eb90f008808050b46cd7ba702c2d75"
+    },
+    {
+      "path": "game/vocab-pics/golden-brown.webp",
+      "bytes": 8998,
+      "sha256": "26004ee4236310da12cdbc7e406a813c406d3f0887434ff339c342d3cb5b50e4"
+    },
+    {
+      "path": "game/vocab-pics/guide.webp",
+      "bytes": 9294,
+      "sha256": "db30f2f521ed3fb2f3b21d53052b6146e56636ee1c805fda3f965f1bcff4df0e"
+    },
+    {
+      "path": "game/vocab-pics/hard.webp",
+      "bytes": 8060,
+      "sha256": "ec04328636751ae342dc6b5e343ddafbb0628029a533ac553d610e37bd786f61"
+    },
+    {
+      "path": "game/vocab-pics/hardly.webp",
+      "bytes": 7944,
+      "sha256": "dbd16522650f532b65321aa567693315454e816b78500a7689ad3636759e8ec8"
+    },
+    {
+      "path": "game/vocab-pics/hold.webp",
+      "bytes": 9186,
+      "sha256": "5e1b6676835c4768cd9f9f2cca8dfb6dd3d624a4783a136fefbd5a66df4fd03d"
+    },
+    {
+      "path": "game/vocab-pics/including.webp",
+      "bytes": 9388,
+      "sha256": "059f5ba97099712a0366f44609e22ec863d2f89db3906c118f49abb94fd66f62"
+    },
+    {
+      "path": "game/vocab-pics/jerseys.webp",
+      "bytes": 5338,
+      "sha256": "121553124d086c7117bf13aee6c97f4685d1055726d6cfd98cb0d195ca17f263"
+    },
+    {
+      "path": "game/vocab-pics/laugh.webp",
+      "bytes": 8786,
+      "sha256": "4e7dc04397a6000d98e5f9f224a22b888f36f7e29292ba37207c63976e0b1221"
+    },
+    {
+      "path": "game/vocab-pics/librarian.webp",
+      "bytes": 5892,
+      "sha256": "5244dbeac6e3e28e5fd15587b09977acc94d65e0b6a826bfc195f93b21a8f120"
+    },
+    {
+      "path": "game/vocab-pics/lining-up.webp",
+      "bytes": 9042,
+      "sha256": "4aa50f0fea79dd50b0a8aff8f39ef7a044ef8749b4f95519040e358f86ff456c"
+    },
+    {
+      "path": "game/vocab-pics/lobby.webp",
+      "bytes": 6204,
+      "sha256": "3328f3d15e2c774b574d6ab7b2daa755f032d53e618ff752bf839a3e521e7a7c"
+    },
+    {
+      "path": "game/vocab-pics/moat.webp",
+      "bytes": 10498,
+      "sha256": "ce17096b416e4b18dbf4f992eaf2afa5aabbc24d0cff07bca23467be7e984986"
+    },
+    {
+      "path": "game/vocab-pics/net.webp",
+      "bytes": 9864,
+      "sha256": "857b2fb094e7eefc49ac46241b4a2c3ab6739861a4f6e4ab560213ea3bf221dd"
+    },
+    {
+      "path": "game/vocab-pics/once.webp",
+      "bytes": 3532,
+      "sha256": "66bef4a22c87314e1f782478900c1811ea79bd07c1df8c31e79aa8d2bb0820c8"
+    },
+    {
+      "path": "game/vocab-pics/outside.webp",
+      "bytes": 4532,
+      "sha256": "65b01264501fcb59f197572882323a5a29e6ec16ddfc29f04187877425d1e7f0"
+    },
+    {
+      "path": "game/vocab-pics/penalty.webp",
+      "bytes": 10962,
+      "sha256": "43034f50f5f98dba4d04ab511af53cbcfb8f5fa8ec6205dafe6b05e3361754cf"
+    },
+    {
+      "path": "game/vocab-pics/picks.webp",
+      "bytes": 8414,
+      "sha256": "4ad22ac47534f5f6705b2c56db9fa28261b980ac5b9848f97b5c878186187c4c"
+    },
+    {
+      "path": "game/vocab-pics/pile.webp",
+      "bytes": 4094,
+      "sha256": "397ea088fd17c0838155073d3a9d945280abdf38f9b81ffeaa30b3542c089d23"
+    },
+    {
+      "path": "game/vocab-pics/porch.webp",
+      "bytes": 6672,
+      "sha256": "387e8ab47b4578c69ab3aaab7c109380441b7e382ff786286c889d8f768f6f05"
+    },
+    {
+      "path": "game/vocab-pics/puffs.webp",
+      "bytes": 9516,
+      "sha256": "e453caa8a8304c23ee4750b550de9b87ef4048ad8ce6531f36073a2fcfab675b"
+    },
+    {
+      "path": "game/vocab-pics/puppet.webp",
+      "bytes": 14064,
+      "sha256": "b1b84d0ab673438956bea20c95fb68bbada5702e4b075657f7d5d0d6c3892fe8"
+    },
+    {
+      "path": "game/vocab-pics/rainy.webp",
+      "bytes": 9598,
+      "sha256": "8f31d61f4a9f9c795c8e92ddde00294a15b90a4fcec05a94a5fd126d8683f98d"
+    },
+    {
+      "path": "game/vocab-pics/roaring.webp",
+      "bytes": 10772,
+      "sha256": "0d56bf69f7846eaededae4bbd0fc415e86b12ad74bfadd21c0d5eb6bde408967"
+    },
+    {
+      "path": "game/vocab-pics/roasting.webp",
+      "bytes": 8480,
+      "sha256": "746020fd329dc967c1b8e6b32b3e58af7d9b0955f9eb10310faf86ad9964e5a4"
+    },
+    {
+      "path": "game/vocab-pics/roll.webp",
+      "bytes": 16898,
+      "sha256": "44df3819c8dc640af5734e44af198d952ba024145c00ea1405b716e72c8b354f"
+    },
+    {
+      "path": "game/vocab-pics/row.webp",
+      "bytes": 8328,
+      "sha256": "324325c4ce67a62fa82401f8aabaf4ef8cf03333ecd440f9d32aaf828dba49ec"
+    },
+    {
+      "path": "game/vocab-pics/sandcastle.webp",
+      "bytes": 10760,
+      "sha256": "769ab53f90312edebef1dbc61d4e9fd7c3b326b9e87c94b14e6f85440380ee7b"
+    },
+    {
+      "path": "game/vocab-pics/scoop.webp",
+      "bytes": 4874,
+      "sha256": "bd4bc0ffca65c42712d5f24380df1d766694df54b46626accc86d267963ff1b5"
+    },
+    {
+      "path": "game/vocab-pics/scores.webp",
+      "bytes": 17384,
+      "sha256": "43f3d662a65f24a35b2d41d128988dd49b3d9619d045830778637aa04565f2e8"
+    },
+    {
+      "path": "game/vocab-pics/scratch.webp",
+      "bytes": 7640,
+      "sha256": "cb25b97da9a576e1dbbeee89f4ab3593a55bd5688a57797ba92bd40c60ea1a0d"
+    },
+    {
+      "path": "game/vocab-pics/season.webp",
+      "bytes": 9508,
+      "sha256": "1f9f1ead91670655c11f1b2772fb20207266111f5fe72c37c8d19ad0754a2dc0"
+    },
+    {
+      "path": "game/vocab-pics/shady.webp",
+      "bytes": 7892,
+      "sha256": "970c9fd9839db68e4307a1b6d62130d0288ae69d2b25c41ec07756de0f591ae2"
+    },
+    {
+      "path": "game/vocab-pics/shelf.webp",
+      "bytes": 3402,
+      "sha256": "b287d7acfc5f758111b5fc9d792c86b79810afeccb3b520eb3eff392f7831694"
+    },
+    {
+      "path": "game/vocab-pics/shore.webp",
+      "bytes": 7858,
+      "sha256": "97a585c187411dc4804fba21f31b382587ecfebe7b09476cd2e59af983259d03"
+    },
+    {
+      "path": "game/vocab-pics/sledding.webp",
+      "bytes": 5166,
+      "sha256": "e970a12f457296ad5e839ac098792613f7213ab4a68f569a39f57663aea9750d"
+    },
+    {
+      "path": "game/vocab-pics/smells.webp",
+      "bytes": 6034,
+      "sha256": "ef91ae6e051004bb586937616fc2fb519f87a6cab3ec08021190bca0b79e273b"
+    },
+    {
+      "path": "game/vocab-pics/soft.webp",
+      "bytes": 4518,
+      "sha256": "915362dfde1805ac1d7a6a91aec0713b9c8870ab45e8e52ae399450eea161e56"
+    },
+    {
+      "path": "game/vocab-pics/soil.webp",
+      "bytes": 11470,
+      "sha256": "34fb96ec53858f00e2b9e7ecff5bca5e0f33f5eaab96eeaa97c46eb58799c1df"
+    },
+    {
+      "path": "game/vocab-pics/splashing.webp",
+      "bytes": 10782,
+      "sha256": "459e7bcca39caca40c9c9a611f4fa1e6f86e75dba9305ab02a30e7e31190710d"
+    },
+    {
+      "path": "game/vocab-pics/stack.webp",
+      "bytes": 7580,
+      "sha256": "fa6650a77aea1df2ea1cd7203f11459ff7ebde97b9e2e29e3299778655e7d455"
+    },
+    {
+      "path": "game/vocab-pics/sticks.webp",
+      "bytes": 5328,
+      "sha256": "73e2339eac2f97c294aa0c9aac4dca5abf09fe0eec032ba3f57756419cb8091c"
+    },
+    {
+      "path": "game/vocab-pics/still.webp",
+      "bytes": 5556,
+      "sha256": "3377c45e39a0a4cdb854299bb62d39da995dfcc0babb2ec8645dd19cd8f236ca"
+    },
+    {
+      "path": "game/vocab-pics/stir.webp",
+      "bytes": 8152,
+      "sha256": "993f07903c4d125b0a9e89d605fdf9df212ad36275dc0fd617c9bf355eda6da3"
+    },
+    {
+      "path": "game/vocab-pics/straight.webp",
+      "bytes": 6014,
+      "sha256": "a200cd84a2c7acdd2569f93f172b2ea5428b6351d50333126d4a81a00b4b5810"
+    },
+    {
+      "path": "game/vocab-pics/stuffed.webp",
+      "bytes": 8822,
+      "sha256": "6d1dc097fb8622065dbde1b10b7baf62da1026aea2c84711e7a4730973da2b90"
+    },
+    {
+      "path": "game/vocab-pics/through.webp",
+      "bytes": 15144,
+      "sha256": "512ac2f6773aea471e085adab648b4628f5166fbd329bd394494f86f149c53d2"
+    },
+    {
+      "path": "game/vocab-pics/toast.webp",
+      "bytes": 8654,
+      "sha256": "93ae09193ea129069fd281a20215f30c987977c8ab07d4ae54d4a2bfc15804c3"
+    },
+    {
+      "path": "game/vocab-pics/together.webp",
+      "bytes": 8170,
+      "sha256": "3c1f68403745c8f50ed7a5337c88f45da11a6d9a0c9e78fa81f4a7350a7cb87b"
+    },
+    {
+      "path": "game/vocab-pics/tour.webp",
+      "bytes": 8760,
+      "sha256": "80f0900e94bf6206b8ba82a299343704a72332538f65b169beb604716caa0eb6"
+    },
+    {
+      "path": "game/vocab-pics/turns.webp",
+      "bytes": 4336,
+      "sha256": "5bf57aac7d6067705d4f09f007b8f80ddde2bfc5d9d18c18f36bbd15b4ab9b3d"
+    },
+    {
+      "path": "game/vocab-pics/twists.webp",
+      "bytes": 9758,
+      "sha256": "581dff3f88a632516faa8613aa133f86e6079e21a17b09597c4dd67ca2b41d81"
+    },
+    {
+      "path": "game/vocab-pics/under.webp",
+      "bytes": 14296,
+      "sha256": "4f5c0572a3b6a865991417f320796ff9db3f4c1c996e6610f0af2254a290fe3c"
+    },
+    {
+      "path": "game/vocab-pics/until.webp",
+      "bytes": 6716,
+      "sha256": "0ec5761e078fa2316f1190401cc6642f6d7a5e4985c36a94c6305596c2044a07"
+    },
+    {
+      "path": "game/vocab-pics/visit.webp",
+      "bytes": 5340,
+      "sha256": "5f521345e3cfc41db4414b9282643c8efc788b50b3cc69b944caee94a76369f6"
+    },
+    {
+      "path": "game/vocab-pics/water.webp",
+      "bytes": 6134,
+      "sha256": "aa4047ee002a312e543e40957268062e8fe6be6ca07d927ccf7f0c7b65939566"
+    },
+    {
+      "path": "game/vocab-pics/week.webp",
+      "bytes": 4604,
+      "sha256": "622229e925a863767950fce1f33a45f33db2cc2f5a183431da6bdb88e1c700b0"
+    },
+    {
+      "path": "game/vocab-pics/wiggling.webp",
+      "bytes": 10292,
+      "sha256": "24990414358644877b50e92e066ed4721b78bcf5a4e3366423b7e51525e50c8f"
+    },
+    {
+      "path": "game/vocab-pics/zookeeper.webp",
+      "bytes": 11142,
+      "sha256": "8d620f8d3ad15194b1b8aa3c75100b14a26de49f9e31793e7c0bbfdae56f94d1"
+    },
+    {
+      "path": "game/voice/en-1.mp3",
+      "bytes": 6291456,
+      "sha256": "100226b00becbeeaa219bd6af7993212640955671058005d22c70747b449d04b"
+    },
+    {
+      "path": "game/voice/en-2.mp3",
+      "bytes": 3123840,
+      "sha256": "6d30b6fb0fd85bb90f02eb048fa3fafe29b4422bfe6722c54f248c9ab36f844d"
+    },
+    {
+      "path": "game/voice/en-num-1.mp3",
+      "bytes": 2496576,
+      "sha256": "07d5968d4c5a32094fe656d5f198d9ecc8c3b74b0a894daf25073ff40675d0bf"
+    },
+    {
+      "path": "game/voice/en-num-2.mp3",
+      "bytes": 2493120,
+      "sha256": "a4b16c8e2998cacfbc7878062eb6d74d840988ffcd918467b0f531e8998b6cf7"
+    },
+    {
+      "path": "game/voice/en-num-3.mp3",
+      "bytes": 340032,
+      "sha256": "76a2e69da450b30eab869a30bba3fe3255cf115f5c1de1111165afc02953cde2"
+    },
+    {
+      "path": "game/voice/en-num-4.mp3",
+      "bytes": 1930752,
+      "sha256": "317d17222798c19b52481ed7f2ea1265851628fa5f2e6bea1ecfa19eb61de7cf"
+    },
+    {
+      "path": "game/voice/en-num-5.mp3",
+      "bytes": 989760,
+      "sha256": "a0d1100eb37364e20967841053c781139fa2bc9a1ec60c298d6e57b9b9d0cd51"
+    },
+    {
+      "path": "game/voice/en-talk-1.mp3",
+      "bytes": 2496384,
+      "sha256": "28dbb6333dc266c728cd291b568fa6a834114a8f8249a06212a793b2e3f6433f"
+    },
+    {
+      "path": "game/voice/en-talk-10.mp3",
+      "bytes": 584448,
+      "sha256": "ff50f8c25f18d7120e59f6689e389e7bc2d9c266ffb7168cf49bcbcb3ebdce99"
+    },
+    {
+      "path": "game/voice/en-talk-11.mp3",
+      "bytes": 43008,
+      "sha256": "54df7bf5a8521b171aaaa81e15de9e8ee5fdc4a7bfff21d080e47f88749c1957"
+    },
+    {
+      "path": "game/voice/en-talk-12.mp3",
+      "bytes": 48960,
+      "sha256": "c56e28aafe9a9a080007e8fa73b2f9867fbc642db800a4f46aaa0da7b53c741b"
+    },
+    {
+      "path": "game/voice/en-talk-13.mp3",
+      "bytes": 2496192,
+      "sha256": "ba2e70459ae8133d0d22c0e4990491031affc8395c318af26d2d897b89a82ce1"
+    },
+    {
+      "path": "game/voice/en-talk-14.mp3",
+      "bytes": 2498880,
+      "sha256": "e08a64db098c554ef53f0573299e55061ff11bb3844c212c78fab4887c3e2224"
+    },
+    {
+      "path": "game/voice/en-talk-15.mp3",
+      "bytes": 170688,
+      "sha256": "9eb0e7430cf0525c33d661f1092e4b78fa35b7a7f9b6796010b4bedcae1263bd"
+    },
+    {
+      "path": "game/voice/en-talk-16.mp3",
+      "bytes": 43392,
+      "sha256": "da678862a4977917b1702a879940097bb99e333627a7c29d6ec7745d395372f8"
+    },
+    {
+      "path": "game/voice/en-talk-17.mp3",
+      "bytes": 165312,
+      "sha256": "f8157be5546eb28543209c4c018c5334563529c3d4916ac29db98fca9692aa75"
+    },
+    {
+      "path": "game/voice/en-talk-18.mp3",
+      "bytes": 2493888,
+      "sha256": "1514ea38c98d06a35cbf71789c404f5e3a832197c50bc6012797fce42ec90c5e"
+    },
+    {
+      "path": "game/voice/en-talk-19.mp3",
+      "bytes": 1602624,
+      "sha256": "d101d9a0dcd38e154299d02b77c86b24e4cc6a58d89a0b51ad93deab9bf4b88c"
+    },
+    {
+      "path": "game/voice/en-talk-2.mp3",
+      "bytes": 2488128,
+      "sha256": "bf75a83d9f24982405e43a9ca2c66cfd03c29018b438146713d1065c986253ae"
+    },
+    {
+      "path": "game/voice/en-talk-20.mp3",
+      "bytes": 40512,
+      "sha256": "898c561da0131eaca195763d8112e018ad670a2539b48fe606a41d674cb7f52e"
+    },
+    {
+      "path": "game/voice/en-talk-21.mp3",
+      "bytes": 144192,
+      "sha256": "6f14f7bbf694b71cdabe0f259ddd151aba3692a6f70fc8e974876a97c2655278"
+    },
+    {
+      "path": "game/voice/en-talk-22.mp3",
+      "bytes": 291456,
+      "sha256": "a71732cb408c814430bbc13bfd1272679e13b7526a398547f66788a1abb5d08d"
+    },
+    {
+      "path": "game/voice/en-talk-23.mp3",
+      "bytes": 48192,
+      "sha256": "e34aed3b99c136ae10ca365686fb3cc9d4461b590b262dc234e73b01d65d6730"
+    },
+    {
+      "path": "game/voice/en-talk-24.mp3",
+      "bytes": 1173120,
+      "sha256": "188b22377f4bb54e41e6d4467110bd58aaa121fdff2e976c9bf5790f6124860a"
+    },
+    {
+      "path": "game/voice/en-talk-25.mp3",
+      "bytes": 40320,
+      "sha256": "4393b4a340d6572462a84a5bbe60853c39bde831d6d824a3598e8c876696e51b"
+    },
+    {
+      "path": "game/voice/en-talk-26.mp3",
+      "bytes": 2344896,
+      "sha256": "fc9df1df8278f4cb05850a8cd0d0176113cb32033a5bb56f8ff5c92eaa226ea1"
+    },
+    {
+      "path": "game/voice/en-talk-27.mp3",
+      "bytes": 82944,
+      "sha256": "ab6092a7d7f02e3f69deec45db65f233b55c5ffaeb2577540d47e98114e9ce51"
+    },
+    {
+      "path": "game/voice/en-talk-28.mp3",
+      "bytes": 64512,
+      "sha256": "511bfc301d0968aa2be04880e2039b65c4e9107735b575da1d5c4819b5f985b3"
+    },
+    {
+      "path": "game/voice/en-talk-3.mp3",
+      "bytes": 2498304,
+      "sha256": "02fc4380c9f398eed3d1c286eb9aa06e2132efe0edd33fc34259c974a10d17b1"
+    },
+    {
+      "path": "game/voice/en-talk-4.mp3",
+      "bytes": 2491392,
+      "sha256": "b4bfe3a252de3a1f6450e01a2057f633d7c032a910eb04108a1c18b58f414dcc"
+    },
+    {
+      "path": "game/voice/en-talk-5.mp3",
+      "bytes": 2495232,
+      "sha256": "2349b9478c0044b4b00bb4ddbe58f0478610df17205bbbad1e5c2d0eeaa5aefb"
+    },
+    {
+      "path": "game/voice/en-talk-6.mp3",
+      "bytes": 1790016,
+      "sha256": "e4c1c49241ba90105f35c93abdf6203ca33ff66346b2b58ed46f856b51da6014"
+    },
+    {
+      "path": "game/voice/en-talk-7.mp3",
+      "bytes": 659520,
+      "sha256": "7c8f97428c5aa16d63a227edc5732b1ceb7b717739be790a326e04ce298acbce"
+    },
+    {
+      "path": "game/voice/en-talk-8.mp3",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "game/voice/en-talk-9.mp3",
+      "bytes": 1129920,
+      "sha256": "71d1fed3cc87d7b44957acf12fcf683073e34a8d530d488257cdaefb120d9360"
+    },
+    {
+      "path": "game/voice/index.json",
+      "bytes": 200534,
+      "sha256": "b0df95d12f49366fafb677f1dc62fc5e7c653867d46ca3c167eb41aae11d7105"
+    },
+    {
+      "path": "game/voice/ko-1.mp3",
+      "bytes": 2499648,
+      "sha256": "0a1f7b3a1332743ebaafcd259a188c0fccc7962e9d215a59110151c7a5c77649"
+    },
+    {
+      "path": "game/voice/ko-2.mp3",
+      "bytes": 2484672,
+      "sha256": "39971a03b5dabdb06f5a8251eaad3588c88b3c0fbff3b40d89894266a84e00ca"
+    },
+    {
+      "path": "game/voice/ko-3.mp3",
+      "bytes": 239040,
+      "sha256": "d53b087becae848d981d106c0a48be2a37627244e8e8b628b4986570dad35cd2"
+    },
+    {
+      "path": "game/voice/zh-1.mp3",
+      "bytes": 2039232,
+      "sha256": "958f1cd8fe9d6b5f2ea7ab6e6f445868f47ed9421cb11ce4916e4ea3d2b98ff8"
+    },
+    {
+      "path": "game/win.mp3",
+      "bytes": 26793,
+      "sha256": "425defb9d942b4acbd1aa8becfd0897350ae918de032bc4cac0c1e39cafc7135"
+    },
+    {
+      "path": "game/words-data.js",
+      "bytes": 3323358,
+      "sha256": "f49a9e0b3d83cdc49864e831afff1c2cf038e7c4d5c35d8184f07ab108948097"
+    },
+    {
+      "path": "game/words.js",
+      "bytes": 8264,
+      "sha256": "da643d5a1991971f0d371bf49d6cd5c444cd2422423f5fd3476216a431e213e9"
+    },
+    {
+      "path": "index.html",
+      "bytes": 1549,
+      "sha256": "62f16ce5ef8c5536acc572a4f7c4d62e1cee0d84272062aced426e524d0ec072"
+    },
+    {
+      "path": "provenance/git-status.txt",
+      "bytes": 2463,
+      "sha256": "15a968e7dcca5ebfd3a2fbeb9dcb70e259872a0d6a2985e97c41b2e5b7901c4a"
+    },
+    {
+      "path": "provenance/package-transformations.json",
+      "bytes": 736,
+      "sha256": "fe42fad16be5eb9daa8e6f5168833e27b49caae656ac35a6477c88c12553fcc9"
+    },
+    {
+      "path": "provenance/verification.json",
+      "bytes": 3243,
+      "sha256": "c2dc17e9e9972a0f180aa8207d9195a25b441c3780e3288eb31ae44578a27c27"
+    },
+    {
+      "path": "references/APPROVED-organic-shelly-and-stone-glass-world.png",
+      "bytes": 2643730,
+      "sha256": "94754968962f1983c22af9fabde6833a05d74c78b746afaf2a97259f6982a6ae"
+    },
+    {
+      "path": "references/README.md",
+      "bytes": 1557,
+      "sha256": "3ceaae1a1a9ae3523f5096f50c2201b39a3d957ac07091843f772dc79d27b5dd"
+    },
+    {
+      "path": "references/UNAPPROVED-isolated-shelly-reference.png",
+      "bytes": 2098939,
+      "sha256": "49c4fd821e4cf750121773d7735bac3cd13d9c6475b7e3fafa15ccdc1a8b87f7"
+    },
+    {
+      "path": "references/earlier-style-studies/stone-glass-organic-shelly-anatomy-2.webp",
+      "bytes": 343290,
+      "sha256": "116e28770fd9df040d68335a5bd2fdffea5b4bd6212634a8bc36130aca9478b1"
+    },
+    {
+      "path": "references/earlier-style-studies/stone-glass-organic-shelly.webp",
+      "bytes": 339062,
+      "sha256": "e18d5d07470c7e32906b8aaa2fbed3a7f9bf9c93318c3c9130e9099e3a9e9fcd"
+    },
+    {
+      "path": "references/earlier-style-studies/stone-glass-synthesis.webp",
+      "bytes": 348224,
+      "sha256": "8efee57beaccaf1c1d17e19dad517904dd10f2d181a5a2380a2dea6db22fd422"
+    },
+    {
+      "path": "references/earlier-style-studies/style-1.webp",
+      "bytes": 696910,
+      "sha256": "14742e0f76cd7ac8d559567729df7dafe080d591de3f420f60f93a21e6ba85dc"
+    },
+    {
+      "path": "references/earlier-style-studies/style-2.webp",
+      "bytes": 430540,
+      "sha256": "dea6d8f89261a475a11ce20ffa8528bef425f70c5f73e7c6bedd8bc256922975"
+    },
+    {
+      "path": "references/earlier-style-studies/style-3.webp",
+      "bytes": 436112,
+      "sha256": "a12c348a9251d2a136185bdfbaeb629016b5608f47e5289255716d3f36398356"
+    },
+    {
+      "path": "references/earlier-style-studies/style-4.webp",
+      "bytes": 695520,
+      "sha256": "d367a36f413b34c753110e952e27d244a0a4dceccd5951bba63635fb42fa3c59"
+    },
+    {
+      "path": "references/earlier-style-studies/style-5.webp",
+      "bytes": 489618,
+      "sha256": "9ca9e6da0bead0893a188b29cef08c5ecf0eb57d2007a21444813b66fc3f1eba"
+    },
+    {
+      "path": "references/earlier-style-studies/style-6.webp",
+      "bytes": 487694,
+      "sha256": "20b5c4f8449fc35ea604b972a79cf2b18cde2b648cc85f5f1b7915c8d6b0c64f"
+    },
+    {
+      "path": "review-site/assets/characters.webp",
+      "bytes": 316922,
+      "sha256": "6089ba0d8b539f023b902a4a14c4af9e087b376897b510f1302a62ec02773035"
+    },
+    {
+      "path": "review-site/assets/coral-cove-anatomy-2.webp",
+      "bytes": 343290,
+      "sha256": "116e28770fd9df040d68335a5bd2fdffea5b4bd6212634a8bc36130aca9478b1"
+    },
+    {
+      "path": "review-site/assets/coral-cove.webp",
+      "bytes": 339062,
+      "sha256": "e18d5d07470c7e32906b8aaa2fbed3a7f9bf9c93318c3c9130e9099e3a9e9fcd"
+    },
+    {
+      "path": "review-site/assets/encounter.webp",
+      "bytes": 228384,
+      "sha256": "e62dcedbe4bacff28759605cf294130723214bdbc882e82f5f67fd817551d543"
+    },
+    {
+      "path": "review-site/assets/harbor.webp",
+      "bytes": 385880,
+      "sha256": "1f1a93a6a381c7eb066953c060d53c785f7bea29f9a156bdc823298e76678cae"
+    },
+    {
+      "path": "review-site/assets/home-anatomy-2.webp",
+      "bytes": 328332,
+      "sha256": "689ddee0bd61cda7f7c39f955cbfcae3e191ffff6a0ce5aaf0a09e8b2a058bea"
+    },
+    {
+      "path": "review-site/assets/home.webp",
+      "bytes": 292612,
+      "sha256": "41422e8f92992ff188a270e254a3d4522cab5ab7c9fbe119e25c3864b74fde1d"
+    },
+    {
+      "path": "review-site/assets/lagoon-caves.webp",
+      "bytes": 360120,
+      "sha256": "ad43a3270cd7724265b265308a84899583f3a5d0d71dd91730a97dde20281ea0"
+    },
+    {
+      "path": "review-site/assets/lighthouse-captain.webp",
+      "bytes": 380330,
+      "sha256": "e009a90936a2ee4df4599b4e9336d67da39d49113f36d67e86d65cc55c4fb26b"
+    },
+    {
+      "path": "review-site/assets/patterns-beach.webp",
+      "bytes": 396356,
+      "sha256": "c333c64ff64791b0b27af373a504d5ab9c933f3bba38e237a6a00137dea6ac47"
+    },
+    {
+      "path": "review-site/assets/shelly-eye-angle-comparison.png",
+      "bytes": 111884,
+      "sha256": "a1943dd9d83c9f571ab9825dc6415ce35728de326956122f677e25354a6cb997"
+    },
+    {
+      "path": "review-site/assets/shelly-options/01-normal.webp",
+      "bytes": 43690,
+      "sha256": "5e5f5ac50f0b1b67dd43d3947b74abd9cb8801cd4b3ab4afaabf781faefaaccf"
+    },
+    {
+      "path": "review-site/assets/shelly-options/01-top.webp",
+      "bytes": 57502,
+      "sha256": "598f50e698f8026e7d7debc5a11bc8cfc61ebaeb403984b49b4264b18d4a2ded"
+    },
+    {
+      "path": "review-site/assets/shelly-options/02-normal.webp",
+      "bytes": 43906,
+      "sha256": "3a1dbaa8a11e71802e1c683ece4e41205a58b06a1175201e6209d37278d0ca52"
+    },
+    {
+      "path": "review-site/assets/shelly-options/02-top.webp",
+      "bytes": 57274,
+      "sha256": "0f7cb577ef8551612b2542933c9e5977d38aef66795ddc7c2d18fa97814df7b2"
+    },
+    {
+      "path": "review-site/assets/shelly-options/03-normal.webp",
+      "bytes": 43646,
+      "sha256": "69272ae73fe10131d71c8b906823ac64b2571d8cb6f615f2aaf58bf1db4e2853"
+    },
+    {
+      "path": "review-site/assets/shelly-options/03-top.webp",
+      "bytes": 57488,
+      "sha256": "44abd59cb1e945e4b59b1c779213836c310dd90330db63b03834f5f5bf4ec1d4"
+    },
+    {
+      "path": "review-site/assets/shelly-options/04-normal.webp",
+      "bytes": 43484,
+      "sha256": "0f6be46377b82948e6862c9c9deb1c338122625b66d2ebe5c4cade6c3133ca86"
+    },
+    {
+      "path": "review-site/assets/shelly-options/04-top.webp",
+      "bytes": 57380,
+      "sha256": "ed098a64f1b37233825d1f536f5f1e69c3ad511938c1f55daf44126a9a8e880c"
+    },
+    {
+      "path": "review-site/assets/shelly-options/05-normal.webp",
+      "bytes": 43622,
+      "sha256": "22b2948ce82b7bdf258bba04fa1f43ffccfe287ca29905b0568bd89b6a49d080"
+    },
+    {
+      "path": "review-site/assets/shelly-options/05-top.webp",
+      "bytes": 57082,
+      "sha256": "09f381629b6863dfafa6c8b9b82f9ae62cac27f2649deb1dd28d779be3b77574"
+    },
+    {
+      "path": "review-site/assets/shelly-options/06-normal.webp",
+      "bytes": 43636,
+      "sha256": "e37806170bdded62b3433fc36ee3fa0bfc06d08f2d7bf328de435035331a9bcb"
+    },
+    {
+      "path": "review-site/assets/shelly-options/06-top.webp",
+      "bytes": 57356,
+      "sha256": "836525e6e759585f3222a937de7e0ab16b07664322ee7a18aa91aafdcf722315"
+    },
+    {
+      "path": "review-site/assets/shelly-options/07-normal.webp",
+      "bytes": 43320,
+      "sha256": "548642f3aa5c1ff994fbd6490a6b7181aeab648ffc4b8b9ad8a6260946bfb7ce"
+    },
+    {
+      "path": "review-site/assets/shelly-options/07-top.webp",
+      "bytes": 57458,
+      "sha256": "657c04abdc6416ce809da85f6401c1eb55767a3b657118d949d6fe5e522a9ed2"
+    },
+    {
+      "path": "review-site/assets/shelly-options/08-normal.webp",
+      "bytes": 43330,
+      "sha256": "d049b862823c20a0d9265db759615fa64efbfa7234725a2a5c0e9977c836004a"
+    },
+    {
+      "path": "review-site/assets/shelly-options/08-top.webp",
+      "bytes": 57062,
+      "sha256": "a1dcbe6645e32b153b4de130a5ded3e373107dc19d8e9898eee49bf8dfb86ffc"
+    },
+    {
+      "path": "review-site/assets/shelly-options/09-normal.webp",
+      "bytes": 43420,
+      "sha256": "c68c96048fe51f479dad81c9a24635ac718eb0120ab9991127ab4835a0f20aa5"
+    },
+    {
+      "path": "review-site/assets/shelly-options/09-top.webp",
+      "bytes": 57392,
+      "sha256": "3b766b5d49bfbb7a3eda72f7e19178f94defcf71c2cd69ef48414aaac8dd63f4"
+    },
+    {
+      "path": "review-site/assets/shelly-options/10-normal.webp",
+      "bytes": 43154,
+      "sha256": "cc70ff4e061832a1232d6a818e80c246bcc06915018e40c551d24fc550f661cf"
+    },
+    {
+      "path": "review-site/assets/shelly-options/10-top.webp",
+      "bytes": 57388,
+      "sha256": "20018f41bc7bf9033389c53d17d91864a357fdd328c9db65e63365f479ecd719"
+    },
+    {
+      "path": "review-site/assets/shelly-options/overview.webp",
+      "bytes": 165318,
+      "sha256": "52b6b178a0d703d4a2b49b9489e5ad02c2feb42e85f5c452e0ab1aee8e1208bd"
+    },
+    {
+      "path": "review-site/assets/study-library.webp",
+      "bytes": 194424,
+      "sha256": "e1cd048aefaba2f6209271dcfd7e0693eae6a2b1113f50551ea11a7826de33fb"
+    },
+    {
+      "path": "review-site/assets/world-map.webp",
+      "bytes": 382630,
+      "sha256": "a9392391ca90965f0d8baedc7d0f1b079dacc022d94e30a8fbdae5964816a22e"
+    },
+    {
+      "path": "review-site/index.html",
+      "bytes": 15910,
+      "sha256": "6dbf538e173d8e8c1e8e036bcc3125720e541065b2a373cd8a4e8b5cd60f211d"
+    },
+    {
+      "path": "review-site/play/assets/models/crafted-shelly-loading.webp",
+      "bytes": 11986,
+      "sha256": "1ce644514ee2e2f95c551db7509bda77737627a674fbf6529337951fd0886ec6"
+    },
+    {
+      "path": "review-site/play/assets/models/crafted-shelly-view.glb",
+      "bytes": 788124,
+      "sha256": "4c94360000524cdd9a0bbc055eb15601b5d3497602c92d39434e7319c7ce4cb2"
+    },
+    {
+      "path": "review-site/play/assets/models/crafted-shelly.glb",
+      "bytes": 1717720,
+      "sha256": "db46a6706c520867c1fe49a25ee9d801af986ff29e0e2913d55c4bbd72fa8bcb"
+    },
+    {
+      "path": "review-site/play/assets/models/shelly-view.glb",
+      "bytes": 1257572,
+      "sha256": "69130fd46c13ab06a8fc6b05f093fc35191aae0800743ed057cb7bddc320124f"
+    },
+    {
+      "path": "review-site/play/assets/models/shelly.glb",
+      "bytes": 3118368,
+      "sha256": "bd59faae74094cbf889529a2b957fc415a4ed547f061dcc9426aa057a6bdd7c6"
+    },
+    {
+      "path": "review-site/play/assets/world/shellstone-color.jpg",
+      "bytes": 53387,
+      "sha256": "b6084a0ec6616be952ba6e9071e6e9356920f2c04dee5d57822069dab6a0973a"
+    },
+    {
+      "path": "review-site/play/assets/world/world-surfaces.jpg",
+      "bytes": 66143,
+      "sha256": "b78e9e1701e05a8751c7244435a965cd6753f731ba8c77270f3cf4d384fde362"
+    },
+    {
+      "path": "review-site/play/audio-clips.js",
+      "bytes": 679033,
+      "sha256": "57c29ca530aa43e17caa0a788533ddc444edc285e6600525327455049e7484da"
+    },
+    {
+      "path": "review-site/play/day-song.mp3",
+      "bytes": 2795949,
+      "sha256": "c98ca9764ae2aaf5fb32b96875472c5ccb9b4408859e4a0c8b9b3eca62f9ec34"
+    },
+    {
+      "path": "review-site/play/deck-song.mp3",
+      "bytes": 960932,
+      "sha256": "b22790bbf6a546b9bfba541ced8eb85658c6083fe2fb0f0e939b2d3a350f69d7"
+    },
+    {
+      "path": "review-site/play/game-song.mp3",
+      "bytes": 1182450,
+      "sha256": "741f136bf6ea5675af12ee211123ce375fb888c2ad3c25277e5e3157c8077bc9"
+    },
+    {
+      "path": "review-site/play/icon-180.png",
+      "bytes": 9010,
+      "sha256": "bfaebbed47658038f6597459f90ebde7df1a95d17c7eb26057ad48f51dd9fa26"
+    },
+    {
+      "path": "review-site/play/icon-192.png",
+      "bytes": 9576,
+      "sha256": "49e4d4220bc8117ec35d416ced459598fd5cfa89426cbede20eeb966b1ad80f5"
+    },
+    {
+      "path": "review-site/play/icon-512.png",
+      "bytes": 24940,
+      "sha256": "93333e752b6c11031309783cd5693f170a00b9060bb87f17b6c2bc2a0f318ae8"
+    },
+    {
+      "path": "review-site/play/index.html",
+      "bytes": 2351468,
+      "sha256": "c05c073376fc3a3e6b755cb0658a5deaacb89cc570b2efff099e24f9ec088db1"
+    },
+    {
+      "path": "review-site/play/library.js",
+      "bytes": 273168,
+      "sha256": "dd02252c56e672288888cd5e6e4be0387f0be7a6a5384e2cd6b3ca9324355f9f"
+    },
+    {
+      "path": "review-site/play/lobby-song.mp3",
+      "bytes": 1098022,
+      "sha256": "32f3e20f271bfd6d2275c69312d3e6989660f97c78d2d99aae333b262a6c419e"
+    },
+    {
+      "path": "review-site/play/manifest.webmanifest",
+      "bytes": 473,
+      "sha256": "7893ae48d9f8ef8664dd8501b0827fdd9678674d3ac44c3e0b0cf8aa4f5373fe"
+    },
+    {
+      "path": "review-site/play/preview-build.json",
+      "bytes": 829,
+      "sha256": "037f4ccb7311bc87a1407ba2d1a9e368218b21125420e0fa2e7d004ab62ff018"
+    },
+    {
+      "path": "review-site/play/reef-models.js",
+      "bytes": 1621025,
+      "sha256": "3811c068e811fcc70e57dd44b6505aa5fd5e6bf5b1b93012498a13fee50a0492"
+    },
+    {
+      "path": "review-site/play/seed-data.js",
+      "bytes": 4286,
+      "sha256": "6581f83ebf3aebd9abf016a756ef4f54d5cf56640641cc5500db5b173480f221"
+    },
+    {
+      "path": "review-site/play/storage.js",
+      "bytes": 9651,
+      "sha256": "60c6e5411f0c202c9a1cf660fdb351cd86c5d1887406cf6b952dcc0846b4e818"
+    },
+    {
+      "path": "review-site/play/three.min.js",
+      "bytes": 603445,
+      "sha256": "9274bbcec8d96168626c732b5d31c775aa8cfb7eaa0599bec0c175908a2c1ce2"
+    },
+    {
+      "path": "review-site/play/win.mp3",
+      "bytes": 26793,
+      "sha256": "425defb9d942b4acbd1aa8becfd0897350ae918de032bc4cac0c1e39cafc7135"
+    },
+    {
+      "path": "review-site/play/words-data.js",
+      "bytes": 3323358,
+      "sha256": "f49a9e0b3d83cdc49864e831afff1c2cf038e7c4d5c35d8184f07ab108948097"
+    },
+    {
+      "path": "review-site/play/words.js",
+      "bytes": 8264,
+      "sha256": "da643d5a1991971f0d371bf49d6cd5c444cd2422423f5fd3476216a431e213e9"
+    },
+    {
+      "path": "review-site/shelly-options.html",
+      "bytes": 21969,
+      "sha256": "0c2eb88e6ba5e68c14a5132dddeeefa58c3b1c15fa387ec3e1c10b011a24d6fe"
+    },
+    {
+      "path": "review-site/shelly.html",
+      "bytes": 748808,
+      "sha256": "84ae414c2e3e71da32048a2b2ad65366d013cc00e1b796eaee4bfbd5ecc6f83f"
+    },
+    {
+      "path": "tools/serve_handoff.py",
+      "bytes": 1247,
+      "sha256": "7235db0b15e5f50bec022674d7f48dc6861147476f1ab5b0b5a9854a8d86bf12"
+    },
+    {
+      "path": "work/REJECTED-shelly-cuteness-survey/check_models.cjs",
+      "bytes": 3161,
+      "sha256": "2ff01742174e53fa96bd81d4f93fd4d2cedfef665580ac41c0671bc5f0fa711b"
+    },
+    {
+      "path": "work/REJECTED-shelly-cuteness-survey/collect_images.py",
+      "bytes": 2029,
+      "sha256": "9760a832ee4b6afaca6102a6b33558e86e874a1232442fd0213e47f31ac50dac"
+    },
+    {
+      "path": "work/REJECTED-shelly-cuteness-survey/gallery-validation.json",
+      "bytes": 184,
+      "sha256": "db83e43736807464401cf4e8d09b348f564809e13b9de648451d725b32c2951a"
+    },
+    {
+      "path": "work/REJECTED-shelly-cuteness-survey/manifest.json",
+      "bytes": 9488,
+      "sha256": "48ccf70cb2003ab7bb178ec56de69bd7e1128f51b179656620b62f6bc29df8e0"
+    },
+    {
+      "path": "work/REJECTED-shelly-cuteness-survey/model-validation.json",
+      "bytes": 2844,
+      "sha256": "84ac5271e4a67632c9799be4d11ec6b1df0627340df2f39cf6642273ae699a32"
+    },
+    {
+      "path": "work/REJECTED-shelly-cuteness-survey/overview.png",
+      "bytes": 1385264,
+      "sha256": "8c368cff2b6fe665886632cd492cff7aaf116be9c583a4a58fbb7a5114d7f4f8"
+    },
+    {
+      "path": "work/REJECTED-shelly-cuteness-survey/render_options.py",
+      "bytes": 3925,
+      "sha256": "bc29b48e17ec58255fc3f10f462a2ca0aefc38580be1be96a621fa0fff54cc63"
+    },
+    {
+      "path": "work/crafted-shelly-v3/eye-projection-comparison.json",
+      "bytes": 4017,
+      "sha256": "f1adc805566f07b6bf7fb540020f0597ef30418c68d56a2a08c6e41f7065cd08"
+    },
+    {
+      "path": "work/crafted-shelly-v3/game-size-comparison.json",
+      "bytes": 1125,
+      "sha256": "d4af514bae5fcb1aba54a477839f70b3ebc54bb7527c87024e8a3cccd2368fa9"
+    },
+    {
+      "path": "work/crafted-shelly-v3/game-size-comparison.png",
+      "bytes": 111884,
+      "sha256": "a1943dd9d83c9f571ab9825dc6415ce35728de326956122f677e25354a6cb997"
+    },
+    {
+      "path": "work/crafted-shelly-v3/proofs/board.png",
+      "bytes": 536807,
+      "sha256": "1b9c078556c863ed5a01ddecc6234079f28535940f28b49f334d062eb2955c9f"
+    },
+    {
+      "path": "work/crafted-shelly-v3/proofs/front.png",
+      "bytes": 472862,
+      "sha256": "0fd71065dc15d03ef086e30ce00fa39b0a723189502ca41290f28e306ede8c65"
+    },
+    {
+      "path": "work/crafted-shelly-v3/proofs/overhead.png",
+      "bytes": 566573,
+      "sha256": "88367ce0d2f0ebf473775317f3778d4ace0c46c56a1c4e3ef6a454c245725cea"
+    },
+    {
+      "path": "work/crafted-shelly-v3/proofs/quarter.png",
+      "bytes": 504721,
+      "sha256": "eb16958ad7f1854360a19fffca52bacdbb9cb6c7247984704466fa761fba3813"
+    },
+    {
+      "path": "work/crafted-shelly-v3/proofs/side.png",
+      "bytes": 491457,
+      "sha256": "87227bbad1bd81dc95fcd2410fe1f599c80edd415302522ef3f47c0338fa4c3d"
+    },
+    {
+      "path": "work/crafted-shelly-v3/proofs/top.png",
+      "bytes": 570951,
+      "sha256": "a187e4d62b821c4fc778aa8a7ca2e69b2fe31a0501a11bee4f938a73c93f5fdb"
+    },
+    {
+      "path": "work/crafted-shelly-v3/render-proof.py",
+      "bytes": 3350,
+      "sha256": "12c8310f56f12096fb3a25c89f71a9615eb83199c43d8326a1dd671703da314f"
+    },
+    {
+      "path": "work/crafted-shelly-v3/runtime-audit.json",
+      "bytes": 3294,
+      "sha256": "88d9e8eac746d5645236c120a8d7e9a5ad084158d24c4d58d5a2da3886aa2895"
+    },
+    {
+      "path": "work/crafted-shelly-v3/validate.py",
+      "bytes": 5690,
+      "sha256": "c7af8c72a61f9d7b0b164e593f1d93e61246fc84098be41b06c6f950f1076777"
+    },
+    {
+      "path": "work/crafted-shelly-v3/validation.json",
+      "bytes": 7328,
+      "sha256": "a14528149fe44c9fc113decffcaddd0f804ba7fbaedda38cb66549d2ac627859"
+    },
+    {
+      "path": "work/redesign-artbook/build_gallery.py",
+      "bytes": 13220,
+      "sha256": "1e3d03522aa93a07649d874834a584bbec8c5c151ab1a3a610f29da019adadd8"
+    },
+    {
+      "path": "work/redesign-artbook/build_play_preview.py",
+      "bytes": 6589,
+      "sha256": "a9fa618223be1b1c6e73fdef417a2b718a69b9cc7b0bad4e8e8d5897bcb8d5f8"
+    },
+    {
+      "path": "work/redesign-artbook/build_shelly_options.py",
+      "bytes": 11609,
+      "sha256": "6afe01cdb2b21fed1b415f36daa6e1c9e82bf15bb8baf515a497a36529e6ca6a"
+    },
+    {
+      "path": "work/redesign-artbook/build_shelly_review.py",
+      "bytes": 2747,
+      "sha256": "21fffbe03ec150642228970df21b890e6922a6f8f3728401ad24dbe18b5939d5"
+    },
+    {
+      "path": "work/redesign-artbook/check_crafted_geometry.js",
+      "bytes": 9177,
+      "sha256": "775d2d4d0fa3d460a17e1add9efe7e28e6a174c99593aa905f30cca59b049f07"
+    },
+    {
+      "path": "work/redesign-artbook/check_crafted_shelly.cjs",
+      "bytes": 5362,
+      "sha256": "cf5e4ee069714b99a23ce8cbc1f496eaa3d3c803788619fa432552dd8108efbe"
+    },
+    {
+      "path": "work/redesign-artbook/collect_images.py",
+      "bytes": 1736,
+      "sha256": "6d65d6e91abce8ed59271ff0dfa0c36e65fc3c580792f69c61db4f6b968fbb9e"
+    },
+    {
+      "path": "work/redesign-artbook/crafted-preview-release.json",
+      "bytes": 1446,
+      "sha256": "e8c5e9defc2e65c12dbf675d8d141849837ebecfb10403c910cbc8c7b9443033"
+    },
+    {
+      "path": "work/redesign-artbook/crafted-preview-v2-release.json",
+      "bytes": 1862,
+      "sha256": "243cba2af0a5b5815259b065bb9a25f3a0fba50c1f5df8a87f43c380befcf2bc"
+    },
+    {
+      "path": "work/redesign-artbook/crafted-preview-v3-release.json",
+      "bytes": 1625,
+      "sha256": "56ccded7d6c6ba3b58dc7c133d5cb3c82d99a83b36ab07e5dd7f88c580d584bc"
+    },
+    {
+      "path": "work/redesign-artbook/export_crafted_scene.cjs",
+      "bytes": 3800,
+      "sha256": "ccfa267810f7a41fb31669ddb540fc6f2b732fb8b30f442a139270df0eae450b"
+    },
+    {
+      "path": "work/redesign-artbook/image-manifest.json",
+      "bytes": 2903,
+      "sha256": "d04887c0c9172ce6f91f5868b8ac203b197bd25091323a03235cb6a852c6d7e5"
+    },
+    {
+      "path": "work/redesign-artbook/measure_shelly_eyes.py",
+      "bytes": 1990,
+      "sha256": "62d5697c401dd8b9ab2701363a65fa1bfd8139c423b21d800d5e0c4ebe1dbc92"
+    },
+    {
+      "path": "work/redesign-artbook/preview-bootstrap.js",
+      "bytes": 2908,
+      "sha256": "9a6143f95c54ca05c1d99eeb8ba9df8467d3f5edc4df3e05b5bcdeb2eb110718"
+    },
+    {
+      "path": "work/redesign-artbook/preview.css",
+      "bytes": 3773,
+      "sha256": "0203f61661bb75937a3c0f8378051c8951d01cb6b02a4897c7bd5b6ed26c1e4f"
+    },
+    {
+      "path": "work/redesign-artbook/release.json",
+      "bytes": 1157,
+      "sha256": "d6bfd932bc04df14d70f11b1bfd6036ba61b8aa95c2a7664410c5def1b1deb45"
+    },
+    {
+      "path": "work/redesign-artbook/render_crafted_scene.py",
+      "bytes": 2065,
+      "sha256": "c4b20fd40141a2551a1249458522d21d1c7e6e3bf93b877f353176ef4b5d7f88"
+    },
+    {
+      "path": "work/redesign-artbook/validation-v2.json",
+      "bytes": 236,
+      "sha256": "6d3f1b5411d1776a9516b60549b0875e6286c5ae213850717c4bbfef08ce6fc7"
+    },
+    {
+      "path": "work/redesign-artbook/validation-v3.json",
+      "bytes": 260,
+      "sha256": "a5efb115e3b9ab353755d99edc6f3813ec41c95acb3fb130e5f196b81e2135c9"
+    },
+    {
+      "path": "work/redesign-artbook/validation.json",
+      "bytes": 129,
+      "sha256": "96b6b63877b0e87c1524453559fd06d6c3fba815797ea6247119ab531da926dc"
+    },
+    {
+      "path": "work/shelly-natural-mouth/final/asset-report.json",
+      "bytes": 997,
+      "sha256": "4d0e82dbc7fde2033745c46c7c150f61e6180926f3fb5659f6934a9e5f4fe279"
+    },
+    {
+      "path": "work/shelly-natural-mouth/final/shelly-view.glb",
+      "bytes": 1257572,
+      "sha256": "69130fd46c13ab06a8fc6b05f093fc35191aae0800743ed057cb7bddc320124f"
+    },
+    {
+      "path": "work/shelly-natural-mouth/final/shelly.glb",
+      "bytes": 3118368,
+      "sha256": "bd59faae74094cbf889529a2b957fc415a4ed547f061dcc9426aa057a6bdd7c6"
+    },
+    {
+      "path": "work/shelly-pearl/workflow/calibrate_trellis.py",
+      "bytes": 2594,
+      "sha256": "218f0f98a0d8ac6da9f2352d92131fa9a338740f71a31e21597245de28702e24"
+    },
+    {
+      "path": "work/shelly-pearl/workflow/inspect_blender.py",
+      "bytes": 1304,
+      "sha256": "5193e0f213bad21014c33d1fc371b6a558c179f492325a13d28f20e494463549"
+    },
+    {
+      "path": "work/shelly-pearl/workflow/inspect_weld.py",
+      "bytes": 1469,
+      "sha256": "0161d789a241f4a492a30cc044ed29ac8f7632e343db144632e37bbb64570131"
+    },
+    {
+      "path": "work/shelly-pearl/workflow/reconstruct.py",
+      "bytes": 2270,
+      "sha256": "61443d71e83908b48a268caca4529aa32bbeec160375f7869dd217c7cd3ba232"
+    },
+    {
+      "path": "work/shelly-pearl/workflow/reconstruction-status.json",
+      "bytes": 247,
+      "sha256": "d0c4fed050e804d147b1888a5850dede40f4980c80056537bbc1d211c3c48002"
+    },
+    {
+      "path": "work/shelly-pearl/workflow/triposr-requirements.txt",
+      "bytes": 203,
+      "sha256": "741408247598c63e9f08cdb5f6fc753d78ac9185bb961cbe7ba8c5c0132aae48"
+    },
+    {
+      "path": "work/shelly-reference-rebuild/PIPELINE-NOTES.md",
+      "bytes": 5353,
+      "sha256": "dc3ec3e6e58b4fd55811638edce179594342dd8a72ffb4c25b7870c2a6e006d9"
+    },
+    {
+      "path": "work/shelly-reference-rebuild/inspect_mesh.py",
+      "bytes": 7675,
+      "sha256": "b1a7dc75844f35ae35954b52df7f24886abde134857ef0a5a991e8aea2d7cbcb"
+    }
+  ]
+}

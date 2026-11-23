@@ -1,0 +1,1206 @@
+{
+  "review_date": "2026-11-16",
+  "purpose": "Independent art-direction critique; current work and proposed work explicitly separated",
+  "source_local_base_commit": "7d9ecc211105d17ba9d15000e55d6714c11ba7f5",
+  "github_review_branch_base": "5fe853303572fef67d777c1eb77cf3567ca31d60",
+  "source_state": "Selected files from uncommitted development work; not a full runnable release",
+  "images": "JPEG compression only; no scene retouching",
+  "files": [
+    {
+      "path": "FABLE-NOTES-READ.md",
+      "kind": "review-document",
+      "bytes": 1370,
+      "sha256": "93c7de4e31243a6308efcbcf3637eb4055f3867ed43318f9ef291090eaeee8a1",
+      "git_blob_sha": "ee63dc54e54b627dd7afa21908746f7db1de1b5f"
+    },
+    {
+      "path": "FABLE-PROMPT.md",
+      "kind": "review-document",
+      "bytes": 3435,
+      "sha256": "dc31dacd52794facca707e2632901076c13829896dffc528400a490a23c5d626",
+      "git_blob_sha": "c9ff820be4749e3eb75ec545ad23eb6b6b58ec0b"
+    },
+    {
+      "path": "GAME-CAPTURES.md",
+      "kind": "review-document",
+      "bytes": 2013,
+      "sha256": "d293259eda3fa22ed3be6bab480c7aa0d756220c3922c45cfbf3fabfc85eee78",
+      "git_blob_sha": "0ad6b5cf8888686771a6cb7dd68976615f4432f9"
+    },
+    {
+      "path": "PLANNED-WORK.md",
+      "kind": "review-document",
+      "bytes": 5671,
+      "sha256": "08c626b422d225c2f81eaf3c1be28c3b8f8f42e061b5d1a794dfcfbed5e2a52d",
+      "git_blob_sha": "9817dec27c087aac497ad6ddb90dfb43f2168dd1"
+    },
+    {
+      "path": "README.md",
+      "kind": "review-document",
+      "bytes": 5765,
+      "sha256": "b2fbe19befcc557968a5f0234b4bcfad2f08cd3f7a9ef6d70b78c4e68b5a1ce6",
+      "git_blob_sha": "19cbb56ef9f785c5a750a21fe7e352a14360f385"
+    },
+    {
+      "path": "SOURCE-GUIDE.md",
+      "kind": "review-document",
+      "bytes": 2192,
+      "sha256": "c1b3dda960f9565b966013dd1e47a46006714da6b2d666b23831ca325721ec1a",
+      "git_blob_sha": "145a2ad1cbbcdb0d7e36cdf00a8b08dd8b81e90d"
+    },
+    {
+      "path": "WORLD-COMPARISONS.md",
+      "kind": "review-document",
+      "bytes": 3796,
+      "sha256": "dd340e14d77fde59cf5f6a283a308d98239953ffd4ecdeec901a0551c4d0d235",
+      "git_blob_sha": "0dee991bf8436369b5079b161b0f2e63741d23a3"
+    },
+    {
+      "path": "characters/CAST-DIRECTION.md",
+      "kind": "character-direction",
+      "source": "art-source/cast-review/CAST-DIRECTION.md",
+      "source_sha256": "677e2c00e33845d740c8806eb273191958d099f872eebd4829e7b2d8df779267",
+      "bytes": 8350,
+      "sha256": "677e2c00e33845d740c8806eb273191958d099f872eebd4829e7b2d8df779267",
+      "git_blob_sha": "43127475f408fcb1fb984addf97dc2ebec3c4345"
+    },
+    {
+      "path": "characters/biological-palettes.json",
+      "kind": "character-direction",
+      "source": "art-source/cast-review/biological-palettes-2026-11-16.json",
+      "source_sha256": "35ae035cecbf55c7f12eee63fa824bb18bb8efd26b17c6cfb553a5aadcb2665e",
+      "bytes": 5180,
+      "sha256": "35ae035cecbf55c7f12eee63fa824bb18bb8efd26b17c6cfb553a5aadcb2665e",
+      "git_blob_sha": "039b1d8bd9f8f3b0ae99d2cdee1d1df6870f7fac"
+    },
+    {
+      "path": "characters/expression-manifest.json",
+      "kind": "character-direction",
+      "source": "art-source/cast-review/expression-review/manifest.json",
+      "source_sha256": "742a1cadd9299022e9cef21500455f699d90447e14ead87b427c344a6e7f14a5",
+      "bytes": 9076,
+      "sha256": "742a1cadd9299022e9cef21500455f699d90447e14ead87b427c344a6e7f14a5",
+      "git_blob_sha": "e22ff11d7395d6aa373b7fcb16a3c52c12b0a248"
+    },
+    {
+      "path": "characters/preferences.json",
+      "kind": "character-direction",
+      "source": "art-source/cast-review/preferences-2026-11-16.json",
+      "source_sha256": "9ae18c78418e0f441f867707e257c40f1a40b353199c526f3609f404a53f4cba",
+      "bytes": 7333,
+      "sha256": "9ae18c78418e0f441f867707e257c40f1a40b353199c526f3609f404a53f4cba",
+      "git_blob_sha": "771f526f9c606c1fffe672d1c9e262a33c2e65a8"
+    },
+    {
+      "path": "evidence/CPU-AUDIT.md",
+      "kind": "static-source-verification",
+      "source": "CPU-AUDIT.md",
+      "source_sha256": "013de29386fef7e1ed7bc18506723dde3db7fad73f0750f65bc06a91d78f2af7",
+      "bytes": 3954,
+      "sha256": "013de29386fef7e1ed7bc18506723dde3db7fad73f0750f65bc06a91d78f2af7",
+      "git_blob_sha": "d3b736b405682a0b3fbf2db487f504184365443d"
+    },
+    {
+      "path": "evidence/OFFLINE-RENDER-METHOD.md",
+      "kind": "render-method",
+      "source": "README.md",
+      "source_sha256": "fd6595c10adca96bc71530994d938300a020221516606b3e34957fd70727faae",
+      "bytes": 1411,
+      "sha256": "fd6595c10adca96bc71530994d938300a020221516606b3e34957fd70727faae",
+      "git_blob_sha": "9f2dc2413e1fd583b18bcc89addf1adcfa09fca8"
+    },
+    {
+      "path": "evidence/audit-before-after.json",
+      "kind": "static-source-verification",
+      "source": "audit-before-after.json",
+      "source_sha256": "76a1fb318cde5aaf54cda4eebb84cb36d0502b425513a4d7bd9df6d6bbf2fb24",
+      "bytes": 19942,
+      "sha256": "76a1fb318cde5aaf54cda4eebb84cb36d0502b425513a4d7bd9df6d6bbf2fb24",
+      "git_blob_sha": "b90017fcc572ed5a38304c16d5ea27d3e3dc410e"
+    },
+    {
+      "path": "evidence/integration-verification.json",
+      "kind": "static-source-verification",
+      "source": "integration-verification.json",
+      "source_sha256": "ad1b7455b630830c8210845ec80dccb46581bd60d48658464c3bb056ac64b23a",
+      "bytes": 847,
+      "sha256": "ad1b7455b630830c8210845ec80dccb46581bd60d48658464c3bb056ac64b23a",
+      "git_blob_sha": "c6fdf7513da87480e0d827abdfcd84fc9d098b4b"
+    },
+    {
+      "path": "evidence/render-manifest.json",
+      "kind": "render-provenance",
+      "source": "manifest.json",
+      "source_sha256": "8969a4e76c0317e989d6b0a152ef5bb6dc05e3d59acd16c561ca00f415b18c9f",
+      "bytes": 68592,
+      "sha256": "8969a4e76c0317e989d6b0a152ef5bb6dc05e3d59acd16c561ca00f415b18c9f",
+      "git_blob_sha": "2bdfd8137b1f17046318cd20b9ad7634365879f4"
+    },
+    {
+      "path": "evidence/source-provenance.json",
+      "kind": "source-provenance",
+      "source": "source-provenance.json",
+      "source_sha256": "25c9f1a6abc045e40bb3fd46c6185a70ca758efe0338683e3b0698cd82f982b9",
+      "bytes": 2130,
+      "sha256": "25c9f1a6abc045e40bb3fd46c6185a70ca758efe0338683e3b0698cd82f982b9",
+      "git_blob_sha": "e27f2f7650c047c4139e0c56d6567c766b779036"
+    },
+    {
+      "path": "evidence/world-pass-diff.patch",
+      "kind": "review-document",
+      "bytes": 31532,
+      "sha256": "fed138e503946c20fdf9194c848f72e9706aa40878855074a52f646fb5a133f6",
+      "git_blob_sha": "a2b1ce5e8d65c251b1fc13a8102d4413c78dc21c"
+    },
+    {
+      "path": "images/concepts/captain.jpg",
+      "kind": "generated-character-concept",
+      "source": "captain.png",
+      "source_sha256": "a6dca5324b0f03815d46db7ea8d63a87b483015e1fff3d83ea25365180c0599e",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1199,
+        1312
+      ],
+      "bytes": 485761,
+      "sha256": "b4760a9e9da47ada9d656ad25ef25201119a0b8de9f32e77b86af8e8d68b808b",
+      "git_blob_sha": "ddec479698e766724e2c5baf0432812fa0aaa0a4"
+    },
+    {
+      "path": "images/concepts/sheet-01.jpg",
+      "kind": "generated-character-concept",
+      "source": "sheet-01.png",
+      "source_sha256": "8257707996d01380ada83ddd3ce6147a8c80d519c10cdee4bb53cc667062dad8",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "bytes": 581150,
+      "sha256": "dc21691e39fd8ae4cf054fd8df94c597228de9ce350c3c11b626482cb4f3675a",
+      "git_blob_sha": "4fba9396c73271c33fa72b773558ec211d89ddf9"
+    },
+    {
+      "path": "images/concepts/sheet-02.jpg",
+      "kind": "generated-character-concept",
+      "source": "sheet-02.png",
+      "source_sha256": "3af8fc5acd9f63086936a5a2b5ba7b62eb3dae2c47c87383def0f19af2c00a25",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "bytes": 622550,
+      "sha256": "930f20540ecbe8b9b2cf9b2a3939667e7a9e36ad42448b0a312a0580099de65c",
+      "git_blob_sha": "67a2fac73657957ade1922b41409b565f79c5ed1"
+    },
+    {
+      "path": "images/game-nov15/beach-overview.jpg",
+      "kind": "historical-browser-capture",
+      "source": "beach-overview.png",
+      "source_sha256": "0c19453de7d0c3b53ab7e938a889f65429cb07f0ea66a248b5848db7cf32a331",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 168643,
+      "sha256": "b735eb613f333a6781878c9d6b9def23896b144f8cede0e2a0a806d1ef306bb2",
+      "git_blob_sha": "6c2996c31921f95b2444586236f279d812dfd31a"
+    },
+    {
+      "path": "images/game-nov15/beach-play.jpg",
+      "kind": "historical-browser-capture",
+      "source": "beach-play.png",
+      "source_sha256": "f93b6ae8d3565c5e317185e5f5a84333b395d7c716dd0ee48d5f17d390ff950c",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 136719,
+      "sha256": "570f8f814690b508aa324b5601cdcae243019cd6bf4bce66a398d71f86fd7baa",
+      "git_blob_sha": "c5d2135688e8e55bce9044d0e0f52cb115348767"
+    },
+    {
+      "path": "images/game-nov15/captain-overview.jpg",
+      "kind": "historical-browser-capture",
+      "source": "captain-overview.png",
+      "source_sha256": "0d644ea3d641b3dc18a9e0e2873d09ebf38b7dfc589886bc794c765ca7147d31",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 154068,
+      "sha256": "66ac2c248ac8d8b220fb3ee85950737d19e76049575ee79285d287d9f3216b82",
+      "git_blob_sha": "1cc26b34ab6c9f3e9eb267e17bfbfe00ddf61c1a"
+    },
+    {
+      "path": "images/game-nov15/captain-play.jpg",
+      "kind": "historical-browser-capture",
+      "source": "captain-play.png",
+      "source_sha256": "fd68c4f3f1c5333f0bbf8de3b9ac688c3f90712c6de08e1f659810772516f277",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 137858,
+      "sha256": "38d9b9f71356b6a28f5506f6d5be4b004a404dc207b2fe486d53ffe2d333b17c",
+      "git_blob_sha": "a3582a7a7552c7816fa8062a40c633d2de444ccf"
+    },
+    {
+      "path": "images/game-nov15/caves-overview.jpg",
+      "kind": "historical-browser-capture",
+      "source": "caves-overview.png",
+      "source_sha256": "0985f157fcd6c84cebf5f8d91e0b04d17685cbdf5786e681476fe0640ab0a4d7",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 118789,
+      "sha256": "4db3ad7e503a3423764cfe4aefef52f0aeb42fee8b1a6e8d7bf4065bf68537d0",
+      "git_blob_sha": "06d1e8acfa374164f6a62c507808e7f6bdf3f2cb"
+    },
+    {
+      "path": "images/game-nov15/caves-play.jpg",
+      "kind": "historical-browser-capture",
+      "source": "caves-play.png",
+      "source_sha256": "c3b05fc57c65f7c4014f15cb742e18c019c7da260a6b5a766f2b2989e57b97e3",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 107904,
+      "sha256": "0f63b7728d18be1198eb18d54cfa89366e4cc931a6efa20ed0c24716e4e4910e",
+      "git_blob_sha": "394df004d569121cd1ec03a8c680833d25975d12"
+    },
+    {
+      "path": "images/game-nov15/cove-overview.jpg",
+      "kind": "historical-browser-capture",
+      "source": "cove-overview.png",
+      "source_sha256": "21c6a850e40f706af8f12b039fd5d62a28f2e66ab56e28719af12f216fccb377",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 237592,
+      "sha256": "fbaa77d3953bdaee7d16fbea367b1591cbfc62edbbf1ba83de2a24d4de55add1",
+      "git_blob_sha": "6a5c03f3f49a69dc42046e94f2bfb7df7f3b3f3c"
+    },
+    {
+      "path": "images/game-nov15/cove-play.jpg",
+      "kind": "historical-browser-capture",
+      "source": "final-tablet.png",
+      "source_sha256": "75116c3865737f421e6a641702583199869c17ffc8c2ab81f88b9ad768a26227",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 149548,
+      "sha256": "a424f4842a73bd2cacbdbe2d2be10196b99621f23622747a733335bd62e631a8",
+      "git_blob_sha": "52a4d36cf41aea9f59c8b43662c624709ca41d80"
+    },
+    {
+      "path": "images/game-nov15/lagoon-overview.jpg",
+      "kind": "historical-browser-capture",
+      "source": "lagoon-overview.png",
+      "source_sha256": "40003c2dbf922616584647c08cbcde52d0350a5ab72309c859bdaa1688128e73",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 163533,
+      "sha256": "26a6951323fcbcf6d54bd6ce45e06176df8376b883ea32be35d7e7b45bddd01b",
+      "git_blob_sha": "0e4fcea6b59ec73e69a52fd49f9b438aa9b9a409"
+    },
+    {
+      "path": "images/game-nov15/lagoon-play.jpg",
+      "kind": "historical-browser-capture",
+      "source": "lagoon-play.png",
+      "source_sha256": "17f74e76ca5c9a1fff28dc27baecfb31c5e4a473ecacbf3bdf7f389d123746a3",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 147562,
+      "sha256": "84b3441fbf89ea60d2836b7c64f53ef133a9031c2dff4160b4bf554a923284bf",
+      "git_blob_sha": "1918305c2494f5af0b1943618b57734c4ad49989"
+    },
+    {
+      "path": "images/game-nov15/light-overview.jpg",
+      "kind": "historical-browser-capture",
+      "source": "light-overview.png",
+      "source_sha256": "ce33e82a7d0212e9cb70dba7cd76c2725a13bca61ad7116002055905687a41e9",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 133400,
+      "sha256": "4fc05867184c53ae569d0e12525af4f38a3773dd206c33fcdac9b496806c88e3",
+      "git_blob_sha": "be96c4d0a717b59da31349902198f587656da3fb"
+    },
+    {
+      "path": "images/game-nov15/light-play.jpg",
+      "kind": "historical-browser-capture",
+      "source": "light-play.png",
+      "source_sha256": "448005e37581cef9d0987db990f6ef8c9a3648e124ab410ba68ac469b34ac141",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 132652,
+      "sha256": "bb4d130266cb47c4d271cd43c2d502473055c8376ae10a2724d7e96b32fdd723",
+      "git_blob_sha": "6146e4ade8c94c721fb84e61ddfe877f9bedf462"
+    },
+    {
+      "path": "images/game-nov15/patterns-overview.jpg",
+      "kind": "historical-browser-capture",
+      "source": "patterns-overview.png",
+      "source_sha256": "7e2735bade15ab72a117813386cf719684af79f19f13ee022ccdb886cad72551",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 125715,
+      "sha256": "fc00b392690630f3d55a9f177dbec994bc2508e5254fb72b3991781aca9e128c",
+      "git_blob_sha": "52146c306681cff6a849545cf1ca7589cfedbea2"
+    },
+    {
+      "path": "images/game-nov15/patterns-play.jpg",
+      "kind": "historical-browser-capture",
+      "source": "patterns-play.png",
+      "source_sha256": "1312cdd06a260a1ac6d1f44094c03c12ab743e802e292f8f7a924f0fd47543e4",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 126384,
+      "sha256": "2efbbcd539a4bd07b123662b32a50e2b6b9865cd698616461e11311401f7b84b",
+      "git_blob_sha": "8066594ac92aa179e335fac80ab3c6b0acc7b087"
+    },
+    {
+      "path": "images/game-nov15/phone.jpg",
+      "kind": "historical-browser-capture",
+      "source": "final-phone.png",
+      "source_sha256": "664e90307cc3b4f4c4c8fa85d34ebd39cdcb13b12866f27ca15e6b555b5e1e0a",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        375,
+        812
+      ],
+      "bytes": 77362,
+      "sha256": "2c114885d28a8c2d352c4f2d761e4a5452103fed916933aee1564964ae087be4",
+      "git_blob_sha": "15ea0b1497f716ee56f7c3522513db5771933bb3"
+    },
+    {
+      "path": "images/game-nov15/tile-close.jpg",
+      "kind": "historical-browser-capture",
+      "source": "tile-close.png",
+      "source_sha256": "1200143160f1ef49966e43afea5867a4c394843ecaac4bd6a66e9015878f7ae9",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 162715,
+      "sha256": "60019a3d5e9c73aa58c0c841fa656ee542f6479f62b04fb3b83c2fe22ebf2d25",
+      "git_blob_sha": "42b6496f5a0ad805ce87272cf542fe367aeb6da5"
+    },
+    {
+      "path": "images/game-nov15/town-overview.jpg",
+      "kind": "historical-browser-capture",
+      "source": "town-overview.png",
+      "source_sha256": "9e4e90dd8b544f7a554add413fab6239817727c6fcf0e5942a752df70a72a490",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 189388,
+      "sha256": "5600ca0d235044a7cfda47804b21d9d6c3d656ed3832411c1f4e97512b550875",
+      "git_blob_sha": "47be548091ce28d9797d3808381875836625ef05"
+    },
+    {
+      "path": "images/game-nov15/town-play.jpg",
+      "kind": "historical-browser-capture",
+      "source": "town-play.png",
+      "source_sha256": "18efa16c53d7f49e952aec1545b8b31199bcacffb4b0b1d806e6e19245b96764",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 157420,
+      "sha256": "414d1518b3b3efe6a0cd8f4b516097a2068c46521592d5f5241cb3dc08a49c68",
+      "git_blob_sha": "0d535e833a8cef4be65e98bf7a651eb331f7bf69"
+    },
+    {
+      "path": "images/models/shelly-back.jpg",
+      "kind": "actual-existing-model-render",
+      "source": "back.png",
+      "source_sha256": "1d52e02a312ecdbb9ee93d58f8bd960a7a4f52a7a3737d28e5ac90531ce78931",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1000,
+        1080
+      ],
+      "bytes": 117678,
+      "sha256": "f089a6ba186af9145bdbd759907ed375da78c38f3399c70ac53f48f5c9720580",
+      "git_blob_sha": "021253a228778f540970f651ae46ef73932ed280"
+    },
+    {
+      "path": "images/models/shelly-front.jpg",
+      "kind": "actual-existing-model-render",
+      "source": "front.png",
+      "source_sha256": "288c99a78c9d5a43c1598fc4529a3e8d7de9057bd44dc41b4087db2276bd8a79",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1000,
+        1080
+      ],
+      "bytes": 113632,
+      "sha256": "e8c6a0e6e673aea2ad86b00d232e34e01cdc6f887490589647633927684df0f5",
+      "git_blob_sha": "e294b5a287672072eafee6ae53d4d8fbf24bc7ff"
+    },
+    {
+      "path": "images/models/shelly-quarter.jpg",
+      "kind": "actual-existing-model-render",
+      "source": "quarter.png",
+      "source_sha256": "ce53f6b3bae25656d56a5fc28e6f7a50192a27bfc1824618dd4eead4f8e9fc47",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1000,
+        1080
+      ],
+      "bytes": 119516,
+      "sha256": "c9b628f09a5913c17cb172afe202b611547c0d98af1cfa82515749c48d34ef73",
+      "git_blob_sha": "bea52663f10fd83b56b121117b9530025229781b"
+    },
+    {
+      "path": "images/models/taxi-front.jpg",
+      "kind": "actual-existing-model-render",
+      "source": "front.png",
+      "source_sha256": "18fb6aabbb89ad5df0930bdb15d8df2e79cc6dbcc53a455e3553904ba6d33d8c",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        450,
+        450
+      ],
+      "bytes": 17709,
+      "sha256": "17af20ab3edace9e060488e9982caacb9db52a57d84ef4fafc5af83ef9b7cce1",
+      "git_blob_sha": "3493b93bc44bd0c071252e45e2c7ba085ab95850"
+    },
+    {
+      "path": "images/world-pass/beach-close-after.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "beach-close-after.png",
+      "source_sha256": "b754ebab15e4ca6323c0c3dddcef8134278a40bb70b97f1ef7d6431d3acda8d9",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 169062,
+      "sha256": "1fa972b5a242f4ced91ecc5f85d0371300815d27421fc5dd1848aa05eb81dce0",
+      "git_blob_sha": "89ebcc9e8d5645205117ab39e45616b5e1d7574a"
+    },
+    {
+      "path": "images/world-pass/beach-close-before.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "beach-close-before.png",
+      "source_sha256": "4070edd8d89538af817107e12a3c5e7b582fa0dae569e1405eb5d6620fb527e6",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 108076,
+      "sha256": "aed55f814950134f55091dc01a8c701da6f3a9ae75658f4b4b67e070e88fc44e",
+      "git_blob_sha": "d525e092d9a778f6184e1c51b77ec523b2f30fc1"
+    },
+    {
+      "path": "images/world-pass/beach-overview-after.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "beach-overview-after.png",
+      "source_sha256": "5c97e6798cb2172acbea66c1abd9ddd2fcb1b2cb5487f93619d61a4da162583b",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 146725,
+      "sha256": "0cb27b52acbcba85e33d3b3cf6df8225977987a8c3a9474cbe77d73c00d8899f",
+      "git_blob_sha": "f24b5510027d8c801174698123ef15d96695787d"
+    },
+    {
+      "path": "images/world-pass/beach-overview-before.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "beach-overview-before.png",
+      "source_sha256": "fdbb43cea6dd5155620843ecdee8302967fa989d99ef7ce2cdf00f36c02942c3",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 108580,
+      "sha256": "c84551b246ab6504d51b76f08f265c6af90a48f63e3851eec9454735a88eea05",
+      "git_blob_sha": "ec63320ead69aacb1ec1fe723a0bacf578c95762"
+    },
+    {
+      "path": "images/world-pass/captain-close-after.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "captain-close-after.png",
+      "source_sha256": "4cb796200563bd0789d72cb0f27f125b5f030028a1e6b5c3e87bab9a8698553e",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 138267,
+      "sha256": "b1382909a665046fca877c92d2530cc19f9f8a84a343c64c1ca6075c17d86cba",
+      "git_blob_sha": "ac93e245e31248776d64b4a4aa35e64d7fd6d1d6"
+    },
+    {
+      "path": "images/world-pass/captain-close-before.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "captain-close-before.png",
+      "source_sha256": "4ac3feda15ea73925aeec86071a96ef91aee07d94eff5228ad6a8897ec926b23",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 176532,
+      "sha256": "e29d50eea907c16cf59988374732b40a23a8c4cd7c89325e084fb0caf4ccc662",
+      "git_blob_sha": "783a50eb05e91c07d96fb40fa88cbe4a546907e2"
+    },
+    {
+      "path": "images/world-pass/captain-overview-after.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "captain-overview-after.png",
+      "source_sha256": "69f09c2dee7be7701e6c9c2e00bea9b7ad15129d8a3e888cd1d754ae8ba4528d",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 133976,
+      "sha256": "bc0ce82984d6f7427315c4e1f9716678ff3ca86a82cdc556a378f16a058218fa",
+      "git_blob_sha": "7919e913922e587230c13406d3e42726b273c9d7"
+    },
+    {
+      "path": "images/world-pass/captain-overview-before.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "captain-overview-before.png",
+      "source_sha256": "56d95eeb6a69065f414e24b3bd8cfd3b066b78ab144f89617f900d5068ca0c41",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 185801,
+      "sha256": "3a6937dbc64b78dd6f3c450be0400c93d994fca02aeb3964b8123ee308c6d869",
+      "git_blob_sha": "ad59ed26abde2e9e91d1358879bba5da90723618"
+    },
+    {
+      "path": "images/world-pass/caves-close-after.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "caves-close-after.png",
+      "source_sha256": "95410da7875cd149b1e64b5bbde7386137cf4648c2d257fea2e9aaa9ec9e1841",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 132212,
+      "sha256": "ee1c2a2b73ad5c1abdb5d140f69ae1cffe98a593f1b789288843a5f4d861327c",
+      "git_blob_sha": "a24d327ebac5e60d7776e2bd878873cd6db81454"
+    },
+    {
+      "path": "images/world-pass/caves-close-before.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "caves-close-before.png",
+      "source_sha256": "694a2e07adb7be95694e5e0777d681e2fc893f3378e856b6d6ef81afc692b261",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 71052,
+      "sha256": "66ad856b58a99d9e56b1f14bc8bf153a747949a0d0a0f6100c88188be6882094",
+      "git_blob_sha": "c8b1a74bf46fc8b931ac0ec031ec13f3caff927d"
+    },
+    {
+      "path": "images/world-pass/caves-overview-after.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "caves-overview-after.png",
+      "source_sha256": "4b9d44d2d51d2fd089064bf63d07926025f78c74ca6f53e5c4771729c8b42c2c",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 103051,
+      "sha256": "1e82dfc46aac8c350ce55a5676f69f57c7fcf56ed73c6923e8ea6cb84bfaab6e",
+      "git_blob_sha": "1fbac15314e3841e4dd426f2b459042e5abdc52a"
+    },
+    {
+      "path": "images/world-pass/caves-overview-before.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "caves-overview-before.png",
+      "source_sha256": "6631a95bbc5b374774c1674ab5804ab34e1e945ca1400a89c49c146b31908d19",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 69725,
+      "sha256": "e1714ec2dd73f663f08dce2b0ef107af7be14591dcdf481b766407f8f605d98c",
+      "git_blob_sha": "b0c68c7971378ad1328ecae1003690d83b57b386"
+    },
+    {
+      "path": "images/world-pass/cove-close-after.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "cove-close-after.png",
+      "source_sha256": "fb96269252b503b6887aa529f55f47f84af3044d48ffa1d0c31c7587052c990d",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 50279,
+      "sha256": "bb12d4fdc89e6f27854fadf8bef11ddd857cfd3850906a22db4761d1148615ff",
+      "git_blob_sha": "7fde37ed75b5340104b3ca9b2a16b28f5ab5dedd"
+    },
+    {
+      "path": "images/world-pass/cove-close-before.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "cove-close-before.png",
+      "source_sha256": "b8459d84e56613fdb33432f89ecbdc53e020556cf637cca3d5e8160a85eac6eb",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 46443,
+      "sha256": "c085e6fc7087c7236d0251777c5b6d1be68ffc4e165b813ec5a61d2728ff7d51",
+      "git_blob_sha": "94eac123bce798f0345a85f8cd22857a5a708ac8"
+    },
+    {
+      "path": "images/world-pass/cove-overview-after.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "cove-overview-after.png",
+      "source_sha256": "3c94661be447687705a33cea9cd908be815cfc9de37c5700b3cf3f828d79e195",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 51987,
+      "sha256": "5f11266b24d8250ed7d6fbe23001a81e10fb50692614b3033759d6a7c6e69ba3",
+      "git_blob_sha": "49a101af06b9f3bea6a391763dc5560b44735b96"
+    },
+    {
+      "path": "images/world-pass/cove-overview-before.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "cove-overview-before.png",
+      "source_sha256": "ac715933750faf105e89d6641fee898f702ae021ec825ef5d132322757cdf6f5",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 50376,
+      "sha256": "d6685bab9efaf950d93c99ae579ac4757c3be76a91700703167b0a010e5c50e6",
+      "git_blob_sha": "b695e561958ff5f9b1d0562b20aa85c4a3de9965"
+    },
+    {
+      "path": "images/world-pass/lagoon-close-after.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "lagoon-close-after.png",
+      "source_sha256": "4db26eefb9d4bbfcca0a9c9ad44fa7f485eec5e14c33c3e0a5825eadb87f4ff3",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 164247,
+      "sha256": "98b8f4e6d45c714a93587537e44c9d95d900059c4397eacd04bafaa4eb727e95",
+      "git_blob_sha": "d87e79ed2b821dd9dffdde7fb3564fb738eaaa6a"
+    },
+    {
+      "path": "images/world-pass/lagoon-close-before.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "lagoon-close-before.png",
+      "source_sha256": "24c8d340f249e892ef27a8f31e0b09aa9033684db76be2b07cb3972c4c7d8ee1",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 148633,
+      "sha256": "f30cf73ce2f29531af72f65add7093c5e620d42574445304a04cabe970f51802",
+      "git_blob_sha": "4eeda48e4b1d76975b9460b920db77bb68b36572"
+    },
+    {
+      "path": "images/world-pass/lagoon-overview-after.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "lagoon-overview-after.png",
+      "source_sha256": "e73090e5ca7d3438d83764d44262dd221f0895ee155aa86b527b0e2d431ca1c4",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 141374,
+      "sha256": "65cc8e89c68115bed9c9a584bc9b6e82afcd769084a9692cb67ec2114ef9c3d6",
+      "git_blob_sha": "12c551b1c014ae67c529f0c54e8e9ea481b8d409"
+    },
+    {
+      "path": "images/world-pass/lagoon-overview-before.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "lagoon-overview-before.png",
+      "source_sha256": "818b3fa961939383576a60497800fc887b06b7b4d34f3e6067846d516f5a8f10",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 135745,
+      "sha256": "8862ff311ec03942e30c27f0d75d708234f121be943442ff1fc41773a007a690",
+      "git_blob_sha": "438107812c5872d1588a332a3cd2ece955f0e4d9"
+    },
+    {
+      "path": "images/world-pass/light-close-after.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "light-close-after.png",
+      "source_sha256": "6cf32817c3a5e30371c15be52031901518af445f59f1ce883faf7b974b43b686",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 175143,
+      "sha256": "a7520dc3f2c82fe3ca9f4f7aaa1f974222ec11d6d3115877c034883761ef0526",
+      "git_blob_sha": "b6afd22f8cb829cb89eaa4ddbaefa3551f7e3b8f"
+    },
+    {
+      "path": "images/world-pass/light-close-before.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "light-close-before.png",
+      "source_sha256": "e3200934a8a47abd501de14759995dc1419bbec740bf024cd70a5ab18e166fc0",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 74788,
+      "sha256": "29b5c33814c03ee6721df70fa17e573b58672b4236483796014c6227c4c5db23",
+      "git_blob_sha": "03459b93dc68c4b5faaeaffd3516b53f98dd76fb"
+    },
+    {
+      "path": "images/world-pass/light-overview-after.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "light-overview-after.png",
+      "source_sha256": "169c4ed2fbf45e88ee97e49d35b59689dea9f4d523cd3e55a645c296d0b50723",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 145359,
+      "sha256": "45779795cb547ef75e04c41c9b90a85640537a484f2fb3e22d9dc658b90f2104",
+      "git_blob_sha": "a85d97b1968f661e2ec24383683f31862d75f1f4"
+    },
+    {
+      "path": "images/world-pass/light-overview-before.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "light-overview-before.png",
+      "source_sha256": "cb9a6420dfaf9d3f912256006981273c1ef878ce0789fb4576d88fef9656ab13",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 81264,
+      "sha256": "836027aee7789e012afb5a37fc4a48dbae37c47d8126fe28041ff1ec710e2a71",
+      "git_blob_sha": "4e2ca198d76a8e494f812845291471f859d3c132"
+    },
+    {
+      "path": "images/world-pass/patterns-close-after.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "patterns-close-after.png",
+      "source_sha256": "b2d0d44c0053c217ae2c507c898288ecbaa9c0d6295d844bfc7bfa8f6840f10c",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 132648,
+      "sha256": "7a8dfcf8ed46fa18cd298e657f7555028fab6c37112bf649d5cf386f5b7523e6",
+      "git_blob_sha": "16a4d9c0a758dd5557d21977cf777c34faf73683"
+    },
+    {
+      "path": "images/world-pass/patterns-close-before.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "patterns-close-before.png",
+      "source_sha256": "2fc5826af30e231d2cbf3375e74fe8669e4b6859208ffa33a791d3807e5d04c3",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 59874,
+      "sha256": "f4427329596105c65cc16d818fecf2cfa5defd0bf23fb7e1d8ce94ba892c9b49",
+      "git_blob_sha": "6c2cf7ec5ef00ebc62006561dbf9d2370cbf8a34"
+    },
+    {
+      "path": "images/world-pass/patterns-overview-after.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "patterns-overview-after.png",
+      "source_sha256": "894ab8c66f68f6ec17db44bdd495b499e75db5ec196e273f46ae8ab39c41ac2e",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 133038,
+      "sha256": "6308fd90abd732e63ec203a460503961fc9ccdcfb5a445d1b807b5bd15d4055e",
+      "git_blob_sha": "55850d6eaf11196fe568742e9214fea639311ec8"
+    },
+    {
+      "path": "images/world-pass/patterns-overview-before.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "patterns-overview-before.png",
+      "source_sha256": "b340b1dfa17b4750c09359d383e7f011849f1520c5c021e1b0a785e0fad07dd9",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 77302,
+      "sha256": "affba5294ae4f87f140a0409b63de3e27d0ceb998380207c0db0bbf004293f9c",
+      "git_blob_sha": "17da913eea7648ab33c1c89e0887e9b1d47b84dd"
+    },
+    {
+      "path": "images/world-pass/town-close-after.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "town-close-after.png",
+      "source_sha256": "a516495dc9e6708392be8b95a4a74f394f087f151fefa4726a57d917c182a942",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 187324,
+      "sha256": "d4e0b3e25aa0508c8f979d73bbcf9de5bab53955cc71b41f21bca6e3b0bc2a05",
+      "git_blob_sha": "aa486f65ece43c430242f142e8cc93c71d9df012"
+    },
+    {
+      "path": "images/world-pass/town-close-before.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "town-close-before.png",
+      "source_sha256": "b9a6f211eb751138339f9e5961326b093ddf6b36d6a7e1ffcc36a0958bb05033",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 193204,
+      "sha256": "f4eddbdd90979c89a7f74edd79816975e197cc13cfe8b131232ce48f8b7e20b7",
+      "git_blob_sha": "a5d4de8fce6dce7bcf02eceb630613b43a86f4d9"
+    },
+    {
+      "path": "images/world-pass/town-overview-after.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "town-overview-after.png",
+      "source_sha256": "af4b1eed06119114ad5f2cafa8754c8f2552ba9bb25a1770730ebe5fb9355567",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 167586,
+      "sha256": "a1e19db0a49c3094b77b9c22ae49f5bed834509b01e38da7acc3cd910a762d1f",
+      "git_blob_sha": "2ef68d40a7dd184e01f15632f66be3e115d9eacd"
+    },
+    {
+      "path": "images/world-pass/town-overview-before.jpg",
+      "kind": "offline-actual-scenery-render",
+      "source": "town-overview-before.png",
+      "source_sha256": "5756755dff540a29b7cb7d66a9ee7a2ce5fa81f132e53b21ee675358aa74d905",
+      "transform": "JPEG compression only; original pixel dimensions; no scene edits",
+      "dimensions": [
+        1024,
+        768
+      ],
+      "bytes": 183849,
+      "sha256": "aff0d101e38711912c893f20af0144b475dfedf1326410e20568c1464359a5fe",
+      "git_blob_sha": "d308608395801504a78caca6f3d9927b99284ff4"
+    },
+    {
+      "path": "source-snapshot/src/css/encounter-stage.css",
+      "kind": "current-visual-source-snapshot",
+      "source": "src/css/encounter-stage.css",
+      "source_sha256": "3ba98125df8e2136a66680ee14d60edc8a0569aff8e53a4a303dda98f3d769b1",
+      "bytes": 4442,
+      "sha256": "3ba98125df8e2136a66680ee14d60edc8a0569aff8e53a4a303dda98f3d769b1",
+      "git_blob_sha": "9c4dd08c216039e58e94d97f0cad04b0410fa9b2"
+    },
+    {
+      "path": "source-snapshot/src/css/reef-3d.css",
+      "kind": "current-visual-source-snapshot",
+      "source": "src/css/reef-3d.css",
+      "source_sha256": "206b5dbd1b0d68e815e12c553a116e91c1648bac8cc477fc1c29f6f78cff6454",
+      "bytes": 79244,
+      "sha256": "206b5dbd1b0d68e815e12c553a116e91c1648bac8cc477fc1c29f6f78cff6454",
+      "git_blob_sha": "cd4babbf57116c5736de2a1b07a6a19a50b60c2c"
+    },
+    {
+      "path": "source-snapshot/src/css/region-boards.css",
+      "kind": "current-visual-source-snapshot",
+      "source": "src/css/region-boards.css",
+      "source_sha256": "c5ada1d67ba4df772e1c0bdb5d6aebcf5ecfaa8e19f756e96d994d0c1365e584",
+      "bytes": 4498,
+      "sha256": "c5ada1d67ba4df772e1c0bdb5d6aebcf5ecfaa8e19f756e96d994d0c1365e584",
+      "git_blob_sha": "3ab59175c21819e6cac48496dfe4138a8ba8531a"
+    },
+    {
+      "path": "source-snapshot/src/css/region-people.css",
+      "kind": "current-visual-source-snapshot",
+      "source": "src/css/region-people.css",
+      "source_sha256": "559c6da033039d869cab4d0ebab617da22f64fc223babf2013a1ed30f89029ad",
+      "bytes": 3139,
+      "sha256": "559c6da033039d869cab4d0ebab617da22f64fc223babf2013a1ed30f89029ad",
+      "git_blob_sha": "ded69b9a46e3106f12752b48dba8a0ef5fa70fa6"
+    },
+    {
+      "path": "source-snapshot/src/js/reef.js",
+      "kind": "current-visual-source-snapshot",
+      "source": "src/js/reef.js",
+      "source_sha256": "69a09ce3c551e18638f6ede76d180bedfc9168b7068f60a773bac3937f7552ac",
+      "bytes": 86541,
+      "sha256": "69a09ce3c551e18638f6ede76d180bedfc9168b7068f60a773bac3937f7552ac",
+      "git_blob_sha": "b453c6b7ab60729a9201bd69c3b68ee196310841"
+    },
+    {
+      "path": "source-snapshot/src/js/reef3d/board.js",
+      "kind": "current-visual-source-snapshot",
+      "source": "src/js/reef3d/board.js",
+      "source_sha256": "b386804b98087aa97c9753572f0d400e71234448be35c353ce2f8a239a924654",
+      "bytes": 120347,
+      "sha256": "b386804b98087aa97c9753572f0d400e71234448be35c353ce2f8a239a924654",
+      "git_blob_sha": "bd372993d225f26b4d073d1e99edda82c8a30ed3"
+    },
+    {
+      "path": "source-snapshot/src/js/reef3d/day-night.js",
+      "kind": "current-visual-source-snapshot",
+      "source": "src/js/reef3d/day-night.js",
+      "source_sha256": "8bdc504826ccb131d841c420527e2f58998cd85f9557f1953ad93143cf1e289c",
+      "bytes": 28237,
+      "sha256": "8bdc504826ccb131d841c420527e2f58998cd85f9557f1953ad93143cf1e289c",
+      "git_blob_sha": "95de836c51004d69628ad0d85f4c9bb1552cf259"
+    },
+    {
+      "path": "source-snapshot/src/js/reef3d/encounter-stage.js",
+      "kind": "current-visual-source-snapshot",
+      "source": "src/js/reef3d/encounter-stage.js",
+      "source_sha256": "138ff98247f14433a014069332ac7797bcf84b1f89c565a4144ecc87da49bb30",
+      "bytes": 11028,
+      "sha256": "138ff98247f14433a014069332ac7797bcf84b1f89c565a4144ecc87da49bb30",
+      "git_blob_sha": "7e0044baa199e1123d958cdb35189883bad1b3ea"
+    },
+    {
+      "path": "source-snapshot/src/js/reef3d/post.js",
+      "kind": "current-visual-source-snapshot",
+      "source": "src/js/reef3d/post.js",
+      "source_sha256": "b80a5e4ffd59ea2dc8d58cc6c5763f8ef182552ed9aef8190a45c923b129ddd9",
+      "bytes": 8606,
+      "sha256": "b80a5e4ffd59ea2dc8d58cc6c5763f8ef182552ed9aef8190a45c923b129ddd9",
+      "git_blob_sha": "1e8e364afc31d6d33b7f376d360eeed1c4dec911"
+    },
+    {
+      "path": "source-snapshot/src/js/reef3d/region-people.js",
+      "kind": "current-visual-source-snapshot",
+      "source": "src/js/reef3d/region-people.js",
+      "source_sha256": "1ae97aadc8e0c03b51f8c5569e37ff4edbd913f792e61acee7c4c3a385787b9c",
+      "bytes": 55534,
+      "sha256": "1ae97aadc8e0c03b51f8c5569e37ff4edbd913f792e61acee7c4c3a385787b9c",
+      "git_blob_sha": "183bf6c699cf6bfa56e1f2d9f4b1f9d20eff65b6"
+    },
+    {
+      "path": "source-snapshot/src/js/reef3d/region-scenery.js",
+      "kind": "current-visual-source-snapshot",
+      "source": "src/js/reef3d/region-scenery.js",
+      "source_sha256": "43280c1770c6bc8cac8746104995d93d6dfd13898ed56e1f0a87eb5c626f463c",
+      "bytes": 23867,
+      "sha256": "43280c1770c6bc8cac8746104995d93d6dfd13898ed56e1f0a87eb5c626f463c",
+      "git_blob_sha": "cf851ab20c3a06665c904b5f8a0f172b05d13e82"
+    },
+    {
+      "path": "source-snapshot/src/js/reef3d/resident-models.js",
+      "kind": "current-visual-source-snapshot",
+      "source": "src/js/reef3d/resident-models.js",
+      "source_sha256": "c54906dd1c2ddf86d64e0570a6ecdc2f95ad32a149f9716d4052ff45900a1762",
+      "bytes": 24109,
+      "sha256": "c54906dd1c2ddf86d64e0570a6ecdc2f95ad32a149f9716d4052ff45900a1762",
+      "git_blob_sha": "068fc15b4053cc7604c55881f787590ab57db816"
+    },
+    {
+      "path": "source-snapshot/src/js/reef3d/scenes.js",
+      "kind": "current-visual-source-snapshot",
+      "source": "src/js/reef3d/scenes.js",
+      "source_sha256": "4f608d40a801314c6d624e5e59e1d0cc2352b5b2b30fd4499167bf6b54cd18f5",
+      "bytes": 64291,
+      "sha256": "4f608d40a801314c6d624e5e59e1d0cc2352b5b2b30fd4499167bf6b54cd18f5",
+      "git_blob_sha": "733e934fa52e9f676b3b7066a8f200b0bedf596c"
+    },
+    {
+      "path": "source-snapshot/src/js/reef3d/shelly.js",
+      "kind": "current-visual-source-snapshot",
+      "source": "src/js/reef3d/shelly.js",
+      "source_sha256": "0ea7b60978fe84e80da724ecef9cb46697c19535359c8e982ec5da8b81128b04",
+      "bytes": 12629,
+      "sha256": "0ea7b60978fe84e80da724ecef9cb46697c19535359c8e982ec5da8b81128b04",
+      "git_blob_sha": "ece9dae4482f7266fd0bc408f39aa7d71fc471aa"
+    },
+    {
+      "path": "source-snapshot/src/js/reef3d/tile-art.js",
+      "kind": "current-visual-source-snapshot",
+      "source": "src/js/reef3d/tile-art.js",
+      "source_sha256": "938242aa065eea14efc0163638d004321bc55b8455f1908f9d112dcc0f26be5f",
+      "bytes": 11908,
+      "sha256": "938242aa065eea14efc0163638d004321bc55b8455f1908f9d112dcc0f26be5f",
+      "git_blob_sha": "d515f9dcb87ac2418d939ead87897c86dd529bc3"
+    },
+    {
+      "path": "source-snapshot/src/js/reef3d/world-detail.js",
+      "kind": "current-visual-source-snapshot",
+      "source": "src/js/reef3d/world-detail.js",
+      "source_sha256": "9b87493d0ff54332c4e69888475b2f7d95eb9417a327601b0175a001c00d8778",
+      "bytes": 17002,
+      "sha256": "9b87493d0ff54332c4e69888475b2f7d95eb9417a327601b0175a001c00d8778",
+      "git_blob_sha": "5720cf251cbf6baa55a7fbf11497e42c42a975f6"
+    },
+    {
+      "path": "source-snapshot/src/js/reef3d/world-overview.js",
+      "kind": "current-visual-source-snapshot",
+      "source": "src/js/reef3d/world-overview.js",
+      "source_sha256": "8f49251cc49d329f9ea9f7b27e8f08bd1adedc25c4133369adfd644712d59994",
+      "bytes": 9554,
+      "sha256": "8f49251cc49d329f9ea9f7b27e8f08bd1adedc25c4133369adfd644712d59994",
+      "git_blob_sha": "618f31d233b5f56470ba342dd1fd8bf677c3def2"
+    },
+    {
+      "path": "source-snapshot/src/js/reef3d/world-routes.js",
+      "kind": "current-visual-source-snapshot",
+      "source": "src/js/reef3d/world-routes.js",
+      "source_sha256": "b0bfe4ec02c5454cb60b832b5f09fb2d57381018cdb6c7a49e7718586ab64f90",
+      "bytes": 3385,
+      "sha256": "b0bfe4ec02c5454cb60b832b5f09fb2d57381018cdb6c7a49e7718586ab64f90",
+      "git_blob_sha": "f3a2a7421ba519a4402f0fc032450cd8cb4682ce"
+    },
+    {
+      "path": "source-snapshot/src/js/reef3d/world-surfaces.js",
+      "kind": "current-visual-source-snapshot",
+      "source": "src/js/reef3d/world-surfaces.js",
+      "source_sha256": "a2cfea65147c2867d926822000feec70bfccb131eb18251e45a9245004eeac2c",
+      "bytes": 9782,
+      "sha256": "a2cfea65147c2867d926822000feec70bfccb131eb18251e45a9245004eeac2c",
+      "git_blob_sha": "9f24ad31f2d3ea0fb908dcc8ef889fa26207b8c1"
+    },
+    {
+      "path": "source-snapshot/src/js/region-boards.js",
+      "kind": "current-visual-source-snapshot",
+      "source": "src/js/region-boards.js",
+      "source_sha256": "9e63178aaacb0b5e4c19f071146d601b95069f1ebd1c634ae4595cc68d62b46b",
+      "bytes": 13122,
+      "sha256": "9e63178aaacb0b5e4c19f071146d601b95069f1ebd1c634ae4595cc68d62b46b",
+      "git_blob_sha": "58bcc6ecd181d3d495e244121cc6f719b1820568"
+    },
+    {
+      "path": "source-snapshot/tools/art/audit_world_scenery.cjs",
+      "kind": "current-visual-source-snapshot",
+      "source": "tools/art/audit_world_scenery.cjs",
+      "source_sha256": "b3bf49f4d8fbfc11d4a664eb1ad669009e9d3636c9dd9b5cce98624522205917",
+      "bytes": 14443,
+      "sha256": "b3bf49f4d8fbfc11d4a664eb1ad669009e9d3636c9dd9b5cce98624522205917",
+      "git_blob_sha": "83c126627d04ddcd74a6936be212f9b30774a646"
+    },
+    {
+      "path": "source-snapshot/tools/art/render_world_scenery.py",
+      "kind": "current-visual-source-snapshot",
+      "source": "tools/art/render_world_scenery.py",
+      "source_sha256": "693756c63bcf380b39e95b1dbd92eed7970a03e71f0bd141f00f744c02ba8227",
+      "bytes": 13672,
+      "sha256": "693756c63bcf380b39e95b1dbd92eed7970a03e71f0bd141f00f744c02ba8227",
+      "git_blob_sha": "aa79b383fc734a2bd514412df489fdffc604a93d"
+    },
+    {
+      "path": "source-snapshot/tools/check/color_pipeline_test.js",
+      "kind": "current-visual-source-snapshot",
+      "source": "tools/check/color_pipeline_test.js",
+      "source_sha256": "2b20b228921c5c3be4abb518fcd6cf836ae741ea4d54571390208682acc53e09",
+      "bytes": 6484,
+      "sha256": "2b20b228921c5c3be4abb518fcd6cf836ae741ea4d54571390208682acc53e09",
+      "git_blob_sha": "5d9cdf4e029af3550dfb9b8325845112c61f5d0f"
+    },
+    {
+      "path": "source-snapshot/tools/check/region_scenery_geometry_test.js",
+      "kind": "current-visual-source-snapshot",
+      "source": "tools/check/region_scenery_geometry_test.js",
+      "source_sha256": "df9266025e87088e22c137edab0ec5fcae360a2ea342cfd792e2103bd9ffe316",
+      "bytes": 4150,
+      "sha256": "df9266025e87088e22c137edab0ec5fcae360a2ea342cfd792e2103bd9ffe316",
+      "git_blob_sha": "b526d27120ad788be654fe49b3a8a3e8d2667ac9"
+    },
+    {
+      "path": "source-snapshot/tools/check/world_surfaces_test.js",
+      "kind": "current-visual-source-snapshot",
+      "source": "tools/check/world_surfaces_test.js",
+      "source_sha256": "d419c2c9ab97cbf20d197abbf5f9dfc6d5815322ea285a8be3bc12b259cd49b2",
+      "bytes": 11236,
+      "sha256": "d419c2c9ab97cbf20d197abbf5f9dfc6d5815322ea285a8be3bc12b259cd49b2",
+      "git_blob_sha": "d2e9ec786432cc884ac78286c433fd0e54f3014b"
+    },
+    {
+      "path": "textures/atlas-layout.json",
+      "kind": "texture-layout",
+      "source": "art-source/world-surfaces/atlas-layout.json",
+      "source_sha256": "22c514535b4560dd7804973e8947293eee0241d3e0e811c7489bb3ca0d9f4651",
+      "bytes": 590,
+      "sha256": "22c514535b4560dd7804973e8947293eee0241d3e0e811c7489bb3ca0d9f4651",
+      "git_blob_sha": "2feb2243b1d948ce767a326ee54abf30d6217470"
+    },
+    {
+      "path": "textures/shellstone-color.jpg",
+      "kind": "runtime-tile-texture-art",
+      "source": "assets/world/shellstone-color.jpg",
+      "source_sha256": "b6084a0ec6616be952ba6e9071e6e9356920f2c04dee5d57822069dab6a0973a",
+      "bytes": 53387,
+      "sha256": "b6084a0ec6616be952ba6e9071e6e9356920f2c04dee5d57822069dab6a0973a",
+      "git_blob_sha": "41befceef58a7b35c63f4d9be30f7f73d9b6c209"
+    },
+    {
+      "path": "textures/world-surfaces.jpg",
+      "kind": "runtime-texture-art",
+      "source": "assets/world/world-surfaces.jpg",
+      "source_sha256": "9e40e1c575d643a1db0ce7daf866340869111bde7f967273a3eb519f2b3b2523",
+      "bytes": 360915,
+      "sha256": "9e40e1c575d643a1db0ce7daf866340869111bde7f967273a3eb519f2b3b2523",
+      "git_blob_sha": "fe163a94382300678104154302603bafde2ed70c"
+    }
+  ]
+}

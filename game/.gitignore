@@ -1,0 +1,8 @@
+__pycache__/
+words-data.json
+tools/words/words-data.js
+node_modules/
+build/
+# Blender's automatic backups stay local; keep the editable .blend sources.
+*.blend1
+*.blend2
