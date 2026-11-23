@@ -1,0 +1,7 @@
+{
+  "service": "microsoft/TRELLIS.2",
+  "input": "/workspace/generated_images/exec-8dc38e31-d010-47c0-8cbb-535df0233759.png",
+  "status": "completed",
+  "glb": "/workspace/work/shelly-pearl/workflow/shelly-trellis-source.glb",
+  "bytes": 4967624
+}
