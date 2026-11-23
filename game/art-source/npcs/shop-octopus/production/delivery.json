@@ -1,0 +1,60 @@
+{
+  "status": "candidate awaiting root visual/integration review",
+  "sourceHelper": "tools/art/build_shop_octopus.py",
+  "runtimeModified": false,
+  "skinMask": "OPAQUE baseColor PNG alpha, skin=255; eyes/suckers/apron/pocket/straps/brass=0",
+  "assets": [
+    {
+      "lod": "board",
+      "path": "shop-octopus-board.glb",
+      "sha256": "877be107fd4ed4eccc5ddbee1b4ee3e63c172cebecdb4affad5263f584478931",
+      "bytes": 933684,
+      "triangles": 7808,
+      "bones": 20,
+      "draws": 1,
+      "maps": [
+        {
+          "name": "painted-color-1024",
+          "mime": "image/png",
+          "width": 1024,
+          "height": 1024,
+          "bytes": 451887
+        },
+        {
+          "name": "painted-surface-256",
+          "mime": "image/png",
+          "width": 256,
+          "height": 256,
+          "bytes": 12966
+        }
+      ],
+      "minimumImportedPoseArmClearance": 0.12134
+    },
+    {
+      "lod": "close",
+      "path": "shop-octopus-close.glb",
+      "sha256": "5775a989d262573cd20e76e202d5005e0af8b6623664585874a90e550d6e45e4",
+      "bytes": 2375644,
+      "triangles": 21744,
+      "bones": 20,
+      "draws": 1,
+      "maps": [
+        {
+          "name": "painted-color-2048",
+          "mime": "image/png",
+          "width": 2048,
+          "height": 2048,
+          "bytes": 1338996
+        },
+        {
+          "name": "painted-surface-512",
+          "mime": "image/png",
+          "width": 512,
+          "height": 512,
+          "bytes": 36698
+        }
+      ],
+      "minimumImportedPoseArmClearance": 0.12134
+    }
+  ]
+}

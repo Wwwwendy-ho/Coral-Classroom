@@ -1,0 +1,80 @@
+{
+  "date": "2026-11-16",
+  "stage": "Whole-cast facial concept review: A eyes preferred, natural mouth anatomy and role-specific reactions; existing deployed models retained.",
+  "taxi": {
+    "concept": "taxi-squid/concept-input.png",
+    "source": "taxi-squid/source-reconstruction.glb",
+    "runtime": "../../assets/models/taxi-squid.glb",
+    "embeddedRuntime": "../../assets/models/taxi-squid-view.glb",
+    "triangles": 7999,
+    "materials": 1,
+    "bones": 2,
+    "clips": [
+      "Idle",
+      "React"
+    ],
+    "bytes": 1257900,
+    "expression": "Bored: half-lidded eyes, relaxed brows and a flat sculpted mouth.",
+    "review": "Four actual-model angles and two motion extrema reviewed; final palette alignment, browser rendering and physical device performance still need review.",
+    "service": "https://huggingface.co/spaces/prithivMLmods/TRELLIS.2-Text-to-3D",
+    "close": {
+      "runtime": "../../assets/models/taxi-squid-close.glb",
+      "triangles": 22000,
+      "colorTexture": 2048,
+      "surfaceTexture": 512,
+      "materials": 1,
+      "bytes": 2946048,
+      "loading": "Matching conversations only; restored board LOD and released GPU resources on exit."
+    },
+    "standaloneViewer": "Close model with 900k-pixel cap; normal board stays at its prior budgets."
+  },
+  "pending": {
+    "characters": [
+      "jisu",
+      "shop-octopus"
+    ],
+    "reason": "New A-eye expression concepts are presented for feedback before finishing replacement models. Jisu/octopus shape drafts exist; last full PBR request exceeded free GPU allowance.",
+    "behavior": "Improved procedural bodies and interactions remain active; no absent models registered.",
+    "earlierReason": "Connected service daily free ZeroGPU allowance exhausted; 240s requested vs119s left; service reported try again in23:56:34 at the request."
+  },
+  "productionInputs": [
+    {
+      "id": "taxi-squid",
+      "path": "taxi-squid/concept-input.png",
+      "prompt": "Create the production reconstruction input for ONLY the Taxi driver, fifth character from the left in the provided lineup. Keep the refined, organic sculpted 3D animated storybook film art style, exact tall slender squid silhouette, cool ivory skin with rose-purple chromatophore speckles, lavender-gray fins, yellow-and-navy checked cab-driver scarf, dark navy small taxi badge. Latest required facial acting: BORED, understated and dryly unimpressed. Heavily half-lidded eyes looking slightly sideways, relaxed low brows, short flat almost-horizontal closed mouth, slightly slouched pose, one tentacle loosely curled. No smile, smirk, anger, sleepy closed eyes or cute astonished grin. Still appealing and readable. This is a squid marine organism: long tapered mantle and paired triangular fins above large eyes, eight delicate arms and two longer feeding tentacles below, no human neck, arms, fingers or torso. Single full body character only, neutral slightly three-quarter frontal view, centered with generous margin, all tentacles fully visible, grounded believable surfaces, finely sculpted skin and cloth detail. No text, labels, layout, props, shadows baked into background, surrounding characters, magical effects or sparkles. Transparent cutout background. Preserve exact cool biology-based palette and checked accessories. Camera at mid-body height for clean volumetric modeling reference."
+    },
+    {
+      "id": "jisu",
+      "path": "jisu/concept-input.png",
+      "prompt": "Create the production reconstruction input for ONLY Jisu, the tiny hermit crab third from the left in the provided lineup. Preserve this character's refined organic sculpted 3D animated storybook film art style, expressive stalk eyes and eager quick smile, small arched crab body and big weathered pale gastropod spiral shell, cobalt electric-blue bands on near-black/navy legs, subtly pale-speckled claws, slender orange antennae. Exactly match the TANGERINE ORANGE postal canvas pouch with practical strap; cream envelope in one raised claw has a TANGERINE ORANGE scallop-shell seal. The orange bag and seal must remain strong orange, not red/brown/pink. Honest small crab anatomy with two different sized claws and visible walking legs, no human anatomy. A lively but easy-to-rig grounded pose, single isolated full-body character, front three-quarter view, all shell and feet within frame, generous margin. Surface detail at Shelly's refined storybook level, carved shell growth lines, blue chitin, tactile canvas. Remove the electrical streaks for reconstruction input; electrical speed cues will be animated separately in game. No text, labels, other creatures, platform, loose accessories, extra scenery or ground plane. Transparent cutout background, soft neutral daylight with no warm grading."
+    },
+    {
+      "id": "shop-octopus",
+      "path": "shop-octopus/concept-input.png",
+      "prompt": "Create the production reconstruction input for ONLY the Town shopkeeper, the large broad adult octopus fourth from the left in the provided lineup. Preserve the selected mature composed character and refined organically sculpted 3D animated storybook film art style: broad heavy substantial pear-shaped mantle, relaxed half-lidded golden eyes with gently raised brows, small friendly closed-mouth expression, rich brick/ruby red Octopus rubescens skin covered in subtle irregular natural cream mottles and tiny skin contours, light cream rows of suckers. Distinct indigo denim work apron with practical broad pocket, visible restrained stitching and brass buttons. Full octopus anatomy, eight organically curling substantial arms, no human shoulders, torso, arms, fingers or legs. Natural red state only; camouflage will be in-game. Single full-body character in slightly three-quarter front view, centered and entire silhouette within frame, generous margin. Keep the calm mature shopkeeper expression and heavy grounded curl, varied flowing arm shapes with clear readable gaps. Remove the loose stock crate and its contents, environment or any other objects so the octopus itself is unobstructed. No typography, labels, other creatures, background or ground plane. Transparent cutout, neutral daylight, sophisticated painted/sculpted organic surfaces, not plastic or clay."
+    }
+  ],
+  "cafe": {
+    "stage": "Authored textured 3D model integrated; physical device performance remains unverified",
+    "board": "../../assets/models/cafe-seahorse.glb",
+    "close": "../../assets/models/cafe-seahorse-close.glb",
+    "triangles": [
+      7880,
+      20848
+    ],
+    "bytes": [
+      593224,
+      1426968
+    ],
+    "materials": 1,
+    "bones": 11,
+    "clips": [
+      "Idle",
+      "Listen",
+      "React"
+    ],
+    "source": "tools/art/build_cafe_seahorse.py",
+    "naturalAnatomy": "Attentive eye aim, head and fin motion; no animated eyelid closure or human mouth",
+    "review": "Actual GLB four-angle and animation poses inspected; one-off offline renders do not establish browser/device FPS."
+  }
+}
