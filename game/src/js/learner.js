@@ -39,12 +39,16 @@
   function learnerEventLog(){
     var pid = S.profile && S.profile.id ? S.profile.id : null;
     if(learnerEvents && learnerEventPid === pid) return learnerEvents;
+    learnerFlush();
     learnerEventPid = pid; learnerEvents = null;
     if(pid){
       try {
         var raw = localStorage.getItem(learnerEventKey(pid));
         var got = typeof safeJsonParse === 'function' ? safeJsonParse(raw, null) : (raw ? JSON.parse(raw) : null);
-        if(got && got.v === 1 && Array.isArray(got.list)) learnerEvents = got;
+        if(got && got.v === 1 && Array.isArray(got.list)){
+          if(got.list.length > LEARNER_MAX_EVENTS) got.list = got.list.slice(-LEARNER_MAX_EVENTS);
+          learnerEvents = got;
+        }
       } catch(e){}
     }
     if(!learnerEvents) learnerEvents = { v: 1, list: [] };
@@ -112,7 +116,9 @@
       it.ch[channel] = c;
       m.dirty = true;
       var ev = learnerEventLog();
-      ev.list.push({ ts: now, k: key.slice(0, 80), ch: channel, g: g, ms: opts && opts.ms != null ? Math.round(+opts.ms) : 0, m: opts && opts.mode ? String(opts.mode).slice(0, 16) : '' });
+      var msVal = opts && opts.ms != null && isFinite(+opts.ms) ? Math.max(0, Math.round(+opts.ms)) : 0;
+      var modeVal = opts && opts.mode ? String(opts.mode).slice(0, 16) : '';
+      ev.list.push({ ts: now, k: key.slice(0, 80), ch: channel, g: g, ms: msVal, m: modeVal });
       if(ev.list.length > LEARNER_MAX_EVENTS) ev.list = ev.list.slice(-LEARNER_MAX_EVENTS);
       ev.dirty = true;
       learnerSaveSoon();
@@ -173,6 +179,26 @@
       var list = learnerEventLog().list;
       return limit ? list.slice(-limit) : list.slice();
     },
+    flush: learnerFlush,
+    dropProfile: function(pid){
+      if(!pid) return;
+      if(learnerPid === pid){ clearTimeout(learnerSaveT); learnerSaveT = null; learnerData = null; learnerPid = undefined; }
+      if(learnerEventPid === pid){ learnerEvents = null; learnerEventPid = null; }
+      try { localStorage.removeItem(learnerStoreKey(pid)); localStorage.removeItem(learnerEventKey(pid)); } catch(e){}
+    },
+    exportProfile: function(pid){
+      if(!pid) return { model: null, events: [] };
+      learnerFlush();
+      var parse = typeof safeJsonParse === 'function' ? safeJsonParse : function(raw, fb){ try { return raw ? JSON.parse(raw) : fb; } catch(e){ return fb; } };
+      var model = null, events = [];
+      try {
+        var m = parse(localStorage.getItem(learnerStoreKey(pid)), null);
+        if(m && m.v === 1 && m.items && typeof m.items === 'object') model = m;
+        var ev = parse(localStorage.getItem(learnerEventKey(pid)), null);
+        if(ev && ev.v === 1 && Array.isArray(ev.list)) events = ev.list;
+      } catch(e){}
+      return { model: model, events: events };
+    },
     regionFocus: function(now){
       now = now || Date.now();
       var byCh = { hear:0, read:0, recall:0, say:0, use:0 };
@@ -183,7 +209,7 @@
           var c = it.ch[ch];
           if(!c || !c.reps) return;
           var r = learnerRecall(c, now);
-          if(c.due <= now || (r != null && r < 0.85)) byCh[ch] += 1;
+          if(c.due <= now || (r != null && r < 0.85) || (c.last && c.due - c.last <= LEARNER_AGAIN_MS)) byCh[ch] += 1;
         });
       });
       var dueByRegion = {
@@ -218,6 +244,14 @@
         var s = code - 0xAC00;
         var jong = s % 28, jung = ((s - jong) / 28) % 21, cho = Math.floor(s / 588);
         out.push({ c: KO_CHO[cho], v: KO_JUNG[jung], b: KO_JONG[jong] });
+      } else if(code >= 0x3131 && code <= 0x318E){
+        if(code === 0x3164) continue;
+        var ch = str.charAt(i);
+        if((code >= 0x314F && code <= 0x3163) || code >= 0x3187){
+          out.push({ c: '', v: ch, b: '', jamo: true });
+        } else {
+          out.push({ c: ch, v: '', b: '', jamo: true });
+        }
       }
     }
     return out;
@@ -225,20 +259,56 @@
   function koSameGroup(a, b, groups){
     return a !== b && groups.some(function(g){ return g.indexOf(a) >= 0 && g.indexOf(b) >= 0; });
   }
+  function koDiffPair(x, y){
+    var diffs = 0, cons = false, vowel = false, batchim = false;
+    if(x.c !== y.c){ diffs++; if(koSameGroup(x.c, y.c, KO_CONS_GROUPS)) cons = true; }
+    if(x.v !== y.v){ diffs++; if(koSameGroup(x.v, y.v, KO_VOWEL_GROUPS)) vowel = true; }
+    if(x.b !== y.b){ diffs++; batchim = true; }
+    return { diffs: diffs, cons: cons, vowel: vowel, batchim: batchim };
+  }
   function koJamoDiag(expected, actual){
     var e = koDecompose(String(expected || '').normalize('NFC'));
     var a = koDecompose(String(actual || '').normalize('NFC'));
     if(!e.length || !a.length || Math.abs(e.length - a.length) > 1) return null;
-    var n = Math.min(e.length, a.length), diffs = 0, consHint = false, vowelHint = false, batchimHint = false;
-    for(var i = 0; i < n; i++){
-      if(e[i].c !== a[i].c){ diffs++; if(koSameGroup(e[i].c, a[i].c, KO_CONS_GROUPS)) consHint = true; }
-      if(e[i].v !== a[i].v){ diffs++; if(koSameGroup(e[i].v, a[i].v, KO_VOWEL_GROUPS)) vowelHint = true; }
-      if(e[i].b !== a[i].b){ diffs++; batchimHint = true; }
+    var diffs = 0, consHint = false, vowelHint = false, batchimHint = false, insDel = false;
+    if(e.length === a.length){
+      for(var i = 0; i < e.length; i++){
+        var p = koDiffPair(e[i], a[i]);
+        diffs += p.diffs;
+        if(p.cons) consHint = true;
+        if(p.vowel) vowelHint = true;
+        if(p.batchim) batchimHint = true;
+      }
+      if(diffs === 0 || diffs > 3) return null;
+    } else {
+      var longer = e.length > a.length ? e : a;
+      var shorter = e.length > a.length ? a : e;
+      var best = null;
+      for(var skip = 0; skip < longer.length; skip++){
+        var d = 0, ch = false, vh = false, bh = false;
+        for(var j = 0; j < shorter.length; j++){
+          var q = koDiffPair(shorter[j], longer[j < skip ? j : j + 1]);
+          d += q.diffs;
+          if(q.cons) ch = true;
+          if(q.vowel) vh = true;
+          if(q.batchim) bh = true;
+        }
+        if(!best || d < best.diffs || (d === best.diffs && (ch || vh || bh) && !(best.cons || best.vowel || best.batchim))){
+          best = { diffs: d, cons: ch, vowel: vh, batchim: bh, skipped: longer[skip] };
+        }
+      }
+      if(!best || best.diffs > 2) return null;
+      if(best.diffs === 0){
+        if(shorter.length < 2 && !best.skipped.jamo) return null;
+        insDel = true;
+      } else {
+        diffs = best.diffs; consHint = best.cons; vowelHint = best.vowel; batchimHint = best.batchim;
+      }
     }
-    if(diffs === 0 || diffs > 3) return null;
     if(consHint) return 'Close! Watch the consonant sound (plain vs. strong/tense).';
     if(vowelHint) return 'Almost! Double-check the vowel shape (e.g. ㅓ vs ㅗ / ㅐ vs ㅔ).';
     if(batchimHint) return 'So close! Check the bottom consonant (받침) on that syllable.';
+    if(insDel) return 'Close! Check for an extra or missing syllable.';
     return null;
   }
   if(typeof window !== 'undefined') window.koJamoDiag = koJamoDiag;
@@ -249,7 +319,7 @@
   //   every other type → read when the question shown is Korean, recall when it's English (or Chinese) and the
   //   answer is Korean
   // Only cards with Hangul count for now: the language course is Korean first.
-  function learnerNoteAnswer(card, mode, rating){
+  function learnerNoteAnswer(card, mode, rating, opts){
     try {
       var front = String(card.front || '').trim(), back = String(card.back || '').trim();
       var ko = learnerHasHangul(front) ? front : (learnerHasHangul(back) ? back : '');
@@ -269,6 +339,8 @@
         else if(mode === 'numsys') prompt = back;
         channel = learnerHasHangul(prompt) ? 'read' : 'recall';
       }
-      Learner.record(ko, channel, rating);
+      var recOpts = opts && typeof opts === 'object' ? Object.assign({}, opts) : {};
+      if(recOpts.mode == null) recOpts.mode = mode;
+      Learner.record(ko, channel, rating, recOpts);
     } catch(e){}
   }
