@@ -506,7 +506,16 @@
     var silentUnlockAudio = null;
     var SILENT_WAV = 'data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';
     function startSilentUnlock(){
-      if(silentUnlockAudio) return;
+      if(!enabled) return;
+      if(silentUnlockAudio){
+        try {
+          if(silentUnlockAudio.paused){
+            var pr = silentUnlockAudio.play();
+            if(pr && pr.catch) pr.catch(function(){});
+          }
+        } catch(e){}
+        return;
+      }
       try {
         silentUnlockAudio = new Audio(SILENT_WAV);
         silentUnlockAudio.loop = true;
@@ -522,12 +531,20 @@
         enabled = !!v;
         try { localStorage.setItem('coralCoveSound', enabled ? '1' : '0'); } catch(e){}
         if(!enabled){
+          if(silentUnlockAudio){ try { silentUnlockAudio.pause(); } catch(e){} }
           try { if(typeof Ambience !== 'undefined' && Ambience.stop) Ambience.stop(); } catch(e){}
           try { if(typeof Speech !== 'undefined' && Speech.stop) Speech.stop(); } catch(e){}
+          try { if(typeof reefWinStop === 'function') reefWinStop(); } catch(e){}
+          try { if(typeof reef3dAmbienceStop === 'function') reef3dAmbienceStop(); } catch(e){}
+        } else {
+          ensureCtx();
+          startSilentUnlock();
+          try { if(typeof Speech !== 'undefined' && Speech.unlock) Speech.unlock(); } catch(e){}
+          try { if(typeof reefMusicStart === 'function') reefMusicStart(); } catch(e){}
         }
         try { if(typeof reefMusicUpdate === 'function') reefMusicUpdate(); } catch(e){}
       },
-      unlock: function(){ ensureCtx(); startSilentUnlock(); }, // call on first user gesture so mobile browsers allow audio later
+      unlock: function(){ if(!enabled) return; ensureCtx(); startSilentUnlock(); }, // call on first user gesture so mobile browsers allow audio later
       // Shares this one AudioContext with the Ambience module below, rather than each spinning up
       // its own -- browsers cap how many contexts can run at once, and there's no reason for a sound
       // effect and a looping background track to fight over separate audio graphs.
@@ -905,6 +922,7 @@
     }
     function unlockAudio(){
       if(unlocked) return;
+      if(!Sound.isEnabled()) return;
       unlocked = true;
       try { var a = getPlayer(); a.src = SILENT_MP3; var p = a.play(); if(p && p.catch) p.catch(function(){ unlocked = false; }); } catch(e){ unlocked = false; }
     }
@@ -1064,7 +1082,7 @@
         speakParts(str, rate, variant, token, onEnd);
       }).catch(function(){ speakSynthCb(str, onEnd, token); });
     }
-    return { speak: speak, speakThen: speakThen, stop: stop, playUrl: playUrl, isSupported: function(){ return supported; },
+    return { speak: speak, speakThen: speakThen, stop: stop, playUrl: playUrl, unlock: unlockAudio, isSupported: function(){ return supported; },
       listVoices: listVoices, getPref: getPref, setPref: setPref, prefKey: prefKey,
       autoVoice: function(lang){ var p = getPref(prefKey(lang)); setPref(prefKey(lang), ''); var v = pickVoice(lang); setPref(prefKey(lang), p); return v; } };
   })();

@@ -5,6 +5,8 @@
 (function(){
   'use strict';
   var D = null, loading = null;
+  var hasOwn = Object.prototype.hasOwnProperty;
+  function own(obj, k){ return obj && hasOwn.call(obj, k) ? obj[k] : undefined; }
 
   function load(){
     if(D) return Promise.resolve(D);
@@ -24,30 +26,31 @@
 
   /* ---------- Chinese ---------- */
   function zhTrad(text){
-    var z = D.zh;
-    if(z.w[text] || z.c[text]) return text;
-    if(z.s[text]) return z.s[text];
-    return Array.from(text).map(function(ch){ return z.c[ch] ? ch : (z.s[ch] || ch); }).join('');
+    var z = D.zh || {};
+    if(own(z.w, text) || own(z.c, text)) return text;
+    var sv = own(z.s, text);
+    if(sv) return sv;
+    return Array.from(text).map(function(ch){ return own(z.c, ch) ? ch : (own(z.s, ch) || ch); }).join('');
   }
   // Splits a run of characters into the longest known words, left to right.
   function zhSegment(text){
-    var z = D.zh, chars = Array.from(text), out = [], i = 0;
+    var z = D.zh || {}, chars = Array.from(text), out = [], i = 0;
     while(i < chars.length){
       var hit = null;
-      for(var n = Math.min(6, chars.length - i); n >= 2; n--){ var w = chars.slice(i, i + n).join(''); if(z.w[w]){ hit = w; break; } }
+      for(var n = Math.min(6, chars.length - i); n >= 2; n--){ var w = chars.slice(i, i + n).join(''); if(own(z.w, w)){ hit = w; break; } }
       if(!hit) hit = chars[i];
       out.push(hit); i += Array.from(hit).length;
     }
     return out;
   }
-  function zhEntry(w){ var z = D.zh; return z.w[w] || z.c[w] || null; }
+  function zhEntry(w){ var z = D.zh || {}; return own(z.w, w) || own(z.c, w) || null; }
   function zhCharParts(ch){
-    var c = D.zh.c[ch]; if(!c || !c.k || !c.k.length) return [];
-    return c.k.map(function(k){ var e = D.zh.c[k]; return { part: k + (e && e.p ? ' (' + e.p + ')' : ''), meaning: e && e.m ? e.m : 'a part of the character' }; });
+    var c = own(D.zh && D.zh.c, ch); if(!c || !c.k || !c.k.length) return [];
+    return c.k.map(function(k){ var e = own(D.zh.c, k); return { part: k + (e && e.p ? ' (' + e.p + ')' : ''), meaning: e && e.m ? e.m : 'a part of the character' }; });
   }
   function zhMadeOf(ch){
-    var c = D.zh.c[ch]; if(!c || !c.k || !c.k.length) return '';
-    return ' Made of ' + c.k.map(function(k){ var e = D.zh.c[k]; return k + (e && e.m ? ' (' + e.m.split(';')[0] + ')' : ''); }).join(' + ') + '.';
+    var c = own(D.zh && D.zh.c, ch); if(!c || !c.k || !c.k.length) return '';
+    return ' Made of ' + c.k.map(function(k){ var e = own(D.zh.c, k); return k + (e && e.m ? ' (' + e.m.split(';')[0] + ')' : ''); }).join(' + ') + '.';
   }
   function zhAnswer(raw){
     var text = zhTrad(raw), words = zhSegment(text), chars = Array.from(text);
@@ -64,7 +67,7 @@
     if(words.length === 1 && zhEntry(text)){
       var w = zhEntry(text);
       return { answer: '“' + shown + '” (' + w.p + ') means: ' + w.m + '. Here is each character.',
-        parts: chars.map(function(ch){ var c = D.zh.c[ch]; return { part: ch + (c && c.p ? ' (' + c.p + ')' : ''), meaning: (c && c.m ? c.m : 'a character') + '.' + zhMadeOf(ch) }; }), example: '' };
+        parts: chars.map(function(ch){ var c = own(D.zh && D.zh.c, ch); return { part: ch + (c && c.p ? ' (' + c.p + ')' : ''), meaning: (c && c.m ? c.m : 'a character') + '.' + zhMadeOf(ch) }; }), example: '' };
     }
     // a phrase or sentence: each word in order
     var known = words.filter(function(x){ return zhEntry(x); }).length;
@@ -89,21 +92,24 @@
       for(var i = 0; i < tries.length; i++){
         if(!tries[i][0].test(w)) continue;
         var b = w.replace(tries[i][0], tries[i][1]);
-        if(b.length > 1 && has[b]) return b;
+        if(b.length > 1 && own(has, b)) return b;
       }
       return null;
     }
-    if(E[w]) return w;
-    if(F[w] && E[F[w]]) return F[w];
-    return base(E) || (B[w] ? w : null) || (F[w] && B[F[w]] ? F[w] : null) || base(B);
+    if(own(E, w)) return w;
+    var fw = own(F, w);
+    if(fw && own(E, fw)) return fw;
+    return base(E) || (own(B, w) ? w : null) || (fw && own(B, fw) ? fw : null) || base(B);
   }
   function enLook(word){
     var shown = word.replace(/[’]/g, "'").replace(/^[^A-Za-z]+|[^A-Za-z']+$/g, ''), w = shown.toLowerCase();  // shown as typed, looked up in lower case
     if(!w) return null;
     var lem = enLemma(w);
     if(!lem) return { word: shown, none: true };
-    if(D.en[lem]) return { word: shown, lemma: lem, senses: D.en[lem] };
-    var g = D.enwn[lem];
+    var e = own(D.en, lem);
+    if(e) return { word: shown, lemma: lem, senses: e };
+    var g = own(D.enwn, lem);
+    if(!g) return { word: shown, none: true };
     return { word: shown, lemma: lem, senses: [{ pos: g[0], def: g[1], ex: '' }], grown: true };
   }
   function enAnswer(q){
@@ -121,7 +127,7 @@
         example: s[0].ex || '' };
     }
     // a few words or a sentence: each word's meaning
-    var parts = [], seen = {};
+    var parts = [], seen = Object.create(null);
     words.forEach(function(w){
       var r = enLook(w); if(!r || seen[r.word.toLowerCase()]) return; seen[r.word.toLowerCase()] = 1;
       parts.push({ part: r.word, meaning: r.none ? 'I do not know this word yet' : r.senses[0].def + (r.grown ? ' (grown-up definition)' : '') });
@@ -142,6 +148,6 @@
     return e;
   }
   // Is this a known English word? (Ask Shelly uses it to tell English words from Korean typed in English letters.)
-  function isEnglish(w){ w = String(w || '').toLowerCase(); return !!(D && D.en && (D.en[w] || (D.enwn && D.enwn[w]) || (D.enf && D.enf[w]))); }
+  function isEnglish(w){ w = String(w || '').toLowerCase(); return !!(D && (own(D.en, w) || own(D.enwn, w) || own(D.enf, w))); }
   window.CoralWords = { load: load, answer: answer, isEnglish: isEnglish, ready: function(){ return !!D; } };
 })();

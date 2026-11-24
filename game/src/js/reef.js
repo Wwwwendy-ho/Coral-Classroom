@@ -728,6 +728,13 @@
      the first four seconds after a right answer, the whole clip after finishing a deck. Played
      through Web Audio so it can fade out on the iPad too. Without the file, the usual chime plays. ---------- */
   var reefWinBuf = null, reefWinLoading = null, reefWinNode = null;
+  function reefWinStop(){
+    if(reefWinNode){
+      try { reefWinNode.stop(); } catch(e){}
+      try { reefWinNode.disconnect(); } catch(e){}
+      reefWinNode = null;
+    }
+  }
   function reefWinLoad(){
     try { if(!Sound.isEnabled()) return null; } catch(e){ return null; }
     if(reefWinBuf || reefWinLoading) return reefWinLoading;
@@ -747,7 +754,7 @@
     if(!reefWinBuf){ var p = reefWinLoad(); if(p && p.then) p.then(function(buf){ if(buf && full && Sound.isEnabled()) reefWinSound(true); }); else { try { if(Sound.isEnabled()) Sound.correct(); } catch(e){} } return; }
     try {
       if(ctx.state === 'suspended' && ctx.resume) ctx.resume();
-      if(reefWinNode){ try { reefWinNode.stop(); } catch(e){} }
+      reefWinStop();
       var src = ctx.createBufferSource(), gain = ctx.createGain(), t = ctx.currentTime;
       var dur = Math.min(reefWinBuf.duration, full ? 14 : 4), vol = full ? .7 : .5;
       src.buffer = reefWinBuf; src.connect(gain); gain.connect(ctx.destination);

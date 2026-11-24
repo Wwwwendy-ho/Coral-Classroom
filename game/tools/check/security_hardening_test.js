@@ -429,5 +429,164 @@ assert.strictEqual(({}).pollutedStorage, undefined);
   assert.match(lCtx.window.koJamoDiag('어머니', '오머니') || '', /vowel/i);
   assert.match(lCtx.window.koJamoDiag('감사합니다', '감사하니다') || '', /받침|bottom/i);
 
-  console.log('Passed: CSP, _headers, safePhotoUrl, safeProxyUrl, safePlainText XSS gadgets, prototype-pollution guards, storage.js bounds, backup validation & cc-gate-lock exclusion, Anki bounds, cc-gate-lock backoff & library.js throttling, password non-echoing, isSafeAssetFilename, sw.js cache rules, music allowlist, and koJamoDiag.');
+  // 14. words.js Object.prototype collision hardening
+  const wordsLs = makeStorage();
+  const wordsWin = {
+    CORAL_WORDS: {
+      en: { dog: [{ pos: 'noun', def: 'a friendly animal', ex: 'The dog runs.' }] },
+      enwn: { zebra: ['noun', 'a striped animal'] },
+      enf: { dogs: 'dog' },
+      zh: { w: {}, c: {}, s: {} }
+    }
+  };
+  const wordsCtx = {
+    window: wordsWin,
+    document: { getElementById: () => null, head: { appendChild() {} }, createElement: () => ({}) },
+    localStorage: wordsLs,
+    Promise
+  };
+  vm.createContext(wordsCtx);
+  vm.runInContext(readGame('words.js'), wordsCtx);
+  await wordsWin.CoralWords.load();
+  for (const protoKey of ['constructor', 'toString', 'valueOf', 'hasOwnProperty', '__proto__', 'prototype']) {
+    assert.strictEqual(wordsWin.CoralWords.isEnglish(protoKey), false, `isEnglish(${protoKey}) must be false`);
+    const ans = wordsWin.CoralWords.answer(protoKey);
+    assert.ok(ans && /do not know/.test(ans.answer), `answer(${protoKey}) must not throw or match Object.prototype`);
+  }
+  const multiAns = wordsWin.CoralWords.answer('What do constructor and toString and dog mean?');
+  assert.ok(multiAns && multiAns.parts.some(p => p.part === 'toString'), 'multi-word answer must not drop toString via seen{}');
+
+  // 15. Strict mute & mute-toggle stop regression (Sound.unlock, Speech unlockAudio, reefWinStop, R3amb)
+  const learnSrc = readGame('src/js/learning.js');
+  const reefSrc = readGame('src/js/reef.js');
+  const partySrc = readGame('src/js/reef3d/party.js');
+  const soundStart = learnSrc.indexOf('  var Sound = (function(){');
+  const soundEnd = learnSrc.indexOf('\n  /* ============ Word Feed ambience', soundStart);
+  const ambStart = learnSrc.indexOf('  var SOUND_TRACKS =', soundEnd);
+  const ambEnd = learnSrc.indexOf('\n  })();', ambStart) + '\n  })();'.length;
+  const winStart = reefSrc.indexOf('  var reefWinBuf = null');
+  const winEnd = reefSrc.indexOf('\n  /* ---------- No "is resting"', winStart);
+  const r3AmbStart = partySrc.indexOf('  var R3amb = null;');
+  const r3AmbEnd = partySrc.indexOf('\n  // Switch the crab', r3AmbStart);
+  const musicBootIdx = musicSrc.indexOf('\n  store.init().then(');
+  assert(soundStart >= 0 && soundEnd > soundStart && ambStart >= 0 && ambEnd > ambStart);
+  assert(winStart >= 0 && winEnd > winStart && r3AmbStart >= 0 && r3AmbEnd > r3AmbStart && musicBootIdx > 0);
+
+  let acNewCount = 0, audioNewCount = 0, audioPlayCount = 0, winStopCount = 0, ambOscStopCount = 0, ambBufStopCount = 0, silentPaused = 0;
+  class FakeBufSrc {
+    constructor(kind) { this.kind = kind; this.buffer = null; this.loop = false; }
+    connect() {}
+    disconnect() {}
+    start() {}
+    stop() { if (this.kind === 'r3amb') ambBufStopCount++; else winStopCount++; }
+  }
+  class FakeAudioContext {
+    constructor() { acNewCount++; this.state = 'running'; this.currentTime = 1; this.sampleRate = 48000; this.destination = {}; }
+    resume() { return Promise.resolve(); }
+    suspend() { return Promise.resolve(); }
+    createGain() { return { gain: { value: 0, setValueAtTime() {}, linearRampToValueAtTime() {}, setTargetAtTime() {}, cancelScheduledValues() {} }, connect() {}, disconnect() {} }; }
+    createBiquadFilter() { return { type: 'lowpass', frequency: { value: 18000, setValueAtTime() {}, linearRampToValueAtTime() {}, cancelScheduledValues() {} }, Q: { value: 0.5 }, connect() {} }; }
+    createOscillator() { return { type: 'sine', frequency: { value: 0, setValueAtTime() {}, exponentialRampToValueAtTime() {} }, detune: { value: 0 }, connect() {}, start() {}, stop() { ambOscStopCount++; } }; }
+    createDelay() { return { delayTime: { value: 0 }, connect() {} }; }
+    createMediaElementSource() { return { connect() {} }; }
+    createBuffer(ch, len) { return { duration: 15, getChannelData: () => new Float32Array(len) }; }
+    createBufferSource() { return new FakeBufSrc(this._nextKind || 'win'); }
+    decodeAudioData(buf, res) { const out = { duration: 15 }; if (res) res(out); return Promise.resolve(out); }
+  }
+  class FakeAudio {
+    constructor(src) {
+      audioNewCount++;
+      this.src = src || '';
+      this.loop = false;
+      this.volume = 1;
+      this.paused = true;
+    }
+    setAttribute() {}
+    addEventListener() {}
+    load() {}
+    play() { audioPlayCount++; this.paused = false; return Promise.resolve(); }
+    pause() { this.paused = true; if (String(this.src).startsWith('data:audio/wav')) silentPaused++; }
+  }
+  const muteLs = makeStorage({ 'cc-music': 'off', 'coralCoveSound': '0' });
+  const muteDocListeners = {};
+  const muteDoc = {
+    hidden: false,
+    body: { contains: () => true, appendChild() {} },
+    head: { appendChild() {} },
+    addEventListener(ev, fn) { (muteDocListeners[ev] = muteDocListeners[ev] || []).push(fn); },
+    getElementById: () => null,
+    querySelector: () => null,
+    querySelectorAll: () => [],
+    createElement: () => ({ addEventListener() {}, remove() {} })
+  };
+  const muteWin = {
+    AudioContext: FakeAudioContext,
+    Audio: FakeAudio,
+    fetch: async () => ({ ok: true, arrayBuffer: async () => new ArrayBuffer(16) }),
+    addEventListener() {}
+  };
+  const muteCtx = {
+    window: muteWin,
+    document: muteDoc,
+    localStorage: muteLs,
+    navigator: {},
+    AudioContext: FakeAudioContext,
+    Audio: FakeAudio,
+    S: { profile: { mode: 'child' }, settings: {}, view: 'study' },
+    ccIcon: () => '',
+    reefNight: () => false,
+    reefGame: () => true,
+    reefInDeck: () => false,
+    regionEncounterActive: () => false,
+    deckSpeechMuted: () => false,
+    AudioClips: { get: async () => null },
+    fetch: muteWin.fetch,
+    addEventListener: () => {},
+    Promise, Math, Date, URL, Blob,
+    setTimeout, clearTimeout, setInterval, clearInterval, console
+  };
+  vm.createContext(muteCtx);
+  vm.runInContext(
+    learnSrc.slice(soundStart, soundEnd) + '\n' +
+    learnSrc.slice(ambStart, ambEnd) + '\n' +
+    reefSrc.slice(winStart, winEnd) + '\n' +
+    partySrc.slice(r3AmbStart, r3AmbEnd) + '\n' +
+    musicSrc.slice(0, musicBootIdx),
+    muteCtx
+  );
+  // While muted (cc-music=off, coralCoveSound=0), unlock & interactions must create ZERO AudioContext / Audio.play()
+  muteCtx.Sound.unlock();
+  ['pointerdown', 'touchend', 'click', 'keydown'].forEach(ev => (muteDocListeners[ev] || []).forEach(fn => fn({ target: {} })));
+  muteCtx.reefMusicStart();
+  muteCtx.reefThemeSting(true);
+  muteCtx.reefWinLoad();
+  muteCtx.reefWinSound(true);
+  muteCtx.Speech.speak('안녕하세요');
+  muteCtx.Ambience.play('waves');
+  assert.strictEqual(acNewCount, 0, 'strict mute must construct 0 AudioContext instances');
+  assert.strictEqual(audioNewCount, 0, 'strict mute must construct 0 Audio instances');
+  assert.strictEqual(audioPlayCount, 0, 'strict mute must invoke 0 Audio.play() calls');
+
+  // Unmuting and starting win celebration + R3amb + Ambience, then calling Sound.setEnabled(false) must stop ALL of them
+  muteCtx.Sound.setEnabled(true);
+  assert.ok(acNewCount >= 1, 'enabling sound unlocks AudioContext');
+  assert.ok(audioPlayCount >= 1, 'enabling sound unlocks silent Audio');
+  await muteCtx.reefWinLoad();
+  muteCtx.reefWinSound(true);
+  const fakeCtx = muteCtx.Sound.getCtx();
+  fakeCtx._nextKind = 'r3amb';
+  muteCtx.reef3dAmbience({ wrap: {}, region: null }, true);
+  fakeCtx._nextKind = 'amb';
+  muteCtx.Ambience.play('waves');
+  assert.strictEqual(muteCtx.Ambience.current(), 'waves');
+
+  muteCtx.Sound.setEnabled(false);
+  assert.strictEqual(winStopCount, 1, 'Sound.setEnabled(false) must stop active reefWinNode');
+  assert.strictEqual(ambBufStopCount, 1, 'Sound.setEnabled(false) must stop active R3amb buffer source');
+  assert.strictEqual(ambOscStopCount, 1, 'Sound.setEnabled(false) must stop active R3amb LFO');
+  assert.strictEqual(muteCtx.Ambience.current(), null, 'Sound.setEnabled(false) must stop Ambience');
+  assert.ok(silentPaused >= 1, 'Sound.setEnabled(false) pauses silentUnlockAudio');
+  assert.strictEqual(muteWin.__reefMusicState().current, null, 'Sound.setEnabled(false) clears active music track');
+
+  console.log('Passed: CSP, _headers, safePhotoUrl, safeProxyUrl, safePlainText XSS gadgets, prototype-pollution guards, storage.js bounds, backup validation & cc-gate-lock exclusion, Anki bounds, cc-gate-lock backoff & library.js throttling, password non-echoing, isSafeAssetFilename, sw.js cache rules, music allowlist, koJamoDiag, words.js prototype isolation, and strict mute/stop guards.');
 })().catch(err => { console.error(err); process.exitCode = 1; });

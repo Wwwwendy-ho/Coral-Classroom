@@ -6,15 +6,15 @@ const start=learning.indexOf('  var VoicePack = (function(){');
 const end=learning.indexOf('\n  })();',learning.indexOf('  var Speech = (function(){'))+'\n  })();'.length;
 function deferred(){let resolve,reject;const promise=new Promise((yes,no)=>{resolve=yes;reject=no});return {promise,resolve,reject}}
 async function flush(){for(let i=0;i<30;i++)await Promise.resolve()}
-function harness({clips=[],voices=true,pendingIndex=false}={}){
- let nextId=0,voiceList=voices?[{name:'Test Korean',lang:'ko-KR'}]:[],synthCancels=0,audioPauses=0,constructHook=null;
- const intervals=new Map(),timeouts=new Map(),spoken=[],plays=[],fetches=[],playResults=[],indexLoad=deferred();
+function harness({clips=[],voices=true,pendingIndex=false,soundEnabled=true}={}){
+ let nextId=0,voiceList=voices?[{name:'Test Korean',lang:'ko-KR'}]:[],synthCancels=0,audioPauses=0,audioConstructs=0,constructHook=null,isSoundOn=soundEnabled;
+ const intervals=new Map(),timeouts=new Map(),docListeners={},spoken=[],plays=[],fetches=[],playResults=[],indexLoad=deferred();
  const entries={};clips.forEach((text,i)=>{entries['n|'+text.replace(/^[^\p{L}\p{N}_]+|[^\p{L}\p{N}_]+$/gu,'')]=[0,i,1]});
  const index={clips:entries,packs:['ko.mp3'],v:1};
  const synth={speaking:false,pending:false,getVoices:()=>voiceList,cancel(){synthCancels++},speak(utter){spoken.push(utter)}};
- function FakeAudio(){if(constructHook)constructHook();this.addEventListener=()=>{};this.pause=()=>{audioPauses++};this.play=()=>{plays.push(this.src);return playResults.length?playResults.shift():Promise.resolve()}}
- const c={console,Promise,Math,Blob,Sound:{isEnabled:()=>true},deckSpeechMuted:()=>false,
-  localStorage:{getItem:()=>null},document:{addEventListener(){}},Audio:FakeAudio,
+ function FakeAudio(){audioConstructs++;if(constructHook)constructHook();this.addEventListener=()=>{};this.pause=()=>{audioPauses++};this.play=()=>{plays.push(this.src);return playResults.length?playResults.shift():Promise.resolve()}}
+ const c={console,Promise,Math,Blob,Sound:{isEnabled:()=>isSoundOn},deckSpeechMuted:()=>false,
+  localStorage:{getItem:()=>null},document:{addEventListener(ev,fn){(docListeners[ev]=docListeners[ev]||[]).push(fn)}},Audio:FakeAudio,
   SpeechSynthesisUtterance:function(text){this.text=text},URL:{createObjectURL:()=> 'blob:test-clip',revokeObjectURL(){}},
   setTimeout(fn,ms){const id=++nextId;timeouts.set(id,{fn,ms});return id},clearTimeout:id=>timeouts.delete(id),
   setInterval(fn,ms){const id=++nextId;intervals.set(id,{fn,ms});return id},clearInterval:id=>intervals.delete(id),
@@ -23,7 +23,8 @@ function harness({clips=[],voices=true,pendingIndex=false}={}){
  c.window={speechSynthesis:synth,SpeechSynthesisUtterance:c.SpeechSynthesisUtterance,fetch:c.fetch};
  vm.createContext(c);vm.runInContext(learning.slice(start,end),c);
  return {speech:c.Speech,spoken,plays,fetches,playResults,indexLoad,index,intervals,timeouts,
-  get cancels(){return synthCancels},get pauses(){return audioPauses},synth,
+  get cancels(){return synthCancels},get pauses(){return audioPauses},get audioConstructs(){return audioConstructs},synth,
+  setSoundEnabled(v){isSoundOn=!!v},fireDoc(ev){(docListeners[ev]||[]).forEach(fn=>fn())},
   voicesOn(){voiceList=[{name:'Test Korean',lang:'ko-KR'}]},intervalTick(){for(const t of [...intervals.values()])t.fn()},
   timeoutTick(ms){for(const [id,t]of [...timeouts])if(t.ms===ms){timeouts.delete(id);t.fn()}},
   constructorHook(fn){constructHook=fn}}
@@ -60,5 +61,14 @@ function harness({clips=[],voices=true,pendingIndex=false}={}){
  // Plain speak shares the voice wait and iOS delayed-synthesis helpers.
  h=harness({voices:false});h.speech.speak('이전 인사');await flush();assert.equal(h.intervals.size,1);h.speech.stop();h.voicesOn();h.intervalTick();assert.equal(h.spoken.length,0);assert.equal(h.intervals.size,0);
  h=harness();h.synth.speaking=true;h.speech.speak('이전 인사');await flush();assert.equal(h.spoken.length,0);h.speech.stop();h.timeoutTick(60);assert.equal(h.spoken.length,0,'stop also cancels delayed iOS synth');
- console.log('Passed actual Speech: pending fetch/play cancellation, newer lesson isolation, canceled/current voice waits, stitched fallback, outer catch, exactly-once completion, and iOS delay.');
+ // Strict mute guard on unlockAudio: zero Audio constructions or play() calls while muted, unlocks once unmuted.
+ h=harness({soundEnabled:false});
+ h.fireDoc('pointerdown');h.fireDoc('touchend');h.fireDoc('keydown');
+ assert.equal(h.audioConstructs,0,'muted unlockAudio must not construct Audio');
+ assert.equal(h.plays.length,0,'muted unlockAudio must not call play()');
+ h.setSoundEnabled(true);
+ h.fireDoc('pointerdown');
+ assert.equal(h.audioConstructs,1,'unlockAudio constructs Audio after sound is enabled');
+ assert.equal(h.plays.length,1,'unlockAudio plays silent unlock clip after sound is enabled');
+ console.log('Passed actual Speech: pending fetch/play cancellation, newer lesson isolation, canceled/current voice waits, stitched fallback, outer catch, exactly-once completion, iOS delay, and strict mute unlock guard.');
 })().catch(e=>{console.error(e);process.exitCode=1});

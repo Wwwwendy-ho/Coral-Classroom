@@ -37,5 +37,19 @@ W.load().then(() => {
     const bad = Object.entries(window.CORAL_WORDS.en).filter(([w, ss]) => !ss.length || ss.some(s => !s.pos || !s.def || !s.ex));
     assert.strictEqual(bad.length, 0, bad.slice(0, 5).map(b => b[0]).join(', '));
   });
+  t('prototype property keys do not collide with Object.prototype', () => {
+    const D = window.CORAL_WORDS;
+    const hasOwn = k => Object.prototype.hasOwnProperty.call(D.en, k) || Object.prototype.hasOwnProperty.call(D.enwn, k) || Object.prototype.hasOwnProperty.call(D.enf, k);
+    for (const k of ['constructor', 'toString', 'valueOf', 'hasOwnProperty', '__proto__', 'prototype']) {
+      const expected = hasOwn(k.toLowerCase());
+      assert.strictEqual(W.isEnglish(k), expected, k + ' isEnglish must match own property');
+      const r = a(k);
+      assert.ok(r && typeof r.answer === 'string', k + ' answer should not throw');
+      if (expected || k === '__proto__') assert.match(r.answer, /means:/);
+      else assert.match(r.answer, /do not know/);
+    }
+    const multi = a('constructor and toString and dog');
+    assert.ok(multi && Array.isArray(multi.parts) && multi.parts.some(p => p.part === 'toString'));
+  });
   console.log(fails ? fails + ' failed' : 'all passed'); process.exit(fails ? 1 : 0);
 });

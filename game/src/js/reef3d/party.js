@@ -519,10 +519,23 @@
         var lfo = ctx.createOscillator(), lfoG = ctx.createGain(); lfo.frequency.value = .07; lfoG.gain.value = 160; lfo.connect(lfoG); lfoG.connect(lp.frequency);
         var gain = ctx.createGain(); gain.gain.value = 0;
         src.connect(lp); lp.connect(gain); gain.connect(ctx.destination); src.start(); lfo.start();
-        R3amb = { ctx: ctx, gain: gain };
+        R3amb = { ctx: ctx, gain: gain, src: src, lfo: lfo };
       }
       R3amb.gain.gain.setTargetAtTime(.06, ctx.currentTime, 1.2);
     } catch(e){}
+  }
+  function reef3dAmbienceStop(){
+    if(!R3amb) return;
+    var amb = R3amb;
+    R3amb = null;
+    try {
+      var now = amb.ctx ? amb.ctx.currentTime : 0;
+      amb.gain.gain.cancelScheduledValues(now);
+      amb.gain.gain.setValueAtTime(0, now);
+    } catch(e){}
+    try { if(amb.src && amb.src.stop) amb.src.stop(); } catch(e){}
+    try { if(amb.lfo && amb.lfo.stop) amb.lfo.stop(); } catch(e){}
+    try { if(amb.gain && amb.gain.disconnect) amb.gain.disconnect(); } catch(e){}
   }
 
   // Switch the crab to another move; 'once' plays it (Dance, Yes) and then returns to idle.
