@@ -1,0 +1,15 @@
+{
+  "slug": "taxi-squid",
+  "model": "tencent/Hunyuan3D-2mini",
+  "subfolder": "hunyuan3d-dit-v2-mini",
+  "seed": 17,
+  "octree_resolution": 256,
+  "steps": 30,
+  "guidance": 5.5,
+  "num_chunks": 8000,
+  "vertices": 252618,
+  "faces": 505248,
+  "bytes": 9095180,
+  "peak_vram_gb": 4.159,
+  "elapsed_seconds": 28.01
+}

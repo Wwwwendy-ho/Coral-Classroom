@@ -27,6 +27,14 @@ Do not claim this entire proposed curriculum/teacher is implemented. Inspect cur
 
 `context/fable-review-snapshot/` is the earlier package FOR critique, with old screenshots/source excerpts and proposed work. Do not mistake every MD in it for advice authored by Fable or for the newest implementation. `context/world-realism/FABLE-PASS-STATUS.md` records an earlier material/landmark/UI pass and its verification limits.
 
+## Flashcard algorithm improvement plan (TODO — queued behind visuals)
+
+Visual unification (Mario Party Shelly, resident cast, companions, and board polish) stays top priority first; the flashcard scheduling upgrades below are queued immediately next to make the Mario Party board game drive stronger Korean retention without runtime bloat:
+
+- **Phase A — Upgrade & promote FSRS-6:** Upgrade `game/src/js/fsrs.js` from FSRS-4.5 default weights to FSRS-6 (MIT-licensed pure JS, short-term/same-day stability handling, zero external dependencies), promote FSRS to the primary scheduler replacing `sm2_speed` as default, and map Easy/Medium/Hard difficulty presets cleanly to target retention (e.g., `0.94 / 0.90 / 0.85`).
+- **Phase B — 5-channel Korean skill routing:** Connect `Learner` (`hear`, `read`, `recall`, `say`, `use` in `game/src/js/learner.js`) directly to board tiles and Harbor Town NPC encounters so encounters automatically pick due Korean items in the learner's weakest skill modality.
+- **Phase C — Durable review event log & future RWKV gate:** Persist a compact on-device ordered review event log (`ts, itemId, channel, mode, rating, responseMs, assisted`) alongside latest card states so [`JSchoreels/anki-rwkv`](https://github.com/JSchoreels/anki-rwkv) can be benchmarked offline against FSRS-6 if upstream resolves checkpoint licensing (`open-spaced-repetition/srs-benchmark#353` / `WEIGHTS-NOTICE.md`) and delivers a phone-safe Safari/WASM runtime benchmarked on iPhone XS.
+
 ## Anki RWKV research
 
 Owner asked whether JSchoreels/anki-rwkv is better and to use it if warranted. It was studied but **not integrated**. The app still defaults to SM2_speed, with SM2/Leitner and separate FSRS 4.5 logic; do not silently substitute a model. Evidence: `context/rwkv-review/evidence.json` and upstream https://github.com/JSchoreels/anki-rwkv .

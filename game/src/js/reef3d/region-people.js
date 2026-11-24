@@ -620,7 +620,7 @@
     meet.addEventListener('click',function(e){ e.stopPropagation(); regionPeopleApproach(view,'shop'); });
     guide.addEventListener('click',function(e){ e.stopPropagation(); regionPeopleApproach(view,'shop'); });
     if(practice) practice.addEventListener('click',function(e){ e.stopPropagation(); regionPeopleApproach(view,'activity'); });
-    view.regionPeople={ root:root, actor:actor, arm:arm, shop:shop, marker:marker, markerSpace:markerSpace, towns:towns, labels:labels, meet:meet, practice:practice, guide:guide, focus:null, disposed:false,
+    view.regionPeople={ root:root, actor:actor, stall:stall, arm:arm, shop:shop, marker:marker, markerSpace:markerSpace, towns:towns, labels:labels, meet:meet, practice:practice, guide:guide, focus:null, disposed:false,
       hitables:[actor,stall].concat(marker?[marker]:[],towns.map(function(t){ return t.object; })), sourceGeos:geos };
     if(typeof regionResidentLoad==='function') regionResidentLoad(view);
   }

@@ -23266,7 +23266,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       // Keep the lighter authored mesh for a low-power visit. Switching quality
       // later changes texture size without downloading or rebuilding the rig.
       var asset = R3.q >= 2 ? 'assets/models/shelly-view.glb?v=natural-1' : 'assets/models/shelly.glb?v=natural-1';
-      if(crafted) asset = R3.q >= 2 ? 'assets/models/crafted-shelly-view.glb?v=organic-3' : 'assets/models/crafted-shelly.glb?v=organic-3';
+      if(crafted) asset = R3.q >= 2 ? 'assets/models/crafted-shelly-view.glb?v=organic-mp-2' : 'assets/models/crafted-shelly.glb?v=organic-mp-2';
       var source = bytes ? Promise.resolve().then(function(){
         var binary = atob(bytes), array = new Uint8Array(binary.length);
         for(var i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
@@ -32302,7 +32302,7 @@ var ReefCraftedWorld = (function(){
   // A small render of the same creature keeps the loading cover and guide
   // badges consistent without creating a second 3D scene.
   mascotTurtleSVG = function(cls){
-    return '<img class="' + esc(cls) + ' crafted-guide-image" src="assets/models/crafted-shelly-loading.webp?v=organic-3" width="384" height="384" alt="Shelly, a mint sea turtle with a lavender shell">';
+    return '<img class="' + esc(cls) + ' crafted-guide-image" src="assets/models/crafted-shelly-loading.webp?v=organic-mp-2" width="384" height="384" alt="Shelly, a mint sea turtle with a lavender shell">';
   };
   var previewId = 'crafted-preview-explorer';
   var launched = false;

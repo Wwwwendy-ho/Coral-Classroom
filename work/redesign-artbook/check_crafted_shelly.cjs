@@ -1,8 +1,9 @@
 // Actual exported GLBs through the production loader, adapter and animation mixer.
 // Images are decoded/inspected separately. This is not a GPU or phone benchmark.
-const fs=require('fs'),vm=require('vm'),assert=require('assert');
-const ROOT='/workspace/coral-classroom',THREE=require(ROOT+'/three.min.js');
-const folder=process.argv[2]||'/workspace/work/crafted-shelly-v3';
+const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert');
+const ROOT=fs.existsSync('/workspace/coral-classroom')?'/workspace/coral-classroom':path.resolve(__dirname,'../../game');
+const THREE=require(ROOT+'/three.min.js');
+const folder=process.argv[2]||path.resolve(__dirname,'../crafted-shelly-v3');
 const loader=fs.readFileSync(ROOT+'/src/js/vendor/three-gltfloader.js','utf8');
 const shelly=fs.readFileSync(ROOT+'/src/js/reef3d/shelly.js','utf8');
 THREE.TextureLoader.prototype.load=function(url,loaded){const t=new THREE.Texture();queueMicrotask(()=>loaded(t));return t};

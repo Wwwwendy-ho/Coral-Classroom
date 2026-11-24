@@ -547,7 +547,7 @@
 
   /* ---------- No grown-up check in the Claude version (Wendy's choice). The GitHub/iPad copy loads its seed data
      file, which defines CORAL_COVE_SEED, and asks for the grown-up password (reefGrownUpGate) wherever a PIN
-     used to be asked. Leaving a deck early still asks the subtraction question in both. ---------- */
+     used to be asked. ---------- */
   function reefNoPin(){ return !window.CORAL_COVE_SEED; }
   /* Inside a grown-up profile nothing asks again: the password was entered on the way in.
      Opening the profile and Manage Profiles (on the profile screen, outside any profile) still ask. */
@@ -565,7 +565,9 @@
     if(!window.crypto || !window.crypto.subtle || typeof TextEncoder !== 'function') return Promise.reject(new Error('Password verification unavailable'));
     return window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)).then(function(buffer){
       var hex = Array.prototype.map.call(new Uint8Array(buffer), function(n){ return ('0' + n.toString(16)).slice(-2); }).join('');
-      return hex === BAKED_PIN_HASH;
+      var target = String(BAKED_PIN_HASH || ''), len = Math.max(hex.length, target.length), diff = hex.length ^ target.length;
+      for(var i = 0; i < len; i++) diff |= (hex.charCodeAt(i) || 0) ^ (target.charCodeAt(i) || 0);
+      return diff === 0;
     });
   }
   window.CoralCoveVerifyGrownUpPassword = reefCheckGrownUpPassword;
@@ -583,17 +585,40 @@
       '</div>';
     var inp = app.querySelector('#adultGateInput'), form = app.querySelector('.reef-password-form');
     var button = app.querySelector('[data-gate="check"]'), message = app.querySelector('#adultGateMsg');
+    function readLock(){
+      try {
+        if(typeof localStorage === 'undefined') return { fails:0, until:0 };
+        var r = localStorage.getItem('cc-gate-lock');
+        var o = r ? JSON.parse(r) : null;
+        return o && typeof o.fails === 'number' && typeof o.until === 'number' ? o : { fails:0, until:0 };
+      } catch(e){ return { fails:0, until:0 }; }
+    }
+    function writeLock(o){
+      try { if(typeof localStorage !== 'undefined') localStorage.setItem('cc-gate-lock', JSON.stringify(o)); } catch(e){}
+    }
     function current(){ return S.adultGate === g && S.pinPromptFor === kind && inp.isConnected; }
     function ready(text){ g.pending=false; inp.disabled=false; button.disabled=false; form.removeAttribute('aria-busy'); message.textContent=text; inp.focus(); }
     function check(){
       if(g.pending || !current()) return;
+      var lk = readLock(), now = Date.now();
+      if(lk.until > now){
+        var wait = Math.ceil((lk.until - now) / 1000);
+        message.textContent = 'Too many attempts. Wait ' + wait + 's and try again.';
+        return;
+      }
       var value=inp.value; inp.value='';
       if(!value){ message.textContent='Enter the password.'; inp.focus(); return; }
       g.pending=true; inp.disabled=true; button.disabled=true; form.setAttribute('aria-busy','true'); message.textContent='Checking password…';
       Promise.resolve().then(function(){ return reefCheckGrownUpPassword(value); }).then(function(ok){
         if(!current()) return;
-        if(ok){ S.adultGate=null; grownUpPassed(kind); }
-        else { inp.setAttribute('aria-invalid','true'); ready('Incorrect password. Try again.'); }
+        if(ok){ writeLock({ fails:0, until:0 }); S.adultGate=null; grownUpPassed(kind); }
+        else {
+          var nf = (lk.fails || 0) + 1;
+          var secs = nf >= 5 ? Math.min(300, 15 * Math.pow(2, nf - 5)) : 0;
+          writeLock({ fails:nf, until: secs ? Date.now() + secs * 1000 : 0 });
+          inp.setAttribute('aria-invalid','true');
+          ready(secs ? 'Incorrect password. Too many attempts — wait ' + secs + 's.' : 'Incorrect password. Try again.');
+        }
       },function(){ if(current()) ready('Password verification is unavailable. Reload and try again.'); });
     }
     function cancel(){ if(S.adultGate !== g) return; inp.value=''; S.adultGate=null; cancelPinPrompt(kind); }
@@ -603,28 +628,7 @@
     inp.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); check(); } else if(e.key === 'Escape'){ e.preventDefault(); cancel(); } });
     setTimeout(function(){ if(current()) try { inp.focus({ preventScroll:true }); } catch(e){} }, 50);
   }
-  /* ---------- Leaving a deck early in Child Mode: a subtraction question instead of the PIN ---------- */
-  /* Leaving a deck early asks a problem. In the endless decks (the swipe feeds) it gets easier the more cards
-     she has read there: a two-digit take-away (20 − 15), then take-away within 10, then adding within 10, then
-     a tiny sum, and after REEF_FREE_EXIT cards she can just leave. */
-  var REEF_ENDLESS = ['feed', 'equationFeed', 'flashFeed', 'langFeed', 'story'], REEF_FREE_EXIT = 30;
-  function reefEndlessSeen(){ return REEF_ENDLESS.indexOf(S.view) >= 0 && S.endless && S.endless.deck === S.currentDeckId ? S.endless.n : 0; }
-  function reefNewProblem(){
-    var n = reefEndlessSeen(), r = function(k){ return Math.floor(Math.random() * k); }, a, b;
-    if(n >= 22){ a = 1 + r(3); return { a: a, b: 1, op: '+', ans: a + 1, tries: 0 }; }   // 2 + 1
-    if(n >= 15){ a = 1 + r(5); b = 1 + r(5); return { a: a, b: b, op: '+', ans: a + b, tries: 0 }; }   // 3 + 4
-    if(n >= 8){ a = 4 + r(6); b = 1 + r(a - 1); return { a: a, b: b, op: '−', ans: a - b, tries: 0 }; }   // 9 − 4
-    a = 12 + r(19); var ans = 3 + r(Math.min(17, a - 7));
-    return { a: a, b: a - ans, op: '−', ans: ans, tries: 0 };
-  }
-  // Counts the cards she has seen in an endless deck (a new card on screen), for the exit problem above.
-  afterRender('endless count', function(){
-    if(REEF_ENDLESS.indexOf(S.view) < 0) return;
-    var cur = document.querySelector('.feed-card-current'); if(!cur) return;
-    if(!S.endless || S.endless.deck !== S.currentDeckId) S.endless = { deck: S.currentDeckId, n: 0, last: null };
-    var sig = S.view + '|' + cur.textContent.replace(/\s+/g, ' ').trim();
-    if(sig !== S.endless.last){ S.endless.last = sig; S.endless.n++; }
-  });
+  /* ---------- Leaving a deck early returns directly to the board (no math gate) ---------- */
   /* ---------- "Say it with me!": in the reading decks (Phonics Words and the other word feeds, and word cards
      she flips) a little Shelly swims in every few cards, says "Say it with me!" and reads the word again, then
      swims away. Child profile only; with Calm motion she fades in and out instead. ---------- */
@@ -660,72 +664,6 @@
 
   var REEF_PRAISE = ['You got it right!', 'Great thinking!', 'You worked it out!', 'Nice careful work!', 'That\'s right! Good checking.', 'Awesome effort!', 'You did it! Great focus.', 'Yes! Good work.'];
   function reefPraiseLine(){ return REEF_PRAISE[Math.floor(Math.random() * REEF_PRAISE.length)]; }
-  function reefMathGate(){
-    // after enough cards in an endless deck she can just leave
-    if(!S.reefGate && reefEndlessSeen() >= REEF_FREE_EXIT){ S.pinPromptFor = null; S.endless = null; setTimeout(goHome, 0); return; }
-    if(!S.reefGate) S.reefGate = reefNewProblem();
-    var g = S.reefGate;
-    g.op = g.op || '−';
-    var opWord = g.op === '+' ? 'plus' : 'minus';
-    var keys = [1,2,3,4,5,6,7,8,9].map(function(k){ return '<button type="button" class="pin-key" data-gate-digit="'+k+'">'+k+'</button>'; }).join('') +
-      '<button type="button" class="pin-key" data-gate="back" aria-label="Delete">'+ccIcon('backspace')+'</button><button type="button" class="pin-key" data-gate-digit="0">0</button>' +
-      '<button type="button" class="pin-key reef-gate-check" data-gate="check">Check</button>';
-    app.innerHTML = '' +
-      '<div class="lock-screen reef-gate">' +
-        '<h2>🧮 Leave This Deck?</h2>' +
-        '<p>Solve this problem to go back.</p>' +
-        '<div class="pin-wrap">' +
-          '<div class="reef-gate-q"><span>'+g.a+' '+g.op+' '+g.b+' =</span>' +
-            '<input id="reefGateInput" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Your answer to '+g.a+' '+opWord+' '+g.b+'" value=""></div>' +
-          '<div class="reef-gate-msg" role="status" aria-live="polite">'+(g.msg || '&nbsp;')+'</div>' +
-          '<div class="pin-grid">'+keys+'</div>' +
-          '<div class="reef-gate-row"><button type="button" class="reef-gate-hint" data-gate="hint">💡 Hint</button>' +
-          '<button type="button" class="pin-cancel" data-gate="stay">Keep practicing</button></div>' +
-        '</div>' +
-      '</div>';
-    var inp = app.querySelector('#reefGateInput'), msg = app.querySelector('.reef-gate-msg');
-    function say(html, cls){ msg.innerHTML = html; msg.className = 'reef-gate-msg' + (cls ? ' ' + cls : ''); }
-    function hint(){ return g.op === '+' ? 'Hint: start at ' + g.a + '. Count up ' + g.b + ' more.' : 'Hint: start at ' + g.b + '. Count up to ' + g.a + '. How many numbers did you count?'; }
-    function check(){
-      var v = inp.value.replace(/\D/g, '');
-      if(!v){ say('Type your answer first, then tap Check.'); inp.focus(); return; }
-      if(+v === g.ans){
-        var p = reefPraiseLine();
-        say('🎉 ' + esc(p) + ' ' + g.a + ' ' + g.op + ' ' + g.b + ' = ' + g.ans + '.', 'ok');
-        try { Sound.correct(); } catch(e){}
-        try { Speech.speak(p); } catch(e){}
-        reefPopBubbles();
-        reefWinSound(false);
-        app.querySelectorAll('.reef-gate button, .reef-gate input').forEach(function(b){ b.disabled = true; });
-        clearTimeout(S.reefGateIdle); S.reefGateIdle = null;
-        setTimeout(function(){ S.reefGate = null; S.pinPromptFor = null; S.endless = null; goHome(); }, 1600);
-        return;
-      }
-      g.tries++;
-      try { Sound.bloop(300); } catch(e){}
-      inp.value = '';
-      say('Not quite. ' + esc(g.tries >= 2 ? hint() : 'Try again. You can tap 💡 Hint for help.'), 'no');
-      inp.focus();
-    }
-    app.querySelectorAll('[data-gate-digit]').forEach(function(b){
-      b.addEventListener('click', function(){ if(inp.value.length < 2){ try { Sound.tap(); } catch(e){} inp.value += b.dataset.gateDigit; } });
-    });
-    app.querySelector('[data-gate="back"]').addEventListener('click', function(){ inp.value = inp.value.slice(0, -1); });
-    app.querySelector('[data-gate="check"]').addEventListener('click', check);
-    app.querySelector('[data-gate="hint"]').addEventListener('click', function(){ say(esc(hint())); try { Speech.speak(hint()); } catch(e){} });
-    app.querySelector('[data-gate="stay"]').addEventListener('click', function(){ clearTimeout(S.reefGateIdle); S.reefGateIdle = null; S.reefGate = null; cancelPinPrompt('exit'); });
-    inp.addEventListener('input', function(){ var d = inp.value.replace(/\D/g, '').slice(0, 2); if(d !== inp.value) inp.value = d; });
-    // Ten seconds without a tap: the problem goes away and she's back in the deck where she was.
-    // (A re-draw of this screen keeps the countdown going; only her taps restart it.)
-    function idle(){ clearTimeout(S.reefGateIdle); S.reefGateIdle = setTimeout(function(){ S.reefGateIdle = null; if(S.pinPromptFor === 'exit' && document.querySelector('.reef-gate')){ S.reefGate = null; cancelPinPrompt('exit'); } }, 10000); }
-    app.querySelector('.reef-gate').addEventListener('pointerdown', idle);
-    inp.addEventListener('keydown', idle);
-    if(!S.reefGateIdle) idle();
-    inp.addEventListener('keydown', function(e){
-      if(e.key === 'Enter'){ e.preventDefault(); check(); }
-      else if(e.key === 'Escape'){ e.preventDefault(); S.reefGate = null; cancelPinPrompt('exit'); }
-    });
-  }
 
   /* ---------- Praise after a right answer: a spoken line that names the effort, any deck type ---------- */
   var reefWasOk = false;
@@ -1024,8 +962,7 @@
   /* ---------- Never stuck (child profile) ----------
      After ten seconds without a tap, the next thing to do glows and Shelly says it ("Tap the card to flip it!"),
      again every twelve seconds while nothing happens. A pop-up on the board that is still waiting fifteen seconds
-     after the first nudge closes itself, so she's back on the board. (The exit problem has its own ten-second
-     timer, in reefMathGate.) */
+     after the first nudge closes itself, so she's back on the board. */
   var REEF_NUDGES = [
     // [what to find, what Shelly says]; the first one on screen wins
     ['.r3-mini-play .r3-tile:not(.up):not(.got)', 'Tap a card to turn it over!'],

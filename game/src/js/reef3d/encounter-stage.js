@@ -52,9 +52,45 @@
     e.hiddenObjects=[];
     var people=view.regionPeople;
     var quiet=[view.guide,view.crab,view.ring,view.nextStar,people.actor,people.marker]
-      .concat(people.towns.map(function(t){ return t.object; }),view.spinners || [],
+      .concat(actor!==people.actor && people.stall ? [people.stall] : [],
+        people.towns.map(function(t){ return t.object; }),view.spinners || [],
         view.spaces.map(function(s){ return s.qb; }));
     quiet.forEach(function(o){ if(o && o!==actor){ e.hiddenObjects.push({object:o,visible:o.visible}); o.visible=false; } });
+    // Zero-cost sightline guard: hide static scenery props sitting directly between camera and actor.
+    if(view.cam && view.scene && window.THREE){
+      var T=window.THREE, halfA=Math.tan(view.cam.fov*Math.PI/360), asp=Math.max(.25,view.cam.aspect);
+      var wEst=bounds.width*Math.cos(.1)+bounds.depth*Math.sin(.1);
+      var dist=Math.max(.75,wEst/(2*halfA*asp*.72),bounds.height/(2*halfA*.76))+bounds.depth*.55;
+      var cx=actor.position.x+bounds.centerX, cy=actor.position.y+bounds.centerY, cz=actor.position.z+bounds.centerZ;
+      var padX=Math.max(.95,bounds.width*.65), padY=Math.max(.85,bounds.height*.65), camZ=cz+dist;
+      var box=new T.Box3(), bSz=new T.Vector3();
+      var isActorRel=function(node){
+        for(var q=actor;q;q=q.parent) if(q===node) return true;
+        for(var p=node;p;p=p.parent) if(p===actor) return true;
+        return false;
+      };
+      var scan=function(node){
+        if(!node || !node.visible || node===people.root || isActorRel(node)) return;
+        if(node.isLight || node.isPoints) return;
+        if(node.isMesh || (node.children && node.children.length && !node.name.indexOf('region-scenery'))){
+          if(node.children && node.children.length && node.name && node.name.indexOf('region-scenery')===0){
+            node.children.forEach(scan); return;
+          }
+          node.updateMatrixWorld(true); box.setFromObject(node);
+          if(!box.isEmpty()){
+            box.getSize(bSz);
+            if(bSz.x<12 && bSz.z<12 && box.max.z>cz+bounds.depth*.25 && box.min.z<camZ+.5 &&
+               box.max.x>cx-padX && box.min.x<cx+padX && box.max.y>cy-padY && box.min.y<cy+padY){
+              e.hiddenObjects.push({object:node,visible:true});
+              node.visible=false;
+            }
+          }
+          return;
+        }
+        if(node.children) node.children.forEach(scan);
+      };
+      view.scene.children.forEach(scan);
+    }
     // The merged world model faces positive Z; turn it a touch toward the learner.
     actor.rotation.y = saved.rotation.y + .1;
     if(typeof regionResidentEncounter==='function') regionResidentEncounter(view,actor);
@@ -159,9 +195,25 @@
       speaking = typeof i === 'number' && !!S.town.log && !!S.town.log[i] && S.town.log[i].who === 'them';
     }
     var calm = reefCalm(), t = now * .001;
-    actor.rotation.x = base.rotation.x + (!calm && speaking ? Math.sin(t * 6.5) * .025 : 0);
-    actor.rotation.z = base.rotation.z + (!calm ? Math.sin(t * 1.4) * .012 : 0);
-    actor.position.y = base.position.y + (!calm && speaking ? Math.sin(t * 6.5) * .025 : 0);
+    var rx = 0, rz = 0, py = 0, sc = 1;
+    if(!calm && e.react){
+      var rp = (now - e.react.t0) / e.react.dur;
+      if(rp >= 1) e.react = null;
+      else if(e.react.mood === 'happy'){
+        py = Math.sin(rp * Math.PI) * .16;
+        sc = 1 + Math.sin(rp * Math.PI * 2) * .035;
+      } else {
+        rz = Math.sin(rp * Math.PI) * .08;
+      }
+    }
+    actor.rotation.x = base.rotation.x + (!calm && speaking ? Math.sin(t * 6.5) * .025 : 0) + rx;
+    actor.rotation.z = base.rotation.z + (!calm ? Math.sin(t * 1.4) * .012 : 0) + rz;
+    actor.position.y = base.position.y + (!calm && speaking ? Math.sin(t * 6.5) * .025 : 0) + py;
+    actor.scale.copy(base.scale).multiplyScalar(sc);
+  }
+  function regionEncounterReact(view, mood){
+    if(!regionEncounterActive(view) || reefCalm()) return;
+    view.encounter.react = { mood: mood === 'happy' ? 'happy' : 'encourage', t0: performance.now(), dur: mood === 'happy' ? 550 : 450 };
   }
   function regionEncounterEnd(view){
     var e = view && view.encounter;

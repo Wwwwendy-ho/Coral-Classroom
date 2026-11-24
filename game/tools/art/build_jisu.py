@@ -65,8 +65,8 @@ def flap(u,v):
     return Vector((x,-.726-.027*math.sin(math.pi*v),z))
 
 def envelope(u,v):
-    x=mix(.40,.94,u);z=mix(.49,.875,v)
-    return Vector((x,-.953-.012*math.sin(math.pi*u)*math.sin(math.pi*v),z))
+    x=mix(.49,.94,u);z=mix(.60,.92,v)+.05*u
+    return Vector((x,-.970-.010*math.sin(math.pi*u)*math.sin(math.pi*v),z))
 
 def make_mesh(lod,mat,rig):
     m=h.MeshBuilder();close=lod=='close';K=1;resolution=1.30 if close else .78
@@ -99,14 +99,22 @@ def make_mesh(lod,mat,rig):
         grid(lambda u,v:eye(side,u,v),20*K,12*K,'eye','Eye.'+suf)
         grid(lambda u,v:eye_rim(side,u,v),24*K,6*K,'body','Eye.'+suf,wrap_v=True)
         pipe([(side*.08,-.72,.75),(side*.12,-.78,1.02),(side*.29,-.79,1.23),(side*.42,-.76,1.27)],[.014,.011,.007,.001],'orange','Antenna.'+suf,n=6,j=14)
-        # Chelipeds are unequal and held low; no humanoid arms or hands.
-        mul=1.17 if side<0 else .84
-        c=(side*.52,-.83,.38)
-        pipe([(side*.29,-.55,.61),(side*.48,-.67,.48),c],[.105,.093,.09],'limb','Claw.'+suf,n=10,j=10)
-        grid(lambda u,v:ell(c,(.153*mul,.168*mul,.20*mul),u,v),16*K,10*K,'claw','Claw.'+suf)
-        # Fixed pincer tip and separate movable finger, with visible narrow cleft.
-        pipe([(side*.62,-.86,.37),(side*.67,-.89,.22),(side*.58,-.91,.13)],[.097*mul,.060*mul,.003],'claw','Claw.'+suf,n=9,j=9)
-        pipe([(side*.45,-.87,.36),(side*.46,-.94,.22),(side*.55,-.94,.15)],[.069*mul,.039*mul,.002],'claw','Claw.'+suf,n=8,j=9)
+        # Chelipeds are unequal; left rests low, right reaches forward/up to pinch and hold the envelope.
+        if side < 0:
+            mul=1.17
+            c=(-.52,-.83,.38)
+            pipe([(-.29,-.55,.61),(-.48,-.67,.48),c],[.105,.093,.09],'limb','Claw.L',n=10,j=10)
+            grid(lambda u,v:ell(c,(.153*mul,.168*mul,.20*mul),u,v),16*K,10*K,'claw','Claw.L')
+            pipe([(-.62,-.86,.37),(-.67,-.89,.22),(-.58,-.91,.13)],[.097*mul,.060*mul,.003],'claw','Claw.L',n=9,j=9)
+            pipe([(-.45,-.87,.36),(-.46,-.94,.22),(-.55,-.94,.15)],[.069*mul,.039*mul,.002],'claw','Claw.L',n=8,j=9)
+        else:
+            mul=.88
+            c=(.48,-.85,.58)
+            pipe([(.29,-.55,.61),(.44,-.70,.56),c],[.105,.093,.086],'limb','Claw.R',n=10,j=10)
+            grid(lambda u,v:ell(c,(.145*mul,.155*mul,.185*mul),u,v),16*K,10*K,'claw','Claw.R')
+            # Outer pincer presses against front face of envelope; inner pincer supports behind it.
+            pipe([(.54,-.88,.57),(.58,-.955,.63),(.53,-.985,.69)],[.088*mul,.054*mul,.003],'claw','Claw.R',n=9,j=9)
+            pipe([(.42,-.87,.57),(.44,-.945,.64),(.50,-.955,.70)],[.064*mul,.036*mul,.002],'claw','Claw.R',n=8,j=9)
     # Postal pouch, flap and seams are physical. Body deliberately stays crab-like.
     grid(lambda u,v:cloth_box((-.658,-.65,.55),(.235,.082,.235),u,v),20*K,10*K,'cloth')
     grid(flap,12*K,8*K,'cloth')
@@ -115,15 +123,15 @@ def make_mesh(lod,mat,rig):
         grid(lambda u,v,z=z:Vector((mix(-.87,-.446,u),mix(-.72,-.58,v),z)),8*K,3*K,'cloth')
     pipe([(-.86,-.714,.65),(-.73,-.718,.76),(-.41,-.63,.81),(-.04,-.50,.815),(.33,-.11,.98),(.42,.24,1.27),(.10,.55,1.55),(-.48,.34,1.23),(-.83,-.35,.77),(-.86,-.63,.58)],[.033]*10,'cloth',n=6,j=32,scale=(1,.20))
     grid(lambda u,v:ell((-.66,-.765,.58),(.038,.014,.038),u,v),12*K,6*K,'metal')
-    # Cream envelope with fold illustration; orange scallop-shell wax seal geometry.
-    grid(envelope,10*K,7*K,'paper')
-    grid(lambda u,v:envelope(u,v)+Vector((0,.014,0)),10*K,7*K,'paper',reverse=True)
-    for x in [.40,.94]:
-        pipe([(x,-.95,.49),(x,-.95,.875)],[.008,.008],'paper',n=4,j=2)
-    grid(lambda u,v:Vector((.67+.085*math.sin(math.pi*v)*math.cos(TAU*u),-1.002-.020*math.sin(math.pi*v),.685+.079*math.cos(math.pi*v))),16*K,10*K,'orange')
+    # Cream envelope with fold illustration + orange scallop-shell wax seal, gripped and weighted to Claw.R.
+    grid(envelope,10*K,7*K,'paper','Claw.R')
+    grid(lambda u,v:envelope(u,v)+Vector((0,.014,0)),10*K,7*K,'paper','Claw.R',reverse=True)
+    for x,z0,z1 in [(.49,.60,.92),(.94,.65,.97)]:
+        pipe([(x,-.966,z0),(x,-.966,z1)],[.008,.008],'paper','Claw.R',n=4,j=2)
+    grid(lambda u,v:Vector((.715+.080*math.sin(math.pi*v)*math.cos(TAU*u),-1.015-.018*math.sin(math.pi*v),.785+.075*math.cos(math.pi*v))),16*K,10*K,'orange','Claw.R')
     for i in range(7):
         a=mix(-1.15,1.15,i/6)
-        pipe([(.67,-1.021,.62),(.67+.035*math.sin(a),-1.025,.675),(.67+.072*math.sin(a),-1.008,.725)],[.007,.008,.003],'orange',n=5,j=5)
+        pipe([(.715,-1.033,.72),(.715+.033*math.sin(a),-1.037,.775),(.715+.068*math.sin(a),-1.020,.825)],[.007,.008,.003],'orange','Claw.R',n=5,j=5)
     obj=m.create(mat,rig);obj.name='Jisu | authored shell, crab and postal kit';obj.data.name='Jisu organic production mesh'
     return obj
 
@@ -218,7 +226,7 @@ def rig_create():
     for side,suf in [(-1,'L'),(1,'R')]:
         bone('Eye.'+suf,(side*.18,-.63,.77),(side*.236,-.66,1.40))
         bone('Antenna.'+suf,(side*.08,-.72,.75),(side*.22,-.78,1.14))
-        bone('Claw.'+suf,(side*.29,-.55,.61),(side*.52,-.83,.38))
+        bone('Claw.'+suf,(side*.29,-.55,.61),(side*.52,-.83,.38) if side<0 else (.48,-.85,.58))
         for j in range(3):bone('Leg%d.%s'%(j+1,suf),(side*(.26+.015*j),-.31+j*.20,.61),(side*(.61+.09*j),-.37+j*.27,.5))
     bpy.ops.object.mode_set(mode='OBJECT');return rig
 

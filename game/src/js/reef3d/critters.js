@@ -68,7 +68,43 @@
     reefCrabMerge(body, movers); parts.eyes.forEach(function(e){ reefCrabMerge(e, []); }); parts.claws.forEach(function(p){ reefCrabMerge(p, []); });
     g.scale.setScalar(size || 1);
     g.userData = { kind: name, parts: parts, anim: { name: 'Idle', t0: 0 }, seed: Math.random() * 4 };
+    reefCrabLoad3D(g, name, body, parts);
     return g;
+  }
+  var reefCrabModels = {};
+  function reefCrabLoad3D(g, name, body, parts){
+    if(typeof window === 'undefined' || !window.THREE || !window.THREE.GLTFLoader) return;
+    var url = name === 'hermit' ? 'assets/models/kiko-hermit.glb?v=mp-1' : 'assets/models/kiko-mochi.glb?v=mp-1';
+    if(!reefCrabModels[url]){
+      reefCrabModels[url] = new Promise(function(resolve){
+        try {
+          if(typeof reefInstallGLTF === 'function') reefInstallGLTF();
+          new window.THREE.GLTFLoader().load(url, resolve, undefined, function(){ resolve(null); });
+        } catch(e){ resolve(null); }
+      });
+    }
+    reefCrabModels[url].then(function(gltf){
+      if(!gltf || !gltf.scene || !g.parent && g.userData.disposed) return;
+      var T = window.THREE;
+      var clone = T.SkeletonUtils && T.SkeletonUtils.clone ? T.SkeletonUtils.clone(gltf.scene) : gltf.scene.clone(true);
+      body.updateMatrixWorld(true);
+      var targetBox = new T.Box3().setFromObject(body), targetSize = new T.Vector3();
+      targetBox.getSize(targetSize);
+      var mBox = new T.Box3().setFromObject(clone), mSize = new T.Vector3();
+      mBox.getSize(mSize);
+      if(mSize.x > 0 && targetSize.x > 0){
+        var sc = (targetSize.x / Math.max(0.01, g.scale.x)) / mSize.x;
+        clone.scale.setScalar(sc);
+        clone.updateMatrixWorld(true);
+        var b2 = new T.Box3().setFromObject(clone), ctr = new T.Vector3();
+        b2.getCenter(ctr);
+        clone.position.set(-ctr.x, -b2.min.y, -ctr.z);
+      }
+      while(body.children.length) body.remove(body.children[0]);
+      parts.claws.length = 0; parts.legs.length = 0; parts.eyes.length = 0;
+      body.add(clone);
+      g.userData.has3D = true;
+    });
   }
   // Joins a group's meshes into one per material, in the group's own space; parts listed in skip stay apart.
   function reefCrabMerge(grp, skip){

@@ -31,7 +31,7 @@
   }
 
   function reef3dShellyLoad(){
-    if(!window.REEF_SHELLY_PREVIEW && new URLSearchParams(window.location.search).get('shelly') !== 'storybook') return Promise.resolve(null);
+    if(!window.REEF_SHELLY_PREVIEW && new URLSearchParams(window.location.search).get('shelly') === 'procedural') return Promise.resolve(null);
     if(R3shelly) return R3shelly;
     R3shelly = reef3dLoad().then(function(){
       reefInstallGLTF();
@@ -43,7 +43,7 @@
         if(controller) controller.abort();
         resolve(null);
       }, 6000); });
-      var crafted = new URLSearchParams(window.location.search).get('art') === 'crafted';
+      var crafted = new URLSearchParams(window.location.search).get('art') !== 'classic';
       // The crafted preview has its own authored creature. Never substitute the
       // older portable inline asset for it, even when that payload is present.
       var inline = !crafted && document.getElementById('reef-shelly-inline');
@@ -51,7 +51,7 @@
       // Keep the lighter authored mesh for a low-power visit. Switching quality
       // later changes texture size without downloading or rebuilding the rig.
       var asset = R3.q >= 2 ? 'assets/models/shelly-view.glb?v=natural-1' : 'assets/models/shelly.glb?v=natural-1';
-      if(crafted) asset = R3.q >= 2 ? 'assets/models/crafted-shelly-view.glb?v=organic-3' : 'assets/models/crafted-shelly.glb?v=organic-3';
+      if(crafted) asset = R3.q >= 2 ? 'assets/models/crafted-shelly-view.glb?v=organic-mp-2' : 'assets/models/crafted-shelly.glb?v=organic-mp-2';
       var source = bytes ? Promise.resolve().then(function(){
         var binary = atob(bytes), array = new Uint8Array(binary.length);
         for(var i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);

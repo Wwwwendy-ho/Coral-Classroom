@@ -133,7 +133,8 @@
       ? '<div class="peek-badge peek-right">✅ That one was right!</div>'
       : '<div class="peek-badge peek-wrong">🦀 That one was marked not quite</div>';
     var body;
-    var photoHTML = rec.photoUrl ? '<img class="card-photo" src="'+esc(rec.photoUrl)+'" alt="">' : '';
+    var purl = safePhotoUrl(rec.photoUrl);
+    var photoHTML = purl ? '<img class="card-photo" src="'+esc(purl)+'" alt="">' : '';
     if(rec.mode === 'choice' || rec.mode === 'match' || rec.mode === 'blank' || rec.mode === 'timedchoice' || rec.mode === 'listen' || rec.mode === 'hanja' || rec.mode === 'numsys'){
       var optsHTML = (rec.choiceOptions||[]).map(function(opt){
         var cls = 'choice-btn';

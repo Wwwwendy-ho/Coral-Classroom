@@ -30,6 +30,21 @@
       if(kz) kz.items.unshift(mw);
       else zones.push({ id: 'korean', label: 'Korean', place: reefPlaceFor('korean', 'Korean'), items: [mw] });
     }
+    if(!zones.length && typeof reefCourseOn === 'function' && reefCourseOn()){
+      var portals = [
+        { id:'__portal:town', name:'Harbor Town', emoji:'🏘️', regionPortal:'town' },
+        { id:'__portal:lagoon', name:'Story Lagoon', emoji:'📖', regionPortal:'lagoon' },
+        { id:'__portal:caves', name:'Echo Caves', emoji:'🎙️', regionPortal:'caves' },
+        { id:'__portal:patterns', name:'Pattern Reef', emoji:'🧩', regionPortal:'patterns' },
+        { id:'__portal:beach', name:'Bottle Beach', emoji:'🍾', regionPortal:'beach' },
+        { id:'__portal:light', name:'Lighthouse', emoji:'🏮', regionPortal:'light' },
+        { id:'__portal:captain', name:'Captain\'s Deck', emoji:'⚓', regionPortal:'captain' }
+      ];
+      zones.push({
+        id: 'korean', label: 'Coral Sea', place: reefPlaceFor('korean', 'Coral Sea'),
+        items: portals.map(function(d){ return { d: d, dc: { due: 0, total: 1 }, kind: 'Explore', state: 'ready' }; })
+      });
+    }
     return zones;
   }
 
@@ -355,6 +370,14 @@
     return '<div class="reef-today"><span class="reef-today-shells" aria-hidden="true">'+shells+'</span><span>'+done+' of '+total+' decks all done</span></div>';
   }
   function reefStartDeck(id){
+    if(typeof id === 'string' && id.indexOf('__portal:') === 0){
+      var target = id.slice(9);
+      if(target === 'library'){ S.editMode = true; render(); return; }
+      var routes = { town: openTown, lagoon: openLagoon, caves: openCaves, patterns: openPatterns, beach: openBeach, light: openLight, captain: openCaptain };
+      var fn = routes[target];
+      if(fn && typeof regionTravel === 'function'){ regionTravel(target, fn); return; }
+      if(fn){ fn(); return; }
+    }
     var d = S.decks.find(function(x){ return x.id === id; });
     R3.fromDeck = true;   // back on the board after this deck (finished or not): a cheer, then the dice
     R3.lastDeckId = id;

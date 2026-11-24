@@ -655,9 +655,10 @@
         (c.mode === 'numsys' ? (esc(c.nsEmoji || '')+' '+esc(c.back)+' → <span lang="ko">'+esc(c.front)+'</span> · '+(NUMSYS[c.nsSys] || NUMSYS.native).icon) :
         c.mode === 'hanja' ? (esc(c.back)+' · <span lang="zh-Hant">'+esc(c.zh||c.hanja||'')+'</span> '+esc(c.py||'')+(c.hzClass ? ' · '+(HANJA_GROUPS[c.hzClass]||{}).icon : '')) :
         (esc(c.back)+(c.note?' · '+esc(c.note):'')))));
+      var cUrl = safePhotoUrl(c.photoUrl);
       return '' +
       '<div class="card-row">' +
-        (c.photoUrl ? '<div class="cr-thumb"><img src="'+esc(c.photoUrl)+'" alt=""></div>' : '') +
+        (cUrl ? '<div class="cr-thumb"><img src="'+esc(cUrl)+'" alt=""></div>' : '') +
         '<div class="cr-text">' +
           '<div class="cr-front">'+esc(c.front)+' '+modeTag+'</div>' +
           '<div class="cr-back">'+backLine+'</div>' +
@@ -677,7 +678,7 @@
     var formTitle = editingCard ? 'Edit card' : 'Add a new card';
     var draft = S.cardFormDraft || { front:'', back:'', note:'', choices:'', blendChunks:'', category:'', photoId:'', photoUrl:'', tcSeconds:'', listenAnswer:'back' };
     var fFront = draft.front; var fBack = draft.back; var fNote = draft.note; var fChoices = draft.choices || ''; var fBlendChunks = draft.blendChunks || ''; var fCategory = draft.category || ''; var fTcSeconds = draft.tcSeconds || '';
-    var fPhotoUrl = draft.photoUrl || '';
+    var fPhotoUrl = safePhotoUrl(draft.photoUrl || '');
     var formMode = S.cardFormMode || 'flip';
     var isReadMode = formMode === 'read';
     var isChoiceMode = formMode === 'choice';

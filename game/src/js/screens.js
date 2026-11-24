@@ -180,17 +180,27 @@
   var COVE_BACKUP_KIND = 'coral-classroom-backup';
   function coveBackupAll(){
     var items = {};
-    try { for(var i = 0; i < localStorage.length; i++){ var k = localStorage.key(i); items[k] = localStorage.getItem(k); } }
-    catch(e){ coveToast('This device won\'t let Coral Classroom read its storage.'); return; }
-    var text = JSON.stringify({ app:'Coral Classroom', kind:COVE_BACKUP_KIND, version:1, savedAt:new Date().toISOString(), items:items });
-    var name = 'coral-classroom-backup-'+coveDate()+'.json';
-    var file = null; try { file = new File([text], name, { type:'application/json' }); } catch(e){}
-    // On an iPhone or iPad the share sheet is the easy way to keep it (Save to Files, AirDrop, Mail)
-    if(file && navigator.canShare && navigator.canShare({ files:[file] })){
-      navigator.share({ files:[file], title:'Coral Classroom backup' }).catch(function(err){ if(!err || err.name !== 'AbortError') coveSaveText(name, text); });
-      return;
+    try {
+      for(var i = 0; i < localStorage.length; i++){
+        var k = localStorage.key(i);
+        if(isAllowedStorageKey(k)) items[k] = localStorage.getItem(k);
+      }
     }
-    coveSaveText(name, text);
+    catch(e){ coveToast('This device won\'t let Coral Classroom read its storage.'); return; }
+    var name = 'coral-classroom-backup-'+coveDate()+'.json';
+    var send = function(digest){
+      var payload = { app:'Coral Classroom', kind:COVE_BACKUP_KIND, version:1, savedAt:new Date().toISOString(), items:items };
+      if(digest) payload.digest = digest;
+      var text = JSON.stringify(payload);
+      var file = null; try { file = new File([text], name, { type:'application/json' }); } catch(e){}
+      // On an iPhone or iPad the share sheet is the easy way to keep it (Save to Files, AirDrop, Mail)
+      if(file && navigator.canShare && navigator.canShare({ files:[file] })){
+        navigator.share({ files:[file], title:'Coral Classroom backup' }).catch(function(err){ if(!err || err.name !== 'AbortError') coveSaveText(name, text); });
+        return;
+      }
+      coveSaveText(name, text);
+    };
+    sha256Hex(canonicalItemsJson(items)).then(send, function(){ send(null); });
   }
   function coveSaveText(name, text){
     try {
@@ -200,17 +210,29 @@
     } catch(e){ coveToast('Downloads aren\'t available here.'); }
   }
   function coveRestoreAll(file){
+    if(file && file.size > COVE_MAX_BACKUP_BYTES){ coveToast('That backup file is too large.'); return; }
     var rd = new FileReader();
     rd.onload = function(){
-      var b = null; try { b = JSON.parse(rd.result); } catch(e){}
-      if(!b || b.kind !== COVE_BACKUP_KIND || !b.items || typeof b.items !== 'object'){ coveToast('That file isn\'t a Coral Classroom backup.'); return; }
-      var when = b.savedAt ? new Date(b.savedAt).toLocaleString() : 'an unknown date';
-      if(!window.confirm('Replace everything on this device with the backup from '+when+'? What is here now will be lost.')) return;
-      try {
-        localStorage.clear();
-        Object.keys(b.items).forEach(function(k){ if(typeof b.items[k] === 'string') localStorage.setItem(k, b.items[k]); });
-      } catch(e){ coveToast('Couldn\'t restore: this device\'s storage is full or blocked.'); return; }
-      coveToast('Restored. Reopening…'); setTimeout(function(){ location.reload(); }, 600);
+      var res = validateBackupPayload(String(rd.result || ''));
+      if(!res.ok){ coveToast(res.reason || 'That file isn\'t a Coral Classroom backup.'); return; }
+      var verify = res.digest
+        ? sha256Hex(res.rawItemsJson).then(function(h){ return timingSafeEqual(h, res.digest); }, function(){ return true; })
+        : Promise.resolve(true);
+      verify.then(function(valid){
+        if(!valid){ coveToast('Backup integrity check failed. File may have been modified.'); return; }
+        var when = res.savedAt ? new Date(res.savedAt).toLocaleString() : 'an unknown date';
+        if(!window.confirm('Replace everything on this device with the backup from '+when+'? What is here now will be lost.')) return;
+        var prev = {};
+        try { for(var i = 0; i < localStorage.length; i++){ var pk = localStorage.key(i); prev[pk] = localStorage.getItem(pk); } } catch(e){}
+        try {
+          localStorage.clear();
+          Object.keys(res.items).forEach(function(k){ localStorage.setItem(k, res.items[k]); });
+        } catch(e){
+          try { localStorage.clear(); Object.keys(prev).forEach(function(pk){ localStorage.setItem(pk, prev[pk]); }); } catch(e2){}
+          coveToast('Couldn\'t restore: this device\'s storage is full or blocked.'); return;
+        }
+        coveToast('Restored. Reopening…'); setTimeout(function(){ location.reload(); }, 600);
+      });
     };
     rd.onerror = function(){ coveToast('Couldn\'t read that file.'); };
     rd.readAsText(file);
@@ -375,7 +397,8 @@
   /* ---------- PROFILES ---------- */
   function profileAvatarHTML(p, size){
     size = size || 'lg';
-    if(p && p.photoUrl) return '<img class="profile-avatar avatar-'+size+'" src="'+esc(p.photoUrl)+'" alt="">';
+    var purl = p && p.photoUrl ? safePhotoUrl(p.photoUrl) : '';
+    if(purl) return '<img class="profile-avatar avatar-'+size+'" src="'+esc(purl)+'" alt="">';
     var initial = (p && p.name) ? esc(p.name.trim().charAt(0).toUpperCase()) : '🐬';
     return '<div class="profile-avatar avatar-'+size+' avatar-fallback">'+initial+'</div>';
   }
@@ -725,7 +748,6 @@
     if(kind === 'enterAdult') return ['🔐 Grown-up Profile', 'Enter the password to open this profile.'];
     if(kind === 'start') return ['🔐 Start Child Mode', 'Ask a grown-up to enter the password to begin today\'s session.'];
     if(kind === 'end') return ['🔐 End Session', 'Enter the password to finish and lock Coral Classroom.'];
-    if(kind === 'exit') return ['🔐 Leave This Deck?', 'Ask a grown-up to enter the password to head back before finishing.'];
     if(kind === 'switch') return ['🔐 Switch Profile', 'Enter the password to end this session and switch profiles.'];
     if(kind === 'manageProfiles') return ['🔐 Manage Profiles', 'Enter the password to add or remove profiles.'];
     if(kind === 'modeSwitch') return ['🔐 Change Mode', 'Enter the password to switch this profile\'s mode.'];
@@ -733,7 +755,6 @@
   }
 
   function renderPinPad(kind){
-    if(kind === 'exit' && reefKid()) return reefMathGate();
     if(reefNoPin() || reefInsideAdult(kind)) return reefSkipPin(kind);
     return reefGrownUpGate(kind);
   }
@@ -798,9 +819,6 @@
       S.pendingEdit = null;
       S.editMode = true;
       if(pe.deckId){ openEditorUnlocked(pe.deckId, pe.focusName); } else { render(); }
-    } else if(kind === 'exit'){
-      S.pinPromptFor = null;
-      goHome();
     } else if(kind === 'switch'){
       S.pinPromptFor = null;
       var endSettings = Object.assign({}, S.settings, { sessionActive:false });
@@ -1264,15 +1282,21 @@
     var delim = dataLines.some(function(l){ return l.indexOf('\t') !== -1; }) ? '\t' : ',';
     var cards = [];
     dataLines.forEach(function(l){
+      if(cards.length >= COVE_MAX_ANKI_CARDS) return;
       var fields = l.split(delim);
-      var front = stripAnkiHtml(fields[0]);
-      var back = stripAnkiHtml(fields[1]);
+      var front = stripControlChars(stripAnkiHtml(fields[0])).slice(0, 600);
+      var back = stripControlChars(stripAnkiHtml(fields[1])).slice(0, 600);
       if(front && back) cards.push({ front: front, back: back });
     });
     return cards;
   }
 
   function handleAnkiImportFile(file){
+    if(file && file.size > COVE_MAX_ANKI_BYTES){
+      S.storeError = 'That import file is too large (max 2 MB).';
+      render();
+      return;
+    }
     var reader = new FileReader();
     reader.onload = function(){
       var parsed = parseAnkiPlainText(String(reader.result || ''));

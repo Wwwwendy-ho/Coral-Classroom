@@ -26,6 +26,7 @@
     return { bytes: u.buffer, type: t.getAttribute('data-type') || 'audio/mpeg' };
   }
   function reefMusicScript(name){
+    if(RM_SONGS.indexOf(name) < 0) return Promise.reject(new Error('invalid track'));
     var inl = reefMusicInline(name); if(inl){ RM.types = RM.types || {}; RM.types[name] = inl.type; return Promise.resolve(inl.bytes); }   // carried inside the page
     return new Promise(function(res, rej){
       var s = document.createElement('script'); s.src = name + '.js'; s.async = true;
@@ -39,18 +40,30 @@
     });
   }
   function reefMusicBytes(name){
+    if(RM_SONGS.indexOf(name) < 0) return Promise.reject(new Error('invalid track'));
     return reefMusicScript(name).then(function(b){ reefMusicNote(name, RM.types && RM.types[name] ? 'loaded from the page' : 'loaded from script'); return b; }, function(e){
       reefMusicNote(name, 'script failed (' + (e && e.message || e) + ')');
       if(!window.fetch) throw e;
       return fetch(name + '.mp3').then(function(r){ if(!r.ok) throw new Error('status ' + r.status); reefMusicNote(name, 'downloaded'); return r.arrayBuffer(); });
     });
   }
+  function reefMusicBus(ctx){
+    if(RM.bus && RM.busCtx === ctx) return RM.bus;
+    if(!ctx || typeof ctx.createBiquadFilter !== 'function') return null;
+    try {
+      var lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass'; lp.frequency.value = 18000; lp.Q.value = 0.5;
+      lp.connect(ctx.destination);
+      RM.bus = lp; RM.busCtx = ctx;
+      return lp;
+    } catch(e){ return null; }
+  }
   function reefMusicEl(name){
     if(RM.el[name]) return RM.el[name];
     var ctx = reefMusicCtx(); if(!ctx) return null;
     var a = new Audio(); a.loop = true; a.preload = 'auto'; a.setAttribute('playsinline', '');
     var m = { a: a, g: null, level: -1, name: name, stage: 1, buf: null, src: null };
-    try { var me = ctx.createMediaElementSource(a); m.g = ctx.createGain(); m.g.gain.value = 0; me.connect(m.g); m.g.connect(ctx.destination); }
+    try { var me = ctx.createMediaElementSource(a); m.g = ctx.createGain(); m.g.gain.value = 0; me.connect(m.g); m.g.connect(reefMusicBus(ctx) || ctx.destination); }
     catch(e){ m.g = null; a.volume = 0; reefMusicNote(name, 'no volume control (' + e.message + ')'); }
     a.addEventListener('playing', function(){ reefMusicNote(name, 'playing'); });
     a.addEventListener('error', function(){
@@ -152,6 +165,15 @@
       reefMusicLevel(m, on ? tg.vol * RM_BASE * RM.duck : 0, fade);
     });
     RM.cur = tg ? tg.name : null;
+    if(RM.bus && RM.busCtx){
+      try {
+        var now = RM.busCtx.currentTime;
+        var focus = !tg || tg.vol < 0.9 || RM.duck < 0.9;
+        RM.bus.frequency.cancelScheduledValues(now);
+        RM.bus.frequency.setValueAtTime(RM.bus.frequency.value, now);
+        RM.bus.frequency.linearRampToValueAtTime(focus ? 2400 : 18000, now + 0.45);
+      } catch(e){}
+    }
   }
   // Under a celebration the music dips, then comes back.
   function reefMusicDuck(seconds){

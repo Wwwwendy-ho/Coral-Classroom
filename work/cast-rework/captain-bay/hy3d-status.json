@@ -1,0 +1,15 @@
+{
+  "slug": "captain-bay",
+  "model": "tencent/Hunyuan3D-2mini",
+  "subfolder": "hunyuan3d-dit-v2-mini",
+  "seed": 17,
+  "octree_resolution": 256,
+  "steps": 30,
+  "guidance": 5.5,
+  "num_chunks": 8000,
+  "vertices": 208833,
+  "faces": 417662,
+  "bytes": 7518724,
+  "peak_vram_gb": 4.159,
+  "elapsed_seconds": 24.6
+}

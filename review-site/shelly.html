@@ -5028,7 +5028,7 @@ reefInstallGLTF();
   }
   function positionCamera(){var d=distance*(camera.aspect<1?1/Math.max(.5,camera.aspect):1);camera.position.set(Math.sin(azimuth)*Math.cos(elevation)*d,Math.sin(elevation)*d+targetY,Math.cos(azimuth)*Math.cos(elevation)*d);camera.lookAt(0,targetY,0);wake();}
   function preset(name){
-    var views={front:[0,.12,3.4,.74],quarter:[.55,.24,3.4,.74],left:[-Math.PI/2,.2,3.4,.74],right:[Math.PI/2,.2,3.4,.74],back:[Math.PI,.25,3.4,.74],game:[.15,.86,3.4,.74],top:[0,1.40,3.4,.74],face:[0,.10,1.8,1.05]},v=views[name]||views.quarter;
+    var views={front:[0,.12,3.4,.74],quarter:[.55,.24,3.4,.74],left:[-Math.PI/2,.2,3.4,.74],right:[Math.PI/2,.2,3.4,.74],back:[Math.PI,.25,3.4,.74],game:[.15,.86,3.4,.74],top:[0,1.40,3.4,.74],face:[0,.10,1.95,.78]},v=views[name]||views.quarter;
     azimuth=v[0];elevation=v[1];distance=v[2];targetY=v[3];positionCamera();
   }
   function play(name,user){
@@ -5063,7 +5063,7 @@ reefInstallGLTF();
       loader.parse(bytes.buffer,'',onLoad,onError);
     } catch(error){onError(error);}
   }
-  var source={"url": "play/assets/models/crafted-shelly.glb?v=organic-3"};
+  var source={"url": "play/assets/models/crafted-shelly.glb?v=organic-mp-1"};
   loadModelSource(source,function(gltf){
     model=gltf.scene;
     model.traverse(function(o){if(!o.isMesh)return;o.frustumCulled=false;[].concat(o.material).forEach(function(m){m.skinning=!!o.isSkinnedMesh;m.morphTargets=!!o.morphTargetInfluences;if(m.map&&m.emissiveMap&&m.map.image===m.emissiveMap.image)m.emissiveMap=m.map;m.needsUpdate=true;});});

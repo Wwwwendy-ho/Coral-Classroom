@@ -4,23 +4,34 @@
   // share a region; a dormant candidate never triggers download or decoding.
   var REGION_RESIDENT_MODELS = { town:[{ id:'taxi', url:'assets/models/taxi-squid.glb', closeUrl:'assets/models/taxi-squid-close.glb' }] };
   var REGION_RESIDENT_CANDIDATES = {
-    'cafe-seahorse':{ region:'town', id:'cafe-seahorse', target:'cafe', url:'assets/models/cafe-seahorse.glb?v=natural-1', closeUrl:'assets/models/cafe-seahorse-close.glb?v=natural-1' },
-    jisu:{ region:'beach', id:'jisu', target:'host', url:'assets/models/jisu.glb?v=cast-1', closeUrl:'assets/models/jisu-close.glb?v=cast-1' },
-    'shop-octopus':{ region:'town', id:'shop-octopus', target:'shop', skinMask:'baseColorAlpha', url:'assets/models/shop-octopus.glb?v=cast-1', closeUrl:'assets/models/shop-octopus-close.glb?v=cast-1' }
+    'cafe-seahorse':{ region:'town', id:'cafe-seahorse', target:'cafe', url:'assets/models/cafe-seahorse.glb?v=mp-1', closeUrl:'assets/models/cafe-seahorse-close.glb?v=mp-1' },
+    jisu:{ region:'beach', id:'jisu', target:'host', url:'assets/models/jisu.glb?v=mp-2', closeUrl:'assets/models/jisu-close.glb?v=mp-2' },
+    'shop-octopus':{ region:'town', id:'shop-octopus', target:'shop', skinMask:'baseColorAlpha', url:'assets/models/shop-octopus.glb?v=mp-1', closeUrl:'assets/models/shop-octopus-close.glb?v=mp-1' },
+    mira:{ region:'lagoon', id:'mira', target:'host', url:'assets/models/mira.glb?v=mp-1', closeUrl:'assets/models/mira-close.glb?v=mp-1' },
+    echo:{ region:'caves', id:'echo', target:'host', url:'assets/models/echo.glb?v=mp-2', closeUrl:'assets/models/echo-close.glb?v=mp-2' },
+    pip:{ region:'patterns', id:'pip', target:'host', url:'assets/models/pip.glb?v=mp-1', closeUrl:'assets/models/pip-close.glb?v=mp-1' },
+    hana:{ region:'light', id:'hana', target:'host', url:'assets/models/hana.glb?v=mp-2', closeUrl:'assets/models/hana-close.glb?v=mp-2' },
+    'captain-bay':{ region:'captain', id:'captain-bay', target:'host', url:'assets/models/captain-bay.glb?v=mp-3', closeUrl:'assets/models/captain-bay-close.glb?v=mp-3' },
+    bok:{ regions:['town','lagoon','caves','patterns','beach','light','captain'], id:'bok', target:'shopkeeper', url:'assets/models/bok.glb?v=mp-3', closeUrl:'assets/models/bok-close.glb?v=mp-3' }
   };
   // Call only after validating both the asset and its cast/reaction contract.
   // A board-only candidate can be activated with includeClose=false.
   function regionResidentEnable(id,includeClose){
     var candidate=REGION_RESIDENT_CANDIDATES[id]; if(!candidate) return false;
-    var entries=REGION_RESIDENT_MODELS[candidate.region] || [];
-    if(!Array.isArray(entries)) entries=[entries];
-    if(entries.some(function(entry){return entry.id===id;})) return false;
-    var entry=Object.assign({},candidate); if(includeClose===false) delete entry.closeUrl;
-    entries.push(entry);REGION_RESIDENT_MODELS[candidate.region]=entries;return true;
+    var regions=candidate.regions || [candidate.region], added=false;
+    regions.forEach(function(region){
+      var entries=REGION_RESIDENT_MODELS[region] || [];
+      if(!Array.isArray(entries)) entries=[entries];
+      if(entries.some(function(entry){return entry.id===id;})) return;
+      var entry=Object.assign({},candidate,{region:region}); delete entry.regions;
+      if(includeClose===false) delete entry.closeUrl;
+      entries.push(entry);REGION_RESIDENT_MODELS[region]=entries;added=true;
+    });
+    return added;
   }
   // Production opt-in: add an ID only after its board and close GLBs pass
   // geometry, texture, performance and cast review. Drafts stay dormant.
-  var REGION_RESIDENT_VALIDATED_IDS = ['cafe-seahorse','jisu','shop-octopus'];
+  var REGION_RESIDENT_VALIDATED_IDS = ['cafe-seahorse','jisu','shop-octopus','mira','echo','pip','hana','captain-bay','bok'];
   REGION_RESIDENT_VALIDATED_IDS.forEach(regionResidentEnable);
   var regionResidentInFlight=false;
 
@@ -55,6 +66,7 @@
       if(p.residents.some(function(state){return state.entry.id===entry.id;})) return;
       var id=entry.target || entry.id;
       var target=id==='host' && p.marker ? {object:p.marker,space:p.markerSpace} :
+        id==='shopkeeper' && p.actor ? {object:p.actor,space:p.shop,fixedPos:true} :
         (p.towns || []).find(function(t){return t.meta.id===id;});
       if(!target || !target.object || !target.object.userData.regionBounds) return;
       var state={target:target,entry:entry,disposed:false,pending:null,root:null,mixer:null,lastTime:0,
@@ -190,6 +202,9 @@
     // Detach temporarily for a true bound of the replacement; keep the old
     // children hidden for shared-resource cleanup with the rest of the view.
     var fallback=visual.children.slice(), fallbackVisibility=fallback.map(function(o){return o.visible;});
+    var tag=null;
+    fallback.forEach(function(o){o.traverse(function(c){if(tag==null && c.userData && c.userData.regionPerson!=null) tag=c.userData.regionPerson;});});
+    if(tag!=null) fit.traverse(function(c){if(c.isMesh) c.userData.regionPerson=tag;});
     fallback.forEach(function(o){visual.remove(o);});
     var introYaw=actor.rotation.y;
     if(matchingIntro) actor.rotation.y=encounter.savedActorTransform.rotation.y;
@@ -197,13 +212,15 @@
     if(matchingIntro) actor.rotation.y=introYaw;
     fallback.forEach(function(o){o.visible=false;visual.add(o);});
     // The far-away fallback must clear the tiles too.
-    var footprint={radius:Math.max(old.radius,actor.userData.regionBounds.radius)};
-    var where=regionPeoplePlacement(view,state.target.space,footprint,state.entry.id==='subway');
-    actor.position.x=where.x; actor.position.z=where.z;
-    if(matchingIntro){
-      encounter.actorBounds=actor.userData.regionBounds;
-      encounter.savedActorTransform.position.x=where.x; encounter.savedActorTransform.position.z=where.z;
+    if(!state.target.fixedPos){
+      var footprint={radius:Math.max(old.radius,actor.userData.regionBounds.radius)};
+      var where=regionPeoplePlacement(view,state.target.space,footprint,state.entry.id==='subway');
+      actor.position.x=where.x; actor.position.z=where.z;
+      if(matchingIntro){
+        encounter.savedActorTransform.position.x=where.x; encounter.savedActorTransform.position.z=where.z;
+      }
     }
+    if(matchingIntro) encounter.actorBounds=actor.userData.regionBounds;
     state.pending=null; state.root=fit; state.fallback=fallback.map(function(o,i){return {object:o,visible:fallbackVisibility[i]};}); state.detailed=true;
     if(gltf.animations && gltf.animations.length){
       var idle=gltf.animations.find(function(a){return a.name==='Idle';});
@@ -322,12 +339,18 @@
     if(!regionResidentPrepare(view,state,gltf,close)){regionResidentRelease(model);return;}
     fit.add(model);
     var previous=visual.children.slice(), visibility=previous.map(function(o){return o.visible;});
+    var tag=null;
+    previous.forEach(function(o){o.traverse(function(c){if(tag==null && c.userData && c.userData.regionPerson!=null) tag=c.userData.regionPerson;});});
+    if(tag!=null) fit.traverse(function(c){if(c.isMesh) c.userData.regionPerson=tag;});
     previous.forEach(function(o){visual.remove(o);});
     var e=close.encounter,yaw=actor.rotation.y;actor.rotation.y=e.savedActorTransform.rotation.y;
     visual.add(fit);regionPeopleCacheBounds(actor);actor.rotation.y=yaw;
     previous.forEach(function(o){o.visible=false;visual.add(o);});
-    var where=regionPeoplePlacement(view,state.target.space,{radius:Math.max(old.radius,actor.userData.regionBounds.radius)},state.entry.id==='subway');
-    actor.position.x=where.x;actor.position.z=where.z;e.savedActorTransform.position.x=where.x;e.savedActorTransform.position.z=where.z;e.actorBounds=actor.userData.regionBounds;
+    if(!state.target.fixedPos){
+      var where=regionPeoplePlacement(view,state.target.space,{radius:Math.max(old.radius,actor.userData.regionBounds.radius)},state.entry.id==='subway');
+      actor.position.x=where.x;actor.position.z=where.z;e.savedActorTransform.position.x=where.x;e.savedActorTransform.position.z=where.z;
+    }
+    e.actorBounds=actor.userData.regionBounds;
     close.previousBounds=old;close.previous=previous.map(function(o,i){return {object:o,visible:visibility[i]};});close.root=fit;
     // Authored attentive listening is conversation-only. Existing residents
     // keep their Idle fallback; this does not add work to hidden characters.

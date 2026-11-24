@@ -34,9 +34,14 @@
     beach: '<g transform="rotate(-28)"><rect x="-6" y="-12" width="12" height="20" rx="5" fill="#8fd3a8" stroke="#2f6b4f" stroke-width="2"/><rect x="-3" y="-18" width="6" height="7" rx="1.5" fill="#8fd3a8" stroke="#2f6b4f" stroke-width="2"/><rect x="-3" y="-21" width="6" height="4" rx="1" fill="#a8814f"/><path d="M-3-4h6M-3 0h6" stroke="#fff8e6" stroke-width="1.6"/></g>',
     light: '<path d="M-7 12l3-26h8l3 26z" fill="#fff8e6" stroke="#7a4f22" stroke-width="2" stroke-linejoin="round"/><path d="M-6 4h12M-5-4h10" stroke="#c2553e" stroke-width="4"/><rect x="-6" y="-21" width="12" height="7" rx="1.5" fill="#ffd36b" stroke="#7a4f22" stroke-width="2"/><path d="M-4-23l4-5 4 5" fill="#c2553e"/><path d="M8-18l18-7M8-17l18 4" stroke="#ffd36b" stroke-width="2.4" stroke-linecap="round" opacity=".9"/>'
   };
+  function reefSeaFocus(){
+    try { return typeof Learner !== 'undefined' && typeof Learner.regionFocus === 'function' ? Learner.regionFocus() : null; }
+    catch(e){ return null; }
+  }
   function reefSeaHTML(view){
     var W = 300, H = 390, c = REEF_REGIONS[0];
     var here = view.region ? ({ patterns:'reef', captain:'deck' }[view.region.id] || view.region.id) : 'cove';
+    var focus = reefSeaFocus(), recReg = focus && focus.recommended ? ({ patterns:'reef' }[focus.recommended] || focus.recommended) : null;
     var routes = REEF_REGIONS.slice(1).map(function(r){
       var mx = (c.x + r.x) / 2 + (r.y - c.y) * .18, my = (c.y + r.y) / 2 - (r.x - c.x) * .18;   // a gentle curve, not a ruler line
       return '<path d="M' + c.x + ' ' + c.y + 'Q' + mx.toFixed(1) + ' ' + my.toFixed(1) + ' ' + r.x + ' ' + r.y + '" fill="none" stroke="#b5452f" stroke-width="2.4" stroke-dasharray="2 8" stroke-linecap="round" opacity=".75"/>';
@@ -50,7 +55,8 @@
       return '<path d="M' + p[0] + ' ' + p[1] + 'q5-5 10 0t10 0" fill="none" stroke="#7fbdb8" stroke-width="1.6" stroke-linecap="round"/>'; }).join('');
     var compass = '<g transform="translate(274 300)" opacity=".8"><circle r="13" fill="none" stroke="#a8814f" stroke-width="1.2"/><path d="M0-17L4 0 0 17-4 0z" fill="#b5452f"/><path d="M-17 0L0 3 17 0 0-3z" fill="#a8814f"/><text y="-20" text-anchor="middle" font-size="9" font-weight="800" fill="#7a4f22">N</text></g>';
     var labels = REEF_REGIONS.map(function(r){
-      return '<button type="button" class="r3-sea-isle' + (r.open ? ' open' : '') + '" data-sea="' + r.id + '" style="left:' + (r.x / W * 100).toFixed(1) + '%;top:' + (r.y / H * 100).toFixed(1) + '%" aria-label="' + esc(r.name) + ': ' + esc(r.teaches) + (r.id === here ? ', you are here' : r.open ? '' : ', opening soon') + '" aria-pressed="false"></button>';
+      var isRec = recReg === r.id && r.id !== here;
+      return '<button type="button" class="r3-sea-isle' + (r.open ? ' open' : '') + (isRec ? ' rec' : '') + '" data-sea="' + r.id + '" style="left:' + (r.x / W * 100).toFixed(1) + '%;top:' + (r.y / H * 100).toFixed(1) + '%" aria-label="' + esc(r.name) + ': ' + esc(r.teaches) + (isRec ? ', recommended next' : '') + (r.id === here ? ', you are here' : r.open ? '' : ', opening soon') + '" aria-pressed="false"></button>';
     }).join('');
     return '<div class="r3-sea" role="tabpanel" aria-label="The sea"><p class="r3-map-hint">Choose an island to explore.</p><div class="r3-sea-chart"><svg viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true">' + waves + routes + compass + isles +
       '</svg>' + labels + '<span class="r3-sea-me" style="left:' + (c.x / W * 100).toFixed(1) + '%;top:' + ((c.y - 30) / H * 100).toFixed(1) + '%" aria-hidden="true">' + reefGuideMini(view.night) + '</span></div>' +
@@ -59,7 +65,11 @@
   function reefSeaInfo(ov, id, focusAction){
     var r = REEF_REGIONS.find(function(x){ return x.id === id; }), box = ov.querySelector('.r3-sea-info'); if(!r || !box) return;
     ov.querySelectorAll('.r3-sea-isle').forEach(function(b){ var picked = b.dataset.sea === id; b.classList.toggle('picked', picked); b.setAttribute('aria-pressed', String(picked)); });
-    box.innerHTML = '<b>' + esc(r.name) + '</b><small>' + esc(r.teaches) + '</small><p>' + esc(r.about) + '</p>' +
+    var focus = reefSeaFocus(), fKey = r.id === 'reef' ? 'patterns' : r.id;
+    var dueN = focus && focus.dueByRegion && focus.dueByRegion[fKey] ? focus.dueByRegion[fKey] : 0;
+    var isRec = focus && focus.recommended === fKey;
+    var badge = isRec ? ' <span class="r3-sea-rec">🎯 Recommended' + (dueN ? ' · ' + dueN + ' due' : '') + '</span>' : (dueN ? ' <span class="r3-sea-due">' + dueN + ' due</span>' : '');
+    box.innerHTML = '<b>' + esc(r.name) + badge + '</b><small>' + esc(r.teaches) + '</small><p>' + esc(r.about) + '</p>' +
       (r.id === 'cove' ? '<button type="button" class="r3-btn main" ' + (R3.view && R3.view.region ? 'data-sea-go="cove"' : 'data-sea-tab="cove"') + '>' + ccIcon('map') + ' Open Coral Cove</button>' :
        r.open ? '<button type="button" class="r3-btn main" data-sea-go="' + r.id + '">' + ccIcon(r.icon || 'story') + ' Open ' + esc(r.openAs || r.name) + '</button>' :
        '<span class="r3-sea-soon">' + ccIcon('sparkle') + ' Opening soon</span>');

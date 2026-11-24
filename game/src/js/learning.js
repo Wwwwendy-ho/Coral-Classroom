@@ -200,10 +200,16 @@
   // into grading at all (only 'sm2_speed' looks at elapsed time).
   var ALGORITHMS = [
     {
+      id: 'fsrs6',
+      icon: '🧠',
+      name: 'Smart Memory (FSRS-6)',
+      blurb: 'Adaptive memory science (FSRS-6) tuned to your target retention and response speed. Best long-term Korean retention with fewer wasted reviews. (Default)'
+    },
+    {
       id: 'sm2_speed',
       icon: '⚡',
       name: 'Standard + Speed',
-      blurb: 'Adaptive scheduling (like Anki) that also factors in how fast an answer came — quick, confident answers get spaced out further than slow, hesitant ones. This is the default.'
+      blurb: 'Adaptive scheduling (like Anki) that also factors in how fast an answer came — quick, confident answers get spaced out further than slow, hesitant ones.'
     },
     {
       id: 'sm2_plain',
@@ -316,6 +322,47 @@
     return { ease: ease, interval: interval, reps: reps, lapses: lapses, due: due, state: state, learningStep: step, isLeech: isLeech, strugglingStreak: streak };
   }
 
+  /* ============ scheduler (FSRS-6 Primary) ============ */
+  function fsrs6RetentionForDiff(diff){
+    if(diff && diff.intervalMult >= 1.15) return 0.85;
+    if(diff && diff.intervalMult <= 0.85) return 0.94;
+    return 0.90;
+  }
+  function gradeCardFSRS6(card, rating, now, diff){
+    now = now || Date.now();
+    diff = diff || currentDifficulty();
+    var g = rating === 'again' ? 1 : (rating === 'hard' ? 2 : (rating === 'easy' ? 4 : 3));
+    var reps = (card.reps || 0) + 1;
+    var lapses = (card.lapses || 0) + (g === 1 ? 1 : 0);
+    var priorStreak = card.strugglingStreak || 0;
+    var streak = g === 1 ? priorStreak + 1 : 0;
+    var mem = null;
+    if(card.fsrsS && card.fsrsD){
+      mem = { s: card.fsrsS, d: card.fsrsD, last: card.fsrsLast || now };
+    } else if((card.interval || 0) > 0){
+      var estD = typeof fsrsClampD === 'function' ? fsrsClampD(11 - (card.ease || EASE_START) * 2.4) : 5;
+      mem = { s: Math.max(0.5, card.interval), d: estD, last: (card.due || now) - card.interval * 86400000 };
+    }
+    var ret = fsrs6RetentionForDiff(diff);
+    var res = fsrsReview(mem, g, now, { retention: ret });
+    var interval = res.ivl;
+    var due = g === 1 ? now + Math.max(2, Math.round(10 * Math.pow(diff.struggleShrink || 0.7, Math.min(priorStreak, 3)))) * 60000 : now + interval * 86400000;
+    return {
+      ease: card.ease || EASE_START,
+      interval: interval,
+      reps: reps,
+      lapses: lapses,
+      due: due,
+      state: g === 1 ? (card.reps > 0 ? 'relearning' : 'learning') : 'review',
+      learningStep: 0,
+      isLeech: lapses >= LEECH_THRESHOLD,
+      strugglingStreak: streak,
+      fsrsS: res.s,
+      fsrsD: res.d,
+      fsrsLast: now
+    };
+  }
+
   /* ============ scheduler (Simple Boxes / Leitner) ============ */
   // A card starts in box 1. A correct answer moves it up one box (capped at the last box); a miss
   // sends it straight back to box 1 and becomes due again right away (so it can resurface the same
@@ -378,10 +425,10 @@
   };
   function autoRating(mode, correct, elapsedMs){
     if(!correct) return 'again';
-    // Only the 'sm2_speed' algorithm (the default) weighs response time; the other two options
+    // Only 'fsrs6' and 'sm2_speed' weigh response time; the other options
     // treat every correct answer the same regardless of how long it took.
-    var algo = S.settings.algorithm || 'sm2_speed';
-    if(algo !== 'sm2_speed') return 'good';
+    var algo = S.settings.algorithm || 'fsrs6';
+    if(algo !== 'sm2_speed' && algo !== 'fsrs6') return 'good';
     var t = TIME_THRESHOLDS[mode] || TIME_THRESHOLDS.flip;
     if(elapsedMs <= t.fastMs) return 'easy';
     if(elapsedMs <= t.slowMs) return 'good';
@@ -488,6 +535,7 @@
       flip: function(){ tone(420, 0, 0.08, 'sine', 0.10); tone(640, 0.05, 0.09, 'sine', 0.09); vibrate(10); },
       // Playful "ta-da!" — a quick bouncing major arpeggio with a sparkly high glimmer on top.
       correct: function(){
+        if(typeof regionEncounterReact==='function' && typeof R3!=='undefined' && R3.view && R3.view.encounter) regionEncounterReact(R3.view, 'happy');
         tone(523, 0,    0.08, 'triangle', 0.15);   // C5
         tone(659, 0.06, 0.08, 'triangle', 0.15);   // E5
         tone(784, 0.12, 0.10, 'triangle', 0.16);   // G5
@@ -498,6 +546,7 @@
       },
       // Playful cartoon "womp womp" — a comic downward slide instead of a harsh buzzer, so it stays fun, not discouraging.
       wrong: function(){
+        if(typeof regionEncounterReact==='function' && typeof R3!=='undefined' && R3.view && R3.view.encounter) regionEncounterReact(R3.view, 'encourage');
         // Child profiles get a soft, neutral two-note "hmm" -- aversive or funny error sounds can make a
         // miss feel like a big event (or a game to trigger) for an autistic learner. Errorless learning
         // keeps the focus on the right answer, which is now shown on every miss.
@@ -509,7 +558,13 @@
         vibrate([20, 30, 20]);
       },
       sessionStart: function(){ tone(523, 0, 0.10, 'triangle', 0.15); tone(659, 0.09, 0.10, 'triangle', 0.15); tone(784, 0.18, 0.18, 'triangle', 0.16); vibrate([20, 50, 20]); },
-      sessionEnd: function(){ tone(784, 0, 0.12, 'triangle', 0.16); tone(659, 0.11, 0.10, 'triangle', 0.14); tone(523, 0.20, 0.18, 'triangle', 0.15); vibrate([30, 60, 30, 60, 30]); }
+      sessionEnd: function(){ tone(784, 0, 0.12, 'triangle', 0.16); tone(659, 0.11, 0.10, 'triangle', 0.14); tone(523, 0.20, 0.18, 'triangle', 0.15); vibrate([30, 60, 30, 60, 30]); },
+      streak: function(n){
+        var notes = [523.25, 587.33, 659.25, 783.99, 880, 1046.5];
+        var f = notes[Math.min(notes.length - 1, Math.max(0, (n || 1) - 1))];
+        tone(f, 0, 0.11, 'triangle', 0.11);
+        tone(f * 1.5, 0.055, 0.14, 'sine', 0.06);
+      }
     };
   })();
 

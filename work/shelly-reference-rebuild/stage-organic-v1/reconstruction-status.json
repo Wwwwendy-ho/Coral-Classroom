@@ -1,0 +1,13 @@
+{
+  "service": "microsoft/TRELLIS.2",
+  "input": "/mnt/c/Users/20750/.gemini/antigravity/scratch/Coral-Classroom/work/shelly-reference-rebuild/stage-organic-v1/input-shelly-clean.png",
+  "seed": 17,
+  "resolution": "1024",
+  "decimation_target": 100000,
+  "texture_size": 2048,
+  "status": "completed",
+  "preprocessed": "/mnt/c/Users/20750/.gemini/antigravity/scratch/Coral-Classroom/work/shelly-reference-rebuild/stage-organic-v1/trellis-preprocessed.png",
+  "glb": "/mnt/c/Users/20750/.gemini/antigravity/scratch/Coral-Classroom/work/shelly-reference-rebuild/stage-organic-v1/shelly-trellis-raw.glb",
+  "bytes": 3536428,
+  "elapsed_seconds": 59.47
+}

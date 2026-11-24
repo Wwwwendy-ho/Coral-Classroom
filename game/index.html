@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self' blob: data:; connect-src 'self' blob: data:; object-src 'none'; base-uri 'self'; form-action 'self'">
 <!-- Built by tools/build.py from the files in src/. Edit those, not index.html (see ARCHITECTURE.md). -->
 <title>Coral Classroom</title>
 <style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><meta name="apple-mobile-web-app-capable" content="yes">
@@ -2018,6 +2018,146 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
      js/ask.js                  Ask Shelly (Lumi at night)
      ====================================================================================================== */
 
+/* from src/js/security.js */
+  /* ---------- Security utilities: URL validation, prototype-pollution-safe JSON, constant-time compare,
+     and strict backup / import bounds. Loaded first inside the app IIFE. ---------- */
+  var COVE_MAX_BACKUP_BYTES = 5 * 1024 * 1024;
+  var COVE_MAX_BACKUP_KEYS = 200;
+  var COVE_MAX_ANKI_BYTES = 2 * 1024 * 1024;
+  var COVE_MAX_ANKI_CARDS = 5000;
+  var COVE_MAX_PHOTO_DATA_BYTES = 2.5 * 1024 * 1024;
+
+  function stripControlChars(s){
+    return String(s == null ? '' : s).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+  }
+
+  function safePhotoUrl(url){
+    if(typeof url !== 'string') return '';
+    var s = url.trim();
+    if(!s || /[\x00-\x1F\x7F\s]/.test(s)) return '';
+    if(/^data:image\/(png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+$/i.test(s)){
+      return s.length <= COVE_MAX_PHOTO_DATA_BYTES ? s : '';
+    }
+    if(/^(?:vocab-pics|friend-pics|assets)\/[A-Za-z0-9._\/-]+\.(?:png|jpe?g|webp|gif)$/i.test(s)){
+      return s.indexOf('..') === -1 ? s : '';
+    }
+    if(/^blob:/i.test(s)){
+      try {
+        if(typeof window !== 'undefined' && window.location && window.location.origin && window.location.origin !== 'null'){
+          return new URL(s).origin === window.location.origin ? s : '';
+        }
+      } catch(e){}
+      return '';
+    }
+    return '';
+  }
+
+  function safeJsonReviver(key, value){
+    if(key === '__proto__' || key === 'constructor' || key === 'prototype') return undefined;
+    return value;
+  }
+
+  function safeJsonParse(raw, fallback){
+    if(typeof raw !== 'string' || !raw) return fallback;
+    try { return JSON.parse(raw, safeJsonReviver); }
+    catch(e){ return fallback; }
+  }
+
+  function sanitizePlainData(val, depth){
+    depth = depth || 0;
+    if(depth > 16 || val == null) return val == null ? null : undefined;
+    var t = typeof val;
+    if(t === 'string' || t === 'number' || t === 'boolean') return val;
+    if(Array.isArray(val)){
+      var arr = [];
+      for(var i = 0; i < val.length; i++){
+        var v = sanitizePlainData(val[i], depth + 1);
+        arr.push(v === undefined ? null : v);
+      }
+      return arr;
+    }
+    if(t === 'object'){
+      var out = {};
+      var keys = Object.keys(val);
+      for(var j = 0; j < keys.length; j++){
+        var k = keys[j];
+        if(k === '__proto__' || k === 'constructor' || k === 'prototype') continue;
+        var sv = sanitizePlainData(val[k], depth + 1);
+        if(sv !== undefined){
+          if(k === 'photoUrl' && typeof sv === 'string') sv = safePhotoUrl(sv);
+          out[k] = sv;
+        }
+      }
+      return out;
+    }
+    return undefined;
+  }
+
+  function timingSafeEqual(a, b){
+    if(typeof a !== 'string' || typeof b !== 'string') return false;
+    var len = Math.max(a.length, b.length);
+    var diff = a.length ^ b.length;
+    for(var i = 0; i < len; i++){
+      diff |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
+    }
+    return diff === 0;
+  }
+
+  function sha256Hex(text){
+    if(typeof window === 'undefined' || !window.crypto || !window.crypto.subtle || typeof TextEncoder !== 'function'){
+      return Promise.reject(new Error('SHA-256 unavailable'));
+    }
+    return window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(text))).then(function(buf){
+      return Array.prototype.map.call(new Uint8Array(buf), function(n){ return ('0' + n.toString(16)).slice(-2); }).join('');
+    });
+  }
+
+  function isAllowedStorageKey(key){
+    return typeof key === 'string' && key.length > 0 && key.length <= 128 &&
+      /^(?:coralClassroom\.|cc-|coralCove|reef[A-Z_]|cove[A-Z_])/.test(key);
+  }
+
+  function canonicalItemsJson(items){
+    var sorted = {};
+    Object.keys(items).sort().forEach(function(k){ sorted[k] = items[k]; });
+    return JSON.stringify(sorted);
+  }
+
+  function validateBackupPayload(rawText){
+    if(typeof rawText !== 'string' || !rawText) return { ok:false, reason:'Empty backup file.' };
+    if(rawText.length > COVE_MAX_BACKUP_BYTES) return { ok:false, reason:'Backup file is too large.' };
+    var b = safeJsonParse(rawText, null);
+    if(!b || typeof b !== 'object' || Array.isArray(b)) return { ok:false, reason:'Invalid backup format.' };
+    var kind = typeof COVE_BACKUP_KIND === 'string' ? COVE_BACKUP_KIND : 'coral-classroom-backup';
+    if(b.kind !== kind || !b.items || typeof b.items !== 'object' || Array.isArray(b.items)){
+      return { ok:false, reason:'That file isn\'t a Coral Classroom backup.' };
+    }
+    var keys = Object.keys(b.items);
+    if(keys.length > COVE_MAX_BACKUP_KEYS) return { ok:false, reason:'Backup contains too many entries.' };
+    var cleanItems = {};
+    for(var i = 0; i < keys.length; i++){
+      var k = keys[i];
+      if(!isAllowedStorageKey(k)) return { ok:false, reason:'Backup contains an unrecognized storage key.' };
+      var v = b.items[k];
+      if(typeof v !== 'string') return { ok:false, reason:'Backup contains an invalid entry.' };
+      var trimmed = v.trim();
+      if(trimmed && (trimmed.charAt(0) === '{' || trimmed.charAt(0) === '[')){
+        var parsed = safeJsonParse(v, undefined);
+        if(parsed !== undefined){
+          v = JSON.stringify(sanitizePlainData(parsed, 0));
+        }
+      }
+      cleanItems[k] = v;
+    }
+    return {
+      ok: true,
+      items: cleanItems,
+      savedAt: b.savedAt || null,
+      digest: typeof b.digest === 'string' ? b.digest : null,
+      rawItemsJson: canonicalItemsJson(b.items)
+    };
+  }
+/* end of src/js/security.js */
 /* from src/js/learning.js */
   /* ============ scheduler (Anki-style SM-2) ============ */
   var LEARN_STEPS_MIN = [1, 10];      // new cards step through these (minutes) before graduating
@@ -2221,10 +2361,16 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
   // into grading at all (only 'sm2_speed' looks at elapsed time).
   var ALGORITHMS = [
     {
+      id: 'fsrs6',
+      icon: '🧠',
+      name: 'Smart Memory (FSRS-6)',
+      blurb: 'Adaptive memory science (FSRS-6) tuned to your target retention and response speed. Best long-term Korean retention with fewer wasted reviews. (Default)'
+    },
+    {
       id: 'sm2_speed',
       icon: '⚡',
       name: 'Standard + Speed',
-      blurb: 'Adaptive scheduling (like Anki) that also factors in how fast an answer came — quick, confident answers get spaced out further than slow, hesitant ones. This is the default.'
+      blurb: 'Adaptive scheduling (like Anki) that also factors in how fast an answer came — quick, confident answers get spaced out further than slow, hesitant ones.'
     },
     {
       id: 'sm2_plain',
@@ -2337,6 +2483,47 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     return { ease: ease, interval: interval, reps: reps, lapses: lapses, due: due, state: state, learningStep: step, isLeech: isLeech, strugglingStreak: streak };
   }
 
+  /* ============ scheduler (FSRS-6 Primary) ============ */
+  function fsrs6RetentionForDiff(diff){
+    if(diff && diff.intervalMult >= 1.15) return 0.85;
+    if(diff && diff.intervalMult <= 0.85) return 0.94;
+    return 0.90;
+  }
+  function gradeCardFSRS6(card, rating, now, diff){
+    now = now || Date.now();
+    diff = diff || currentDifficulty();
+    var g = rating === 'again' ? 1 : (rating === 'hard' ? 2 : (rating === 'easy' ? 4 : 3));
+    var reps = (card.reps || 0) + 1;
+    var lapses = (card.lapses || 0) + (g === 1 ? 1 : 0);
+    var priorStreak = card.strugglingStreak || 0;
+    var streak = g === 1 ? priorStreak + 1 : 0;
+    var mem = null;
+    if(card.fsrsS && card.fsrsD){
+      mem = { s: card.fsrsS, d: card.fsrsD, last: card.fsrsLast || now };
+    } else if((card.interval || 0) > 0){
+      var estD = typeof fsrsClampD === 'function' ? fsrsClampD(11 - (card.ease || EASE_START) * 2.4) : 5;
+      mem = { s: Math.max(0.5, card.interval), d: estD, last: (card.due || now) - card.interval * 86400000 };
+    }
+    var ret = fsrs6RetentionForDiff(diff);
+    var res = fsrsReview(mem, g, now, { retention: ret });
+    var interval = res.ivl;
+    var due = g === 1 ? now + Math.max(2, Math.round(10 * Math.pow(diff.struggleShrink || 0.7, Math.min(priorStreak, 3)))) * 60000 : now + interval * 86400000;
+    return {
+      ease: card.ease || EASE_START,
+      interval: interval,
+      reps: reps,
+      lapses: lapses,
+      due: due,
+      state: g === 1 ? (card.reps > 0 ? 'relearning' : 'learning') : 'review',
+      learningStep: 0,
+      isLeech: lapses >= LEECH_THRESHOLD,
+      strugglingStreak: streak,
+      fsrsS: res.s,
+      fsrsD: res.d,
+      fsrsLast: now
+    };
+  }
+
   /* ============ scheduler (Simple Boxes / Leitner) ============ */
   // A card starts in box 1. A correct answer moves it up one box (capped at the last box); a miss
   // sends it straight back to box 1 and becomes due again right away (so it can resurface the same
@@ -2399,10 +2586,10 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
   };
   function autoRating(mode, correct, elapsedMs){
     if(!correct) return 'again';
-    // Only the 'sm2_speed' algorithm (the default) weighs response time; the other two options
+    // Only 'fsrs6' and 'sm2_speed' weigh response time; the other options
     // treat every correct answer the same regardless of how long it took.
-    var algo = S.settings.algorithm || 'sm2_speed';
-    if(algo !== 'sm2_speed') return 'good';
+    var algo = S.settings.algorithm || 'fsrs6';
+    if(algo !== 'sm2_speed' && algo !== 'fsrs6') return 'good';
     var t = TIME_THRESHOLDS[mode] || TIME_THRESHOLDS.flip;
     if(elapsedMs <= t.fastMs) return 'easy';
     if(elapsedMs <= t.slowMs) return 'good';
@@ -2509,6 +2696,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
       flip: function(){ tone(420, 0, 0.08, 'sine', 0.10); tone(640, 0.05, 0.09, 'sine', 0.09); vibrate(10); },
       // Playful "ta-da!" — a quick bouncing major arpeggio with a sparkly high glimmer on top.
       correct: function(){
+        if(typeof regionEncounterReact==='function' && typeof R3!=='undefined' && R3.view && R3.view.encounter) regionEncounterReact(R3.view, 'happy');
         tone(523, 0,    0.08, 'triangle', 0.15);   // C5
         tone(659, 0.06, 0.08, 'triangle', 0.15);   // E5
         tone(784, 0.12, 0.10, 'triangle', 0.16);   // G5
@@ -2519,6 +2707,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
       },
       // Playful cartoon "womp womp" — a comic downward slide instead of a harsh buzzer, so it stays fun, not discouraging.
       wrong: function(){
+        if(typeof regionEncounterReact==='function' && typeof R3!=='undefined' && R3.view && R3.view.encounter) regionEncounterReact(R3.view, 'encourage');
         // Child profiles get a soft, neutral two-note "hmm" -- aversive or funny error sounds can make a
         // miss feel like a big event (or a game to trigger) for an autistic learner. Errorless learning
         // keeps the focus on the right answer, which is now shown on every miss.
@@ -2530,7 +2719,13 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
         vibrate([20, 30, 20]);
       },
       sessionStart: function(){ tone(523, 0, 0.10, 'triangle', 0.15); tone(659, 0.09, 0.10, 'triangle', 0.15); tone(784, 0.18, 0.18, 'triangle', 0.16); vibrate([20, 50, 20]); },
-      sessionEnd: function(){ tone(784, 0, 0.12, 'triangle', 0.16); tone(659, 0.11, 0.10, 'triangle', 0.14); tone(523, 0.20, 0.18, 'triangle', 0.15); vibrate([30, 60, 30, 60, 30]); }
+      sessionEnd: function(){ tone(784, 0, 0.12, 'triangle', 0.16); tone(659, 0.11, 0.10, 'triangle', 0.14); tone(523, 0.20, 0.18, 'triangle', 0.15); vibrate([30, 60, 30, 60, 30]); },
+      streak: function(n){
+        var notes = [523.25, 587.33, 659.25, 783.99, 880, 1046.5];
+        var f = notes[Math.min(notes.length - 1, Math.max(0, (n || 1) - 1))];
+        tone(f, 0, 0.11, 'triangle', 0.11);
+        tone(f * 1.5, 0.055, 0.14, 'sine', 0.06);
+      }
     };
   })();
 
@@ -4013,17 +4208,27 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
   var COVE_BACKUP_KIND = 'coral-classroom-backup';
   function coveBackupAll(){
     var items = {};
-    try { for(var i = 0; i < localStorage.length; i++){ var k = localStorage.key(i); items[k] = localStorage.getItem(k); } }
-    catch(e){ coveToast('This device won\'t let Coral Classroom read its storage.'); return; }
-    var text = JSON.stringify({ app:'Coral Classroom', kind:COVE_BACKUP_KIND, version:1, savedAt:new Date().toISOString(), items:items });
-    var name = 'coral-classroom-backup-'+coveDate()+'.json';
-    var file = null; try { file = new File([text], name, { type:'application/json' }); } catch(e){}
-    // On an iPhone or iPad the share sheet is the easy way to keep it (Save to Files, AirDrop, Mail)
-    if(file && navigator.canShare && navigator.canShare({ files:[file] })){
-      navigator.share({ files:[file], title:'Coral Classroom backup' }).catch(function(err){ if(!err || err.name !== 'AbortError') coveSaveText(name, text); });
-      return;
+    try {
+      for(var i = 0; i < localStorage.length; i++){
+        var k = localStorage.key(i);
+        if(isAllowedStorageKey(k)) items[k] = localStorage.getItem(k);
+      }
     }
-    coveSaveText(name, text);
+    catch(e){ coveToast('This device won\'t let Coral Classroom read its storage.'); return; }
+    var name = 'coral-classroom-backup-'+coveDate()+'.json';
+    var send = function(digest){
+      var payload = { app:'Coral Classroom', kind:COVE_BACKUP_KIND, version:1, savedAt:new Date().toISOString(), items:items };
+      if(digest) payload.digest = digest;
+      var text = JSON.stringify(payload);
+      var file = null; try { file = new File([text], name, { type:'application/json' }); } catch(e){}
+      // On an iPhone or iPad the share sheet is the easy way to keep it (Save to Files, AirDrop, Mail)
+      if(file && navigator.canShare && navigator.canShare({ files:[file] })){
+        navigator.share({ files:[file], title:'Coral Classroom backup' }).catch(function(err){ if(!err || err.name !== 'AbortError') coveSaveText(name, text); });
+        return;
+      }
+      coveSaveText(name, text);
+    };
+    sha256Hex(canonicalItemsJson(items)).then(send, function(){ send(null); });
   }
   function coveSaveText(name, text){
     try {
@@ -4033,17 +4238,29 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     } catch(e){ coveToast('Downloads aren\'t available here.'); }
   }
   function coveRestoreAll(file){
+    if(file && file.size > COVE_MAX_BACKUP_BYTES){ coveToast('That backup file is too large.'); return; }
     var rd = new FileReader();
     rd.onload = function(){
-      var b = null; try { b = JSON.parse(rd.result); } catch(e){}
-      if(!b || b.kind !== COVE_BACKUP_KIND || !b.items || typeof b.items !== 'object'){ coveToast('That file isn\'t a Coral Classroom backup.'); return; }
-      var when = b.savedAt ? new Date(b.savedAt).toLocaleString() : 'an unknown date';
-      if(!window.confirm('Replace everything on this device with the backup from '+when+'? What is here now will be lost.')) return;
-      try {
-        localStorage.clear();
-        Object.keys(b.items).forEach(function(k){ if(typeof b.items[k] === 'string') localStorage.setItem(k, b.items[k]); });
-      } catch(e){ coveToast('Couldn\'t restore: this device\'s storage is full or blocked.'); return; }
-      coveToast('Restored. Reopening…'); setTimeout(function(){ location.reload(); }, 600);
+      var res = validateBackupPayload(String(rd.result || ''));
+      if(!res.ok){ coveToast(res.reason || 'That file isn\'t a Coral Classroom backup.'); return; }
+      var verify = res.digest
+        ? sha256Hex(res.rawItemsJson).then(function(h){ return timingSafeEqual(h, res.digest); }, function(){ return true; })
+        : Promise.resolve(true);
+      verify.then(function(valid){
+        if(!valid){ coveToast('Backup integrity check failed. File may have been modified.'); return; }
+        var when = res.savedAt ? new Date(res.savedAt).toLocaleString() : 'an unknown date';
+        if(!window.confirm('Replace everything on this device with the backup from '+when+'? What is here now will be lost.')) return;
+        var prev = {};
+        try { for(var i = 0; i < localStorage.length; i++){ var pk = localStorage.key(i); prev[pk] = localStorage.getItem(pk); } } catch(e){}
+        try {
+          localStorage.clear();
+          Object.keys(res.items).forEach(function(k){ localStorage.setItem(k, res.items[k]); });
+        } catch(e){
+          try { localStorage.clear(); Object.keys(prev).forEach(function(pk){ localStorage.setItem(pk, prev[pk]); }); } catch(e2){}
+          coveToast('Couldn\'t restore: this device\'s storage is full or blocked.'); return;
+        }
+        coveToast('Restored. Reopening…'); setTimeout(function(){ location.reload(); }, 600);
+      });
     };
     rd.onerror = function(){ coveToast('Couldn\'t read that file.'); };
     rd.readAsText(file);
@@ -4208,7 +4425,8 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
   /* ---------- PROFILES ---------- */
   function profileAvatarHTML(p, size){
     size = size || 'lg';
-    if(p && p.photoUrl) return '<img class="profile-avatar avatar-'+size+'" src="'+esc(p.photoUrl)+'" alt="">';
+    var purl = p && p.photoUrl ? safePhotoUrl(p.photoUrl) : '';
+    if(purl) return '<img class="profile-avatar avatar-'+size+'" src="'+esc(purl)+'" alt="">';
     var initial = (p && p.name) ? esc(p.name.trim().charAt(0).toUpperCase()) : '🐬';
     return '<div class="profile-avatar avatar-'+size+' avatar-fallback">'+initial+'</div>';
   }
@@ -4558,7 +4776,6 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     if(kind === 'enterAdult') return ['🔐 Grown-up Profile', 'Enter the password to open this profile.'];
     if(kind === 'start') return ['🔐 Start Child Mode', 'Ask a grown-up to enter the password to begin today\'s session.'];
     if(kind === 'end') return ['🔐 End Session', 'Enter the password to finish and lock Coral Classroom.'];
-    if(kind === 'exit') return ['🔐 Leave This Deck?', 'Ask a grown-up to enter the password to head back before finishing.'];
     if(kind === 'switch') return ['🔐 Switch Profile', 'Enter the password to end this session and switch profiles.'];
     if(kind === 'manageProfiles') return ['🔐 Manage Profiles', 'Enter the password to add or remove profiles.'];
     if(kind === 'modeSwitch') return ['🔐 Change Mode', 'Enter the password to switch this profile\'s mode.'];
@@ -4566,7 +4783,6 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
   }
 
   function renderPinPad(kind){
-    if(kind === 'exit' && reefKid()) return reefMathGate();
     if(reefNoPin() || reefInsideAdult(kind)) return reefSkipPin(kind);
     return reefGrownUpGate(kind);
   }
@@ -4631,9 +4847,6 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
       S.pendingEdit = null;
       S.editMode = true;
       if(pe.deckId){ openEditorUnlocked(pe.deckId, pe.focusName); } else { render(); }
-    } else if(kind === 'exit'){
-      S.pinPromptFor = null;
-      goHome();
     } else if(kind === 'switch'){
       S.pinPromptFor = null;
       var endSettings = Object.assign({}, S.settings, { sessionActive:false });
@@ -5097,15 +5310,21 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     var delim = dataLines.some(function(l){ return l.indexOf('\t') !== -1; }) ? '\t' : ',';
     var cards = [];
     dataLines.forEach(function(l){
+      if(cards.length >= COVE_MAX_ANKI_CARDS) return;
       var fields = l.split(delim);
-      var front = stripAnkiHtml(fields[0]);
-      var back = stripAnkiHtml(fields[1]);
+      var front = stripControlChars(stripAnkiHtml(fields[0])).slice(0, 600);
+      var back = stripControlChars(stripAnkiHtml(fields[1])).slice(0, 600);
       if(front && back) cards.push({ front: front, back: back });
     });
     return cards;
   }
 
   function handleAnkiImportFile(file){
+    if(file && file.size > COVE_MAX_ANKI_BYTES){
+      S.storeError = 'That import file is too large (max 2 MB).';
+      render();
+      return;
+    }
     var reader = new FileReader();
     reader.onload = function(){
       var parsed = parseAnkiPlainText(String(reader.result || ''));
@@ -5276,14 +5495,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     app.querySelector('[data-act="exit-feed"]').addEventListener('click', function(){
       try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(e){}
       Ambience.stop();
-      // In Adult Mode a grown-up is already in (no PIN was needed to get here), so backing out of
-      // Word Feed just returns to Manage Decks -- same rule as exit-study just above. In Child Mode,
-      // a kid backing out of Word Feed on their own needs a grown-up's PIN, same as leaving a study
-      // round early (this used to skip the PIN entirely, which meant a kid could freely wander out
-      // of a session mid-swipe with no grown-up involved).
-      if(S.managingDecks){ goHome(); return; }
-      S.pinPromptFor = 'exit';
-      render();
+      goHome();
     });
 
     app.querySelector('[data-act="feed-sounds"]').addEventListener('click', function(){
@@ -5770,10 +5982,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
 
     app.querySelector('[data-act="exit-story"]').addEventListener('click', function(){
       try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(e){}
-      // Same Child Mode PIN guard as exit-feed above -- see that comment for why.
-      if(S.managingDecks){ goHome(); return; }
-      S.pinPromptFor = 'exit';
-      render();
+      goHome();
     });
 
     wireVerticalSwipeFeed('storyStage',
@@ -5882,10 +6091,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
 
     app.querySelector('[data-act="exit-equation"]').addEventListener('click', function(){
       try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(e){}
-      // Same Child Mode PIN guard as exit-feed/exit-story above -- see that comment for why.
-      if(S.managingDecks){ goHome(); return; }
-      S.pinPromptFor = 'exit';
-      render();
+      goHome();
     });
 
     wireVerticalSwipeFeed('equationStage',
@@ -6013,10 +6219,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
 
     app.querySelector('[data-act="exit-lang"]').addEventListener('click', function(){
       try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(e){}
-      // Same Child Mode PIN guard as exit-feed/exit-story/exit-equation above -- see that comment for why.
-      if(S.managingDecks){ goHome(); return; }
-      S.pinPromptFor = 'exit';
-      render();
+      goHome();
     });
 
     wireVerticalSwipeFeed('langStage',
@@ -6107,11 +6310,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
 
     app.querySelector('[data-act="exit-readalong"]').addEventListener('click', function(){
       try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(e){}
-      // Same Child Mode PIN guard as exit-feed/exit-story/exit-equation/exit-lang above -- see that
-      // comment for why.
-      if(S.managingDecks){ goHome(); return; }
-      S.pinPromptFor = 'exit';
-      render();
+      goHome();
     });
 
     // Direct DOM manipulation rather than a render() per tap -- same reasoning as the timed-choice
@@ -6209,10 +6408,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
       '<div class="feed-hint">↕ Swipe for another card · '+(idx+1)+' of '+n+'</div>';
 
     app.querySelector('[data-act="exit-flash"]').addEventListener('click', function(){
-      // Same Child Mode PIN guard as every other feed's exit button -- see exit-feed's comment.
-      if(S.managingDecks){ goHome(); return; }
-      S.pinPromptFor = 'exit';
-      render();
+      goHome();
     });
     app.querySelector('[data-act="flash-order"]').addEventListener('click', function(){
       S.flashOrdered = !S.flashOrdered;
@@ -6348,9 +6544,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
 
     app.querySelector('[data-act="exit-mini"]').addEventListener('click', function(){
       try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(e){}
-      if(S.managingDecks){ goHome(); return; }
-      S.pinPromptFor = 'exit';
-      render();
+      goHome();
     });
     // Words and buttons keep their own touches, so tapping them never starts a page swipe underneath.
     function ownTouch(el){ el.addEventListener('pointerdown', function(e){ e.stopPropagation(); }); }
@@ -7681,7 +7875,8 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
       ? '<div class="peek-badge peek-right">✅ That one was right!</div>'
       : '<div class="peek-badge peek-wrong">🦀 That one was marked not quite</div>';
     var body;
-    var photoHTML = rec.photoUrl ? '<img class="card-photo" src="'+esc(rec.photoUrl)+'" alt="">' : '';
+    var purl = safePhotoUrl(rec.photoUrl);
+    var photoHTML = purl ? '<img class="card-photo" src="'+esc(purl)+'" alt="">' : '';
     if(rec.mode === 'choice' || rec.mode === 'match' || rec.mode === 'blank' || rec.mode === 'timedchoice' || rec.mode === 'listen' || rec.mode === 'hanja' || rec.mode === 'numsys'){
       var optsHTML = (rec.choiceOptions||[]).map(function(opt){
         var cls = 'choice-btn';
@@ -8611,7 +8806,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
       '<div class="flip-scene" style="position:relative;z-index:1;">' +
         '<div class="face face-front read-face echo-face">' +
           '<div class="read-label">🎙️ Echo it</div>' +
-          (card.photoUrl?'<img class="card-photo" src="'+esc(card.photoUrl)+'" alt="">':'') +
+          (safePhotoUrl(card.photoUrl)?'<img class="card-photo" src="'+esc(safePhotoUrl(card.photoUrl))+'" alt="">':'') +
           '<div class="card-text" data-echo-text>'+esc(card.front)+'</div>' +
           (card.back ? '<div class="echo-meaning">'+esc(card.back)+'</div>' : '') +
           '<div class="listen-big echo-listen">' +
@@ -8691,7 +8886,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
       '<div class="flip-scene" style="position:relative;z-index:1;">' +
         '<div class="face face-front read-face build-face">' +
           '<div class="read-label">🧩 Build the sentence</div>' +
-          (card.photoUrl?'<img class="card-photo" src="'+esc(card.photoUrl)+'" alt="">':'') +
+          (safePhotoUrl(card.photoUrl)?'<img class="card-photo" src="'+esc(safePhotoUrl(card.photoUrl))+'" alt="">':'') +
           '<div class="card-text build-meaning">'+esc(card.back || '…')+'</div>' +
           '<div class="build-tools"><button type="button" class="btn btn-ghost" data-act="build-hear">🔊 Hear it</button>' +
             (!done && bs.placed.length > bs.locked.length ? '<button type="button" class="btn btn-ghost" data-act="build-undo">↩︎ Undo</button>' : '') + '</div>' +
@@ -9018,7 +9213,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
         '<div class="flip-scene" style="position:relative;z-index:1;">' +
           '<div class="face face-front read-face">' +
             '<div class="read-label">🗣️ Read it out loud</div>' +
-            (card.photoUrl?'<img class="card-photo" src="'+esc(card.photoUrl)+'" alt="">':'') +
+            (safePhotoUrl(card.photoUrl)?'<img class="card-photo" src="'+esc(safePhotoUrl(card.photoUrl))+'" alt="">':'') +
             '<div class="card-text">'+esc(card.front)+'</div>' +
             (card.note?'<div class="card-note dim">'+esc(card.note)+'</div>':'') +
           '</div>' +
@@ -9046,7 +9241,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
         '<div class="flip-scene" style="position:relative;z-index:1;">' +
           '<div class="face face-front read-face">' +
             '<div class="read-label">🔘 Pick the answer</div>' +
-            (card.photoUrl?'<img class="card-photo" src="'+esc(card.photoUrl)+'" alt="">':'') +
+            (safePhotoUrl(card.photoUrl)?'<img class="card-photo" src="'+esc(safePhotoUrl(card.photoUrl))+'" alt="">':'') +
             '<div class="card-text">'+esc(card.front)+'</div>' +
           '</div>' +
         '</div>' +
@@ -9075,7 +9270,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
         '<div class="flip-scene" style="position:relative;z-index:1;">' +
           '<div class="face face-front read-face">' +
             '<div class="read-label">'+(tc.reefCalm ? '🔘 Pick the answer' : '⏱️ Beat the clock')+'</div>' +
-            (card.photoUrl?'<img class="card-photo" src="'+esc(card.photoUrl)+'" alt="">':'') +
+            (safePhotoUrl(card.photoUrl)?'<img class="card-photo" src="'+esc(safePhotoUrl(card.photoUrl))+'" alt="">':'') +
             '<div class="card-text">'+esc(tc.prompt)+'</div>' +
           '</div>' +
         '</div>' +
@@ -9099,7 +9294,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
         '<div class="flip-scene" style="position:relative;z-index:1;">' +
           '<div class="face face-front read-face">' +
             '<div class="read-label">🐚 Slide to sound it out</div>' +
-            (card.photoUrl?'<img class="card-photo" src="'+esc(card.photoUrl)+'" alt="">':'') +
+            (safePhotoUrl(card.photoUrl)?'<img class="card-photo" src="'+esc(safePhotoUrl(card.photoUrl))+'" alt="">':'') +
             (bd.hangul ? '<div class="blend-built" id="blendBuilt" aria-live="polite">'+hangulBuiltHTML(bd, bd.revealedCount)+'</div>' : '') +
             '<div class="blend-word" style="max-width:'+(bd.hangul ? 340 : bsz.trackPx)+'px;">'+chunkSpans+'</div>' +
           '</div>' +
@@ -9133,7 +9328,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
         '<div class="flip-scene" style="position:relative;z-index:1;">' +
           '<div class="face face-front read-face">' +
             '<div class="read-label">👂 Listen &amp; pick</div>' +
-            (card.photoUrl && lsDone ?'<img class="card-photo" src="'+esc(card.photoUrl)+'" alt="">':'') +
+            (safePhotoUrl(card.photoUrl) && lsDone ?'<img class="card-photo" src="'+esc(safePhotoUrl(card.photoUrl))+'" alt="">':'') +
             '<div class="listen-big">' +
               '<button type="button" class="listen-play" data-act="listen-play" aria-label="Play the word again">'+ccIcon('sound')+'</button>' +
               '<button type="button" class="btn btn-ghost listen-slow" data-act="listen-slow">🐢 Slower</button>' +
@@ -9180,7 +9375,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
         '<div class="flip-scene" style="position:relative;z-index:1;">' +
           '<div class="face face-front read-face">' +
             '<div class="read-label">'+(mode==='blank'?'📝 Fill in the blank':'🧲 Drag the match')+'</div>' +
-            (card.photoUrl?'<img class="card-photo" src="'+esc(card.photoUrl)+'" alt="">':'') +
+            (safePhotoUrl(card.photoUrl)?'<img class="card-photo" src="'+esc(safePhotoUrl(card.photoUrl))+'" alt="">':'') +
             promptHTML +
           '</div>' +
         '</div>' +
@@ -9193,7 +9388,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
       stageInner = '' +
         '<div class="flip-scene" style="position:relative;z-index:1;">' +
           '<div class="flip-card '+(coveFlipFrom?'flipped':'')+'" id="flipCard">' +
-            '<div class="face face-front">'+(card.photoUrl?'<img class="card-photo" src="'+esc(card.photoUrl)+'" alt="">':'')+'<div class="card-text">'+esc(card.front)+'</div></div>' +
+            '<div class="face face-front">'+(safePhotoUrl(card.photoUrl)?'<img class="card-photo" src="'+esc(safePhotoUrl(card.photoUrl))+'" alt="">':'')+'<div class="card-text">'+esc(card.front)+'</div></div>' +
             '<div class="face face-back"><div class="card-text">'+esc(card.back)+'</div>'+(card.note && !backIsWord?'<div class="card-note">'+esc(card.note)+'</div>':'')+(Speech.isSupported()?'<button type="button" class="replay-audio-btn" data-act="replay-audio">👂 Hear it again</button>':'')+'</div>' +
           '</div>' +
         '</div>' +
@@ -9238,14 +9433,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     })();
 
     app.querySelector('[data-act="exit-study"]').addEventListener('click', function(){
-      // In Adult Mode a grown-up is already in (no PIN was needed to get here), so backing out of a
-      // deck early just returns to Manage Decks. The PIN guard below is a Child Mode-only protection
-      // against a kid quitting a round early without a grown-up's say-so.
-      if(S.managingDecks){ goHome(); return; }
-      // Leaving a deck before finishing the round needs a grown-up's PIN — finishing normally
-      // (via the summary screen's own buttons) does not, so this only guards the early exit.
-      S.pinPromptFor = 'exit';
-      render();
+      goHome();
     });
     wireCtrlRow();
     var stageEl = app.querySelector('.stage');
@@ -9437,9 +9625,13 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     // differ upstream, in whether autoRating() let response time influence the rating at all. Either
     // way, the parent-set difficulty (round size aside) shapes how far a good answer is spaced out
     // and how hard a struggling card gets reinforced — see DIFFICULTIES up top.
-    var algo = S.settings.algorithm || 'sm2_speed';
+    var algo = S.settings.algorithm || 'fsrs6';
     var diff = currentDifficulty();
-    var updates = card._practice ? {} : ((algo === 'leitner') ? gradeCardLeitner(card, rating !== 'again', Date.now(), diff) : gradeCard(card, rating, Date.now(), diff));
+    var updates = card._practice ? {} : (
+      algo === 'leitner' ? gradeCardLeitner(card, rating !== 'again', Date.now(), diff)
+      : algo === 'fsrs6' ? gradeCardFSRS6(card, rating, Date.now(), diff)
+      : gradeCard(card, rating, Date.now(), diff)
+    );
     // Cumulative right/wrong counters, independent of the scheduling algorithm above -- these are
     // what the Progress page's per-deck "topics" breakdown groups by category and sums.
     updates.timesSeen = (card.timesSeen || 0) + 1;
@@ -10297,9 +10489,10 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
         (c.mode === 'numsys' ? (esc(c.nsEmoji || '')+' '+esc(c.back)+' → <span lang="ko">'+esc(c.front)+'</span> · '+(NUMSYS[c.nsSys] || NUMSYS.native).icon) :
         c.mode === 'hanja' ? (esc(c.back)+' · <span lang="zh-Hant">'+esc(c.zh||c.hanja||'')+'</span> '+esc(c.py||'')+(c.hzClass ? ' · '+(HANJA_GROUPS[c.hzClass]||{}).icon : '')) :
         (esc(c.back)+(c.note?' · '+esc(c.note):'')))));
+      var cUrl = safePhotoUrl(c.photoUrl);
       return '' +
       '<div class="card-row">' +
-        (c.photoUrl ? '<div class="cr-thumb"><img src="'+esc(c.photoUrl)+'" alt=""></div>' : '') +
+        (cUrl ? '<div class="cr-thumb"><img src="'+esc(cUrl)+'" alt=""></div>' : '') +
         '<div class="cr-text">' +
           '<div class="cr-front">'+esc(c.front)+' '+modeTag+'</div>' +
           '<div class="cr-back">'+backLine+'</div>' +
@@ -10319,7 +10512,7 @@ html.theming .ciw .swtw,html.theming .ciw .swlw,html.theming .ciw .swnear,html.t
     var formTitle = editingCard ? 'Edit card' : 'Add a new card';
     var draft = S.cardFormDraft || { front:'', back:'', note:'', choices:'', blendChunks:'', category:'', photoId:'', photoUrl:'', tcSeconds:'', listenAnswer:'back' };
     var fFront = draft.front; var fBack = draft.back; var fNote = draft.note; var fChoices = draft.choices || ''; var fBlendChunks = draft.blendChunks || ''; var fCategory = draft.category || ''; var fTcSeconds = draft.tcSeconds || '';
-    var fPhotoUrl = draft.photoUrl || '';
+    var fPhotoUrl = safePhotoUrl(draft.photoUrl || '');
     var formMode = S.cardFormMode || 'flip';
     var isReadMode = formMode === 'read';
     var isChoiceMode = formMode === 'choice';
@@ -11825,7 +12018,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
 
   /* ---------- No grown-up check in the Claude version (Wendy's choice). The GitHub/iPad copy loads its seed data
      file, which defines CORAL_COVE_SEED, and asks for the grown-up password (reefGrownUpGate) wherever a PIN
-     used to be asked. Leaving a deck early still asks the subtraction question in both. ---------- */
+     used to be asked. ---------- */
   function reefNoPin(){ return !window.CORAL_COVE_SEED; }
   /* Inside a grown-up profile nothing asks again: the password was entered on the way in.
      Opening the profile and Manage Profiles (on the profile screen, outside any profile) still ask. */
@@ -11843,7 +12036,9 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     if(!window.crypto || !window.crypto.subtle || typeof TextEncoder !== 'function') return Promise.reject(new Error('Password verification unavailable'));
     return window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)).then(function(buffer){
       var hex = Array.prototype.map.call(new Uint8Array(buffer), function(n){ return ('0' + n.toString(16)).slice(-2); }).join('');
-      return hex === BAKED_PIN_HASH;
+      var target = String(BAKED_PIN_HASH || ''), len = Math.max(hex.length, target.length), diff = hex.length ^ target.length;
+      for(var i = 0; i < len; i++) diff |= (hex.charCodeAt(i) || 0) ^ (target.charCodeAt(i) || 0);
+      return diff === 0;
     });
   }
   window.CoralCoveVerifyGrownUpPassword = reefCheckGrownUpPassword;
@@ -11861,17 +12056,40 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       '</div>';
     var inp = app.querySelector('#adultGateInput'), form = app.querySelector('.reef-password-form');
     var button = app.querySelector('[data-gate="check"]'), message = app.querySelector('#adultGateMsg');
+    function readLock(){
+      try {
+        if(typeof localStorage === 'undefined') return { fails:0, until:0 };
+        var r = localStorage.getItem('cc-gate-lock');
+        var o = r ? JSON.parse(r) : null;
+        return o && typeof o.fails === 'number' && typeof o.until === 'number' ? o : { fails:0, until:0 };
+      } catch(e){ return { fails:0, until:0 }; }
+    }
+    function writeLock(o){
+      try { if(typeof localStorage !== 'undefined') localStorage.setItem('cc-gate-lock', JSON.stringify(o)); } catch(e){}
+    }
     function current(){ return S.adultGate === g && S.pinPromptFor === kind && inp.isConnected; }
     function ready(text){ g.pending=false; inp.disabled=false; button.disabled=false; form.removeAttribute('aria-busy'); message.textContent=text; inp.focus(); }
     function check(){
       if(g.pending || !current()) return;
+      var lk = readLock(), now = Date.now();
+      if(lk.until > now){
+        var wait = Math.ceil((lk.until - now) / 1000);
+        message.textContent = 'Too many attempts. Wait ' + wait + 's and try again.';
+        return;
+      }
       var value=inp.value; inp.value='';
       if(!value){ message.textContent='Enter the password.'; inp.focus(); return; }
       g.pending=true; inp.disabled=true; button.disabled=true; form.setAttribute('aria-busy','true'); message.textContent='Checking password…';
       Promise.resolve().then(function(){ return reefCheckGrownUpPassword(value); }).then(function(ok){
         if(!current()) return;
-        if(ok){ S.adultGate=null; grownUpPassed(kind); }
-        else { inp.setAttribute('aria-invalid','true'); ready('Incorrect password. Try again.'); }
+        if(ok){ writeLock({ fails:0, until:0 }); S.adultGate=null; grownUpPassed(kind); }
+        else {
+          var nf = (lk.fails || 0) + 1;
+          var secs = nf >= 5 ? Math.min(300, 15 * Math.pow(2, nf - 5)) : 0;
+          writeLock({ fails:nf, until: secs ? Date.now() + secs * 1000 : 0 });
+          inp.setAttribute('aria-invalid','true');
+          ready(secs ? 'Incorrect password. Too many attempts — wait ' + secs + 's.' : 'Incorrect password. Try again.');
+        }
       },function(){ if(current()) ready('Password verification is unavailable. Reload and try again.'); });
     }
     function cancel(){ if(S.adultGate !== g) return; inp.value=''; S.adultGate=null; cancelPinPrompt(kind); }
@@ -11881,28 +12099,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     inp.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); check(); } else if(e.key === 'Escape'){ e.preventDefault(); cancel(); } });
     setTimeout(function(){ if(current()) try { inp.focus({ preventScroll:true }); } catch(e){} }, 50);
   }
-  /* ---------- Leaving a deck early in Child Mode: a subtraction question instead of the PIN ---------- */
-  /* Leaving a deck early asks a problem. In the endless decks (the swipe feeds) it gets easier the more cards
-     she has read there: a two-digit take-away (20 − 15), then take-away within 10, then adding within 10, then
-     a tiny sum, and after REEF_FREE_EXIT cards she can just leave. */
-  var REEF_ENDLESS = ['feed', 'equationFeed', 'flashFeed', 'langFeed', 'story'], REEF_FREE_EXIT = 30;
-  function reefEndlessSeen(){ return REEF_ENDLESS.indexOf(S.view) >= 0 && S.endless && S.endless.deck === S.currentDeckId ? S.endless.n : 0; }
-  function reefNewProblem(){
-    var n = reefEndlessSeen(), r = function(k){ return Math.floor(Math.random() * k); }, a, b;
-    if(n >= 22){ a = 1 + r(3); return { a: a, b: 1, op: '+', ans: a + 1, tries: 0 }; }   // 2 + 1
-    if(n >= 15){ a = 1 + r(5); b = 1 + r(5); return { a: a, b: b, op: '+', ans: a + b, tries: 0 }; }   // 3 + 4
-    if(n >= 8){ a = 4 + r(6); b = 1 + r(a - 1); return { a: a, b: b, op: '−', ans: a - b, tries: 0 }; }   // 9 − 4
-    a = 12 + r(19); var ans = 3 + r(Math.min(17, a - 7));
-    return { a: a, b: a - ans, op: '−', ans: ans, tries: 0 };
-  }
-  // Counts the cards she has seen in an endless deck (a new card on screen), for the exit problem above.
-  afterRender('endless count', function(){
-    if(REEF_ENDLESS.indexOf(S.view) < 0) return;
-    var cur = document.querySelector('.feed-card-current'); if(!cur) return;
-    if(!S.endless || S.endless.deck !== S.currentDeckId) S.endless = { deck: S.currentDeckId, n: 0, last: null };
-    var sig = S.view + '|' + cur.textContent.replace(/\s+/g, ' ').trim();
-    if(sig !== S.endless.last){ S.endless.last = sig; S.endless.n++; }
-  });
+  /* ---------- Leaving a deck early returns directly to the board (no math gate) ---------- */
   /* ---------- "Say it with me!": in the reading decks (Phonics Words and the other word feeds, and word cards
      she flips) a little Shelly swims in every few cards, says "Say it with me!" and reads the word again, then
      swims away. Child profile only; with Calm motion she fades in and out instead. ---------- */
@@ -11938,72 +12135,6 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
 
   var REEF_PRAISE = ['You got it right!', 'Great thinking!', 'You worked it out!', 'Nice careful work!', 'That\'s right! Good checking.', 'Awesome effort!', 'You did it! Great focus.', 'Yes! Good work.'];
   function reefPraiseLine(){ return REEF_PRAISE[Math.floor(Math.random() * REEF_PRAISE.length)]; }
-  function reefMathGate(){
-    // after enough cards in an endless deck she can just leave
-    if(!S.reefGate && reefEndlessSeen() >= REEF_FREE_EXIT){ S.pinPromptFor = null; S.endless = null; setTimeout(goHome, 0); return; }
-    if(!S.reefGate) S.reefGate = reefNewProblem();
-    var g = S.reefGate;
-    g.op = g.op || '−';
-    var opWord = g.op === '+' ? 'plus' : 'minus';
-    var keys = [1,2,3,4,5,6,7,8,9].map(function(k){ return '<button type="button" class="pin-key" data-gate-digit="'+k+'">'+k+'</button>'; }).join('') +
-      '<button type="button" class="pin-key" data-gate="back" aria-label="Delete">'+ccIcon('backspace')+'</button><button type="button" class="pin-key" data-gate-digit="0">0</button>' +
-      '<button type="button" class="pin-key reef-gate-check" data-gate="check">Check</button>';
-    app.innerHTML = '' +
-      '<div class="lock-screen reef-gate">' +
-        '<h2>🧮 Leave This Deck?</h2>' +
-        '<p>Solve this problem to go back.</p>' +
-        '<div class="pin-wrap">' +
-          '<div class="reef-gate-q"><span>'+g.a+' '+g.op+' '+g.b+' =</span>' +
-            '<input id="reefGateInput" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Your answer to '+g.a+' '+opWord+' '+g.b+'" value=""></div>' +
-          '<div class="reef-gate-msg" role="status" aria-live="polite">'+(g.msg || '&nbsp;')+'</div>' +
-          '<div class="pin-grid">'+keys+'</div>' +
-          '<div class="reef-gate-row"><button type="button" class="reef-gate-hint" data-gate="hint">💡 Hint</button>' +
-          '<button type="button" class="pin-cancel" data-gate="stay">Keep practicing</button></div>' +
-        '</div>' +
-      '</div>';
-    var inp = app.querySelector('#reefGateInput'), msg = app.querySelector('.reef-gate-msg');
-    function say(html, cls){ msg.innerHTML = html; msg.className = 'reef-gate-msg' + (cls ? ' ' + cls : ''); }
-    function hint(){ return g.op === '+' ? 'Hint: start at ' + g.a + '. Count up ' + g.b + ' more.' : 'Hint: start at ' + g.b + '. Count up to ' + g.a + '. How many numbers did you count?'; }
-    function check(){
-      var v = inp.value.replace(/\D/g, '');
-      if(!v){ say('Type your answer first, then tap Check.'); inp.focus(); return; }
-      if(+v === g.ans){
-        var p = reefPraiseLine();
-        say('🎉 ' + esc(p) + ' ' + g.a + ' ' + g.op + ' ' + g.b + ' = ' + g.ans + '.', 'ok');
-        try { Sound.correct(); } catch(e){}
-        try { Speech.speak(p); } catch(e){}
-        reefPopBubbles();
-        reefWinSound(false);
-        app.querySelectorAll('.reef-gate button, .reef-gate input').forEach(function(b){ b.disabled = true; });
-        clearTimeout(S.reefGateIdle); S.reefGateIdle = null;
-        setTimeout(function(){ S.reefGate = null; S.pinPromptFor = null; S.endless = null; goHome(); }, 1600);
-        return;
-      }
-      g.tries++;
-      try { Sound.bloop(300); } catch(e){}
-      inp.value = '';
-      say('Not quite. ' + esc(g.tries >= 2 ? hint() : 'Try again. You can tap 💡 Hint for help.'), 'no');
-      inp.focus();
-    }
-    app.querySelectorAll('[data-gate-digit]').forEach(function(b){
-      b.addEventListener('click', function(){ if(inp.value.length < 2){ try { Sound.tap(); } catch(e){} inp.value += b.dataset.gateDigit; } });
-    });
-    app.querySelector('[data-gate="back"]').addEventListener('click', function(){ inp.value = inp.value.slice(0, -1); });
-    app.querySelector('[data-gate="check"]').addEventListener('click', check);
-    app.querySelector('[data-gate="hint"]').addEventListener('click', function(){ say(esc(hint())); try { Speech.speak(hint()); } catch(e){} });
-    app.querySelector('[data-gate="stay"]').addEventListener('click', function(){ clearTimeout(S.reefGateIdle); S.reefGateIdle = null; S.reefGate = null; cancelPinPrompt('exit'); });
-    inp.addEventListener('input', function(){ var d = inp.value.replace(/\D/g, '').slice(0, 2); if(d !== inp.value) inp.value = d; });
-    // Ten seconds without a tap: the problem goes away and she's back in the deck where she was.
-    // (A re-draw of this screen keeps the countdown going; only her taps restart it.)
-    function idle(){ clearTimeout(S.reefGateIdle); S.reefGateIdle = setTimeout(function(){ S.reefGateIdle = null; if(S.pinPromptFor === 'exit' && document.querySelector('.reef-gate')){ S.reefGate = null; cancelPinPrompt('exit'); } }, 10000); }
-    app.querySelector('.reef-gate').addEventListener('pointerdown', idle);
-    inp.addEventListener('keydown', idle);
-    if(!S.reefGateIdle) idle();
-    inp.addEventListener('keydown', function(e){
-      if(e.key === 'Enter'){ e.preventDefault(); check(); }
-      else if(e.key === 'Escape'){ e.preventDefault(); S.reefGate = null; cancelPinPrompt('exit'); }
-    });
-  }
 
   /* ---------- Praise after a right answer: a spoken line that names the effort, any deck type ---------- */
   var reefWasOk = false;
@@ -12302,8 +12433,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   /* ---------- Never stuck (child profile) ----------
      After ten seconds without a tap, the next thing to do glows and Shelly says it ("Tap the card to flip it!"),
      again every twelve seconds while nothing happens. A pop-up on the board that is still waiting fifteen seconds
-     after the first nudge closes itself, so she's back on the board. (The exit problem has its own ten-second
-     timer, in reefMathGate.) */
+     after the first nudge closes itself, so she's back on the board. */
   var REEF_NUDGES = [
     // [what to find, what Shelly says]; the first one on screen wins
     ['.r3-mini-play .r3-tile:not(.up):not(.got)', 'Tap a card to turn it over!'],
@@ -12411,6 +12541,21 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       var kz = zones.find(function(z){ return z.id === 'korean'; }) || zones[0];
       if(kz) kz.items.unshift(mw);
       else zones.push({ id: 'korean', label: 'Korean', place: reefPlaceFor('korean', 'Korean'), items: [mw] });
+    }
+    if(!zones.length && typeof reefCourseOn === 'function' && reefCourseOn()){
+      var portals = [
+        { id:'__portal:town', name:'Harbor Town', emoji:'🏘️', regionPortal:'town' },
+        { id:'__portal:lagoon', name:'Story Lagoon', emoji:'📖', regionPortal:'lagoon' },
+        { id:'__portal:caves', name:'Echo Caves', emoji:'🎙️', regionPortal:'caves' },
+        { id:'__portal:patterns', name:'Pattern Reef', emoji:'🧩', regionPortal:'patterns' },
+        { id:'__portal:beach', name:'Bottle Beach', emoji:'🍾', regionPortal:'beach' },
+        { id:'__portal:light', name:'Lighthouse', emoji:'🏮', regionPortal:'light' },
+        { id:'__portal:captain', name:'Captain\'s Deck', emoji:'⚓', regionPortal:'captain' }
+      ];
+      zones.push({
+        id: 'korean', label: 'Coral Sea', place: reefPlaceFor('korean', 'Coral Sea'),
+        items: portals.map(function(d){ return { d: d, dc: { due: 0, total: 1 }, kind: 'Explore', state: 'ready' }; })
+      });
     }
     return zones;
   }
@@ -12737,6 +12882,14 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     return '<div class="reef-today"><span class="reef-today-shells" aria-hidden="true">'+shells+'</span><span>'+done+' of '+total+' decks all done</span></div>';
   }
   function reefStartDeck(id){
+    if(typeof id === 'string' && id.indexOf('__portal:') === 0){
+      var target = id.slice(9);
+      if(target === 'library'){ S.editMode = true; render(); return; }
+      var routes = { town: openTown, lagoon: openLagoon, caves: openCaves, patterns: openPatterns, beach: openBeach, light: openLight, captain: openCaptain };
+      var fn = routes[target];
+      if(fn && typeof regionTravel === 'function'){ regionTravel(target, fn); return; }
+      if(fn){ fn(); return; }
+    }
     var d = S.decks.find(function(x){ return x.id === id; });
     R3.fromDeck = true;   // back on the board after this deck (finished or not): a cheer, then the dice
     R3.lastDeckId = id;
@@ -12811,7 +12964,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     subjects: function(){ return SUBJECTS.map(function(s){ return { id: s.id, icon: s.icon, label: s.label }; }); },
     setGoals: function(list){
       if(!S.profile || !Array.isArray(list)) return Promise.resolve(false);
-      S.profile.goals = list.slice(0, 6);
+      S.profile.goals = list.filter(function(g){ return typeof g === 'string' && g.trim(); }).map(function(g){ return g.trim().slice(0, 40); }).slice(0, 6);
       return Promise.resolve(S.store.updateProfile(S.profile.id, { goals: S.profile.goals })).then(function(){ return true; }, function(){ return false; });
     },
     decks: function(){ return (S.decks || []).filter(function(d){ return !d.archived; }).map(function(d){ return { id: d.id, name: d.name, emoji: d.emoji || '🌊', subject: d.subject || '' }; }); },
@@ -12836,8 +12989,10 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     // otherwise (courseOn), it's on for Wendy only.
     courseOn: function(){ return reefCourseOn(); },
     course: function(){ return reefCourseOn() && S.profile.course ? S.profile.course : null; },
-    setCourse: function(c){ if(!S.profile) return Promise.resolve(false); S.profile.course = c; S.profile.courseOn = true;
-      return Promise.resolve(S.store.updateProfile(S.profile.id, { course: c, courseOn: true })).then(function(){ return true; }, function(){ return false; }); },
+    setCourse: function(c){ if(!S.profile || (c !== null && (typeof c !== 'object' || Array.isArray(c)))) return Promise.resolve(false);
+      var clean = c === null ? null : sanitizePlainData(c, 0);
+      S.profile.course = clean; S.profile.courseOn = true;
+      return Promise.resolve(S.store.updateProfile(S.profile.id, { course: clean, courseOn: true })).then(function(){ return true; }, function(){ return false; }); },
     setCourseOn: function(on){ if(!S.profile) return Promise.resolve(false); S.profile.courseOn = !!on;
       return Promise.resolve(S.store.updateProfile(S.profile.id, { courseOn: !!on })).then(function(){ return true; }, function(){ return false; }); },
     needsGrownUpCheck: function(){ return !reefNoPin() && !reefInsideAdult('library'); },
@@ -12854,7 +13009,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     var zones = reefZones();
     if(!zones.length){
       // Just opened and the decks (or their card counts) aren't in yet: keep the calm-water cover up instead of
-      // flashing the plain screen. A profile that really has no decks gets its normal screen after 2.5 seconds.
+      // flashing the plain screen. Once loaded, render a Coral Cove Welcome stop so players always enter the 3D map.
       var pid = S.profile && S.profile.id;
       if(reefHome.pid !== pid){ reefHome.pid = pid; reefHome.at = Date.now(); }
       var counting = S.decks.some(function(d){ return !d.archived && !S.dueCounts[d.id]; });
@@ -12862,8 +13017,12 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       if((counting || fresh) && !R3.failed){
         document.body.classList.add('r3-full', 'r3-loading');
         clearTimeout(reefHome.coverT); reefHome.coverT = setTimeout(function(){ if(!document.querySelector('.r3')) document.body.classList.remove('r3-full', 'r3-loading'); }, counting ? 8000 : 2500 - (Date.now() - reefHome.at));
+        return;
       }
-      return;
+      zones = [{
+        id: 'other', label: 'Coral Cove', place: reefPlaceFor('other', 'Coral Cove'),
+        items: [{ d: { id:'__portal:library', name:'Deck Library', emoji:'📚', regionPortal:'library' }, dc: { due: 0, total: 1 }, kind: 'Explore', state: 'ready' }]
+      }];
     }
     ['.subject-tabs', '.deck-grid', '.empty-filter-note'].forEach(function(sel){ var e = app.querySelector(sel); if(e) e.hidden = true; });
     var holder = document.createElement('div');
@@ -12907,53 +13066,71 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   }
 /* end of src/js/library-api.js */
 /* from src/js/fsrs.js */
-  /* ---------- FSRS-4.5: when to see a word again ----------
-     The memory model behind the learner model (learner.js). Each thing a learner knows has a stability S (how many
-     days until the chance of remembering it falls to 90%) and a difficulty D (1 easy … 10 hard). A review with a
-     grade (1 again, 2 hard, 3 good, 4 easy) updates both, and the next review is set for when recall is expected
-     to have dropped to the target. These are the published FSRS-4.5 formulas with its default weights.
+  /* ---------- FSRS-6: when to see a word again ----------
+     Modern 21-weight FSRS-6 memory model (MIT-licensed pure JS) behind the learner model (learner.js)
+     and primary deck scheduler (learning.js). Each item has a stability S (days until recall drops to
+     target retention) and a difficulty D (1 easy … 10 hard), plus same-day short-term stability handling.
      Kept to plain functions with no app state, so tools/check/test_fsrs.js can run this file on its own. */
-  var FSRS_W = [0.4872, 1.4003, 3.7145, 13.8206, 5.1618, 1.2298, 0.8975, 0.031, 1.6474, 0.1367, 1.0461, 2.1072, 0.0793, 0.3246, 1.587, 0.2272, 2.8755];
-  var FSRS_DECAY = -0.5;
-  var FSRS_FACTOR = 19 / 81;      // chosen so that recall is exactly 90% after S days
+  var FSRS_W = [
+    0.212, 1.2931, 2.3065, 8.2956,
+    6.4133, 0.8334, 3.0194, 0.001,
+    1.8722, 0.1666, 0.796, 1.4835,
+    0.0614, 0.2629, 1.6483, 0.6014,
+    1.8729, 0.5425, 0.0912, 0.0658,
+    0.1542
+  ];
+  var FSRS_DECAY = -FSRS_W[20];
+  var FSRS_FACTOR = Math.pow(0.9, -1 / FSRS_W[20]) - 1;   // ensures fsrsR(S, S) === 0.90
   var FSRS_RETENTION = 0.9;
   function fsrsClampD(d){ return Math.min(10, Math.max(1, d)); }
-  function fsrsInitS(g){ return FSRS_W[g - 1]; }
-  function fsrsInitD(g){ return fsrsClampD(FSRS_W[4] - (g - 3) * FSRS_W[5]); }
+  function fsrsInitS(g){ return Math.max(0.01, FSRS_W[g - 1]); }
+  function fsrsInitD(g){ return fsrsClampD(FSRS_W[4] - Math.exp(FSRS_W[5] * (g - 1)) + 1); }
   // chance of recall t days after the last review
-  function fsrsR(t, s){ return Math.pow(1 + FSRS_FACTOR * Math.max(0, t) / s, FSRS_DECAY); }
-  // days until recall falls to the target (with a 0.9 target this equals S)
-  function fsrsInterval(s){ return s / FSRS_FACTOR * (Math.pow(FSRS_RETENTION, 1 / FSRS_DECAY) - 1); }
-  // Difficulty moves with the grade, then is pulled a little back toward a new card's "good" difficulty, so
-  // one bad day can't pin a word at 10 forever.
+  function fsrsR(t, s){ return Math.pow(1 + FSRS_FACTOR * Math.max(0, t) / Math.max(0.01, s), FSRS_DECAY); }
+  // days until recall falls to the target retention (defaults to 0.9, where interval equals S)
+  function fsrsInterval(s, retention){
+    var ret = retention == null ? FSRS_RETENTION : Math.min(0.99, Math.max(0.7, +retention || FSRS_RETENTION));
+    return Math.max(0.01, s) / FSRS_FACTOR * (Math.pow(ret, 1 / FSRS_DECAY) - 1);
+  }
+  // FSRS-6 difficulty update with linear damping and mean reversion toward fsrsInitD(4)
   function fsrsNextD(d, g){
-    var moved = d - FSRS_W[6] * (g - 3);
-    return fsrsClampD(FSRS_W[7] * fsrsInitD(3) + (1 - FSRS_W[7]) * moved);
+    var deltaD = -FSRS_W[6] * (g - 3);
+    var next = d + deltaD * (10 - d) / 9;
+    return fsrsClampD(FSRS_W[7] * fsrsInitD(4) + (1 - FSRS_W[7]) * next);
   }
   function fsrsRecallS(d, s, r, g){
     var hard = g === 2 ? FSRS_W[15] : 1, easy = g === 4 ? FSRS_W[16] : 1;
     return s * (Math.exp(FSRS_W[8]) * (11 - d) * Math.pow(s, -FSRS_W[9]) * (Math.exp(FSRS_W[10] * (1 - r)) - 1) * hard * easy + 1);
   }
-  // A forgotten word restarts from a lower stability. It never comes out higher than before the lapse (the
-  // formula can, for a very new word), since forgetting can't make a memory stronger.
   function fsrsForgetS(d, s, r){
     var next = FSRS_W[11] * Math.pow(d, -FSRS_W[12]) * (Math.pow(s + 1, FSRS_W[13]) - 1) * Math.exp(FSRS_W[14] * (1 - r));
     return Math.min(s, next);
   }
-  // One review. mem is {s, d, last} (or null for a first review); now and last are in ms. Returns the new
-  // {s, d, ivl} with ivl in days: at least one day after a pass, and 0 after "again" (see again soon).
-  function fsrsReview(mem, g, now){
+  // FSRS-6 same-day short-term stability update (elapsedDays < 1)
+  function fsrsShortTermS(s, g){
+    var inc = Math.exp(FSRS_W[17] * (g - 3 + FSRS_W[18])) * Math.pow(Math.max(0.01, s), -FSRS_W[19]);
+    if(g >= 3) inc = Math.max(1, inc);
+    return Math.max(0.01, s * inc);
+  }
+  // One review. mem is {s, d, last} (or null for a first review); now and last are in ms.
+  // opts.retention optionally overrides target retention (e.g. 0.94 / 0.90 / 0.85).
+  function fsrsReview(mem, g, now, opts){
     var s, d;
     if(!mem || !mem.s){
       s = fsrsInitS(g); d = fsrsInitD(g);
     } else {
-      var r = fsrsR((now - (mem.last || now)) / 864e5, mem.s);
+      var elapsedDays = Math.max(0, (now - (mem.last || now)) / 864e5);
+      var r = fsrsR(elapsedDays, mem.s);
       d = fsrsNextD(mem.d, g);
-      // the stability update uses the difficulty from before this review, as FSRS does
-      s = g === 1 ? fsrsForgetS(mem.d, mem.s, r) : fsrsRecallS(mem.d, mem.s, r, g);
+      if(elapsedDays < 1){
+        s = fsrsShortTermS(mem.s, g);
+      } else {
+        s = g === 1 ? fsrsForgetS(mem.d, mem.s, r) : fsrsRecallS(mem.d, mem.s, r, g);
+      }
     }
     s = Math.max(0.01, s);
-    var ivl = g === 1 ? 0 : Math.max(1, Math.round(fsrsInterval(s)));
+    var retention = opts && opts.retention != null ? opts.retention : FSRS_RETENTION;
+    var ivl = g === 1 ? 0 : Math.max(1, Math.round(fsrsInterval(s, retention)));
     return { s: s, d: d, ivl: ivl };
   }
 /* end of src/js/fsrs.js */
@@ -12977,6 +13154,8 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   var LEARNER_AGAIN_MS = 10 * 60e3;  // a missed word comes back in ten minutes, like a learning step
   var LEARNER_GRADES = { again: 1, hard: 2, good: 3, easy: 4 };
   var learnerData = null, learnerPid, learnerSaveT = null;
+  var learnerEvents = null, learnerEventPid = null;
+  var LEARNER_MAX_EVENTS = 2000;
 
   // "  Hello,  World! " and "hello world" are the same item
   function learnerKey(text){
@@ -12993,6 +13172,21 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   // The model for whoever is signed in, loaded when first needed and again after a profile switch. With no
   // profile (the picker), changes stay in memory only.
   function learnerStoreKey(pid){ return 'cc-learner-' + pid; }
+  function learnerEventKey(pid){ return 'cc-events-' + pid; }
+  function learnerEventLog(){
+    var pid = S.profile && S.profile.id ? S.profile.id : null;
+    if(learnerEvents && learnerEventPid === pid) return learnerEvents;
+    learnerEventPid = pid; learnerEvents = null;
+    if(pid){
+      try {
+        var raw = localStorage.getItem(learnerEventKey(pid));
+        var got = typeof safeJsonParse === 'function' ? safeJsonParse(raw, null) : (raw ? JSON.parse(raw) : null);
+        if(got && got.v === 1 && Array.isArray(got.list)) learnerEvents = got;
+      } catch(e){}
+    }
+    if(!learnerEvents) learnerEvents = { v: 1, list: [] };
+    return learnerEvents;
+  }
   function learnerModel(){
     var pid = S.profile && S.profile.id ? S.profile.id : null;
     if(learnerData && learnerPid === pid) return learnerData;
@@ -13001,7 +13195,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     if(pid){
       try {
         var raw = localStorage.getItem(learnerStoreKey(pid));
-        var got = raw ? JSON.parse(raw) : null;
+        var got = typeof safeJsonParse === 'function' ? safeJsonParse(raw, null) : (raw ? JSON.parse(raw) : null);
         if(got && got.v === 1 && got.items && typeof got.items === 'object') learnerData = got;
       } catch(e){}
     }
@@ -13015,9 +13209,14 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   }
   function learnerFlush(){
     clearTimeout(learnerSaveT); learnerSaveT = null;
-    if(!learnerData || !learnerPid || !learnerData.dirty) return;
-    delete learnerData.dirty;
-    try { localStorage.setItem(learnerStoreKey(learnerPid), JSON.stringify(learnerData)); } catch(e){ learnerData.dirty = true; }
+    if(learnerData && learnerPid && learnerData.dirty){
+      delete learnerData.dirty;
+      try { localStorage.setItem(learnerStoreKey(learnerPid), JSON.stringify(learnerData)); } catch(e){ learnerData.dirty = true; }
+    }
+    if(learnerEvents && learnerEventPid && learnerEvents.dirty){
+      delete learnerEvents.dirty;
+      try { localStorage.setItem(learnerEventKey(learnerEventPid), JSON.stringify(learnerEvents)); } catch(e){ learnerEvents.dirty = true; }
+    }
   }
   // iOS can close a Home Screen app without warning; pagehide is the last moment it reliably tells us.
   window.addEventListener('pagehide', learnerFlush);
@@ -13048,7 +13247,12 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       if(lapsed) c.lapses += 1;
       c.due = next.ivl ? now + next.ivl * 864e5 : now + LEARNER_AGAIN_MS;
       it.ch[channel] = c;
-      m.dirty = true; learnerSaveSoon();
+      m.dirty = true;
+      var ev = learnerEventLog();
+      ev.list.push({ ts: now, k: key.slice(0, 80), ch: channel, g: g, ms: opts && opts.ms != null ? Math.round(+opts.ms) : 0, m: opts && opts.mode ? String(opts.mode).slice(0, 16) : '' });
+      if(ev.list.length > LEARNER_MAX_EVENTS) ev.list = ev.list.slice(-LEARNER_MAX_EVENTS);
+      ev.dirty = true;
+      learnerSaveSoon();
       return { s: c.s, d: c.d, due: c.due, last: c.last, reps: c.reps, lapses: c.lapses };
     },
     // Everything known about one item (a copy), or null
@@ -13101,8 +13305,80 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
         });
       });
       return out;
+    },
+    events: function(limit){
+      var list = learnerEventLog().list;
+      return limit ? list.slice(-limit) : list.slice();
+    },
+    regionFocus: function(now){
+      now = now || Date.now();
+      var byCh = { hear:0, read:0, recall:0, say:0, use:0 };
+      var items = learnerModel().items;
+      Object.keys(items).forEach(function(k){
+        var it = items[k];
+        LEARNER_CHANNELS.forEach(function(ch){
+          var c = it.ch[ch];
+          if(!c || !c.reps) return;
+          var r = learnerRecall(c, now);
+          if(c.due <= now || (r != null && r < 0.85)) byCh[ch] += 1;
+        });
+      });
+      var dueByRegion = {
+        lagoon: byCh.read + byCh.hear,
+        caves: byCh.say + byCh.hear,
+        reef: byCh.use,
+        beach: byCh.recall + byCh.use,
+        town: byCh.hear + byCh.use,
+        cove: byCh.hear + byCh.read + byCh.recall + byCh.say + byCh.use
+      };
+      var weakestChannel = null, maxCh = 0;
+      LEARNER_CHANNELS.forEach(function(ch){ if(byCh[ch] > maxCh){ maxCh = byCh[ch]; weakestChannel = ch; } });
+      var recommended = null, maxReg = 0;
+      ['caves', 'reef', 'beach', 'lagoon', 'town'].forEach(function(reg){
+        if(dueByRegion[reg] > maxReg){ maxReg = dueByRegion[reg]; recommended = reg; }
+      });
+      return { byChannel: byCh, dueByRegion: dueByRegion, weakestChannel: weakestChannel, recommended: recommended };
     }
   };
+
+  /* ---------- Korean Hangul Jamo Diagnostics: specific phonetic/batchim feedback ---------- */
+  var KO_CHO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+  var KO_JUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+  var KO_JONG = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+  var KO_CONS_GROUPS = ['ㄱㅋㄲ','ㄷㅌㄸ','ㅂㅍㅃ','ㅈㅊㅉ','ㅅㅆ'];
+  var KO_VOWEL_GROUPS = ['ㅓㅗ','ㅐㅔ','ㅜㅡ','ㅕㅛ','ㅏㅓ'];
+  function koDecompose(str){
+    var out = [];
+    for(var i = 0; i < str.length; i++){
+      var code = str.charCodeAt(i);
+      if(code >= 0xAC00 && code <= 0xD7A3){
+        var s = code - 0xAC00;
+        var jong = s % 28, jung = ((s - jong) / 28) % 21, cho = Math.floor(s / 588);
+        out.push({ c: KO_CHO[cho], v: KO_JUNG[jung], b: KO_JONG[jong] });
+      }
+    }
+    return out;
+  }
+  function koSameGroup(a, b, groups){
+    return a !== b && groups.some(function(g){ return g.indexOf(a) >= 0 && g.indexOf(b) >= 0; });
+  }
+  function koJamoDiag(expected, actual){
+    var e = koDecompose(String(expected || '').normalize('NFC'));
+    var a = koDecompose(String(actual || '').normalize('NFC'));
+    if(!e.length || !a.length || Math.abs(e.length - a.length) > 1) return null;
+    var n = Math.min(e.length, a.length), diffs = 0, consHint = false, vowelHint = false, batchimHint = false;
+    for(var i = 0; i < n; i++){
+      if(e[i].c !== a[i].c){ diffs++; if(koSameGroup(e[i].c, a[i].c, KO_CONS_GROUPS)) consHint = true; }
+      if(e[i].v !== a[i].v){ diffs++; if(koSameGroup(e[i].v, a[i].v, KO_VOWEL_GROUPS)) vowelHint = true; }
+      if(e[i].b !== a[i].b){ diffs++; batchimHint = true; }
+    }
+    if(diffs === 0 || diffs > 3) return null;
+    if(consHint) return 'Close! Watch the consonant sound (plain vs. strong/tense).';
+    if(vowelHint) return 'Almost! Double-check the vowel shape (e.g. ㅓ vs ㅗ / ㅐ vs ㅔ).';
+    if(batchimHint) return 'So close! Check the bottom consonant (받침) on that syllable.';
+    return null;
+  }
+  if(typeof window !== 'undefined') window.koJamoDiag = koJamoDiag;
 
   // Called by commitGrade() for every answered study card, before the card's round state is cleared. Records
   // the Korean side of the card in the channel the card type practices:
@@ -16037,7 +16313,10 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       if(lex && !slipped && stems.some(function(s){ return lex.known(s); })) known.push(w);
       if(lex && fixes.length < 2 && !slipped){
         var sp = bbSpell(w, lex, all[i + 1]);
-        if(sp) fixes.push({ kind: 'spell', word: sp.word, fix: sp.fix, why: sp.word + ' isn\'t in your words or the dictionary. Did you mean ' + sp.fix + '?' });
+        if(sp){
+          var diag = typeof window !== 'undefined' && typeof window.koJamoDiag === 'function' ? window.koJamoDiag(sp.fix, sp.word) : null;
+          fixes.push({ kind: 'spell', word: sp.word, fix: sp.fix, why: (diag ? diag + ' ' : '') + 'Did you mean ' + sp.fix + '?' });
+        }
       }
     });
     var clean = sents.filter(function(s){ return !patFind(s, { typed: true }).length; });
@@ -22947,7 +23226,43 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     reefCrabMerge(body, movers); parts.eyes.forEach(function(e){ reefCrabMerge(e, []); }); parts.claws.forEach(function(p){ reefCrabMerge(p, []); });
     g.scale.setScalar(size || 1);
     g.userData = { kind: name, parts: parts, anim: { name: 'Idle', t0: 0 }, seed: Math.random() * 4 };
+    reefCrabLoad3D(g, name, body, parts);
     return g;
+  }
+  var reefCrabModels = {};
+  function reefCrabLoad3D(g, name, body, parts){
+    if(typeof window === 'undefined' || !window.THREE || !window.THREE.GLTFLoader) return;
+    var url = name === 'hermit' ? 'assets/models/kiko-hermit.glb?v=mp-1' : 'assets/models/kiko-mochi.glb?v=mp-1';
+    if(!reefCrabModels[url]){
+      reefCrabModels[url] = new Promise(function(resolve){
+        try {
+          if(typeof reefInstallGLTF === 'function') reefInstallGLTF();
+          new window.THREE.GLTFLoader().load(url, resolve, undefined, function(){ resolve(null); });
+        } catch(e){ resolve(null); }
+      });
+    }
+    reefCrabModels[url].then(function(gltf){
+      if(!gltf || !gltf.scene || !g.parent && g.userData.disposed) return;
+      var T = window.THREE;
+      var clone = T.SkeletonUtils && T.SkeletonUtils.clone ? T.SkeletonUtils.clone(gltf.scene) : gltf.scene.clone(true);
+      body.updateMatrixWorld(true);
+      var targetBox = new T.Box3().setFromObject(body), targetSize = new T.Vector3();
+      targetBox.getSize(targetSize);
+      var mBox = new T.Box3().setFromObject(clone), mSize = new T.Vector3();
+      mBox.getSize(mSize);
+      if(mSize.x > 0 && targetSize.x > 0){
+        var sc = (targetSize.x / Math.max(0.01, g.scale.x)) / mSize.x;
+        clone.scale.setScalar(sc);
+        clone.updateMatrixWorld(true);
+        var b2 = new T.Box3().setFromObject(clone), ctr = new T.Vector3();
+        b2.getCenter(ctr);
+        clone.position.set(-ctr.x, -b2.min.y, -ctr.z);
+      }
+      while(body.children.length) body.remove(body.children[0]);
+      parts.claws.length = 0; parts.legs.length = 0; parts.eyes.length = 0;
+      body.add(clone);
+      g.userData.has3D = true;
+    });
   }
   // Joins a group's meshes into one per material, in the group's own space; parts listed in skip stay apart.
   function reefCrabMerge(grp, skip){
@@ -23244,7 +23559,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   }
 
   function reef3dShellyLoad(){
-    if(!window.REEF_SHELLY_PREVIEW && new URLSearchParams(window.location.search).get('shelly') !== 'storybook') return Promise.resolve(null);
+    if(!window.REEF_SHELLY_PREVIEW && new URLSearchParams(window.location.search).get('shelly') === 'procedural') return Promise.resolve(null);
     if(R3shelly) return R3shelly;
     R3shelly = reef3dLoad().then(function(){
       reefInstallGLTF();
@@ -23256,7 +23571,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
         if(controller) controller.abort();
         resolve(null);
       }, 6000); });
-      var crafted = new URLSearchParams(window.location.search).get('art') === 'crafted';
+      var crafted = new URLSearchParams(window.location.search).get('art') !== 'classic';
       // The crafted preview has its own authored creature. Never substitute the
       // older portable inline asset for it, even when that payload is present.
       var inline = !crafted && document.getElementById('reef-shelly-inline');
@@ -23264,7 +23579,7 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
       // Keep the lighter authored mesh for a low-power visit. Switching quality
       // later changes texture size without downloading or rebuilding the rig.
       var asset = R3.q >= 2 ? 'assets/models/shelly-view.glb?v=natural-1' : 'assets/models/shelly.glb?v=natural-1';
-      if(crafted) asset = R3.q >= 2 ? 'assets/models/crafted-shelly-view.glb?v=organic-3' : 'assets/models/crafted-shelly.glb?v=organic-3';
+      if(crafted) asset = R3.q >= 2 ? 'assets/models/crafted-shelly-view.glb?v=organic-mp-2' : 'assets/models/crafted-shelly.glb?v=organic-mp-2';
       var source = bytes ? Promise.resolve().then(function(){
         var binary = atob(bytes), array = new Uint8Array(binary.length);
         for(var i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
@@ -24495,7 +24810,7 @@ var ReefCraftedWorld = (function(){
     mauve: ['#8a77b0', '#aa91cc', '#c3a3df', '#e6c9f5', '#ecd8fa']
   };
   function enabled(region, night){
-    return !region && !night && new URLSearchParams(window.location.search).get('art') === 'crafted';
+    return !region && !night && new URLSearchParams(window.location.search).get('art') !== 'classic';
   }
   function random(n){
     var x = Math.sin(n * 621.127 + 7.17) * 31214.823;
@@ -26134,7 +26449,8 @@ var ReefCraftedWorld = (function(){
       caus: caus, rays: rays, rayList: rayList, schools: schools, fx: [], kit: kit, regionGround: regionGround,
       fishMixers: fishMixers, bigOne: bigOne, models: models, baked: true, blobG: blobG, blobC: blobC, glowG: glowG, groundY: groundY,
       crab: crab, crabFit: crabFit, crabGap: reefCrabExtent(guide) / 2 + crabFit / 2 + .2, leaving: null, spareCrab: null, chestMixer: chestMixer, chestActs: chestActs, nextStar: nextStar, spinners: spinners, lastT: performance.now(),
-      plume: plume, lamp: lamp, wreck: wreckFx, reefFx: reefFx, shipDeck: shipDeck, rig: rig, bake: bake, floor: floor, craftedPavilion: craftedPavilion
+      plume: plume, lamp: lamp, wreck: wreckFx, reefFx: reefFx, shipDeck: shipDeck, rig: rig, bake: bake, floor: floor, craftedPavilion: craftedPavilion,
+      motes: reef3dAmbientMotes(scene, region, night)
     };
     view.post = reef3dPost(renderer, night);
     if(crafted && view.post){
@@ -26310,6 +26626,17 @@ var ReefCraftedWorld = (function(){
       });
       view.bubbles.instanceMatrix.needsUpdate = true;
       if(view.plume) reef3dPlume(view.plume, view.dummy, t);
+      if(view.motes){
+        view.motes.visible = !calm && !view.encounter;
+        if(view.motes.visible){
+          var mp = view.motes.geometry.attributes.position, md = view.motes.userData.seeds;
+          for(var mi = 0; mi < md.length; mi++){
+            var ms = md[mi];
+            mp.setXYZ(mi, g.x + ms.ox + Math.sin(t * .6 + ms.p) * .9, ms.y + Math.sin(t * .9 + ms.p * 1.3) * .45, g.z + ms.oz + Math.cos(t * .5 + ms.p) * .9);
+          }
+          mp.needsUpdate = true;
+        }
+      }
       if(view.lamp){ var lf = .5 + Math.sin(t * 1.6) * .5, fk = Math.sin(t * 7.3) * .5 + Math.sin(t * 11.1) * .5;   // a slow breath plus a candle flicker
         view.lamp.pool.material.opacity = .85 + lf * .12 + fk * .03; if(view.lamp.glow) view.lamp.glow.material.color.setHSL(.12, 1, .68 + lf * .08);
         if(view.lamp.halo){ view.lamp.halo.scale.setScalar(3.4 + lf * .5 + fk * .12); view.lamp.halo.material.opacity = .62 + fk * .08; } }
@@ -26433,6 +26760,26 @@ var ReefCraftedWorld = (function(){
     // nothing important moving: a device that has shown it struggles may draw the gentle idle motion at half speed
     view.idle = !busy && !view.emote && !view.dice && !view.themeFx && !view.themeIn && now - (view.touchAt || 0) > 2000 &&
       !view.schools.some(function(sc){ return sc.flee; });
+  }
+  function reef3dAmbientMotes(scene, region, night){
+    var THREE = window.THREE; if(!THREE || !scene) return null;
+    var cols = { town:'#ffefc7', lagoon:'#ffe694', caves:'#9ef7ff', patterns:'#ffb8d0', beach:'#fff1c2', light:'#ffe082', captain:'#dff7ff' };
+    var col = night ? '#9cecff' : (region && cols[region.id]) || '#fff5c4';
+    var n = 28, pos = new Float32Array(n * 3), seeds = [];
+    for(var i = 0; i < n; i++){
+      var s = { ox: (Math.random() - .5) * 20, y: .9 + Math.random() * 4.5, oz: (Math.random() - .5) * 20, p: Math.random() * 6.28 };
+      seeds.push(s); pos[i * 3] = s.ox; pos[i * 3 + 1] = s.y; pos[i * 3 + 2] = s.oz;
+    }
+    var cv = document.createElement('canvas'); cv.width = cv.height = 32;
+    var g = cv.getContext('2d'), gr = g.createRadialGradient(16, 16, 1, 16, 16, 15);
+    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.4, 'rgba(255,255,255,.55)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 32, 32);
+    var tex = new THREE.CanvasTexture(cv), geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    var mat = new THREE.PointsMaterial({ color: col, map: tex, size: .38, transparent: true, opacity: .78, depthWrite: false, blending: THREE.AdditiveBlending });
+    var pts = new THREE.Points(geo, mat); pts.frustumCulled = false; pts.userData.seeds = seeds;
+    scene.add(pts);
+    return pts;
   }
   function reef3dLoop(view){
     if(view.raf) return;
@@ -27735,23 +28082,34 @@ var ReefCraftedWorld = (function(){
   // share a region; a dormant candidate never triggers download or decoding.
   var REGION_RESIDENT_MODELS = { town:[{ id:'taxi', url:'assets/models/taxi-squid.glb', closeUrl:'assets/models/taxi-squid-close.glb' }] };
   var REGION_RESIDENT_CANDIDATES = {
-    'cafe-seahorse':{ region:'town', id:'cafe-seahorse', target:'cafe', url:'assets/models/cafe-seahorse.glb?v=natural-1', closeUrl:'assets/models/cafe-seahorse-close.glb?v=natural-1' },
-    jisu:{ region:'beach', id:'jisu', target:'host', url:'assets/models/jisu.glb?v=cast-1', closeUrl:'assets/models/jisu-close.glb?v=cast-1' },
-    'shop-octopus':{ region:'town', id:'shop-octopus', target:'shop', skinMask:'baseColorAlpha', url:'assets/models/shop-octopus.glb?v=cast-1', closeUrl:'assets/models/shop-octopus-close.glb?v=cast-1' }
+    'cafe-seahorse':{ region:'town', id:'cafe-seahorse', target:'cafe', url:'assets/models/cafe-seahorse.glb?v=mp-1', closeUrl:'assets/models/cafe-seahorse-close.glb?v=mp-1' },
+    jisu:{ region:'beach', id:'jisu', target:'host', url:'assets/models/jisu.glb?v=mp-2', closeUrl:'assets/models/jisu-close.glb?v=mp-2' },
+    'shop-octopus':{ region:'town', id:'shop-octopus', target:'shop', skinMask:'baseColorAlpha', url:'assets/models/shop-octopus.glb?v=mp-1', closeUrl:'assets/models/shop-octopus-close.glb?v=mp-1' },
+    mira:{ region:'lagoon', id:'mira', target:'host', url:'assets/models/mira.glb?v=mp-1', closeUrl:'assets/models/mira-close.glb?v=mp-1' },
+    echo:{ region:'caves', id:'echo', target:'host', url:'assets/models/echo.glb?v=mp-2', closeUrl:'assets/models/echo-close.glb?v=mp-2' },
+    pip:{ region:'patterns', id:'pip', target:'host', url:'assets/models/pip.glb?v=mp-1', closeUrl:'assets/models/pip-close.glb?v=mp-1' },
+    hana:{ region:'light', id:'hana', target:'host', url:'assets/models/hana.glb?v=mp-2', closeUrl:'assets/models/hana-close.glb?v=mp-2' },
+    'captain-bay':{ region:'captain', id:'captain-bay', target:'host', url:'assets/models/captain-bay.glb?v=mp-3', closeUrl:'assets/models/captain-bay-close.glb?v=mp-3' },
+    bok:{ regions:['town','lagoon','caves','patterns','beach','light','captain'], id:'bok', target:'shopkeeper', url:'assets/models/bok.glb?v=mp-3', closeUrl:'assets/models/bok-close.glb?v=mp-3' }
   };
   // Call only after validating both the asset and its cast/reaction contract.
   // A board-only candidate can be activated with includeClose=false.
   function regionResidentEnable(id,includeClose){
     var candidate=REGION_RESIDENT_CANDIDATES[id]; if(!candidate) return false;
-    var entries=REGION_RESIDENT_MODELS[candidate.region] || [];
-    if(!Array.isArray(entries)) entries=[entries];
-    if(entries.some(function(entry){return entry.id===id;})) return false;
-    var entry=Object.assign({},candidate); if(includeClose===false) delete entry.closeUrl;
-    entries.push(entry);REGION_RESIDENT_MODELS[candidate.region]=entries;return true;
+    var regions=candidate.regions || [candidate.region], added=false;
+    regions.forEach(function(region){
+      var entries=REGION_RESIDENT_MODELS[region] || [];
+      if(!Array.isArray(entries)) entries=[entries];
+      if(entries.some(function(entry){return entry.id===id;})) return;
+      var entry=Object.assign({},candidate,{region:region}); delete entry.regions;
+      if(includeClose===false) delete entry.closeUrl;
+      entries.push(entry);REGION_RESIDENT_MODELS[region]=entries;added=true;
+    });
+    return added;
   }
   // Production opt-in: add an ID only after its board and close GLBs pass
   // geometry, texture, performance and cast review. Drafts stay dormant.
-  var REGION_RESIDENT_VALIDATED_IDS = ['cafe-seahorse','jisu','shop-octopus'];
+  var REGION_RESIDENT_VALIDATED_IDS = ['cafe-seahorse','jisu','shop-octopus','mira','echo','pip','hana','captain-bay','bok'];
   REGION_RESIDENT_VALIDATED_IDS.forEach(regionResidentEnable);
   var regionResidentInFlight=false;
 
@@ -27786,6 +28144,7 @@ var ReefCraftedWorld = (function(){
       if(p.residents.some(function(state){return state.entry.id===entry.id;})) return;
       var id=entry.target || entry.id;
       var target=id==='host' && p.marker ? {object:p.marker,space:p.markerSpace} :
+        id==='shopkeeper' && p.actor ? {object:p.actor,space:p.shop,fixedPos:true} :
         (p.towns || []).find(function(t){return t.meta.id===id;});
       if(!target || !target.object || !target.object.userData.regionBounds) return;
       var state={target:target,entry:entry,disposed:false,pending:null,root:null,mixer:null,lastTime:0,
@@ -27921,6 +28280,9 @@ var ReefCraftedWorld = (function(){
     // Detach temporarily for a true bound of the replacement; keep the old
     // children hidden for shared-resource cleanup with the rest of the view.
     var fallback=visual.children.slice(), fallbackVisibility=fallback.map(function(o){return o.visible;});
+    var tag=null;
+    fallback.forEach(function(o){o.traverse(function(c){if(tag==null && c.userData && c.userData.regionPerson!=null) tag=c.userData.regionPerson;});});
+    if(tag!=null) fit.traverse(function(c){if(c.isMesh) c.userData.regionPerson=tag;});
     fallback.forEach(function(o){visual.remove(o);});
     var introYaw=actor.rotation.y;
     if(matchingIntro) actor.rotation.y=encounter.savedActorTransform.rotation.y;
@@ -27928,13 +28290,15 @@ var ReefCraftedWorld = (function(){
     if(matchingIntro) actor.rotation.y=introYaw;
     fallback.forEach(function(o){o.visible=false;visual.add(o);});
     // The far-away fallback must clear the tiles too.
-    var footprint={radius:Math.max(old.radius,actor.userData.regionBounds.radius)};
-    var where=regionPeoplePlacement(view,state.target.space,footprint,state.entry.id==='subway');
-    actor.position.x=where.x; actor.position.z=where.z;
-    if(matchingIntro){
-      encounter.actorBounds=actor.userData.regionBounds;
-      encounter.savedActorTransform.position.x=where.x; encounter.savedActorTransform.position.z=where.z;
+    if(!state.target.fixedPos){
+      var footprint={radius:Math.max(old.radius,actor.userData.regionBounds.radius)};
+      var where=regionPeoplePlacement(view,state.target.space,footprint,state.entry.id==='subway');
+      actor.position.x=where.x; actor.position.z=where.z;
+      if(matchingIntro){
+        encounter.savedActorTransform.position.x=where.x; encounter.savedActorTransform.position.z=where.z;
+      }
     }
+    if(matchingIntro) encounter.actorBounds=actor.userData.regionBounds;
     state.pending=null; state.root=fit; state.fallback=fallback.map(function(o,i){return {object:o,visible:fallbackVisibility[i]};}); state.detailed=true;
     if(gltf.animations && gltf.animations.length){
       var idle=gltf.animations.find(function(a){return a.name==='Idle';});
@@ -28053,12 +28417,18 @@ var ReefCraftedWorld = (function(){
     if(!regionResidentPrepare(view,state,gltf,close)){regionResidentRelease(model);return;}
     fit.add(model);
     var previous=visual.children.slice(), visibility=previous.map(function(o){return o.visible;});
+    var tag=null;
+    previous.forEach(function(o){o.traverse(function(c){if(tag==null && c.userData && c.userData.regionPerson!=null) tag=c.userData.regionPerson;});});
+    if(tag!=null) fit.traverse(function(c){if(c.isMesh) c.userData.regionPerson=tag;});
     previous.forEach(function(o){visual.remove(o);});
     var e=close.encounter,yaw=actor.rotation.y;actor.rotation.y=e.savedActorTransform.rotation.y;
     visual.add(fit);regionPeopleCacheBounds(actor);actor.rotation.y=yaw;
     previous.forEach(function(o){o.visible=false;visual.add(o);});
-    var where=regionPeoplePlacement(view,state.target.space,{radius:Math.max(old.radius,actor.userData.regionBounds.radius)},state.entry.id==='subway');
-    actor.position.x=where.x;actor.position.z=where.z;e.savedActorTransform.position.x=where.x;e.savedActorTransform.position.z=where.z;e.actorBounds=actor.userData.regionBounds;
+    if(!state.target.fixedPos){
+      var where=regionPeoplePlacement(view,state.target.space,{radius:Math.max(old.radius,actor.userData.regionBounds.radius)},state.entry.id==='subway');
+      actor.position.x=where.x;actor.position.z=where.z;e.savedActorTransform.position.x=where.x;e.savedActorTransform.position.z=where.z;
+    }
+    e.actorBounds=actor.userData.regionBounds;
     close.previousBounds=old;close.previous=previous.map(function(o,i){return {object:o,visible:visibility[i]};});close.root=fit;
     // Authored attentive listening is conversation-only. Existing residents
     // keep their Idle fallback; this does not add work to hidden characters.
@@ -28726,7 +29096,7 @@ var ReefCraftedWorld = (function(){
     meet.addEventListener('click',function(e){ e.stopPropagation(); regionPeopleApproach(view,'shop'); });
     guide.addEventListener('click',function(e){ e.stopPropagation(); regionPeopleApproach(view,'shop'); });
     if(practice) practice.addEventListener('click',function(e){ e.stopPropagation(); regionPeopleApproach(view,'activity'); });
-    view.regionPeople={ root:root, actor:actor, arm:arm, shop:shop, marker:marker, markerSpace:markerSpace, towns:towns, labels:labels, meet:meet, practice:practice, guide:guide, focus:null, disposed:false,
+    view.regionPeople={ root:root, actor:actor, stall:stall, arm:arm, shop:shop, marker:marker, markerSpace:markerSpace, towns:towns, labels:labels, meet:meet, practice:practice, guide:guide, focus:null, disposed:false,
       hitables:[actor,stall].concat(marker?[marker]:[],towns.map(function(t){ return t.object; })), sourceGeos:geos };
     if(typeof regionResidentLoad==='function') regionResidentLoad(view);
   }
@@ -29013,9 +29383,45 @@ var ReefCraftedWorld = (function(){
     e.hiddenObjects=[];
     var people=view.regionPeople;
     var quiet=[view.guide,view.crab,view.ring,view.nextStar,people.actor,people.marker]
-      .concat(people.towns.map(function(t){ return t.object; }),view.spinners || [],
+      .concat(actor!==people.actor && people.stall ? [people.stall] : [],
+        people.towns.map(function(t){ return t.object; }),view.spinners || [],
         view.spaces.map(function(s){ return s.qb; }));
     quiet.forEach(function(o){ if(o && o!==actor){ e.hiddenObjects.push({object:o,visible:o.visible}); o.visible=false; } });
+    // Zero-cost sightline guard: hide static scenery props sitting directly between camera and actor.
+    if(view.cam && view.scene && window.THREE){
+      var T=window.THREE, halfA=Math.tan(view.cam.fov*Math.PI/360), asp=Math.max(.25,view.cam.aspect);
+      var wEst=bounds.width*Math.cos(.1)+bounds.depth*Math.sin(.1);
+      var dist=Math.max(.75,wEst/(2*halfA*asp*.72),bounds.height/(2*halfA*.76))+bounds.depth*.55;
+      var cx=actor.position.x+bounds.centerX, cy=actor.position.y+bounds.centerY, cz=actor.position.z+bounds.centerZ;
+      var padX=Math.max(.95,bounds.width*.65), padY=Math.max(.85,bounds.height*.65), camZ=cz+dist;
+      var box=new T.Box3(), bSz=new T.Vector3();
+      var isActorRel=function(node){
+        for(var q=actor;q;q=q.parent) if(q===node) return true;
+        for(var p=node;p;p=p.parent) if(p===actor) return true;
+        return false;
+      };
+      var scan=function(node){
+        if(!node || !node.visible || node===people.root || isActorRel(node)) return;
+        if(node.isLight || node.isPoints) return;
+        if(node.isMesh || (node.children && node.children.length && !node.name.indexOf('region-scenery'))){
+          if(node.children && node.children.length && node.name && node.name.indexOf('region-scenery')===0){
+            node.children.forEach(scan); return;
+          }
+          node.updateMatrixWorld(true); box.setFromObject(node);
+          if(!box.isEmpty()){
+            box.getSize(bSz);
+            if(bSz.x<12 && bSz.z<12 && box.max.z>cz+bounds.depth*.25 && box.min.z<camZ+.5 &&
+               box.max.x>cx-padX && box.min.x<cx+padX && box.max.y>cy-padY && box.min.y<cy+padY){
+              e.hiddenObjects.push({object:node,visible:true});
+              node.visible=false;
+            }
+          }
+          return;
+        }
+        if(node.children) node.children.forEach(scan);
+      };
+      view.scene.children.forEach(scan);
+    }
     // The merged world model faces positive Z; turn it a touch toward the learner.
     actor.rotation.y = saved.rotation.y + .1;
     if(typeof regionResidentEncounter==='function') regionResidentEncounter(view,actor);
@@ -29120,9 +29526,25 @@ var ReefCraftedWorld = (function(){
       speaking = typeof i === 'number' && !!S.town.log && !!S.town.log[i] && S.town.log[i].who === 'them';
     }
     var calm = reefCalm(), t = now * .001;
-    actor.rotation.x = base.rotation.x + (!calm && speaking ? Math.sin(t * 6.5) * .025 : 0);
-    actor.rotation.z = base.rotation.z + (!calm ? Math.sin(t * 1.4) * .012 : 0);
-    actor.position.y = base.position.y + (!calm && speaking ? Math.sin(t * 6.5) * .025 : 0);
+    var rx = 0, rz = 0, py = 0, sc = 1;
+    if(!calm && e.react){
+      var rp = (now - e.react.t0) / e.react.dur;
+      if(rp >= 1) e.react = null;
+      else if(e.react.mood === 'happy'){
+        py = Math.sin(rp * Math.PI) * .16;
+        sc = 1 + Math.sin(rp * Math.PI * 2) * .035;
+      } else {
+        rz = Math.sin(rp * Math.PI) * .08;
+      }
+    }
+    actor.rotation.x = base.rotation.x + (!calm && speaking ? Math.sin(t * 6.5) * .025 : 0) + rx;
+    actor.rotation.z = base.rotation.z + (!calm ? Math.sin(t * 1.4) * .012 : 0) + rz;
+    actor.position.y = base.position.y + (!calm && speaking ? Math.sin(t * 6.5) * .025 : 0) + py;
+    actor.scale.copy(base.scale).multiplyScalar(sc);
+  }
+  function regionEncounterReact(view, mood){
+    if(!regionEncounterActive(view) || reefCalm()) return;
+    view.encounter.react = { mood: mood === 'happy' ? 'happy' : 'encourage', t0: performance.now(), dur: mood === 'happy' ? 550 : 450 };
   }
   function regionEncounterEnd(view){
     var e = view && view.encounter;
@@ -29533,16 +29955,23 @@ var ReefCraftedWorld = (function(){
         var own = it.hat && b.hats.indexOf(it.id) >= 0, wearing = b.hat === it.id;
         var btn = own ? '<button type="button" class="r3-btn" data-wear="' + it.id + '">' + (wearing ? 'Take off' : 'Wear') + '</button>'
           : '<button type="button" class="r3-btn main" data-buy="' + it.id + '"' + (b.shells < it.cost ? ' disabled' : '') + '>🐚 ' + it.cost + '</button>';
-        return '<li><span class="r3-shop-e" aria-hidden="true">' + it.e + '</span><span class="r3-shop-t"><b>' + esc(it.name) + '</b>' +
-          (it.id === 'dbl' ? '<small>' + esc(it.note) + (b.dbl ? ' · you have ' + b.dbl : '') + '</small>' : own ? '<small>Yours</small>' : '') + '</span>' + btn + '</li>';
+        return '<li' + (it.id === 'dbl' ? ' class="r3-shop-feat"' : '') + '><span class="r3-shop-e" aria-hidden="true">' + it.e + '</span><span class="r3-shop-t"><b>' + esc(it.name) + '</b>' +
+          (it.id === 'dbl' ? '<small>' + esc(it.note) + (b.dbl ? ' · ' + b.dbl + ' owned' : '') + '</small>' : own ? '<small>Yours</small>' : '') + '</span>' + btn + '</li>';
       }).join('');
     }
-    var intro = host ? (host.portrait || ccIcon('bag')) + '<h3>' + esc(host.title) + '</h3><p>' + esc(host.intro) + '</p>' : '<div class="r3-panel-e" aria-hidden="true">🦀</div><h3>Hermit Crab\'s Shop</h3>';
-    var el = reef3dPanel(view, 'r3-shop', intro +
-      '<p class="r3-shop-have">You have <b>' + b.shells + '</b> shells.</p><ul class="r3-shop-list">' + rows() + '</ul>' +
+    var head = (host ? (host.portrait || '') : '') +
+      '<div class="r3-shop-head"><h3>' + (host ? esc(host.title) : '🦀 Hermit Crab\'s Shop') + '</h3>' +
+      '<p class="r3-shop-have" aria-label="You have ' + b.shells + ' shells">🐚 <b>' + b.shells + '</b></p></div>';
+    var el = reef3dPanel(view, 'r3-shop', head +
+      '<ul class="r3-shop-list">' + rows() + '</ul>' +
       '<div class="r3-panel-row"><button type="button" class="r3-btn" data-done>' + (browse ? 'Close' : 'Keep going') + '</button></div>');
     try { Sound.bloop(620, 0, .05); } catch(e){}
-    function redraw(){ el.querySelector('.r3-shop-list').innerHTML = rows(); el.querySelector('.r3-shop-have b').textContent = b.shells; }
+    function redraw(){
+      el.querySelector('.r3-shop-list').innerHTML = rows();
+      var have = el.querySelector('.r3-shop-have');
+      have.querySelector('b').textContent = b.shells;
+      have.setAttribute('aria-label', 'You have ' + b.shells + ' shells');
+    }
     function closeShop(){
       el.remove(); regionEncounterEnd(view);
       if(done) done();
@@ -30454,9 +30883,14 @@ var ReefCraftedWorld = (function(){
     beach: '<g transform="rotate(-28)"><rect x="-6" y="-12" width="12" height="20" rx="5" fill="#8fd3a8" stroke="#2f6b4f" stroke-width="2"/><rect x="-3" y="-18" width="6" height="7" rx="1.5" fill="#8fd3a8" stroke="#2f6b4f" stroke-width="2"/><rect x="-3" y="-21" width="6" height="4" rx="1" fill="#a8814f"/><path d="M-3-4h6M-3 0h6" stroke="#fff8e6" stroke-width="1.6"/></g>',
     light: '<path d="M-7 12l3-26h8l3 26z" fill="#fff8e6" stroke="#7a4f22" stroke-width="2" stroke-linejoin="round"/><path d="M-6 4h12M-5-4h10" stroke="#c2553e" stroke-width="4"/><rect x="-6" y="-21" width="12" height="7" rx="1.5" fill="#ffd36b" stroke="#7a4f22" stroke-width="2"/><path d="M-4-23l4-5 4 5" fill="#c2553e"/><path d="M8-18l18-7M8-17l18 4" stroke="#ffd36b" stroke-width="2.4" stroke-linecap="round" opacity=".9"/>'
   };
+  function reefSeaFocus(){
+    try { return typeof Learner !== 'undefined' && typeof Learner.regionFocus === 'function' ? Learner.regionFocus() : null; }
+    catch(e){ return null; }
+  }
   function reefSeaHTML(view){
     var W = 300, H = 390, c = REEF_REGIONS[0];
     var here = view.region ? ({ patterns:'reef', captain:'deck' }[view.region.id] || view.region.id) : 'cove';
+    var focus = reefSeaFocus(), recReg = focus && focus.recommended ? ({ patterns:'reef' }[focus.recommended] || focus.recommended) : null;
     var routes = REEF_REGIONS.slice(1).map(function(r){
       var mx = (c.x + r.x) / 2 + (r.y - c.y) * .18, my = (c.y + r.y) / 2 - (r.x - c.x) * .18;   // a gentle curve, not a ruler line
       return '<path d="M' + c.x + ' ' + c.y + 'Q' + mx.toFixed(1) + ' ' + my.toFixed(1) + ' ' + r.x + ' ' + r.y + '" fill="none" stroke="#b5452f" stroke-width="2.4" stroke-dasharray="2 8" stroke-linecap="round" opacity=".75"/>';
@@ -30470,7 +30904,8 @@ var ReefCraftedWorld = (function(){
       return '<path d="M' + p[0] + ' ' + p[1] + 'q5-5 10 0t10 0" fill="none" stroke="#7fbdb8" stroke-width="1.6" stroke-linecap="round"/>'; }).join('');
     var compass = '<g transform="translate(274 300)" opacity=".8"><circle r="13" fill="none" stroke="#a8814f" stroke-width="1.2"/><path d="M0-17L4 0 0 17-4 0z" fill="#b5452f"/><path d="M-17 0L0 3 17 0 0-3z" fill="#a8814f"/><text y="-20" text-anchor="middle" font-size="9" font-weight="800" fill="#7a4f22">N</text></g>';
     var labels = REEF_REGIONS.map(function(r){
-      return '<button type="button" class="r3-sea-isle' + (r.open ? ' open' : '') + '" data-sea="' + r.id + '" style="left:' + (r.x / W * 100).toFixed(1) + '%;top:' + (r.y / H * 100).toFixed(1) + '%" aria-label="' + esc(r.name) + ': ' + esc(r.teaches) + (r.id === here ? ', you are here' : r.open ? '' : ', opening soon') + '" aria-pressed="false"></button>';
+      var isRec = recReg === r.id && r.id !== here;
+      return '<button type="button" class="r3-sea-isle' + (r.open ? ' open' : '') + (isRec ? ' rec' : '') + '" data-sea="' + r.id + '" style="left:' + (r.x / W * 100).toFixed(1) + '%;top:' + (r.y / H * 100).toFixed(1) + '%" aria-label="' + esc(r.name) + ': ' + esc(r.teaches) + (isRec ? ', recommended next' : '') + (r.id === here ? ', you are here' : r.open ? '' : ', opening soon') + '" aria-pressed="false"></button>';
     }).join('');
     return '<div class="r3-sea" role="tabpanel" aria-label="The sea"><p class="r3-map-hint">Choose an island to explore.</p><div class="r3-sea-chart"><svg viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true">' + waves + routes + compass + isles +
       '</svg>' + labels + '<span class="r3-sea-me" style="left:' + (c.x / W * 100).toFixed(1) + '%;top:' + ((c.y - 30) / H * 100).toFixed(1) + '%" aria-hidden="true">' + reefGuideMini(view.night) + '</span></div>' +
@@ -30479,7 +30914,11 @@ var ReefCraftedWorld = (function(){
   function reefSeaInfo(ov, id, focusAction){
     var r = REEF_REGIONS.find(function(x){ return x.id === id; }), box = ov.querySelector('.r3-sea-info'); if(!r || !box) return;
     ov.querySelectorAll('.r3-sea-isle').forEach(function(b){ var picked = b.dataset.sea === id; b.classList.toggle('picked', picked); b.setAttribute('aria-pressed', String(picked)); });
-    box.innerHTML = '<b>' + esc(r.name) + '</b><small>' + esc(r.teaches) + '</small><p>' + esc(r.about) + '</p>' +
+    var focus = reefSeaFocus(), fKey = r.id === 'reef' ? 'patterns' : r.id;
+    var dueN = focus && focus.dueByRegion && focus.dueByRegion[fKey] ? focus.dueByRegion[fKey] : 0;
+    var isRec = focus && focus.recommended === fKey;
+    var badge = isRec ? ' <span class="r3-sea-rec">🎯 Recommended' + (dueN ? ' · ' + dueN + ' due' : '') + '</span>' : (dueN ? ' <span class="r3-sea-due">' + dueN + ' due</span>' : '');
+    box.innerHTML = '<b>' + esc(r.name) + badge + '</b><small>' + esc(r.teaches) + '</small><p>' + esc(r.about) + '</p>' +
       (r.id === 'cove' ? '<button type="button" class="r3-btn main" ' + (R3.view && R3.view.region ? 'data-sea-go="cove"' : 'data-sea-tab="cove"') + '>' + ccIcon('map') + ' Open Coral Cove</button>' :
        r.open ? '<button type="button" class="r3-btn main" data-sea-go="' + r.id + '">' + ccIcon(r.icon || 'story') + ' Open ' + esc(r.openAs || r.name) + '</button>' :
        '<span class="r3-sea-soon">' + ccIcon('sparkle') + ' Opening soon</span>');
@@ -31868,6 +32307,7 @@ var ReefCraftedWorld = (function(){
     return { bytes: u.buffer, type: t.getAttribute('data-type') || 'audio/mpeg' };
   }
   function reefMusicScript(name){
+    if(RM_SONGS.indexOf(name) < 0) return Promise.reject(new Error('invalid track'));
     var inl = reefMusicInline(name); if(inl){ RM.types = RM.types || {}; RM.types[name] = inl.type; return Promise.resolve(inl.bytes); }   // carried inside the page
     return new Promise(function(res, rej){
       var s = document.createElement('script'); s.src = name + '.js'; s.async = true;
@@ -31881,18 +32321,30 @@ var ReefCraftedWorld = (function(){
     });
   }
   function reefMusicBytes(name){
+    if(RM_SONGS.indexOf(name) < 0) return Promise.reject(new Error('invalid track'));
     return reefMusicScript(name).then(function(b){ reefMusicNote(name, RM.types && RM.types[name] ? 'loaded from the page' : 'loaded from script'); return b; }, function(e){
       reefMusicNote(name, 'script failed (' + (e && e.message || e) + ')');
       if(!window.fetch) throw e;
       return fetch(name + '.mp3').then(function(r){ if(!r.ok) throw new Error('status ' + r.status); reefMusicNote(name, 'downloaded'); return r.arrayBuffer(); });
     });
   }
+  function reefMusicBus(ctx){
+    if(RM.bus && RM.busCtx === ctx) return RM.bus;
+    if(!ctx || typeof ctx.createBiquadFilter !== 'function') return null;
+    try {
+      var lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass'; lp.frequency.value = 18000; lp.Q.value = 0.5;
+      lp.connect(ctx.destination);
+      RM.bus = lp; RM.busCtx = ctx;
+      return lp;
+    } catch(e){ return null; }
+  }
   function reefMusicEl(name){
     if(RM.el[name]) return RM.el[name];
     var ctx = reefMusicCtx(); if(!ctx) return null;
     var a = new Audio(); a.loop = true; a.preload = 'auto'; a.setAttribute('playsinline', '');
     var m = { a: a, g: null, level: -1, name: name, stage: 1, buf: null, src: null };
-    try { var me = ctx.createMediaElementSource(a); m.g = ctx.createGain(); m.g.gain.value = 0; me.connect(m.g); m.g.connect(ctx.destination); }
+    try { var me = ctx.createMediaElementSource(a); m.g = ctx.createGain(); m.g.gain.value = 0; me.connect(m.g); m.g.connect(reefMusicBus(ctx) || ctx.destination); }
     catch(e){ m.g = null; a.volume = 0; reefMusicNote(name, 'no volume control (' + e.message + ')'); }
     a.addEventListener('playing', function(){ reefMusicNote(name, 'playing'); });
     a.addEventListener('error', function(){
@@ -31994,6 +32446,15 @@ var ReefCraftedWorld = (function(){
       reefMusicLevel(m, on ? tg.vol * RM_BASE * RM.duck : 0, fade);
     });
     RM.cur = tg ? tg.name : null;
+    if(RM.bus && RM.busCtx){
+      try {
+        var now = RM.busCtx.currentTime;
+        var focus = !tg || tg.vol < 0.9 || RM.duck < 0.9;
+        RM.bus.frequency.cancelScheduledValues(now);
+        RM.bus.frequency.setValueAtTime(RM.bus.frequency.value, now);
+        RM.bus.frequency.linearRampToValueAtTime(focus ? 2400 : 18000, now + 0.45);
+      } catch(e){}
+    }
   }
   // Under a celebration the music dips, then comes back.
   function reefMusicDuck(seconds){
@@ -33443,10 +33904,37 @@ body.reef-calm .r3-dice-tip, body.reef-calm .r3-dice-num{ animation:none !import
 .r3-btn:disabled{ opacity:.45; cursor:default; }
 .r3-btn:active:not(:disabled){ transform:translateY(3px); box-shadow:0 1px 0 #c4a87a; }
 .r3-btn:focus-visible, .r3-tile:focus-visible, .r3-bub:focus-visible, .r3-oddb:focus-visible, .r3-die-pick:focus-visible{ outline:4px solid #f2b544; outline-offset:2px; }
+.r3-sea-isle.rec{ box-shadow:0 0 0 4px #ffd24a, 0 0 14px rgba(255,210,74,.75); }
+.r3-sea-rec, .r3-sea-due{ display:inline-block; margin-left:6px; padding:1px 8px; border-radius:999px; font-size:.76rem; font-weight:800; vertical-align:middle; background:#ffeaa7; color:#6b4400; }
+.r3-sea-due{ background:rgba(28,140,147,.14); color:#135d63; }
 .r3.night .r3-btn{ background:#2c4a51; color:#f6e9c8; box-shadow:0 4px 0 #142a30; } .r3.night .r3-btn.main{ background:#2aa7b6; color:#06232a; box-shadow:0 4px 0 #136a74; }
-.r3-shop-list{ list-style:none; margin:8px 0 0; padding:0; display:grid; gap:8px; text-align:left; }
-.r3-shop-list li{ display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:10px; padding:8px 10px; border-radius:16px; background:rgba(0,0,0,.05); }
-.r3-shop-e{ font-size:1.8rem; } .r3-shop-t{ min-width:0; display:flex; flex-direction:column; } .r3-shop-t small{ font-weight:700; opacity:.7; }
+.r3-shop .r3-panel-card{ width:min(560px, 100%); padding:14px 16px; }
+.r3-shop-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; text-align:left; }
+.r3-shop-head h3{ margin:0; font-size:1.35rem; line-height:1.15; }
+.r3-shop-have{ margin:0 !important; flex:none; display:inline-flex; align-items:center; gap:5px; padding:4px 12px; border-radius:999px; background:rgba(217,178,90,.22); font:800 1rem 'Baloo 2',sans-serif; opacity:1 !important; font-variant-numeric:tabular-nums; }
+.r3.night .r3-shop-have{ background:rgba(42,167,182,.22); }
+.r3-shop-list{ list-style:none; margin:8px 0 0; padding:0; display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:7px; text-align:left; }
+.r3-shop-list li{ display:grid; grid-template-columns:auto minmax(0, 1fr) auto; align-items:center; gap:8px; padding:7px 10px; border-radius:14px; background:rgba(0,0,0,.05); }
+.r3.night .r3-shop-list li{ background:rgba(255,255,255,.07); }
+.r3-shop-list li.r3-shop-feat{ grid-column:1 / -1; background:rgba(28,140,147,.09); }
+.r3.night .r3-shop-list li.r3-shop-feat{ background:rgba(42,167,182,.16); }
+.r3-shop-e{ font-size:1.4rem; line-height:1; }
+.r3-shop-t{ min-width:0; display:flex; flex-direction:column; line-height:1.15; }
+.r3-shop-t b{ font-size:.96rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.r3-shop-t small{ font-weight:700; font-size:.78rem; opacity:.72; }
+.r3-shop-list .r3-btn{ padding:6px 11px; border-radius:12px; font-size:.9rem; box-shadow:0 3px 0 #c4a87a; white-space:nowrap; }
+.r3-shop-list .r3-btn.main{ box-shadow:0 3px 0 #0f5f66; }
+.r3.night .r3-shop-list .r3-btn{ box-shadow:0 3px 0 #142a30; }
+.r3.night .r3-shop-list .r3-btn.main{ box-shadow:0 3px 0 #136a74; }
+.r3-shop .r3-panel-row{ margin-top:10px; }
+.r3-shop .r3-panel-row .r3-btn{ padding:8px 20px; }
+@media (max-width:520px){
+  .r3-shop .r3-panel-card{ padding:12px 12px; }
+  .r3-shop-head h3{ font-size:1.2rem; }
+  .r3-shop-list{ gap:6px; }
+  .r3-shop-list li:not(.r3-shop-feat){ grid-template-columns:auto minmax(0, 1fr); row-gap:5px; column-gap:6px; padding:7px 8px; }
+  .r3-shop-list li:not(.r3-shop-feat) .r3-btn{ grid-column:1 / -1; width:100%; padding:5px 8px; font-size:.86rem; }
+}
 .r3-wheel-wrap{ position:relative; width:min(240px, 62vw); aspect-ratio:1; margin:6px auto 8px; }
 .r3-wheel{ position:absolute; inset:0; border-radius:50%; box-shadow:inset 0 0 0 6px rgba(255,255,255,.6), 0 6px 0 rgba(0,0,0,.15); transition:transform 3.2s cubic-bezier(.15,.85,.2,1); }
 .r3-wheel span{ position:absolute; left:50%; top:50%; font-size:1.8rem; transform:rotate(var(--a)) translateY(-36%) translateY(calc(min(240px, 62vw) * -.3)) rotate(calc(var(--a) * -1)); margin:-.6em 0 0 -.5em; }
@@ -34036,11 +34524,15 @@ body.reef-calm .r3-map.sea-on .r3-sea, body.reef-calm .r3-sea-me{ animation:none
   padding:16px max(16px,env(safe-area-inset-right,0px)) max(18px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
   background:linear-gradient(180deg,rgba(8,35,42,.03) 0%,rgba(8,35,42,.04) 48%,rgba(8,35,42,.48) 100%);
 }
-.r3.rpg-stage-intro .r3-person-panel .r3-panel-card,
-.r3.rpg-stage-intro .r3-shop .r3-panel-card{
+.r3.rpg-stage-intro .r3-person-panel .r3-panel-card{
   width:min(560px,100%);
   max-height:min(45dvh,440px);
   padding:16px 18px;
+}
+.r3.rpg-stage-intro .r3-shop .r3-panel-card{
+  width:min(600px,100%);
+  max-height:min(48dvh,440px);
+  padding:14px 16px;
 }
 .r3.rpg-stage-intro .r3-person-panel .r3-person-portrait-art,
 .r3.rpg-stage-intro .r3-shop .r3-person-portrait-art{display:none}
@@ -34113,8 +34605,8 @@ body.rpg-lesson .ask-btn:not(.ask-inline){left:max(12px,env(safe-area-inset-left
   body.rpg-lesson .rpg-stage-host{grid-template-rows:40dvh minmax(0,1fr)}
 }
 @media (max-width:480px){
-  .r3.rpg-stage-intro .r3-person-panel .r3-panel-card,
-  .r3.rpg-stage-intro .r3-shop .r3-panel-card{max-height:45dvh;padding:12px 14px}
+  .r3.rpg-stage-intro .r3-person-panel .r3-panel-card{max-height:45dvh;padding:12px 14px}
+  .r3.rpg-stage-intro .r3-shop .r3-panel-card{max-height:min(50dvh,420px);padding:12px 12px}
   .r3.rpg-stage-intro .r3-panel-card p{line-height:1.25}
   body.rpg-lesson .rpg-dialogue{padding-top:12px}
 }

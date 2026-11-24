@@ -228,7 +228,10 @@
       if(lex && !slipped && stems.some(function(s){ return lex.known(s); })) known.push(w);
       if(lex && fixes.length < 2 && !slipped){
         var sp = bbSpell(w, lex, all[i + 1]);
-        if(sp) fixes.push({ kind: 'spell', word: sp.word, fix: sp.fix, why: sp.word + ' isn\'t in your words or the dictionary. Did you mean ' + sp.fix + '?' });
+        if(sp){
+          var diag = typeof window !== 'undefined' && typeof window.koJamoDiag === 'function' ? window.koJamoDiag(sp.fix, sp.word) : null;
+          fixes.push({ kind: 'spell', word: sp.word, fix: sp.fix, why: (diag ? diag + ' ' : '') + 'Did you mean ' + sp.fix + '?' });
+        }
       }
     });
     var clean = sents.filter(function(s){ return !patFind(s, { typed: true }).length; });

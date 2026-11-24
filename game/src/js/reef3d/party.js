@@ -159,16 +159,23 @@
         var own = it.hat && b.hats.indexOf(it.id) >= 0, wearing = b.hat === it.id;
         var btn = own ? '<button type="button" class="r3-btn" data-wear="' + it.id + '">' + (wearing ? 'Take off' : 'Wear') + '</button>'
           : '<button type="button" class="r3-btn main" data-buy="' + it.id + '"' + (b.shells < it.cost ? ' disabled' : '') + '>🐚 ' + it.cost + '</button>';
-        return '<li><span class="r3-shop-e" aria-hidden="true">' + it.e + '</span><span class="r3-shop-t"><b>' + esc(it.name) + '</b>' +
-          (it.id === 'dbl' ? '<small>' + esc(it.note) + (b.dbl ? ' · you have ' + b.dbl : '') + '</small>' : own ? '<small>Yours</small>' : '') + '</span>' + btn + '</li>';
+        return '<li' + (it.id === 'dbl' ? ' class="r3-shop-feat"' : '') + '><span class="r3-shop-e" aria-hidden="true">' + it.e + '</span><span class="r3-shop-t"><b>' + esc(it.name) + '</b>' +
+          (it.id === 'dbl' ? '<small>' + esc(it.note) + (b.dbl ? ' · ' + b.dbl + ' owned' : '') + '</small>' : own ? '<small>Yours</small>' : '') + '</span>' + btn + '</li>';
       }).join('');
     }
-    var intro = host ? (host.portrait || ccIcon('bag')) + '<h3>' + esc(host.title) + '</h3><p>' + esc(host.intro) + '</p>' : '<div class="r3-panel-e" aria-hidden="true">🦀</div><h3>Hermit Crab\'s Shop</h3>';
-    var el = reef3dPanel(view, 'r3-shop', intro +
-      '<p class="r3-shop-have">You have <b>' + b.shells + '</b> shells.</p><ul class="r3-shop-list">' + rows() + '</ul>' +
+    var head = (host ? (host.portrait || '') : '') +
+      '<div class="r3-shop-head"><h3>' + (host ? esc(host.title) : '🦀 Hermit Crab\'s Shop') + '</h3>' +
+      '<p class="r3-shop-have" aria-label="You have ' + b.shells + ' shells">🐚 <b>' + b.shells + '</b></p></div>';
+    var el = reef3dPanel(view, 'r3-shop', head +
+      '<ul class="r3-shop-list">' + rows() + '</ul>' +
       '<div class="r3-panel-row"><button type="button" class="r3-btn" data-done>' + (browse ? 'Close' : 'Keep going') + '</button></div>');
     try { Sound.bloop(620, 0, .05); } catch(e){}
-    function redraw(){ el.querySelector('.r3-shop-list').innerHTML = rows(); el.querySelector('.r3-shop-have b').textContent = b.shells; }
+    function redraw(){
+      el.querySelector('.r3-shop-list').innerHTML = rows();
+      var have = el.querySelector('.r3-shop-have');
+      have.querySelector('b').textContent = b.shells;
+      have.setAttribute('aria-label', 'You have ' + b.shells + ' shells');
+    }
     function closeShop(){
       el.remove(); regionEncounterEnd(view);
       if(done) done();

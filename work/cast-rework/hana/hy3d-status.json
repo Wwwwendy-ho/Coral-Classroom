@@ -1,0 +1,15 @@
+{
+  "slug": "hana",
+  "model": "tencent/Hunyuan3D-2mini",
+  "subfolder": "hunyuan3d-dit-v2-mini",
+  "seed": 17,
+  "octree_resolution": 256,
+  "steps": 30,
+  "guidance": 5.5,
+  "num_chunks": 8000,
+  "vertices": 332200,
+  "faces": 664426,
+  "bytes": 11960300,
+  "peak_vram_gb": 4.159,
+  "elapsed_seconds": 25.51
+}

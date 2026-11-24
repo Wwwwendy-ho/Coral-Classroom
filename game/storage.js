@@ -22,7 +22,9 @@
   var docs = {};
   var canSave = true;
 
-  function clone(v) { return v === undefined ? undefined : JSON.parse(JSON.stringify(v)); }
+  function safeReviver(k, v) { return (k === '__proto__' || k === 'constructor' || k === 'prototype') ? undefined : v; }
+  function safeParse(s) { return JSON.parse(s, safeReviver); }
+  function clone(v) { return v === undefined ? undefined : safeParse(JSON.stringify(v)); }
 
   if (!seed) {
     // seed-data.js didn't load. Don't save anything, so a later visit (once the file is there)
@@ -33,7 +35,8 @@
   } else {
     try {
       var saved = localStorage.getItem(KEY);
-      docs = saved ? JSON.parse(saved) : {};
+      docs = saved ? safeParse(saved) : {};
+      if (!docs || typeof docs !== 'object' || Array.isArray(docs)) docs = {};
     } catch (e) {
       canSave = false;
       docs = {};

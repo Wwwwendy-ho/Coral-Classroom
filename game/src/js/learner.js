@@ -17,6 +17,8 @@
   var LEARNER_AGAIN_MS = 10 * 60e3;  // a missed word comes back in ten minutes, like a learning step
   var LEARNER_GRADES = { again: 1, hard: 2, good: 3, easy: 4 };
   var learnerData = null, learnerPid, learnerSaveT = null;
+  var learnerEvents = null, learnerEventPid = null;
+  var LEARNER_MAX_EVENTS = 2000;
 
   // "  Hello,  World! " and "hello world" are the same item
   function learnerKey(text){
@@ -33,6 +35,21 @@
   // The model for whoever is signed in, loaded when first needed and again after a profile switch. With no
   // profile (the picker), changes stay in memory only.
   function learnerStoreKey(pid){ return 'cc-learner-' + pid; }
+  function learnerEventKey(pid){ return 'cc-events-' + pid; }
+  function learnerEventLog(){
+    var pid = S.profile && S.profile.id ? S.profile.id : null;
+    if(learnerEvents && learnerEventPid === pid) return learnerEvents;
+    learnerEventPid = pid; learnerEvents = null;
+    if(pid){
+      try {
+        var raw = localStorage.getItem(learnerEventKey(pid));
+        var got = typeof safeJsonParse === 'function' ? safeJsonParse(raw, null) : (raw ? JSON.parse(raw) : null);
+        if(got && got.v === 1 && Array.isArray(got.list)) learnerEvents = got;
+      } catch(e){}
+    }
+    if(!learnerEvents) learnerEvents = { v: 1, list: [] };
+    return learnerEvents;
+  }
   function learnerModel(){
     var pid = S.profile && S.profile.id ? S.profile.id : null;
     if(learnerData && learnerPid === pid) return learnerData;
@@ -41,7 +58,7 @@
     if(pid){
       try {
         var raw = localStorage.getItem(learnerStoreKey(pid));
-        var got = raw ? JSON.parse(raw) : null;
+        var got = typeof safeJsonParse === 'function' ? safeJsonParse(raw, null) : (raw ? JSON.parse(raw) : null);
         if(got && got.v === 1 && got.items && typeof got.items === 'object') learnerData = got;
       } catch(e){}
     }
@@ -55,9 +72,14 @@
   }
   function learnerFlush(){
     clearTimeout(learnerSaveT); learnerSaveT = null;
-    if(!learnerData || !learnerPid || !learnerData.dirty) return;
-    delete learnerData.dirty;
-    try { localStorage.setItem(learnerStoreKey(learnerPid), JSON.stringify(learnerData)); } catch(e){ learnerData.dirty = true; }
+    if(learnerData && learnerPid && learnerData.dirty){
+      delete learnerData.dirty;
+      try { localStorage.setItem(learnerStoreKey(learnerPid), JSON.stringify(learnerData)); } catch(e){ learnerData.dirty = true; }
+    }
+    if(learnerEvents && learnerEventPid && learnerEvents.dirty){
+      delete learnerEvents.dirty;
+      try { localStorage.setItem(learnerEventKey(learnerEventPid), JSON.stringify(learnerEvents)); } catch(e){ learnerEvents.dirty = true; }
+    }
   }
   // iOS can close a Home Screen app without warning; pagehide is the last moment it reliably tells us.
   window.addEventListener('pagehide', learnerFlush);
@@ -88,7 +110,12 @@
       if(lapsed) c.lapses += 1;
       c.due = next.ivl ? now + next.ivl * 864e5 : now + LEARNER_AGAIN_MS;
       it.ch[channel] = c;
-      m.dirty = true; learnerSaveSoon();
+      m.dirty = true;
+      var ev = learnerEventLog();
+      ev.list.push({ ts: now, k: key.slice(0, 80), ch: channel, g: g, ms: opts && opts.ms != null ? Math.round(+opts.ms) : 0, m: opts && opts.mode ? String(opts.mode).slice(0, 16) : '' });
+      if(ev.list.length > LEARNER_MAX_EVENTS) ev.list = ev.list.slice(-LEARNER_MAX_EVENTS);
+      ev.dirty = true;
+      learnerSaveSoon();
       return { s: c.s, d: c.d, due: c.due, last: c.last, reps: c.reps, lapses: c.lapses };
     },
     // Everything known about one item (a copy), or null
@@ -141,8 +168,80 @@
         });
       });
       return out;
+    },
+    events: function(limit){
+      var list = learnerEventLog().list;
+      return limit ? list.slice(-limit) : list.slice();
+    },
+    regionFocus: function(now){
+      now = now || Date.now();
+      var byCh = { hear:0, read:0, recall:0, say:0, use:0 };
+      var items = learnerModel().items;
+      Object.keys(items).forEach(function(k){
+        var it = items[k];
+        LEARNER_CHANNELS.forEach(function(ch){
+          var c = it.ch[ch];
+          if(!c || !c.reps) return;
+          var r = learnerRecall(c, now);
+          if(c.due <= now || (r != null && r < 0.85)) byCh[ch] += 1;
+        });
+      });
+      var dueByRegion = {
+        lagoon: byCh.read + byCh.hear,
+        caves: byCh.say + byCh.hear,
+        reef: byCh.use,
+        beach: byCh.recall + byCh.use,
+        town: byCh.hear + byCh.use,
+        cove: byCh.hear + byCh.read + byCh.recall + byCh.say + byCh.use
+      };
+      var weakestChannel = null, maxCh = 0;
+      LEARNER_CHANNELS.forEach(function(ch){ if(byCh[ch] > maxCh){ maxCh = byCh[ch]; weakestChannel = ch; } });
+      var recommended = null, maxReg = 0;
+      ['caves', 'reef', 'beach', 'lagoon', 'town'].forEach(function(reg){
+        if(dueByRegion[reg] > maxReg){ maxReg = dueByRegion[reg]; recommended = reg; }
+      });
+      return { byChannel: byCh, dueByRegion: dueByRegion, weakestChannel: weakestChannel, recommended: recommended };
     }
   };
+
+  /* ---------- Korean Hangul Jamo Diagnostics: specific phonetic/batchim feedback ---------- */
+  var KO_CHO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+  var KO_JUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+  var KO_JONG = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+  var KO_CONS_GROUPS = ['ㄱㅋㄲ','ㄷㅌㄸ','ㅂㅍㅃ','ㅈㅊㅉ','ㅅㅆ'];
+  var KO_VOWEL_GROUPS = ['ㅓㅗ','ㅐㅔ','ㅜㅡ','ㅕㅛ','ㅏㅓ'];
+  function koDecompose(str){
+    var out = [];
+    for(var i = 0; i < str.length; i++){
+      var code = str.charCodeAt(i);
+      if(code >= 0xAC00 && code <= 0xD7A3){
+        var s = code - 0xAC00;
+        var jong = s % 28, jung = ((s - jong) / 28) % 21, cho = Math.floor(s / 588);
+        out.push({ c: KO_CHO[cho], v: KO_JUNG[jung], b: KO_JONG[jong] });
+      }
+    }
+    return out;
+  }
+  function koSameGroup(a, b, groups){
+    return a !== b && groups.some(function(g){ return g.indexOf(a) >= 0 && g.indexOf(b) >= 0; });
+  }
+  function koJamoDiag(expected, actual){
+    var e = koDecompose(String(expected || '').normalize('NFC'));
+    var a = koDecompose(String(actual || '').normalize('NFC'));
+    if(!e.length || !a.length || Math.abs(e.length - a.length) > 1) return null;
+    var n = Math.min(e.length, a.length), diffs = 0, consHint = false, vowelHint = false, batchimHint = false;
+    for(var i = 0; i < n; i++){
+      if(e[i].c !== a[i].c){ diffs++; if(koSameGroup(e[i].c, a[i].c, KO_CONS_GROUPS)) consHint = true; }
+      if(e[i].v !== a[i].v){ diffs++; if(koSameGroup(e[i].v, a[i].v, KO_VOWEL_GROUPS)) vowelHint = true; }
+      if(e[i].b !== a[i].b){ diffs++; batchimHint = true; }
+    }
+    if(diffs === 0 || diffs > 3) return null;
+    if(consHint) return 'Close! Watch the consonant sound (plain vs. strong/tense).';
+    if(vowelHint) return 'Almost! Double-check the vowel shape (e.g. ㅓ vs ㅗ / ㅐ vs ㅔ).';
+    if(batchimHint) return 'So close! Check the bottom consonant (받침) on that syllable.';
+    return null;
+  }
+  if(typeof window !== 'undefined') window.koJamoDiag = koJamoDiag;
 
   // Called by commitGrade() for every answered study card, before the card's round state is cleared. Records
   // the Korean side of the card in the channel the card type practices:

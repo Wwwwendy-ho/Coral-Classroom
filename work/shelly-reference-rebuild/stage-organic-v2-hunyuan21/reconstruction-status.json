@@ -1,0 +1,15 @@
+{
+  "service": "tencent/Hunyuan3D-2.1",
+  "endpoint": "/generation_all",
+  "input": "/mnt/c/Users/20750/.gemini/antigravity/scratch/Coral-Classroom/work/shelly-reference-rebuild/stage-organic-v1/input-shelly-clean.png",
+  "steps": 30,
+  "guidance_scale": 5.5,
+  "seed": 42,
+  "octree_resolution": 384,
+  "check_box_rembg": true,
+  "num_chunks": 8000,
+  "randomize_seed": false,
+  "status": "failed",
+  "error": "AppError: 'You have exceeded your free ZeroGPU quota (270s requested vs. 261s left). Try again in 23:50:07. Subscribe to Hugging Face PRO to get 40 min of ZeroGPU quota a day - https://huggingface.co/subscribe/pro?from=ZeroGPU'",
+  "elapsed_seconds": 4.55
+}

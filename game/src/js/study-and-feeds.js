@@ -134,14 +134,7 @@
     app.querySelector('[data-act="exit-feed"]').addEventListener('click', function(){
       try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(e){}
       Ambience.stop();
-      // In Adult Mode a grown-up is already in (no PIN was needed to get here), so backing out of
-      // Word Feed just returns to Manage Decks -- same rule as exit-study just above. In Child Mode,
-      // a kid backing out of Word Feed on their own needs a grown-up's PIN, same as leaving a study
-      // round early (this used to skip the PIN entirely, which meant a kid could freely wander out
-      // of a session mid-swipe with no grown-up involved).
-      if(S.managingDecks){ goHome(); return; }
-      S.pinPromptFor = 'exit';
-      render();
+      goHome();
     });
 
     app.querySelector('[data-act="feed-sounds"]').addEventListener('click', function(){
@@ -628,10 +621,7 @@
 
     app.querySelector('[data-act="exit-story"]').addEventListener('click', function(){
       try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(e){}
-      // Same Child Mode PIN guard as exit-feed above -- see that comment for why.
-      if(S.managingDecks){ goHome(); return; }
-      S.pinPromptFor = 'exit';
-      render();
+      goHome();
     });
 
     wireVerticalSwipeFeed('storyStage',
@@ -740,10 +730,7 @@
 
     app.querySelector('[data-act="exit-equation"]').addEventListener('click', function(){
       try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(e){}
-      // Same Child Mode PIN guard as exit-feed/exit-story above -- see that comment for why.
-      if(S.managingDecks){ goHome(); return; }
-      S.pinPromptFor = 'exit';
-      render();
+      goHome();
     });
 
     wireVerticalSwipeFeed('equationStage',
@@ -871,10 +858,7 @@
 
     app.querySelector('[data-act="exit-lang"]').addEventListener('click', function(){
       try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(e){}
-      // Same Child Mode PIN guard as exit-feed/exit-story/exit-equation above -- see that comment for why.
-      if(S.managingDecks){ goHome(); return; }
-      S.pinPromptFor = 'exit';
-      render();
+      goHome();
     });
 
     wireVerticalSwipeFeed('langStage',
@@ -965,11 +949,7 @@
 
     app.querySelector('[data-act="exit-readalong"]').addEventListener('click', function(){
       try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(e){}
-      // Same Child Mode PIN guard as exit-feed/exit-story/exit-equation/exit-lang above -- see that
-      // comment for why.
-      if(S.managingDecks){ goHome(); return; }
-      S.pinPromptFor = 'exit';
-      render();
+      goHome();
     });
 
     // Direct DOM manipulation rather than a render() per tap -- same reasoning as the timed-choice
@@ -1067,10 +1047,7 @@
       '<div class="feed-hint">↕ Swipe for another card · '+(idx+1)+' of '+n+'</div>';
 
     app.querySelector('[data-act="exit-flash"]').addEventListener('click', function(){
-      // Same Child Mode PIN guard as every other feed's exit button -- see exit-feed's comment.
-      if(S.managingDecks){ goHome(); return; }
-      S.pinPromptFor = 'exit';
-      render();
+      goHome();
     });
     app.querySelector('[data-act="flash-order"]').addEventListener('click', function(){
       S.flashOrdered = !S.flashOrdered;

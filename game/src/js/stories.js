@@ -88,9 +88,7 @@
 
     app.querySelector('[data-act="exit-mini"]').addEventListener('click', function(){
       try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(e){}
-      if(S.managingDecks){ goHome(); return; }
-      S.pinPromptFor = 'exit';
-      render();
+      goHome();
     });
     // Words and buttons keep their own touches, so tapping them never starts a page swipe underneath.
     function ownTouch(el){ el.addEventListener('pointerdown', function(e){ e.stopPropagation(); }); }

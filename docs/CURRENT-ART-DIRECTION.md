@@ -4,6 +4,10 @@
 
 Use `../references/APPROVED-organic-shelly-and-stone-glass-world.png` as the primary style reference. It combines an organic mint/seafoam turtle, cream underside, opaque lavender/periwinkle shell and appealing naturally integrated eyes with smooth sculptural stone and satin/frosted glass scenery. Shelly is a living animal, not glass, stone, wood, a toy or clay. Avoid a reptilian/snaky top-down appearance, giant button eyes, exposed stalk-like neck, human lips/teeth/grin and uncanny baby proportions.
 
+### Locked shared visual bar (2026-11-22 — Modern Mario Party / Animal Crossing)
+
+Characters and map must share the exact same clean, readable surface frequency (modeled on *Mario Party* / *Animal Crossing*): keep appealing organic 3D silhouettes (avoiding lumpy primitives and noisy AI micro-speckle or dense scale crackle), and pair them with smooth sculpted gradients, deliberate broad markings, expressive glossy eyes, and satin-matte dielectric shading across Shelly (`stage-organic-v3-mp`), all resident NPCs, board companions, and ~15% board tile bevel/AO polish.
+
 Environmental material mix can vary by region: stone, glass, restrained wood and thematic plastic. The owner wanted the feel of human arts/crafts, biodegradable materials where appropriate, and plastic for bad/polluted places or objects. Do not equate all glass/plastic use with evil without context. Current preference is less grain/wood, more smooth stone and glass, rich colors, dimensional forms, diffuse lighting and low reflectivity. Avoid noisy roughness, mirror surfaces and the dull/brown look of earlier drafts.
 
 The owner likes 2D where reasonable to save cost. Use dimensional terrain, important silhouettes, route tiles and characters where camera/interaction needs them; illustrated distance, menus and static chart layers can be 2D/2.5D. The result must read as a world. Do not spend the phone budget on unnecessary geometry or transparent layers.

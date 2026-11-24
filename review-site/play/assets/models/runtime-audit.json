@@ -1,0 +1,180 @@
+{
+  "actualGLBs": true,
+  "productionLoader": true,
+  "obsoleteInlineIgnored": true,
+  "allSixClips": true,
+  "browserTested": false,
+  "models": [
+    {
+      "crafted": true,
+      "tier": 0,
+      "file": "crafted-shelly.glb",
+      "triangles": 22199,
+      "bytes": 1430956,
+      "bones": 11,
+      "flipperVertexGroups": {
+        "FlipperFL": 1005,
+        "Body": 8476,
+        "Neck": 1477,
+        "Tail": 143,
+        "FlipperRL": 714,
+        "FlipperRR": 719,
+        "FlipperFR": 919,
+        "Head": 2109,
+        "EyeL": 41,
+        "EyeR": 30
+      },
+      "worldSize": [
+        2.05,
+        1.0052219108792697,
+        2.027722272790956
+      ],
+      "animatedBounds": {
+        "Idle": [
+          2.059,
+          1.056,
+          2.065
+        ],
+        "Swim": [
+          2.062,
+          1.15,
+          2.046
+        ],
+        "Turn": [
+          2.103,
+          1.087,
+          2.031
+        ],
+        "Happy": [
+          2.064,
+          1.078,
+          2.046
+        ],
+        "Curious": [
+          2.05,
+          1.049,
+          2.028
+        ],
+        "Celebrate": [
+          2.056,
+          1.247,
+          2.052
+        ]
+      }
+    },
+    {
+      "crafted": true,
+      "tier": 2,
+      "file": "crafted-shelly-view.glb",
+      "triangles": 11199,
+      "bytes": 756932,
+      "bones": 11,
+      "flipperVertexGroups": {
+        "FlipperFL": 599,
+        "Body": 4803,
+        "Neck": 848,
+        "Tail": 77,
+        "FlipperRL": 413,
+        "FlipperRR": 416,
+        "FlipperFR": 521,
+        "Head": 1172,
+        "EyeL": 21,
+        "EyeR": 17
+      },
+      "worldSize": [
+        2.05,
+        1.0059141901533084,
+        2.0272684241193937
+      ],
+      "animatedBounds": {
+        "Idle": [
+          2.059,
+          1.056,
+          2.064
+        ],
+        "Swim": [
+          2.061,
+          1.15,
+          2.046
+        ],
+        "Turn": [
+          2.104,
+          1.088,
+          2.031
+        ],
+        "Happy": [
+          2.063,
+          1.078,
+          2.045
+        ],
+        "Curious": [
+          2.05,
+          1.048,
+          2.027
+        ],
+        "Celebrate": [
+          2.056,
+          1.246,
+          2.051
+        ]
+      }
+    },
+    {
+      "crafted": false,
+      "tier": 2,
+      "file": "shelly-view.glb",
+      "triangles": 11947,
+      "bytes": 1257572,
+      "bones": 11,
+      "flipperVertexGroups": {
+        "FlipperFL": 621,
+        "Body": 5040,
+        "FlipperRL": 330,
+        "EyeL": 1585,
+        "Head": 3368,
+        "Neck": 390,
+        "FlipperRR": 316,
+        "EyeR": 1029,
+        "Tail": 38,
+        "FlipperFR": 646
+      },
+      "worldSize": [
+        1.3204117997996816,
+        1.4799999999999998,
+        1.5192595788085588
+      ],
+      "animatedBounds": {
+        "Idle": [
+          1.329,
+          1.505,
+          1.565
+        ],
+        "Swim": [
+          1.519,
+          1.539,
+          1.545
+        ],
+        "Turn": [
+          1.377,
+          1.537,
+          1.524
+        ],
+        "Happy": [
+          1.414,
+          1.541,
+          1.541
+        ],
+        "Curious": [
+          1.32,
+          1.512,
+          1.519
+        ],
+        "Celebrate": [
+          1.397,
+          1.561,
+          1.545
+        ]
+      }
+    }
+  ]
+}

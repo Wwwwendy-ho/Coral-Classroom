@@ -1,0 +1,90 @@
+{
+  "file": "shop-octopus-board.glb",
+  "bytes": 537260,
+  "triangles": 7808,
+  "draws": 1,
+  "materials": 1,
+  "bones": 20,
+  "textureImages": [
+    {
+      "name": "painted-color-1024",
+      "mime": "image/png",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 67669
+    },
+    {
+      "name": "painted-surface-256",
+      "mime": "image/png",
+      "width": 256,
+      "height": 256,
+      "bytes": 763
+    }
+  ],
+  "alphaMode": "OPAQUE",
+  "materialName": "OctopusSkinMask",
+  "materialExtras": {
+    "residentSkinMask": "baseColorAlpha"
+  },
+  "maxWeightSumError": 0.0,
+  "maxInfluences": 2,
+  "embeddedPngSkinMask": {
+    "skin": {
+      "min": 255,
+      "max": 255,
+      "expected": 255
+    },
+    "arm": {
+      "min": 255,
+      "max": 255,
+      "expected": 255
+    },
+    "cloth": {
+      "min": 0,
+      "max": 0,
+      "expected": 0
+    },
+    "pocket": {
+      "min": 0,
+      "max": 0,
+      "expected": 0
+    },
+    "eye": {
+      "min": 0,
+      "max": 0,
+      "expected": 0
+    },
+    "sucker": {
+      "min": 0,
+      "max": 0,
+      "expected": 0
+    },
+    "gold": {
+      "min": 0,
+      "max": 0,
+      "expected": 0
+    },
+    "strap": {
+      "min": 0,
+      "max": 0,
+      "expected": 0
+    }
+  },
+  "clips": [
+    {
+      "name": "Idle",
+      "channels": 60,
+      "duration": 4.033333333333333
+    },
+    {
+      "name": "Listen",
+      "channels": 60,
+      "duration": 3.433333333333333
+    },
+    {
+      "name": "React",
+      "channels": 60,
+      "duration": 1.9666666666666666
+    }
+  ]
+}

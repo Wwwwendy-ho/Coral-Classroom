@@ -1,7 +1,7 @@
 /* Coral Cove offline support: keeps a copy of the app's files so it still opens without Wi-Fi.
    Network first, so a new upload to GitHub shows up the next time the iPad is online. */
-var CACHE = 'coral-classroom-20261117-natural-characters';
-var FILES = ['./', 'index.html', 'assets/models/shelly-view.glb?v=natural-1', 'assets/world/shellstone-color.jpg', 'assets/world/world-surfaces.jpg', 'seed-data.js?v=20261026', 'audio-clips.js?v=20261026', 'storage.js?v=20261026',
+var CACHE = 'coral-classroom-20261124-hardened-cast';
+var FILES = ['./', 'index.html', 'assets/models/crafted-shelly.glb?v=organic-mp-2', 'assets/world/shellstone-color.jpg', 'assets/world/world-surfaces.jpg', 'seed-data.js?v=20261026', 'audio-clips.js?v=20261026', 'storage.js?v=20261026',
              'library.js', 'words.js', 'words-data.js', 'three.min.js', 'reef-models.js', 'win.mp3', 'lobby-song.mp3', 'day-song.mp3', 'night-song.mp3', 'deck-song.mp3', 'game-song.mp3', 'timer-song.mp3', 'region-town-song.mp3', 'region-lagoon-song.mp3', 'region-caves-song.mp3', 'region-patterns-song.mp3', 'region-beach-song.mp3', 'region-light-song.mp3', 'region-captain-song.mp3', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', function (e) {
@@ -43,8 +43,9 @@ function fontFromCache(req) {
 
 self.addEventListener('fetch', function (e) {
   if (e.request.method !== 'GET') return;
-  if (FONT_HOSTS.indexOf(new URL(e.request.url).hostname) >= 0) { e.respondWith(fontFromCache(e.request)); return; }
-  if (new URL(e.request.url).origin !== self.location.origin) return;
+  var reqUrl = new URL(e.request.url);
+  if (reqUrl.protocol === 'https:' && FONT_HOSTS.indexOf(reqUrl.hostname) >= 0) { e.respondWith(fontFromCache(e.request)); return; }
+  if (reqUrl.origin !== self.location.origin) return;
   if (e.request.headers.has('range')) {
     var url = e.request.url.split('#')[0];
     e.respondWith(caches.match(url, { ignoreSearch: true }).then(function (cached) {
@@ -60,7 +61,7 @@ self.addEventListener('fetch', function (e) {
     // Ask GitHub every time instead of the browser's 10-minute cache, so an update shows up the
     // first time the app is reopened online. Unchanged files come back as a quick "not modified".
     fetch(e.request.mode === 'navigate' ? e.request.url : e.request, { cache: 'no-cache', credentials: 'same-origin' }).then(function (res) {
-      if (res.status === 200) { var copy = res.clone(); caches.open(CACHE).then(function (c) { return c.put(e.request, copy); }).catch(function () {}); }
+      if (res.status === 200 && res.type === 'basic') { var copy = res.clone(); caches.open(CACHE).then(function (c) { return c.put(e.request, copy); }).catch(function () {}); }
       return res;
     }).catch(function () {
       return caches.match(e.request, { ignoreSearch: true }).then(function (r) { return r || caches.match('index.html'); });

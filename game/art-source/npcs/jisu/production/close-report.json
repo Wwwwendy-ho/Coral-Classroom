@@ -1,6 +1,6 @@
 {
   "file": "jisu-close.glb",
-  "bytes": 1771084,
+  "bytes": 984672,
   "triangles": 21318,
   "draws": 1,
   "materials": 1,
@@ -11,14 +11,14 @@
       "width": 2048,
       "height": 2048,
       "mime": "image/jpeg",
-      "bytes": 939854
+      "bytes": 154039
     },
     {
       "name": "jisu-surface-512",
       "width": 512,
       "height": 512,
       "mime": "image/png",
-      "bytes": 3791
+      "bytes": 3280
     }
   ],
   "clips": [
@@ -86,21 +86,6 @@
       "channels": 42
     }
   ],
-  "weightedVertices": 12028,
-  "unweightedVertices": 0,
-  "maxInfluences": 1,
-  "bounds": [
-    [
-      -1.0690890550613403,
-      -1.0320546627044678,
-      0.0555170513689518
-    ],
-    [
-      1.0690890550613403,
-      0.9300000071525574,
-      1.7755810022354126
-    ]
-  ],
   "exportedVertices": 12135,
   "unweightedExportVertices": 0,
   "maxSerializedInfluences": 1,
@@ -122,5 +107,20 @@
     "Leg1.R",
     "Leg2.R",
     "Leg3.R"
+  ],
+  "weightedVertices": 12028,
+  "unweightedVertices": 0,
+  "maxInfluences": 1,
+  "bounds": [
+    [
+      -1.0690890550613403,
+      -1.0440541505813599,
+      0.0555170513689518
+    ],
+    [
+      1.0690890550613403,
+      0.9300000071525574,
+      1.7755810022354126
+    ]
   ]
 }

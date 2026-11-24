@@ -13,7 +13,7 @@
     subjects: function(){ return SUBJECTS.map(function(s){ return { id: s.id, icon: s.icon, label: s.label }; }); },
     setGoals: function(list){
       if(!S.profile || !Array.isArray(list)) return Promise.resolve(false);
-      S.profile.goals = list.slice(0, 6);
+      S.profile.goals = list.filter(function(g){ return typeof g === 'string' && g.trim(); }).map(function(g){ return g.trim().slice(0, 40); }).slice(0, 6);
       return Promise.resolve(S.store.updateProfile(S.profile.id, { goals: S.profile.goals })).then(function(){ return true; }, function(){ return false; });
     },
     decks: function(){ return (S.decks || []).filter(function(d){ return !d.archived; }).map(function(d){ return { id: d.id, name: d.name, emoji: d.emoji || '🌊', subject: d.subject || '' }; }); },
@@ -38,8 +38,10 @@
     // otherwise (courseOn), it's on for Wendy only.
     courseOn: function(){ return reefCourseOn(); },
     course: function(){ return reefCourseOn() && S.profile.course ? S.profile.course : null; },
-    setCourse: function(c){ if(!S.profile) return Promise.resolve(false); S.profile.course = c; S.profile.courseOn = true;
-      return Promise.resolve(S.store.updateProfile(S.profile.id, { course: c, courseOn: true })).then(function(){ return true; }, function(){ return false; }); },
+    setCourse: function(c){ if(!S.profile || (c !== null && (typeof c !== 'object' || Array.isArray(c)))) return Promise.resolve(false);
+      var clean = c === null ? null : sanitizePlainData(c, 0);
+      S.profile.course = clean; S.profile.courseOn = true;
+      return Promise.resolve(S.store.updateProfile(S.profile.id, { course: clean, courseOn: true })).then(function(){ return true; }, function(){ return false; }); },
     setCourseOn: function(on){ if(!S.profile) return Promise.resolve(false); S.profile.courseOn = !!on;
       return Promise.resolve(S.store.updateProfile(S.profile.id, { courseOn: !!on })).then(function(){ return true; }, function(){ return false; }); },
     needsGrownUpCheck: function(){ return !reefNoPin() && !reefInsideAdult('library'); },
@@ -56,7 +58,7 @@
     var zones = reefZones();
     if(!zones.length){
       // Just opened and the decks (or their card counts) aren't in yet: keep the calm-water cover up instead of
-      // flashing the plain screen. A profile that really has no decks gets its normal screen after 2.5 seconds.
+      // flashing the plain screen. Once loaded, render a Coral Cove Welcome stop so players always enter the 3D map.
       var pid = S.profile && S.profile.id;
       if(reefHome.pid !== pid){ reefHome.pid = pid; reefHome.at = Date.now(); }
       var counting = S.decks.some(function(d){ return !d.archived && !S.dueCounts[d.id]; });
@@ -64,8 +66,12 @@
       if((counting || fresh) && !R3.failed){
         document.body.classList.add('r3-full', 'r3-loading');
         clearTimeout(reefHome.coverT); reefHome.coverT = setTimeout(function(){ if(!document.querySelector('.r3')) document.body.classList.remove('r3-full', 'r3-loading'); }, counting ? 8000 : 2500 - (Date.now() - reefHome.at));
+        return;
       }
-      return;
+      zones = [{
+        id: 'other', label: 'Coral Cove', place: reefPlaceFor('other', 'Coral Cove'),
+        items: [{ d: { id:'__portal:library', name:'Deck Library', emoji:'📚', regionPortal:'library' }, dc: { due: 0, total: 1 }, kind: 'Explore', state: 'ready' }]
+      }];
     }
     ['.subject-tabs', '.deck-grid', '.empty-filter-note'].forEach(function(sel){ var e = app.querySelector(sel); if(e) e.hidden = true; });
     var holder = document.createElement('div');

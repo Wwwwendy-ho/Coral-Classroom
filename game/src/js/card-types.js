@@ -476,7 +476,7 @@
       '<div class="flip-scene" style="position:relative;z-index:1;">' +
         '<div class="face face-front read-face echo-face">' +
           '<div class="read-label">🎙️ Echo it</div>' +
-          (card.photoUrl?'<img class="card-photo" src="'+esc(card.photoUrl)+'" alt="">':'') +
+          (safePhotoUrl(card.photoUrl)?'<img class="card-photo" src="'+esc(safePhotoUrl(card.photoUrl))+'" alt="">':'') +
           '<div class="card-text" data-echo-text>'+esc(card.front)+'</div>' +
           (card.back ? '<div class="echo-meaning">'+esc(card.back)+'</div>' : '') +
           '<div class="listen-big echo-listen">' +
@@ -556,7 +556,7 @@
       '<div class="flip-scene" style="position:relative;z-index:1;">' +
         '<div class="face face-front read-face build-face">' +
           '<div class="read-label">🧩 Build the sentence</div>' +
-          (card.photoUrl?'<img class="card-photo" src="'+esc(card.photoUrl)+'" alt="">':'') +
+          (safePhotoUrl(card.photoUrl)?'<img class="card-photo" src="'+esc(safePhotoUrl(card.photoUrl))+'" alt="">':'') +
           '<div class="card-text build-meaning">'+esc(card.back || '…')+'</div>' +
           '<div class="build-tools"><button type="button" class="btn btn-ghost" data-act="build-hear">🔊 Hear it</button>' +
             (!done && bs.placed.length > bs.locked.length ? '<button type="button" class="btn btn-ghost" data-act="build-undo">↩︎ Undo</button>' : '') + '</div>' +
@@ -883,7 +883,7 @@
         '<div class="flip-scene" style="position:relative;z-index:1;">' +
           '<div class="face face-front read-face">' +
             '<div class="read-label">🗣️ Read it out loud</div>' +
-            (card.photoUrl?'<img class="card-photo" src="'+esc(card.photoUrl)+'" alt="">':'') +
+            (safePhotoUrl(card.photoUrl)?'<img class="card-photo" src="'+esc(safePhotoUrl(card.photoUrl))+'" alt="">':'') +
             '<div class="card-text">'+esc(card.front)+'</div>' +
             (card.note?'<div class="card-note dim">'+esc(card.note)+'</div>':'') +
           '</div>' +
@@ -911,7 +911,7 @@
         '<div class="flip-scene" style="position:relative;z-index:1;">' +
           '<div class="face face-front read-face">' +
             '<div class="read-label">🔘 Pick the answer</div>' +
-            (card.photoUrl?'<img class="card-photo" src="'+esc(card.photoUrl)+'" alt="">':'') +
+            (safePhotoUrl(card.photoUrl)?'<img class="card-photo" src="'+esc(safePhotoUrl(card.photoUrl))+'" alt="">':'') +
             '<div class="card-text">'+esc(card.front)+'</div>' +
           '</div>' +
         '</div>' +
@@ -940,7 +940,7 @@
         '<div class="flip-scene" style="position:relative;z-index:1;">' +
           '<div class="face face-front read-face">' +
             '<div class="read-label">'+(tc.reefCalm ? '🔘 Pick the answer' : '⏱️ Beat the clock')+'</div>' +
-            (card.photoUrl?'<img class="card-photo" src="'+esc(card.photoUrl)+'" alt="">':'') +
+            (safePhotoUrl(card.photoUrl)?'<img class="card-photo" src="'+esc(safePhotoUrl(card.photoUrl))+'" alt="">':'') +
             '<div class="card-text">'+esc(tc.prompt)+'</div>' +
           '</div>' +
         '</div>' +
@@ -964,7 +964,7 @@
         '<div class="flip-scene" style="position:relative;z-index:1;">' +
           '<div class="face face-front read-face">' +
             '<div class="read-label">🐚 Slide to sound it out</div>' +
-            (card.photoUrl?'<img class="card-photo" src="'+esc(card.photoUrl)+'" alt="">':'') +
+            (safePhotoUrl(card.photoUrl)?'<img class="card-photo" src="'+esc(safePhotoUrl(card.photoUrl))+'" alt="">':'') +
             (bd.hangul ? '<div class="blend-built" id="blendBuilt" aria-live="polite">'+hangulBuiltHTML(bd, bd.revealedCount)+'</div>' : '') +
             '<div class="blend-word" style="max-width:'+(bd.hangul ? 340 : bsz.trackPx)+'px;">'+chunkSpans+'</div>' +
           '</div>' +
@@ -998,7 +998,7 @@
         '<div class="flip-scene" style="position:relative;z-index:1;">' +
           '<div class="face face-front read-face">' +
             '<div class="read-label">👂 Listen &amp; pick</div>' +
-            (card.photoUrl && lsDone ?'<img class="card-photo" src="'+esc(card.photoUrl)+'" alt="">':'') +
+            (safePhotoUrl(card.photoUrl) && lsDone ?'<img class="card-photo" src="'+esc(safePhotoUrl(card.photoUrl))+'" alt="">':'') +
             '<div class="listen-big">' +
               '<button type="button" class="listen-play" data-act="listen-play" aria-label="Play the word again">'+ccIcon('sound')+'</button>' +
               '<button type="button" class="btn btn-ghost listen-slow" data-act="listen-slow">🐢 Slower</button>' +
@@ -1045,7 +1045,7 @@
         '<div class="flip-scene" style="position:relative;z-index:1;">' +
           '<div class="face face-front read-face">' +
             '<div class="read-label">'+(mode==='blank'?'📝 Fill in the blank':'🧲 Drag the match')+'</div>' +
-            (card.photoUrl?'<img class="card-photo" src="'+esc(card.photoUrl)+'" alt="">':'') +
+            (safePhotoUrl(card.photoUrl)?'<img class="card-photo" src="'+esc(safePhotoUrl(card.photoUrl))+'" alt="">':'') +
             promptHTML +
           '</div>' +
         '</div>' +
@@ -1058,7 +1058,7 @@
       stageInner = '' +
         '<div class="flip-scene" style="position:relative;z-index:1;">' +
           '<div class="flip-card '+(coveFlipFrom?'flipped':'')+'" id="flipCard">' +
-            '<div class="face face-front">'+(card.photoUrl?'<img class="card-photo" src="'+esc(card.photoUrl)+'" alt="">':'')+'<div class="card-text">'+esc(card.front)+'</div></div>' +
+            '<div class="face face-front">'+(safePhotoUrl(card.photoUrl)?'<img class="card-photo" src="'+esc(safePhotoUrl(card.photoUrl))+'" alt="">':'')+'<div class="card-text">'+esc(card.front)+'</div></div>' +
             '<div class="face face-back"><div class="card-text">'+esc(card.back)+'</div>'+(card.note && !backIsWord?'<div class="card-note">'+esc(card.note)+'</div>':'')+(Speech.isSupported()?'<button type="button" class="replay-audio-btn" data-act="replay-audio">👂 Hear it again</button>':'')+'</div>' +
           '</div>' +
         '</div>' +
@@ -1103,14 +1103,7 @@
     })();
 
     app.querySelector('[data-act="exit-study"]').addEventListener('click', function(){
-      // In Adult Mode a grown-up is already in (no PIN was needed to get here), so backing out of a
-      // deck early just returns to Manage Decks. The PIN guard below is a Child Mode-only protection
-      // against a kid quitting a round early without a grown-up's say-so.
-      if(S.managingDecks){ goHome(); return; }
-      // Leaving a deck before finishing the round needs a grown-up's PIN — finishing normally
-      // (via the summary screen's own buttons) does not, so this only guards the early exit.
-      S.pinPromptFor = 'exit';
-      render();
+      goHome();
     });
     wireCtrlRow();
     var stageEl = app.querySelector('.stage');
@@ -1302,9 +1295,13 @@
     // differ upstream, in whether autoRating() let response time influence the rating at all. Either
     // way, the parent-set difficulty (round size aside) shapes how far a good answer is spaced out
     // and how hard a struggling card gets reinforced — see DIFFICULTIES up top.
-    var algo = S.settings.algorithm || 'sm2_speed';
+    var algo = S.settings.algorithm || 'fsrs6';
     var diff = currentDifficulty();
-    var updates = card._practice ? {} : ((algo === 'leitner') ? gradeCardLeitner(card, rating !== 'again', Date.now(), diff) : gradeCard(card, rating, Date.now(), diff));
+    var updates = card._practice ? {} : (
+      algo === 'leitner' ? gradeCardLeitner(card, rating !== 'again', Date.now(), diff)
+      : algo === 'fsrs6' ? gradeCardFSRS6(card, rating, Date.now(), diff)
+      : gradeCard(card, rating, Date.now(), diff)
+    );
     // Cumulative right/wrong counters, independent of the scheduling algorithm above -- these are
     // what the Progress page's per-deck "topics" breakdown groups by category and sums.
     updates.timesSeen = (card.timesSeen || 0) + 1;

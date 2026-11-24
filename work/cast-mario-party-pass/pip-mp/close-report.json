@@ -1,0 +1,121 @@
+{
+  "file": "pip-close.glb",
+  "bytes": 783972,
+  "triangles": 16548,
+  "draws": 1,
+  "materials": 1,
+  "bones": 9,
+  "textureImages": [
+    {
+      "name": "painted-color-2048",
+      "width": 2048,
+      "height": 2048,
+      "mime": "image/jpeg",
+      "bytes": 149400
+    },
+    {
+      "name": "painted-surface-512",
+      "width": 512,
+      "height": 512,
+      "mime": "image/png",
+      "bytes": 3661
+    }
+  ],
+  "clips": [
+    {
+      "name": "Idle",
+      "duration": 2.4333,
+      "animatedBones": [
+        "Body",
+        "Dorsal",
+        "Eye.L",
+        "Eye.R",
+        "Float",
+        "Head",
+        "Pectoral.L",
+        "Pectoral.R",
+        "Tail"
+      ],
+      "channels": 27
+    },
+    {
+      "name": "Listen",
+      "duration": 2.1667,
+      "animatedBones": [
+        "Body",
+        "Dorsal",
+        "Eye.L",
+        "Eye.R",
+        "Float",
+        "Head",
+        "Pectoral.L",
+        "Pectoral.R",
+        "Tail"
+      ],
+      "channels": 27
+    },
+    {
+      "name": "React",
+      "duration": 1.4333,
+      "animatedBones": [
+        "Body",
+        "Dorsal",
+        "Eye.L",
+        "Eye.R",
+        "Float",
+        "Head",
+        "Pectoral.L",
+        "Pectoral.R",
+        "Tail"
+      ],
+      "channels": 27
+    }
+  ],
+  "exportedSkinWeights": {
+    "verticesAfterUVSplits": 9254,
+    "unweighted": 0,
+    "maxSumError": 2.9802322387695312e-08,
+    "maxInfluences": 2
+  },
+  "eyeMotionFromActualGLB": {
+    "Idle": {
+      "Eye.L": {
+        "samples": 73,
+        "maxDegreesFromFirst": 11.449
+      },
+      "Eye.R": {
+        "samples": 73,
+        "maxDegreesFromFirst": 9.438
+      }
+    },
+    "Listen": {
+      "Eye.L": {
+        "samples": 65,
+        "maxDegreesFromFirst": 4.742
+      },
+      "Eye.R": {
+        "samples": 65,
+        "maxDegreesFromFirst": 6.04
+      }
+    },
+    "React": {
+      "Eye.L": {
+        "samples": 43,
+        "maxDegreesFromFirst": 10.73
+      },
+      "Eye.R": {
+        "samples": 43,
+        "maxDegreesFromFirst": 14.403
+      }
+    }
+  },
+  "skinWeights": {
+    "vertices": 9106,
+    "unweighted": 0,
+    "maxInfluences": 2,
+    "maxSumError": 2.9802322387695312e-08
+  },
+  "character": "pip",
+  "species": "royal gramma",
+  "validation": "Offline CPU, exported GLB reimported before review rendering; no browser/device FPS claim."
+}
