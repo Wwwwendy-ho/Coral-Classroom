@@ -229,7 +229,8 @@
       if(lex && fixes.length < 2 && !slipped){
         var sp = bbSpell(w, lex, all[i + 1]);
         if(sp){
-          var diag = typeof window !== 'undefined' && typeof window.koJamoDiag === 'function' ? window.koJamoDiag(sp.fix, sp.word) : null;
+          var diagFn = typeof koJamoDiag === 'function' ? koJamoDiag : (typeof window !== 'undefined' && typeof window.koJamoDiag === 'function' ? window.koJamoDiag : null);
+          var diag = diagFn ? diagFn(sp.fix, sp.word) : null;
           fixes.push({ kind: 'spell', word: sp.word, fix: sp.fix, why: (diag ? diag + ' ' : '') + 'Did you mean ' + sp.fix + '?' });
         }
       }

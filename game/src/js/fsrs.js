@@ -36,7 +36,7 @@
   }
   function fsrsForgetS(d, s, r){
     var next = FSRS_W[11] * Math.pow(d, -FSRS_W[12]) * (Math.pow(s + 1, FSRS_W[13]) - 1) * Math.exp(FSRS_W[14] * (1 - r));
-    return Math.min(s, next);
+    return Math.max(0.01, Math.min(s, next));
   }
   // FSRS-6 same-day short-term stability update (elapsedDays < 1)
   function fsrsShortTermS(s, g){
@@ -47,17 +47,20 @@
   // One review. mem is {s, d, last} (or null for a first review); now and last are in ms.
   // opts.retention optionally overrides target retention (e.g. 0.94 / 0.90 / 0.85).
   function fsrsReview(mem, g, now, opts){
+    g = Math.min(4, Math.max(1, Math.round(+g) || 3));
     var s, d;
     if(!mem || !mem.s){
       s = fsrsInitS(g); d = fsrsInitD(g);
     } else {
+      var curS = Math.max(0.01, +mem.s || 0.01);
+      var curD = (mem.d != null && isFinite(+mem.d)) ? fsrsClampD(+mem.d) : fsrsInitD(3);
       var elapsedDays = Math.max(0, (now - (mem.last || now)) / 864e5);
-      var r = fsrsR(elapsedDays, mem.s);
-      d = fsrsNextD(mem.d, g);
+      var r = fsrsR(elapsedDays, curS);
+      d = fsrsNextD(curD, g);
       if(elapsedDays < 1){
-        s = fsrsShortTermS(mem.s, g);
+        s = fsrsShortTermS(curS, g);
       } else {
-        s = g === 1 ? fsrsForgetS(mem.d, mem.s, r) : fsrsRecallS(mem.d, mem.s, r, g);
+        s = g === 1 ? fsrsForgetS(curD, curS, r) : fsrsRecallS(curD, curS, r, g);
       }
     }
     s = Math.max(0.01, s);
