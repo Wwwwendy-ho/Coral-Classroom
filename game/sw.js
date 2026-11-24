@@ -43,7 +43,8 @@ function fontFromCache(req) {
 
 self.addEventListener('fetch', function (e) {
   if (e.request.method !== 'GET') return;
-  var reqUrl = new URL(e.request.url);
+  var reqUrl;
+  try { reqUrl = new URL(e.request.url); } catch (err) { return; }
   if (reqUrl.protocol === 'https:' && FONT_HOSTS.indexOf(reqUrl.hostname) >= 0) { e.respondWith(fontFromCache(e.request)); return; }
   if (reqUrl.origin !== self.location.origin) return;
   if (e.request.headers.has('range')) {
@@ -51,7 +52,7 @@ self.addEventListener('fetch', function (e) {
     e.respondWith(caches.match(url, { ignoreSearch: true }).then(function (cached) {
       if (cached) return rangeFromCache(e.request, cached);
       e.waitUntil(fetch(url, { credentials: 'same-origin' }).then(function (res) {
-        if (res.ok && res.status === 200) return caches.open(CACHE).then(function (c) { return c.put(url, res); });
+        if (res.ok && res.status === 200 && res.type === 'basic') return caches.open(CACHE).then(function (c) { return c.put(url, res); });
       }).catch(function () {}));
       return fetch(e.request);
     }));

@@ -17,14 +17,63 @@
 
   var KEY = 'coralClassroom.geminiHandoff.demo.v1';
   var META = '__coralCoveMeta';
+  var MAX_DOC_BYTES = 3 * 1024 * 1024;
+  var MAX_TOTAL_BYTES = 5 * 1024 * 1024;
+  var MAX_PHOTO_DATA_BYTES = 2.5 * 1024 * 1024;
+  function isBadKey(k) { return k === '__proto__' || k === 'constructor' || k === 'prototype'; }
   var seed = window.CORAL_COVE_SEED;
   var seedVersion = window.CORAL_COVE_SEED_VERSION || 'unversioned';
-  var docs = {};
+  var docs = Object.create(null);
   var canSave = true;
 
-  function safeReviver(k, v) { return (k === '__proto__' || k === 'constructor' || k === 'prototype') ? undefined : v; }
+  function safePhotoUrlLocal(url) {
+    if (typeof url !== 'string') return '';
+    var s = url.trim();
+    if (!s || /[\x00-\x1F\x7F\s]/.test(s)) return '';
+    if (/^data:image\/(png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/]+={0,2}$/i.test(s)) {
+      return s.length <= MAX_PHOTO_DATA_BYTES ? s : '';
+    }
+    if (/^(?:vocab-pics|friend-pics|assets)\/[A-Za-z0-9._\/-]+\.(?:png|jpe?g|webp|gif)$/i.test(s)) {
+      return s.indexOf('..') === -1 && s.indexOf('//') === -1 && s.indexOf('/.') === -1 ? s : '';
+    }
+    if (/^blob:/i.test(s)) {
+      try {
+        if (window.location && window.location.origin && window.location.origin !== 'null') {
+          return new URL(s).origin === window.location.origin ? s : '';
+        }
+      } catch (e) {}
+      return '';
+    }
+    return '';
+  }
+
+  function safeReviver(k, v) {
+    if (isBadKey(k)) return undefined;
+    if (k === 'photoUrl' && typeof v === 'string') return safePhotoUrlLocal(v);
+    return v;
+  }
   function safeParse(s) { return JSON.parse(s, safeReviver); }
   function clone(v) { return v === undefined ? undefined : safeParse(JSON.stringify(v)); }
+
+  function isSafePath(path) {
+    if (typeof path !== 'string' || !path || path.length > 512) return false;
+    if (path === META) return false;
+    var parts = path.split('/');
+    for (var i = 0; i < parts.length; i++) {
+      var seg = parts[i];
+      if (!seg || seg === '.' || seg === '..' || isBadKey(seg)) return false;
+    }
+    return true;
+  }
+
+  function toNullMap(obj) {
+    var out = Object.create(null);
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return out;
+    Object.keys(obj).forEach(function (k) {
+      if (k === META || isSafePath(k)) out[k] = obj[k];
+    });
+    return out;
+  }
 
   if (!seed) {
     // seed-data.js didn't load. Don't save anything, so a later visit (once the file is there)
@@ -35,18 +84,17 @@
   } else {
     try {
       var saved = localStorage.getItem(KEY);
-      docs = saved ? safeParse(saved) : {};
-      if (!docs || typeof docs !== 'object' || Array.isArray(docs)) docs = {};
+      docs = toNullMap(saved ? safeParse(saved) : null);
     } catch (e) {
       canSave = false;
-      docs = {};
+      docs = Object.create(null);
     }
     var meta = docs[META] || {};
     if (meta.seedVersion !== seedVersion) {
       moveRenamedProfiles();
       // Add every starting document this device doesn't have yet; keep everything it does have.
       Object.keys(seed).forEach(function (p) {
-        if (!Object.prototype.hasOwnProperty.call(docs, p)) docs[p] = clone(seed[p]);
+        if (isSafePath(p) && !Object.prototype.hasOwnProperty.call(docs, p)) docs[p] = clone(seed[p]);
       });
       docs[META] = { seedVersion: seedVersion, mergedAt: Date.now() };
       writeNow();
@@ -164,23 +212,47 @@
     });
   }
 
-  function write(path, data) { docs[path] = clone(data); persist(); notify(parentOf(path)); }
+  function write(path, data) {
+    if (!isSafePath(path)) throw new Error('Invalid storage path');
+    if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Invalid document data');
+    var clean = clone(data);
+    var docJson = JSON.stringify(clean);
+    if (docJson.length > MAX_DOC_BYTES) throw new Error('Document exceeds storage size limit');
+    var had = Object.prototype.hasOwnProperty.call(docs, path);
+    var prev = had ? docs[path] : undefined;
+    docs[path] = clean;
+    if (JSON.stringify(docs).length > MAX_TOTAL_BYTES) {
+      if (had) docs[path] = prev;
+      else delete docs[path];
+      throw new Error('Total storage exceeds size limit');
+    }
+    persist();
+    notify(parentOf(path));
+  }
 
   function docRef(path) {
+    if (!isSafePath(path)) throw new Error('Invalid storage path');
     return {
       id: path.slice(path.lastIndexOf('/') + 1),
       path: path,
       get: function () { return Promise.resolve(makeDocSnap(path)); },
       set: function (data, opts) {
-        var base = (opts && opts.merge && has(path)) ? docs[path] : {};
-        write(path, Object.assign({}, clone(base), clone(data)));
-        return Promise.resolve();
+        try {
+          if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Invalid document data');
+          var base = (opts && opts.merge && has(path)) ? docs[path] : {};
+          write(path, Object.assign({}, clone(base), clone(data)));
+          return Promise.resolve();
+        } catch (err) { return Promise.reject(err); }
       },
       update: function (data) {
-        write(path, Object.assign({}, clone(has(path) ? docs[path] : {}), clone(data)));
-        return Promise.resolve();
+        try {
+          if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Invalid document data');
+          write(path, Object.assign({}, clone(has(path) ? docs[path] : {}), clone(data)));
+          return Promise.resolve();
+        } catch (err) { return Promise.reject(err); }
       },
       delete: function () {
+        if (!isSafePath(path)) return Promise.reject(new Error('Invalid storage path'));
         if (has(path)) { delete docs[path]; persist(); notify(parentOf(path)); }
         return Promise.resolve();
       },
@@ -189,12 +261,15 @@
   }
 
   function collRef(path, order) {
+    if (!isSafePath(path)) throw new Error('Invalid storage path');
     return {
       path: path,
       doc: function (id) { return docRef(path + '/' + (id || newId())); },
       add: function (data) {
-        var ref = docRef(path + '/' + newId());
-        return ref.set(data).then(function () { return ref; });
+        try {
+          var ref = docRef(path + '/' + newId());
+          return ref.set(data).then(function () { return ref; });
+        } catch (err) { return Promise.reject(err); }
       },
       get: function () { return Promise.resolve(queryDocs(path, order)); },
       orderBy: function (field, dir) { return collRef(path, { field: field, dir: dir || 'asc' }); },
@@ -214,6 +289,7 @@
   var db = {
     collection: function (path) { return collRef(path); },
     doc: function (path) {
+      if (!isSafePath(path)) throw new Error('Invalid storage path');
       // Recorded pronunciation clips are bundled read-only and never saved to device storage.
       if (path.indexOf('audio-clips/') === 0) {
         var found = Object.prototype.hasOwnProperty.call(audio, path);

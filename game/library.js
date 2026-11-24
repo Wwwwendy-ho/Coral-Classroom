@@ -26,7 +26,55 @@
   function rnd(n){ return Math.floor(Math.random() * n); }
   function pick(a){ return a[rnd(a.length)]; }
   function shuffle(a){ a = a.slice(); for(var i = a.length - 1; i > 0; i--){ var j = rnd(i + 1), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
-  function plain(h){ var d = document.createElement('div'); d.innerHTML = String(h || ''); return (d.textContent || '').replace(/\s+/g, ' ').trim(); }
+  var SAFE_ENT = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', mdash: '\u2014', ndash: '\u2013', hellip: '\u2026', lsquo: '\u2018', rsquo: '\u2019', ldquo: '\u201C', rdquo: '\u201D' };
+  function safePlainFallback(str){
+    var s = String(str == null ? '' : str);
+    for(var pass = 0; pass < 8; pass++){
+      var prev = s;
+      s = s.replace(/<(script|style)\b[^>]*>[\s\S]*?(?:<\/\1\s*>|$)/gi, ' ');
+      s = s.replace(/<!--[\s\S]*?(?:-->|$)/g, ' ');
+      s = s.replace(/<\/?[a-zA-Z!?](?:[^<>"']|"[^"]*"|'[^']*')*>/g, ' ');
+      s = s.replace(/<(?:\/|!|\?|[a-zA-Z]+[\s/][^>]*=)[^>]*$/g, '');
+      if(s === prev) break;
+    }
+    s = s.replace(/&(?:#(\d+)|#x([0-9a-fA-F]+)|([a-zA-Z]+));/g, function(m, dec, hex, name){
+      if(dec != null || hex != null){
+        var cp = parseInt(dec != null ? dec : hex, dec != null ? 10 : 16);
+        if(!isFinite(cp) || cp < 0 || cp > 0x10FFFF || (cp >= 0xD800 && cp <= 0xDFFF)) return '';
+        if(cp === 9 || cp === 10 || cp === 13) return ' ';
+        if(cp < 32 || cp === 127) return '';
+        return typeof String.fromCodePoint === 'function' ? String.fromCodePoint(cp) : String.fromCharCode(cp);
+      }
+      var low = name.toLowerCase();
+      return Object.prototype.hasOwnProperty.call(SAFE_ENT, low) ? SAFE_ENT[low] : m;
+    });
+    return s.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').replace(/\s+/g, ' ').trim();
+  }
+  function plain(h){
+    var sec = window.CoralCoveSecurity;
+    return sec && typeof sec.safePlainText === 'function' ? sec.safePlainText(h) : safePlainFallback(h);
+  }
+  function safeReviver(k, v){ return (k === '__proto__' || k === 'constructor' || k === 'prototype') ? undefined : v; }
+  function safeParseJson(raw, fallback){
+    var sec = window.CoralCoveSecurity;
+    if(sec && typeof sec.safeJsonParse === 'function') return sec.safeJsonParse(raw, fallback);
+    if(typeof raw !== 'string' || !raw) return fallback;
+    try { return JSON.parse(raw, safeReviver); } catch(e){ return fallback; }
+  }
+  function safeProxyUrl(url){
+    var sec = window.CoralCoveSecurity;
+    if(sec && typeof sec.safeProxyUrl === 'function') return sec.safeProxyUrl(url);
+    if(typeof url !== 'string') return '';
+    var s = url.trim();
+    if(!s || /[\x00-\x1F\x7F\s]/.test(s)) return '';
+    try {
+      var u = new URL(s);
+      if(u.username || u.password || !u.hostname) return '';
+      if(u.protocol === 'https:') return u.href;
+      if(u.protocol === 'http:' && (u.hostname === 'localhost' || u.hostname === '127.0.0.1')) return u.href;
+    } catch(e){}
+    return '';
+  }
   function speak(t){ var c = CC(); if(c && LIB.settings().voice !== false) c.speak(t); }
   function sound(n){ var c = CC(); if(c) c.sound(n); }
   // The app's drawn icons (window.ccIcon in index.html); an emoji stands in if they aren't there
@@ -35,10 +83,22 @@
 
   /* ---------- per-device settings, and per-profile Library records (kept on this device) ---------- */
   var SKEY = 'coral-lib-settings';
-  function settings(){ try { return JSON.parse(localStorage.getItem(SKEY)) || {}; } catch(e){ return {}; } }
+  function settings(){
+    try {
+      var s = safeParseJson(localStorage.getItem(SKEY), null);
+      s = s && typeof s === 'object' && !Array.isArray(s) ? s : {};
+      if(s.proxyUrl) s.proxyUrl = safeProxyUrl(s.proxyUrl);
+      return s;
+    } catch(e){ return {}; }
+  }
   function saveSettings(s){ try { localStorage.setItem(SKEY, JSON.stringify(s)); } catch(e){} }
   function pkey(){ var p = CC() && CC().profile(); return 'coral-lib:' + (p ? p.id : 'guest'); }
-  function rec(){ try { return JSON.parse(localStorage.getItem(pkey())) || {}; } catch(e){ return {}; } }
+  function rec(){
+    try {
+      var r = safeParseJson(localStorage.getItem(pkey()), null);
+      return r && typeof r === 'object' && !Array.isArray(r) ? r : {};
+    } catch(e){ return {}; }
+  }
   function saveRec(r){ try { localStorage.setItem(pkey(), JSON.stringify(r)); } catch(e){} }
   // An event in the Library's log (maths answers, worksheets done, chats), for progress and the weekly letter.
   function log(kind, data){
@@ -49,13 +109,15 @@
   }
 
   /* ---------- Claude when online (through the grown-up's helper), otherwise the offline version ---------- */
-  function claudeReady(){ var s = settings(); return !!(s.proxyUrl && s.proxyCode && navigator.onLine !== false); }
+  function claudeReady(){ var s = settings(); return !!(safeProxyUrl(s.proxyUrl) && s.proxyCode && navigator.onLine !== false); }
   // ask(task, messages, system) -> Promise of text, or null when Claude isn't available (callers then use offline).
   function ask(task, messages, system){
     if(!claudeReady()) return Promise.resolve(null);
-    var s = settings(), ctl = typeof AbortController === 'function' ? new AbortController() : null;
+    var s = settings(), url = safeProxyUrl(s.proxyUrl);
+    if(!url) return Promise.resolve(null);
+    var ctl = typeof AbortController === 'function' ? new AbortController() : null;
     var timer = setTimeout(function(){ if(ctl) ctl.abort(); }, task === 'worksheet' || task === 'photo' ? 60000 : 25000);
-    return fetch(s.proxyUrl, { method: 'POST', headers: { 'content-type': 'application/json', 'x-coral-code': s.proxyCode },
+    return fetch(url, { method: 'POST', headers: { 'content-type': 'application/json', 'x-coral-code': s.proxyCode },
       body: JSON.stringify({ task: task, system: system || '', messages: messages }), signal: ctl ? ctl.signal : undefined })
       .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j && j.error || ('status ' + r.status)); return j; }); })
       .then(function(j){ clearTimeout(timer); LIB.lastSource = 'claude'; return (j && j.text) || null; })
@@ -66,7 +128,7 @@
     if(!text) return null;
     var m = text.match(/```(?:json)?\s*([\s\S]*?)```/); var t = m ? m[1] : text;
     var a = t.indexOf('{'), b = t.indexOf('['), s = a < 0 ? b : b < 0 ? a : Math.min(a, b); if(s < 0) return null;
-    try { return JSON.parse(t.slice(s, Math.max(t.lastIndexOf('}'), t.lastIndexOf(']')) + 1)); } catch(e){ return null; }
+    return safeParseJson(t.slice(s, Math.max(t.lastIndexOf('}'), t.lastIndexOf(']')) + 1), null);
   }
 
   /* ---------- her decks and cards ---------- */
@@ -713,18 +775,54 @@
     ds.forEach(function(d){ cards(d.id).then(function(cs){ var m = cs.filter(function(c){ return cardStateOf(c) === 'mastered'; }).length; var s = el.querySelector('[data-count="' + d.id + '"]'); if(s) s.textContent = cs.length + ' cards · ' + m + ' mastered'; }); });
   } };
 
+  function gateHelper(){
+    var c = CC();
+    if(c && c.gate && typeof c.gate.checkLock === 'function') return c.gate;
+    if(window.CoralCoveGate && typeof window.CoralCoveGate.checkLock === 'function') return window.CoralCoveGate;
+    var LOCK_KEY = 'cc-gate-lock';
+    function read(){
+      try {
+        if(typeof localStorage === 'undefined') return { fails:0, until:0 };
+        var o = safeParseJson(localStorage.getItem(LOCK_KEY), null);
+        return o && typeof o.fails === 'number' && isFinite(o.fails) && o.fails >= 0 && typeof o.until === 'number' && isFinite(o.until) && o.until >= 0
+          ? { fails: Math.floor(o.fails), until: o.until } : { fails:0, until:0 };
+      } catch(e){ return { fails:0, until:0 }; }
+    }
+    function write(o){ try { if(typeof localStorage !== 'undefined') localStorage.setItem(LOCK_KEY, JSON.stringify(o)); } catch(e){} }
+    return {
+      checkLock: function(now){
+        var t = typeof now === 'number' ? now : Date.now(), lk = read(), locked = lk.until > t;
+        return { locked: locked, waitSecs: locked ? Math.ceil((lk.until - t) / 1000) : 0, fails: lk.fails, until: lk.until };
+      },
+      recordFailure: function(now){
+        var t = typeof now === 'number' ? now : Date.now(), lk = read(), nf = lk.fails + 1;
+        var secs = nf >= 5 ? Math.min(300, 15 * Math.pow(2, Math.min(nf - 5, 10))) : 0;
+        var until = secs ? t + secs * 1000 : 0;
+        write({ fails: nf, until: until });
+        return { fails: nf, secs: secs, until: until };
+      },
+      resetLock: function(){ write({ fails:0, until:0 }); }
+    };
+  }
+
   // Settings: the Claude helper and a few preferences. Protected by the shared grown-up password.
   LIB.views.settings = { title: 'Settings', render: function(el){
     var ask = !CC() || !CC().needsGrownUpCheck || CC().needsGrownUpCheck();
     if(ask && !LIB.pinOK){
       el.innerHTML = '<section class="clib-card"><h2>Grown-ups only</h2><p>Enter the password to change Library settings.</p><form data-gate><label class="clib-label" for="clibPin">Password</label><input id="clibPin" class="clib-input" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false"><div class="clib-row"><button type="submit" class="clib-btn main">Unlock</button></div></form><p class="clib-msg" role="status" aria-live="polite"></p></section>';
       var inp = $('#clibPin', el), form = $('[data-gate]', el), button = $('button', form), message = $('.clib-msg', el);
-      var generation = grownUpCheckGeneration, profileKey = pkey(), pending = false;
+      var generation = grownUpCheckGeneration, profileKey = pkey(), pending = false, gate = gateHelper();
       function current(){ return generation === grownUpCheckGeneration && root && !root.hidden && root.contains(form) && pkey() === profileKey; }
       form.addEventListener('submit', function(e){
         e.preventDefault(); if(pending || !current()) return;
+        var lk = gate.checkLock();
+        if(lk.locked){
+          inp.value = '';
+          message.textContent = 'Too many attempts. Wait ' + lk.waitSecs + 's and try again.';
+          return;
+        }
         var value = inp.value; inp.value = '';
-        if(!value){ message.textContent = 'Incorrect password. Try again.'; inp.focus(); return; }
+        if(!value){ message.textContent = 'Enter the password.'; inp.focus(); return; }
         pending = true; inp.disabled = true; button.disabled = true; form.setAttribute('aria-busy', 'true'); message.textContent = 'Checking password…';
         Promise.resolve().then(function(){
           if(!current()) return false;
@@ -733,8 +831,12 @@
         }).then(function(ok){
           if(!current()) return;
           pending = false; form.removeAttribute('aria-busy'); inp.disabled = false; button.disabled = false;
-          if(ok === true){ LIB.pinOK = true; go('settings', null, true); }
-          else { message.textContent = 'Incorrect password. Try again.'; inp.focus(); }
+          if(ok === true){ gate.resetLock(); LIB.pinOK = true; go('settings', null, true); }
+          else {
+            var failRes = gate.recordFailure();
+            message.textContent = failRes.secs ? 'Incorrect password. Too many attempts — wait ' + failRes.secs + 's.' : 'Incorrect password. Try again.';
+            inp.focus();
+          }
         }, function(){
           if(!current()) return;
           pending = false; form.removeAttribute('aria-busy'); inp.disabled = false; button.disabled = false;
@@ -755,12 +857,21 @@
       '<label class="clib-check"><input type="checkbox" id="clibLog"' + (s.noLog ? '' : ' checked') + '> Keep a log of tutor chats for grown-ups</label>' +
       '<div class="clib-row"><button type="button" class="clib-btn" data-chatlog>Read the chat log</button></div></section>';
     var msg = $('.clib-msg', el);
-    function save(){ s.proxyUrl = $('#clibUrl', el).value.trim(); s.proxyCode = $('#clibCode', el).value.trim(); s.voice = $('#clibVoice', el).checked;
+    function save(){
+      var rawUrl = $('#clibUrl', el).value.trim();
+      var cleanUrl = rawUrl ? safeProxyUrl(rawUrl) : '';
+      if(rawUrl && !cleanUrl){
+        msg.textContent = 'Helper address must use https:// (or http://localhost / http://127.0.0.1).';
+        return false;
+      }
+      s.proxyUrl = cleanUrl; s.proxyCode = $('#clibCode', el).value.trim(); s.voice = $('#clibVoice', el).checked;
       s.interests = $('#clibInt', el).value.split(',').map(function(x){ return x.trim(); }).filter(Boolean).slice(0, 8);
-      s.noBig = !$('#clibBig', el).checked; s.noLog = !$('#clibLog', el).checked; saveSettings(s); root.querySelector('.clib-source').textContent = claudeReady() ? '✨ Claude on' : '📴 Offline mode'; }
-    $('[data-save]', el).addEventListener('click', function(){ save(); msg.textContent = 'Saved.'; });
+      s.noBig = !$('#clibBig', el).checked; s.noLog = !$('#clibLog', el).checked; saveSettings(s); root.querySelector('.clib-source').textContent = claudeReady() ? '✨ Claude on' : '📴 Offline mode';
+      return true;
+    }
+    $('[data-save]', el).addEventListener('click', function(){ if(save()) msg.textContent = 'Saved.'; });
     $('[data-off]', el).addEventListener('click', function(){ $('#clibUrl', el).value = ''; $('#clibCode', el).value = ''; save(); msg.textContent = 'Claude is off. Everything uses the offline versions.'; });
-    $('[data-test]', el).addEventListener('click', function(){ save(); msg.textContent = 'Asking Claude…';
+    $('[data-test]', el).addEventListener('click', function(){ if(!save()) return; msg.textContent = 'Asking Claude…';
       ask('chat', [{ role: 'user', content: 'Say hello to ' + learnerDesc() + ' in one short sentence.' }]).then(function(t){ msg.textContent = t ? 'It works! Claude says: ' + t : 'It didn\'t work: ' + (LIB.lastError || 'no reply') + '. Check the address and passphrase.'; }); });
     $('[data-chatlog]', el).addEventListener('click', function(){ go('chatLog'); });
     wireGoals(el);
@@ -1354,7 +1465,7 @@
   } };
 
   LIB.views.wsMake = { title: 'Make a worksheet', render: function(el, arg){
-    var o = arg ? JSON.parse(arg) : { src: 'deck' }, ds = goalFirst(decks());
+    var o = arg ? (safeParseJson(arg, null) || { src: 'deck' }) : { src: 'deck' }, ds = goalFirst(decks());
     var k = KINDS_HOME.find(function(x){ return x.src === o.src; }) || KINDS_HOME[0];
     this.title = k.e + ' ' + k.name;
     var html = '<section class="clib-card">';
@@ -1616,7 +1727,9 @@
     return h + '</section>';
   }
   LIB.views.wsShow = { title: 'Worksheet', render: function(el, arg){
-    var ws = JSON.parse(arg); this.title = ws.title;
+    var ws = safeParseJson(arg, null);
+    if(!ws || typeof ws !== 'object' || !Array.isArray(ws.sections)){ el.innerHTML = '<p class="clib-note">Couldn\'t open that worksheet.</p>'; return; }
+    this.title = ws.title;
     var r = rec(); r.worksheets = r.worksheets || []; if(!r.worksheets.some(function(w){ return w.title === ws.title && w.made === ws.made; })){ ws.made = ws.made || Date.now(); r.worksheets.push(ws); r.worksheets = r.worksheets.slice(-20); saveRec(r); }
     var checkable = ws.sections.some(function(s){ return s.kind !== 'trace'; });
     el.innerHTML = '<div class="clib-print-area"><header class="clib-ws-head"><h1>' + esc(ws.title) + '</h1><p>' + esc(LEVELS[ws.level] ? LEVELS[ws.level].label : '') + ' · Name: ____________ · Date: ' + today() + (ws.by === 'claude' ? ' · written with Claude' : '') + '</p></header>' +
@@ -1633,7 +1746,7 @@
         total++; if(ok) right++; li.classList.toggle('ok', ok); li.classList.toggle('no', !ok);
         var why = li.querySelector('.clib-why'); if(!why) return;
         if(ok){ why.innerHTML = ''; return; }
-        var steps = JSON.parse(li.dataset.steps || '[]'), m = li.dataset.m ? JSON.parse(li.dataset.m) : null, mis = m && LIB.misconception ? LIB.misconception(m.a, m.op, m.b, given) : null;
+        var steps = safeParseJson(li.dataset.steps || '[]', []), m = li.dataset.m ? safeParseJson(li.dataset.m, null) : null, mis = m && LIB.misconception ? LIB.misconception(m.a, m.op, m.b, given) : null;
         why.innerHTML = '<p class="clib-bad">The answer is ' + esc(a) + '.</p>' + (mis ? '<p>🔎 ' + esc(mis.tip) + '</p>' : '') + (steps.length ? '<ol>' + steps.map(function(s){ return '<li>' + esc(s) + '</li>'; }).join('') + '</ol>' : '');
         if(m) wrongs.push({ m: m, given: given, mis: mis && mis.id });
       });
