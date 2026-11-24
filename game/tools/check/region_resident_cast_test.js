@@ -77,7 +77,7 @@ function finishModel(asset=model()){assert(parses.length,'pending parser');parse
  assert.strictEqual(v.regionPeople.resident,taxiState,'legacy diagnostic alias');
  c.regionResidentLoad(v);assert.equal(v.regionPeople.residents.length,2,'load is idempotent');
  v.guide.position.set(0,0,0);let count=requests.length;c.regionResidentTick(v,10);c.regionResidentTick(v,11);
- assert.equal(requests.length,count+1);assert.equal(requests.at(-1).url,'assets/models/taxi-squid.glb');
+ assert.equal(requests.length,count+1);assert.equal(requests.at(-1).url.split('?')[0],'assets/models/taxi-squid.glb');
  await flush();c.regionResidentTick(v,12);assert.equal(requests.length,count+1,'parsing retains global slot');
  finishModel();assert(taxiState.root);
  const encounter=begin(v,shop);c.regionResidentTick(v,20);assert.equal(requests.at(-1).url.split('?')[0],'assets/models/shop-octopus-close.glb');

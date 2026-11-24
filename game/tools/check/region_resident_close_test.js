@@ -35,7 +35,7 @@ function startClose(f,phase='intro'){
  // A distant board view never fetches the close model; it fetches only when a
  // matching encounter starts, and repeated tick/request calls share one fetch.
  let f=makeView();c.regionResidentTick(f.view,10);assert.equal(fetches.length,0,'no close fetch while only on board');
- const intro=startClose(f,'intro');assert.equal(fetches.length,1);assert.equal(fetches[0].url,'assets/models/taxi-squid-close.glb');
+ const intro=startClose(f,'intro');assert.equal(fetches.length,1);assert.equal(fetches[0].url.split('?')[0],'assets/models/taxi-squid-close.glb');
  c.regionResidentCloseRequest(f.view,f.state);c.regionResidentTick(f.view,20);assert.equal(fetches.length,1,'one request per encounter');
  await tick();const cb=parseCallback;const tex=new THREE.Texture(),skel=new THREE.Skeleton();let gd=0,md=0,td=0,sd=0;
  const cg=new THREE.BoxGeometry(.7,1.2,.5),cm=new THREE.MeshStandardMaterial();cg.addEventListener('dispose',()=>gd++);cm.addEventListener('dispose',()=>md++);tex.addEventListener('dispose',()=>td++);skel.dispose=()=>sd++;

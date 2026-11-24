@@ -67,13 +67,67 @@
     var movers = parts.eyes.concat(parts.claws, parts.legs);
     reefCrabMerge(body, movers); parts.eyes.forEach(function(e){ reefCrabMerge(e, []); }); parts.claws.forEach(function(p){ reefCrabMerge(p, []); });
     g.scale.setScalar(size || 1);
-    g.userData = { kind: name, parts: parts, anim: { name: 'Idle', t0: 0 }, seed: Math.random() * 4 };
+    g.updateMatrixWorld(true);
+    var procBox = new THREE.Box3().setFromObject(body), procSz = new THREE.Vector3();
+    procBox.getSize(procSz);
+    g.userData = { kind: name, parts: parts, anim: { name: 'Idle', t0: 0 }, seed: Math.random() * 4, procWidth: procSz.x / Math.max(0.01, g.scale.x), disposed: false };
     reefCrabLoad3D(g, name, body, parts);
     return g;
   }
   var reefCrabModels = {};
+  function reefCrabSyncClip(crab, name, immediate){
+    var u = crab && crab.userData;
+    if(!u || !u.mixer || !u.clips) return;
+    var T = window.THREE, clips = u.clips;
+    var want = (name === 'Dance' || name === 'Happy' || name === 'React') ? 'React'
+      : (name === 'Yes' || name === 'Listen') ? 'Listen' : 'Idle';
+    var next = clips[want] || clips.Idle;
+    if(!next) return;
+    var speed = name === 'Walk' ? 1.45 : name === 'Dance' ? 1.15 : 1;
+    var loopOnce = name === 'React';
+    next.setLoop(loopOnce && T ? T.LoopOnce : (T ? T.LoopRepeat : 2201), loopOnce ? 1 : Infinity);
+    next.setEffectiveTimeScale(speed);
+    if(u.activeAction === next){
+      if(loopOnce){ next.reset().setEffectiveWeight(1).play(); }
+      return;
+    }
+    var prev = u.activeAction;
+    u.activeAction = next;
+    next.reset().setEffectiveWeight(1).play();
+    if(prev && !immediate) prev.crossFadeTo(next, .18, false);
+  }
+  function reefCrabDispose(crab){
+    if(!crab || !crab.userData) return;
+    var u = crab.userData;
+    u.disposed = true;
+    u.onDone = null;
+    if(u.mixer){
+      u.mixer.stopAllAction();
+      if(u.modelRoot) u.mixer.uncacheRoot(u.modelRoot);
+      u.mixer = null;
+    }
+    var seenSkel = [], seenGeo = [], seenMat = [];
+    crab.traverse(function(o){
+      if(o.isSkinnedMesh && o.skeleton && seenSkel.indexOf(o.skeleton) < 0){
+        seenSkel.push(o.skeleton);
+        if(o.skeleton.dispose) o.skeleton.dispose();
+      }
+      if(!u.has3D && o.geometry && seenGeo.indexOf(o.geometry) < 0){
+        seenGeo.push(o.geometry);
+        o.geometry.dispose();
+      }
+      if(o.material){
+        (Array.isArray(o.material) ? o.material : [o.material]).forEach(function(m){
+          if(m && seenMat.indexOf(m) < 0){ seenMat.push(m); m.dispose(); }
+        });
+      }
+    });
+    u.clips = null; u.activeAction = null; u.modelRoot = null;
+  }
   function reefCrabLoad3D(g, name, body, parts){
-    if(typeof window === 'undefined' || !window.THREE || !window.THREE.GLTFLoader) return;
+    if(typeof window === 'undefined' || !window.THREE) return;
+    if(!window.THREE.GLTFLoader && typeof reefInstallGLTF === 'function') try { reefInstallGLTF(); } catch(e){}
+    if(!window.THREE.GLTFLoader) return;
     var url = name === 'hermit' ? 'assets/models/kiko-hermit.glb?v=mp-1' : 'assets/models/kiko-mochi.glb?v=mp-1';
     if(!reefCrabModels[url]){
       reefCrabModels[url] = new Promise(function(resolve){
@@ -84,26 +138,78 @@
       });
     }
     reefCrabModels[url].then(function(gltf){
-      if(!gltf || !gltf.scene || !g.parent && g.userData.disposed) return;
+      if(!gltf || !gltf.scene || g.userData.disposed) return;
       var T = window.THREE;
       var clone = T.SkeletonUtils && T.SkeletonUtils.clone ? T.SkeletonUtils.clone(gltf.scene) : gltf.scene.clone(true);
-      body.updateMatrixWorld(true);
-      var targetBox = new T.Box3().setFromObject(body), targetSize = new T.Vector3();
-      targetBox.getSize(targetSize);
+      clone.traverse(function(o){
+        if(!o.isMesh) return;
+        o.castShadow = true; o.receiveShadow = true;
+        if(o.isSkinnedMesh) o.frustumCulled = false;
+        function wrapMat(src){
+          var mat = src.clone();
+          mat.onBeforeCompile = function(shader){
+            shader.fragmentShader = shader.fragmentShader.replace('#include <encodings_fragment>', 'gl_FragColor = LinearTosRGB( gl_FragColor );');
+          };
+          mat.customProgramCacheKey = function(){ return 'crab-srgb-v1'; };
+          mat.skinning = !!o.isSkinnedMesh;
+          mat.needsUpdate = true;
+          return mat;
+        }
+        o.material = Array.isArray(o.material) ? o.material.map(wrapMat) : wrapMat(o.material);
+      });
       var mBox = new T.Box3().setFromObject(clone), mSize = new T.Vector3();
       mBox.getSize(mSize);
-      if(mSize.x > 0 && targetSize.x > 0){
-        var sc = (targetSize.x / Math.max(0.01, g.scale.x)) / mSize.x;
+      var procWidth = g.userData.procWidth;
+      if(!(procWidth > 0)){
+        body.updateMatrixWorld(true);
+        var targetBox = new T.Box3().setFromObject(body), targetSize = new T.Vector3();
+        targetBox.getSize(targetSize);
+        procWidth = targetSize.x / Math.max(0.01, g.scale.x);
+      }
+      if(mSize.x > 0 && procWidth > 0){
+        var sc = procWidth / mSize.x;
         clone.scale.setScalar(sc);
         clone.updateMatrixWorld(true);
         var b2 = new T.Box3().setFromObject(clone), ctr = new T.Vector3();
         b2.getCenter(ctr);
         clone.position.set(-ctr.x, -b2.min.y, -ctr.z);
       }
-      while(body.children.length) body.remove(body.children[0]);
+      var oldChildren = body.children.slice(), oldGeo = [], oldMat = [];
+      oldChildren.forEach(function(ch){
+        body.remove(ch);
+        ch.traverse(function(o){
+          if(o.geometry && oldGeo.indexOf(o.geometry) < 0) oldGeo.push(o.geometry);
+          if(o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach(function(m){ if(m && oldMat.indexOf(m) < 0) oldMat.push(m); });
+        });
+      });
+      oldGeo.forEach(function(geo){ geo.dispose(); });
+      oldMat.forEach(function(mat){ mat.dispose(); });
       parts.claws.length = 0; parts.legs.length = 0; parts.eyes.length = 0;
       body.add(clone);
       g.userData.has3D = true;
+      g.userData.modelRoot = clone;
+      g.userData.lastAnimT = 0;
+      if(gltf.animations && gltf.animations.length){
+        var mixer = new T.AnimationMixer(clone), clips = {};
+        ['Idle', 'Listen', 'React'].forEach(function(clipName){
+          var clip = gltf.animations.find(function(a){ return a.name === clipName; });
+          if(clip) clips[clipName] = mixer.clipAction(clip);
+        });
+        if(clips.Idle || clips.Listen || clips.React){
+          g.userData.mixer = mixer;
+          g.userData.clips = clips;
+          mixer.addEventListener('finished', function(ev){
+            if(g.userData.disposed) return;
+            if(g.userData.anim && g.userData.anim.name === 'React' && ev.action === clips.React){
+              var cb = g.userData.onDone; g.userData.onDone = null;
+              g.userData.anim = { name: 'Idle', t0: performance.now() / 1000 };
+              reefCrabSyncClip(g, 'Idle');
+              if(cb) cb();
+            }
+          });
+          reefCrabSyncClip(g, g.userData.anim ? g.userData.anim.name : 'Idle', true);
+        }
+      }
     });
   }
   // Joins a group's meshes into one per material, in the group's own space; parts listed in skip stay apart.
@@ -134,17 +240,37 @@
 
   // Moves: Idle and Walk loop; Dance, Yes and Happy play once (seconds) and then return to Idle.
   var REEF_CRAB_ONCE = { Dance: 1.6, Yes: .9, Happy: .7 };
-  function reefCrabPlay(crab, name, done){ crab.userData.anim = { name: name, t0: performance.now() / 1000 }; crab.userData.onDone = done || null; }
+  function reefCrabPlay(crab, name, done){
+    crab.userData.anim = { name: name, t0: performance.now() / 1000 };
+    crab.userData.onDone = done || null;
+    if(crab.userData.has3D && crab.userData.mixer) reefCrabSyncClip(crab, name);
+  }
   function reefCrabAnimate(crab){
-    var u = crab.userData, P = u.parts, a = u.anim, t = performance.now() / 1000, k = t - a.t0, len = REEF_CRAB_ONCE[a.name], p = len ? Math.min(1, k / len) : 0;
-    if(len && p >= 1){ a = u.anim = { name: 'Idle', t0: t }; p = 0; if(u.onDone){ var f = u.onDone; u.onDone = null; f(); } }
+    var u = crab.userData;
+    if(u.disposed) return;
+    var P = u.parts, a = u.anim, nowMs = performance.now(), t = nowMs / 1000, k = t - a.t0, len = REEF_CRAB_ONCE[a.name], p = len ? Math.min(1, k / len) : 0;
+    if(len && p >= 1){
+      a = u.anim = { name: 'Idle', t0: t }; p = 0;
+      if(u.has3D && u.mixer) reefCrabSyncClip(crab, 'Idle');
+      if(u.onDone){ var f = u.onDone; u.onDone = null; f(); }
+    }
     var by = 0, bry = 0, brz = 0, up = 0, wave = .06, waveSp = 1.6, swing = .05, legSp = 2;
     if(a.name === 'Walk'){ swing = .55; legSp = 18; by = Math.abs(Math.sin(t * 18)) * .035; brz = Math.sin(t * 9) * .06; wave = .1; waveSp = 9; }
     else if(a.name === 'Dance'){ by = Math.abs(Math.sin(p * Math.PI * 4)) * .28; bry = p * Math.PI * 2; up = .9; wave = .35; waveSp = 14; swing = .4; legSp = 14; }
     else if(a.name === 'Yes'){ by = Math.sin(p * Math.PI) * .22; up = .7 * Math.sin(p * Math.PI); }
     else if(a.name === 'Happy'){ brz = Math.sin(p * Math.PI * 6) * .18 * (1 - p); up = .5 * Math.sin(p * Math.PI); wave = .25; waveSp = 14; }
-    else by = Math.sin(t * 2) * .02;
+    else if(!u.has3D) by = Math.sin(t * 2) * .02;
     P.body.position.y = by; P.body.rotation.set(0, bry, brz);
+    if(u.has3D && u.mixer){
+      if(typeof reefCalm === 'function' && reefCalm()){ u.lastAnimT = 0; }
+      else {
+        var elapsed = u.lastAnimT ? (nowMs - u.lastAnimT) / 1000 : 0;
+        var dt = elapsed > 0 && elapsed < .25 ? Math.min(.05, elapsed) : 0;
+        u.lastAnimT = nowMs;
+        u.mixer.update(dt);
+      }
+      return;
+    }
     P.claws.forEach(function(c, i){ var b = c.userData.base; c.rotation.set(b.x + Math.sin(t * waveSp + i * 1.7) * wave, b.y, b.z + c.userData.sd * up); });
     P.legs.forEach(function(l, i){ var b = l.userData.base; l.rotation.set(b.x + Math.sin(t * legSp + i * 1.3) * swing, b.y, b.z); });
     var blink = (t + u.seed) % 4.1 < .12 ? .1 : 1;
@@ -157,6 +283,7 @@
     var old = host.crab, size = old.scale.x;
     reefCrabNow = reefCrabOther();
     var reuse = host.spareCrab && host.spareCrab.userData.kind === reefCrabNow, neu = reuse ? host.spareCrab : reefCrabBuild(reefCrabNow, host.kit.grad, size);
+    if(!reuse && host.spareCrab) reefCrabDispose(host.spareCrab);
     if(!reuse && host.crabFit){ neu.position.set(0, 0, 0); neu.rotation.set(0, 0, 0); reefCrabFit(neu, host.crabFit); }
     host.spareCrab = old; host.crab = neu;
     neu.rotation.y = 0; reefCrabPlay(neu, 'Idle');
