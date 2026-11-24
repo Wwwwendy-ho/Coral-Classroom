@@ -8,7 +8,7 @@
     return window.claude.use('sample').then(function(ns){ Ask.ns = ns || null; return Ask.ns; }).catch(function(){ Ask.ns = null; return null; });
   }
   function askName(){ try { return coveSwimName() || 'Shelly'; } catch(e){ return 'Shelly'; } }
-  function askPlain(s){ var d = document.createElement('div'); d.innerHTML = String(s == null ? '' : s); return (d.textContent || '').replace(/\s+/g, ' ').trim(); }
+  function askPlain(s){ return safePlainText(s); }
   // The card on screen right now, if there is one.
   function askCard(){
     var c = null;
