@@ -5,10 +5,13 @@
      (bouncy) in minigames. All but the day and night songs are original loops made for Coral Cove
      (tools/compose_music.py and tools/compose_regions.py). Plays in the lobby and in every profile's game,
      dips under the celebration clip, and follows a 🎵 switch saved on this device. ---------- */
-  var RM = { el: {}, cur: null, duck: 1, started: false };
+  var RM = { el: {}, cur: null, duck: 1, started: false, speechCount: 0, speechDuck: false, speechSafetyT: null };
   var RM_KEY = 'cc-music';
+  var RM_REGION_SONGS = ['town', 'lagoon', 'caves', 'patterns', 'beach', 'light', 'captain'].map(function(id){ return 'region-' + id + '-song'; });
+  var RM_SONGS = ['day-song', 'night-song', 'lobby-song', 'deck-song', 'timer-song', 'game-song'].concat(RM_REGION_SONGS);
   function reefMusicOn(){ try { return localStorage.getItem(RM_KEY) !== 'off'; } catch(e){ return true; } }
-  function reefMusicSet(on){ try { localStorage.setItem(RM_KEY, on ? 'on' : 'off'); } catch(e){} reefMusicUpdate(); reefMusicButtons(); }
+  function reefSoundOn(){ try { return typeof Sound === 'undefined' || !Sound || typeof Sound.isEnabled !== 'function' || Sound.isEnabled(); } catch(e){ return true; } }
+  function reefMusicSet(on){ try { localStorage.setItem(RM_KEY, on ? 'on' : 'off'); } catch(e){} if(on && !RM.started) reefMusicStart(); else reefMusicUpdate(); reefMusicButtons(); }
   function reefMusicCtx(){ try { return Sound.getCtx(); } catch(e){ return null; } }
   // Each song streams from an audio element (decoded bit by bit as it plays) instead of being unpacked whole
   // into memory first (about 60 MB a song), which an iPad can quietly refuse while the 3D board is running.
@@ -21,6 +24,7 @@
   RM.log = [];
   function reefMusicNote(name, msg){ RM.log.push(name.replace('-song', '') + ': ' + msg); if(RM.log.length > 12) RM.log.shift(); }
   function reefMusicInline(name){
+    if(RM_SONGS.indexOf(name) < 0) return null;
     var t = document.getElementById('reef-song-' + name); if(!t) return null;
     var bin = atob(t.textContent.trim()), u = new Uint8Array(bin.length); for(var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
     return { bytes: u.buffer, type: t.getAttribute('data-type') || 'audio/mpeg' };
@@ -52,13 +56,14 @@
     if(!ctx || typeof ctx.createBiquadFilter !== 'function') return null;
     try {
       var lp = ctx.createBiquadFilter();
-      lp.type = 'lowpass'; lp.frequency.value = 18000; lp.Q.value = 0.5;
+      lp.type = 'lowpass'; lp.frequency.value = RM.speechDuck ? 2400 : 18000; lp.Q.value = 0.5;
       lp.connect(ctx.destination);
-      RM.bus = lp; RM.busCtx = ctx;
+      RM.bus = lp; RM.busCtx = ctx; RM._busFocus = !!RM.speechDuck;
       return lp;
     } catch(e){ return null; }
   }
   function reefMusicEl(name){
+    if(RM_SONGS.indexOf(name) < 0) return null;
     if(RM.el[name]) return RM.el[name];
     var ctx = reefMusicCtx(); if(!ctx) return null;
     var a = new Audio(); a.loop = true; a.preload = 'auto'; a.setAttribute('playsinline', '');
@@ -117,13 +122,14 @@
   }
   // What should be playing right now, and how loud (1 = full, small = tucked under a deck).
   function reefMusicTarget(){
-    if(!reefMusicOn() || document.hidden) return null;
-    try { if(!Sound.isEnabled()) return null; } catch(e){}
+    if(!reefMusicOn() || !reefSoundOn() || document.hidden) return null;
     var name = reefNight() ? 'night-song' : 'day-song';
     if(!S.profile) return { name: 'lobby-song', vol: 1 };       // the profile screen
     if(!reefGame()) return null;
-    if(regionEncounterActive(R3.view) && R3.view.encounter.phase === 'lesson')
-      return { name:'region-' + R3.view.encounter.region + '-song', vol:RM_DECK };
+    if(regionEncounterActive(R3.view) && R3.view.encounter.phase === 'lesson'){
+      var encSong = 'region-' + R3.view.encounter.region + '-song';
+      return { name: RM_SONGS.indexOf(encSong) >= 0 ? encSong : 'deck-song', vol: RM_DECK };
+    }
     if(S.view === 'study' && S.timedChoiceTimerHandle && S.timedChoiceState && !S.timedChoiceState.reefCalm) return { name: 'timer-song', vol: RM_DECK };
     if(document.querySelector('.r3-mini')) return { name: 'game-song', vol: RM_GAME };    // under the minigame's sound effects
     // The region state persists while lessons are open, so require the actual
@@ -131,17 +137,25 @@
     var board = typeof window.__regionBoardView === 'function' ? window.__regionBoardView() : null;
     if(board && board.mode === 'board' && board.region === S.view &&
        document.querySelector('.rb-root[data-region-board="' + board.region + '"]')){
-      return { name: 'region-' + board.region + '-song', vol: 1 };
+      var brdSong = 'region-' + board.region + '-song';
+      if(RM_SONGS.indexOf(brdSong) >= 0) return { name: brdSong, vol: 1 };
     }
     if(reefInDeck() || S.view === 'summary') return { name: 'deck-song', vol: RM_DECK };   // kept low so speech stays clear
     return { name: name, vol: 1 };
   }
-  var RM_REGION_SONGS = ['town', 'lagoon', 'caves', 'patterns', 'beach', 'light', 'captain'].map(function(id){ return 'region-' + id + '-song'; });
-  var RM_SONGS = ['day-song', 'night-song', 'lobby-song', 'deck-song', 'timer-song', 'game-song'].concat(RM_REGION_SONGS);
   window.__reefMusicState = function(){
     var target = reefMusicTarget(), tracks = {};
     Object.keys(RM.el).forEach(function(name){ var m = RM.el[name]; tracks[name] = { level:m.level, stage:m.stage, paused:reefMusicPaused(m) }; });
-    return { target:target && { name:target.name, vol:target.vol }, current:RM.cur, started:RM.started, duck:RM.duck, tracks:tracks };
+    return {
+      target:target && { name:target.name, vol:target.vol },
+      current:RM.cur,
+      started:RM.started,
+      duck:RM.duck,
+      speechDuck:!!RM.speechDuck,
+      speechCount:RM.speechCount || 0,
+      busFreq:RM.bus ? RM.bus.frequency.value : null,
+      tracks:tracks
+    };
   };
   // Lines the timer song up with a countdown that started at startMs, so its firm kalimba notes land on the seconds.
   function reefMusicTimerSync(startMs){
@@ -155,36 +169,94 @@
   var RM_DECK = .5, RM_GAME = .7;   // the deck song is mastered at about -21 LUFS, the game song -18, the reef songs -15 to -17
   var RM_BASE = .5;   // the songs' overall level under Coral Cove's own sounds and voice
   function reefMusicUpdate(){
+    var muted = !reefMusicOn() || !reefSoundOn();
+    if(muted){
+      Object.keys(RM.el).forEach(function(k){
+        var m = RM.el[k];
+        clearTimeout(m.stopT);
+        m.level = 0;
+        if(m.g){
+          try {
+            var nowM = RM.busCtx ? RM.busCtx.currentTime : 0;
+            m.g.gain.cancelScheduledValues(nowM);
+            m.g.gain.setValueAtTime(0, nowM);
+          } catch(e){}
+        } else {
+          try { m.a.volume = 0; } catch(e){}
+        }
+        reefMusicPause(m);
+      });
+      RM.cur = null;
+      if(RM.bus && RM.busCtx){
+        try {
+          var bNow = RM.busCtx.currentTime;
+          RM.bus.frequency.cancelScheduledValues(bNow);
+          RM.bus.frequency.setValueAtTime(2400, bNow);
+          RM._busFocus = true;
+        } catch(e){}
+      }
+      return;
+    }
     if(!RM.started) return;
     var tg = reefMusicTarget();
+    var speechMul = RM.speechDuck ? 0.55 : 1;
     RM_SONGS.forEach(function(name){
       var on = !!tg && tg.name === name;
       if(!on && !RM.el[name]) return;
       var m = reefMusicEl(name); if(!m) return;
-      var fade = !RM.cur || name === 'timer-song' || RM.cur === 'timer-song' ? .25 : on && RM.cur === name ? .8 : 1.2;   // the very first song comes straight in   // switching songs crossfades; the timer comes in quickly
-      reefMusicLevel(m, on ? tg.vol * RM_BASE * RM.duck : 0, fade);
+      var fade = !RM.cur || name === 'timer-song' || RM.cur === 'timer-song' ? .25 : on && RM.cur === name ? (RM.speechDuck ? .25 : .8) : 1.2;   // the very first song comes straight in   // switching songs crossfades; the timer comes in quickly
+      reefMusicLevel(m, on ? tg.vol * RM_BASE * RM.duck * speechMul : 0, fade);
     });
     RM.cur = tg ? tg.name : null;
     if(RM.bus && RM.busCtx){
       try {
-        var now = RM.busCtx.currentTime;
-        var focus = !tg || tg.vol < 0.9 || RM.duck < 0.9;
-        RM.bus.frequency.cancelScheduledValues(now);
-        RM.bus.frequency.setValueAtTime(RM.bus.frequency.value, now);
-        RM.bus.frequency.linearRampToValueAtTime(focus ? 2400 : 18000, now + 0.45);
+        var focus = !tg || tg.vol < 0.9 || RM.duck < 0.9 || !!RM.speechDuck;
+        if(RM._busFocus !== focus){
+          RM._busFocus = focus;
+          var now = RM.busCtx.currentTime;
+          RM.bus.frequency.cancelScheduledValues(now);
+          RM.bus.frequency.setValueAtTime(RM.bus.frequency.value, now);
+          RM.bus.frequency.linearRampToValueAtTime(focus ? 2400 : 18000, now + (focus ? 0.3 : 0.45));
+        }
       } catch(e){}
     }
   }
   // Under a celebration the music dips, then comes back.
   function reefMusicDuck(seconds){
+    if(!reefMusicOn() || !reefSoundOn()) return;
     RM.duck = .35; reefMusicUpdate();
     clearTimeout(reefMusicDuck.t); reefMusicDuck.t = setTimeout(function(){ RM.duck = 1; reefMusicUpdate(); }, seconds * 1000);
+  }
+  // Ref-counted speech ducking: warms the low-pass bus (2400 Hz) and gently ducks music while
+  // spoken words/lessons play, opening smoothly back to 18000 Hz when all active speech finishes.
+  function reefMusicSpeechDuck(active, forceReset){
+    if(forceReset){
+      clearTimeout(RM.speechSafetyT); RM.speechSafetyT = null;
+      RM.speechCount = 0;
+      RM.speechDuck = false;
+      reefMusicUpdate();
+      return;
+    }
+    if(active){
+      RM.speechCount = Math.max(0, RM.speechCount || 0) + 1;
+      RM.speechDuck = true;
+      clearTimeout(RM.speechSafetyT);
+      RM.speechSafetyT = setTimeout(function(){ reefMusicSpeechDuck(false, true); }, 16000);
+    } else {
+      RM.speechCount = Math.max(0, (RM.speechCount || 0) - 1);
+      if(RM.speechCount === 0){
+        clearTimeout(RM.speechSafetyT); RM.speechSafetyT = null;
+        RM.speechDuck = false;
+      }
+    }
+    reefMusicUpdate();
   }
   // Browsers only allow sound after a tap, so the music starts on the first one. iPads only count the
   // end of a touch (not its start) as permission, so every kind of tap tries until sound is really running.
   // 'playback' tells iPads to keep playing when the side switch or Control Center is set to silent,
   // the same way Shelly's voice clips already do.
   function reefMusicStart(){
+    if(!reefMusicOn() || !reefSoundOn()) return;
     try { if(navigator.audioSession && navigator.audioSession.type !== 'playback') navigator.audioSession.type = 'playback'; } catch(e){}
     var ctx = reefMusicCtx(); if(!ctx) return;
     RM.started = true;
@@ -193,18 +265,22 @@
   }
   ['pointerdown', 'touchend', 'click', 'keydown'].forEach(function(t){ document.addEventListener(t, reefMusicStart, true); });
   // Do not warm every song during startup: the active screen streams its own track.
-  if(window.CORAL_COVE_SEED && window.fetch){
+  if(window.CORAL_COVE_SEED && window.fetch && reefMusicOn() && reefSoundOn()){
     fetch('lobby-song.mp3').catch(function(){});
   }
   // Leaving the app or locking the device stops the music straight away (no fade: timers stop in the background);
   // coming back picks it up again.
   function reefMusicAway(){
+    clearTimeout(RM.speechSafetyT); RM.speechSafetyT = null;
+    RM.speechCount = 0; RM.speechDuck = false;
     Object.keys(RM.el).forEach(function(k){ var m = RM.el[k]; clearTimeout(m.stopT); reefMusicPause(m); m.level = 0; if(m.g) try { m.g.gain.cancelScheduledValues(0); m.g.gain.value = 0; } catch(e){} });
-    if(reefWinNode){ try { reefWinNode.stop(); } catch(e){} reefWinNode = null; }
+    if(typeof reefWinNode !== 'undefined' && reefWinNode){ try { reefWinNode.stop(); } catch(e){} reefWinNode = null; }
     try { if(window.speechSynthesis) speechSynthesis.cancel(); } catch(e){}
-    var ctx = reefMusicCtx(); if(ctx && ctx.state === 'running' && ctx.suspend) ctx.suspend().catch(function(){});
+    var ctx = RM.busCtx || (RM.started ? reefMusicCtx() : null);
+    if(ctx && ctx.state === 'running' && ctx.suspend) ctx.suspend().catch(function(){});
   }
   function reefMusicBack(){
+    if(!RM.started || !reefMusicOn() || !reefSoundOn()) return;
     var ctx = reefMusicCtx(); if(ctx && ctx.state !== 'running' && ctx.resume) ctx.resume().then(reefMusicUpdate, function(){});
     Object.keys(RM.el).forEach(function(k){ RM.el[k].level = -1; });
     reefMusicUpdate();
@@ -225,7 +301,9 @@
     var b = e.target.closest && e.target.closest('[data-music-toggle]'); if(!b) return;
     e.preventDefault();
     if(RM.held){ RM.held = false; return; }   // a long hold shows the music check instead of switching
-    reefMusicStart(); reefMusicSet(!reefMusicOn());
+    var next = !reefMusicOn();
+    reefMusicSet(next);
+    if(next) reefMusicStart();
   });
   // Hold 🎵 for a second: a small note says what the music did, for a grown-up to pass on.
   document.addEventListener('pointerdown', function(e){
@@ -236,7 +314,7 @@
   ['pointerup', 'pointercancel', 'pointerleave'].forEach(function(t){ document.addEventListener(t, function(){ clearTimeout(RM.holdT); }); });
   function reefMusicShowLog(){
     var old = document.querySelector('.rm-log'); if(old) old.remove();
-    var ctx = reefMusicCtx(), d = document.createElement('div');
+    var ctx = RM.started ? reefMusicCtx() : RM.busCtx, d = document.createElement('div');
     d.className = 'rm-log'; d.setAttribute('role', 'status');
     d.textContent = 'Music check — sound: ' + (ctx ? ctx.state : 'none') + ' · music ' + (reefMusicOn() ? 'on' : 'off') + ' · ' + (RM.log.length ? RM.log.join(' · ') : 'not started yet (tap anywhere first)');
     d.addEventListener('click', function(){ d.remove(); });
@@ -249,7 +327,7 @@
      Sunrise is bright and climbs (C major, added 9th); moonrise is softer and lower (A minor 9th) with a slow
      low glide like a whale call and two high twinkles. Follows the sound setting; the background music dips under it. */
   function reefThemeSting(dark){
-    try { if(!Sound.isEnabled()) return; } catch(e){ return; }
+    if(!reefSoundOn() || !reefMusicOn()) return;
     var c = reefMusicCtx(); if(!c) return;
     if(c.state === 'suspended' && c.resume) c.resume();
     try { reefMusicDuck(4.2); } catch(e){}
