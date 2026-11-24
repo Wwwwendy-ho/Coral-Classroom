@@ -50,56 +50,113 @@
     var e=view.encounter, bounds=actor.userData.regionBounds || regionPeopleCacheBounds(actor);
     e.actorBounds=bounds;
     e.hiddenObjects=[];
+    e.sightlineHidden=[];
     var people=view.regionPeople;
-    var quiet=[view.guide,view.crab,view.ring,view.nextStar,people.actor,people.marker]
-      .concat(actor!==people.actor && people.stall ? [people.stall] : [],
-        people.towns.map(function(t){ return t.object; }),view.spinners || [],
-        view.spaces.map(function(s){ return s.qb; }));
+    var quiet=[view.guide,view.crab,view.ring,view.nextStar,people.actor,people.marker,people.stall]
+      .concat(people.towns.map(function(t){ return t.object; }),view.spinners || [],
+        view.spaces.map(function(s){ return s.qb; }),
+        view.party && view.party.gate ? [view.party.gate] : []);
     quiet.forEach(function(o){ if(o && o!==actor){ e.hiddenObjects.push({object:o,visible:o.visible}); o.visible=false; } });
-    // Zero-cost sightline guard: hide static scenery props sitting directly between camera and actor.
-    if(view.cam && view.scene && window.THREE){
-      var T=window.THREE, halfA=Math.tan(view.cam.fov*Math.PI/360), asp=Math.max(.25,view.cam.aspect);
-      var wEst=bounds.width*Math.cos(.1)+bounds.depth*Math.sin(.1);
-      var dist=Math.max(.75,wEst/(2*halfA*asp*.72),bounds.height/(2*halfA*.76))+bounds.depth*.55;
-      var cx=actor.position.x+bounds.centerX, cy=actor.position.y+bounds.centerY, cz=actor.position.z+bounds.centerZ;
-      var padX=Math.max(.95,bounds.width*.65), padY=Math.max(.85,bounds.height*.65), camZ=cz+dist;
-      var box=new T.Box3(), bSz=new T.Vector3();
-      var isActorRel=function(node){
-        for(var q=actor;q;q=q.parent) if(q===node) return true;
-        for(var p=node;p;p=p.parent) if(p===actor) return true;
-        return false;
-      };
-      var scan=function(node){
-        if(!node || !node.visible || node===people.root || isActorRel(node)) return;
-        if(node.isLight || node.isPoints) return;
-        if(node.isMesh || (node.children && node.children.length && !node.name.indexOf('region-scenery'))){
-          if(node.children && node.children.length && node.name && node.name.indexOf('region-scenery')===0){
-            node.children.forEach(scan); return;
-          }
-          node.updateMatrixWorld(true); box.setFromObject(node);
-          if(!box.isEmpty()){
-            box.getSize(bSz);
-            if(bSz.x<12 && bSz.z<12 && box.max.z>cz+bounds.depth*.25 && box.min.z<camZ+.5 &&
-               box.max.x>cx-padX && box.min.x<cx+padX && box.max.y>cy-padY && box.min.y<cy+padY){
-              e.hiddenObjects.push({object:node,visible:true});
-              node.visible=false;
-            }
-          }
-          return;
-        }
-        if(node.children) node.children.forEach(scan);
-      };
-      view.scene.children.forEach(scan);
-    }
     // The merged world model faces positive Z; turn it a touch toward the learner.
     actor.rotation.y = saved.rotation.y + .1;
     if(typeof regionResidentEncounter==='function') regionResidentEncounter(view,actor);
+    regionEncounterSightline(view);
     reef3dQEncounter(view,true);
     if(view.post) view.post.on = false;
     view.wrap.classList.add('rpg-stage-scene', 'rpg-stage-intro');
     view.wrap.inert = false;
     view.w = 0;
     return true;
+  }
+  function regionEncounterSightline(view){
+    var e = view && view.encounter;
+    if(!e || !view.cam || !view.scene || !window.THREE) return;
+    if(e.sightlineHidden){
+      e.sightlineHidden.forEach(function(savedObject){ savedObject.object.visible = savedObject.visible; });
+    }
+    e.sightlineHidden = [];
+    var actor = e.actor, people = view.regionPeople;
+    if(!actor) return;
+    var bounds = actor.userData.regionBounds || e.actorBounds || regionPeopleCacheBounds(actor);
+    e.actorBounds = bounds;
+    e.sightlineBounds = bounds;
+    e.sightlineX = actor.position.x;
+    e.sightlineZ = actor.position.z;
+    var T = window.THREE, halfA = Math.tan(view.cam.fov * Math.PI / 360), asp = Math.max(.25, view.cam.aspect);
+    var wEst = bounds.width * Math.cos(.1) + bounds.depth * Math.sin(.1);
+    var dist = Math.max(.75, wEst / (2 * halfA * asp * .72), bounds.height / (2 * halfA * .76)) + bounds.depth * .55;
+    var cx = actor.position.x + bounds.centerX, cy = actor.position.y + bounds.centerY, cz = actor.position.z + bounds.centerZ;
+    var camY = cy + bounds.height * .06, camZ = cz + dist;
+    var padX = Math.max(.95, bounds.width * .65), padY = Math.max(.85, bounds.height * .65);
+    var minZ = cz - Math.min(.25, bounds.depth * .15);
+    var camVec = new T.Vector3(cx, camY, camZ), rayDir = new T.Vector3(), rayTarget = new T.Vector3();
+    var raycaster = new T.Raycaster(), box = new T.Box3(), bSz = new T.Vector3();
+    var rayTargets = [];
+    for(var iy = -1; iy <= 1; iy++){
+      for(var ix = -1; ix <= 1; ix++){
+        rayTargets.push([cx + ix * bounds.width * .45, cy + iy * bounds.height * .4, cz + bounds.depth * .2]);
+      }
+    }
+    var isActorOrChild = function(node){
+      for(var p = node; p; p = p.parent) if(p === actor) return true;
+      return false;
+    };
+    var isActorAncestor = function(node){
+      for(var q = actor.parent; q; q = q.parent) if(q === node) return true;
+      return false;
+    };
+    var isNodeVisible = function(obj){
+      for(var q = obj; q; q = q.parent) if(!q.visible) return false;
+      return true;
+    };
+    var blocksSightline = function(node){
+      if(box.containsPoint(camVec)) return true;
+      for(var ri = 0; ri < rayTargets.length; ri++){
+        var rt = rayTargets[ri];
+        rayTarget.set(rt[0], rt[1], rt[2]);
+        rayDir.copy(rayTarget).sub(camVec);
+        var maxDist = rayDir.length();
+        if(maxDist < .05) continue;
+        rayDir.multiplyScalar(1 / maxDist);
+        raycaster.set(camVec, rayDir);
+        raycaster.near = .01;
+        raycaster.far = maxDist;
+        var hits = raycaster.intersectObject(node, true);
+        for(var hi = 0; hi < hits.length; hi++){
+          if(hits[hi].distance > .01 && hits[hi].distance < maxDist && isNodeVisible(hits[hi].object)) return true;
+        }
+      }
+      return false;
+    };
+    var inRegion = false;
+    var scan = function(node){
+      if(!node || !node.visible || isActorOrChild(node) || (node.userData && node.userData.reefGround)) return;
+      if(node.isLight || node.isPoints || node.isSprite) return;
+      var isRegionGroup = !!(node.name && node.name.indexOf('region-') === 0);
+      var isPeopleRoot = !!(people && node === people.root);
+      var isPropUnit = !node.isMesh && node.userData && node.userData.space != null;
+      if(isActorAncestor(node) || isPeopleRoot || isRegionGroup || (!node.isMesh && !isPropUnit && node.children && node.children.length)){
+        var wasInRegion = inRegion;
+        if(isRegionGroup) inRegion = true;
+        node.children.forEach(scan);
+        inRegion = wasInRegion;
+        return;
+      }
+      if(!node.isMesh && !isPropUnit) return;
+      node.updateMatrixWorld(true);
+      box.setFromObject(node);
+      if(box.isEmpty()) return;
+      if(box.max.z <= minZ || box.min.z >= camZ + .35 ||
+         box.max.x <= cx - padX || box.min.x >= cx + padX ||
+         box.max.y <= cy - padY || box.min.y >= cy + padY) return;
+      box.getSize(bSz);
+      var smallProp = !inRegion && bSz.x < 5 && bSz.z < 5 && box.max.z > cz + bounds.depth * .1;
+      if(smallProp || blocksSightline(node)){
+        e.sightlineHidden.push({ object: node, visible: true });
+        node.visible = false;
+      }
+    };
+    view.scene.children.forEach(scan);
   }
   function regionEncounterActive(view, activity){
     var e = view && view.encounter, board = S.regionBoard, pid = S.profile && S.profile.id;
@@ -189,6 +246,9 @@
     var e = view.encounter, actor = e.actor, base = e.savedActorTransform;
     if(view.post) view.post.on=false;
     if(!actor || !base) return;
+    if(e.sightlineBounds !== e.actorBounds || e.sightlineX !== actor.position.x || e.sightlineZ !== actor.position.z){
+      regionEncounterSightline(view);
+    }
     var speaking = false;
     if(e.region === 'town' && e.phase === 'lesson' && S.town){
       var i = S.town.speaking;
@@ -200,10 +260,13 @@
       var rp = (now - e.react.t0) / e.react.dur;
       if(rp >= 1) e.react = null;
       else if(e.react.mood === 'happy'){
-        py = Math.sin(rp * Math.PI) * .16;
-        sc = 1 + Math.sin(rp * Math.PI * 2) * .035;
+        py = Math.sin(rp * Math.PI) * .18;
+        sc = 1 + Math.sin(rp * Math.PI * 2) * .042;
+        rx = -Math.sin(rp * Math.PI) * .055;
       } else {
-        rz = Math.sin(rp * Math.PI) * .08;
+        rz = Math.sin(rp * Math.PI * 2) * .07;
+        rx = Math.sin(rp * Math.PI) * .055;
+        py = Math.sin(rp * Math.PI) * .04;
       }
     }
     actor.rotation.x = base.rotation.x + (!calm && speaking ? Math.sin(t * 6.5) * .025 : 0) + rx;
@@ -213,7 +276,25 @@
   }
   function regionEncounterReact(view, mood){
     if(!regionEncounterActive(view) || reefCalm()) return;
-    view.encounter.react = { mood: mood === 'happy' ? 'happy' : 'encourage', t0: performance.now(), dur: mood === 'happy' ? 550 : 450 };
+    var isHappy = mood === 'happy';
+    view.encounter.react = { mood: isHappy ? 'happy' : 'encourage', t0: performance.now(), dur: isHappy ? 550 : 450 };
+    if(typeof regionResidentPlayReact === 'function'){
+      regionResidentPlayReact(view, view.encounter.actor, mood);
+    } else if(typeof regionResidentReact === 'function'){
+      regionResidentReact(view, view.encounter.actor, mood);
+    } else if(typeof regionResidentStates === 'function'){
+      var states = regionResidentStates(view), actor = view.encounter.actor;
+      var st = states && states.find(function(s){ return s && s.target && s.target.object === actor; });
+      if(st){
+        var player = st.close && st.close.root ? st.close : st;
+        if(player && player.react && player.action && player.mixer){
+          try {
+            player.react.reset().play();
+            player.action.crossFadeTo(player.react, .18, false);
+          } catch(err){}
+        }
+      }
+    }
   }
   function regionEncounterEnd(view){
     var e = view && view.encounter;
@@ -223,6 +304,7 @@
     var actor = e.actor, saved = e.savedActorTransform;
     if(actor && saved){ actor.position.copy(saved.position); actor.rotation.copy(saved.rotation); actor.scale.copy(saved.scale); }
     (e.hiddenObjects || []).forEach(function(savedObject){ savedObject.object.visible=savedObject.visible; });
+    (e.sightlineHidden || []).forEach(function(savedObject){ savedObject.object.visible=savedObject.visible; });
     if(view.post && e.savedPostOn !== null) view.post.on = e.savedPostOn;
     view.camMode = e.savedCamMode;
     view.wrap.inert = e.savedInert;

@@ -62,7 +62,7 @@
     function placed(s,side,dist,dz,fn){ var p=at(s,side,dist,dz); fn(p[0],p[1],p[2]); }
     function pathSide(s,i){ return i%2 ? 1 : -1; }
     function foundations(col){
-      main.forEach(function(s,i){ if(i%2) return; add(cyl(1.75,1.9,.12,12),col,s.x,(s.y||0)-.16,s.z); });
+      main.forEach(function(s,i){ if(i%2) return; add(cyl(1.75,1.9,.12,12),col,s.x,(s.y||0)-.16,s.z).userData.reefGround=true; });
     }
     function lantern(x,y,z,col){
       post(.07,2.2,'#50445d',x,y,z); add(cyl(.42,.24,.52,6),'#744f64',x,y+2.16,z);
@@ -155,7 +155,8 @@
     // instead of the same rectangular floor in seven colours.
     var bounds=sp.bounds || {minX:-30,maxX:30,minZ:-30,maxZ:30};
     if(view.floor) view.floor.visible=false;
-    block(bounds.maxX-bounds.minX+35,.08,bounds.maxZ-bounds.minZ+35,{town:'#419fb8',lagoon:'#45bdb9',caves:'#395d83',patterns:'#5c9bd0',beach:'#64cbd3',light:'#5aaec0',captain:'#438fba'}[id],(bounds.minX+bounds.maxX)/2,id==='captain'?-1.1:-.66,(bounds.minZ+bounds.maxZ)/2,0,false);
+    var water=block(bounds.maxX-bounds.minX+35,.08,bounds.maxZ-bounds.minZ+35,{town:'#419fb8',lagoon:'#45bdb9',caves:'#395d83',patterns:'#5c9bd0',beach:'#64cbd3',light:'#5aaec0',captain:'#438fba'}[id],(bounds.minX+bounds.maxX)/2,id==='captain'?-1.1:-.66,(bounds.minZ+bounds.maxZ)/2,0,false);
+    water.userData.reefGround=true;
     if(view.wrap) view.wrap.classList.add('region-'+id);
     // Large floors keep their colour and construction in the baked geometry.
     // A shared world grid gives paving staggered joints and deck planks a single
@@ -172,7 +173,7 @@
       });
       var g=own(new T.BufferGeometry()); g.setAttribute('position',new T.Float32BufferAttribute(p,3));
       g.setAttribute('color',new T.Float32BufferAttribute(c,3)); g.computeVertexNormals();
-      var o=add(g,'#ffffff',0,0,0,0,0,0,false); o.userData.reefStructure=kind; return o;
+      var o=add(g,'#ffffff',0,0,0,0,0,0,false); o.userData.reefStructure=kind; o.userData.reefGround=true; return o;
     }
     function clipped(poly,axis,limit,greater){
       var out=[];
@@ -241,7 +242,7 @@
         }
       }
       var geo=own(new T.BufferGeometry());geo.setAttribute('position',new T.Float32BufferAttribute(pos,3));geo.setAttribute('color',new T.Float32BufferAttribute(colors,3));geo.setIndex(idx);geo.computeVertexNormals();
-      var floor=add(geo,id==='town'?'#a59b87':top,0,0,0,0,0,0,false);floor.userData.reefStructure='broad-ground';
+      var floor=add(geo,id==='town'?'#a59b87':top,0,0,0,0,0,0,false);floor.userData.reefStructure='broad-ground';floor.userData.reefGround=true;
       if(id==='town')pattern(tops,deckY+.006,false);
       if(id!=='light')painted(wet,deckY+.012,top,'wet-shore');
       if(filled){
@@ -249,7 +250,7 @@
         var fill=own(new T.ShapeGeometry(shape));fill.rotateX(-Math.PI/2);
         var fp=fill.attributes.position,fc=[];for(var v=0;v<fp.count;v++){var value=.97+.045*(fp.getX(v)-cx)/(bounds.maxX-bounds.minX+1);fc.push(value,value,value);}
         fill.setAttribute('color',new T.Float32BufferAttribute(fc,3));
-        var interior=add(fill,top,0,deckY,0,0,0,0,false);interior.userData.reefStructure='broad-ground';
+        var interior=add(fill,top,0,deckY,0,0,0,0,false);interior.userData.reefStructure='broad-ground';interior.userData.reefGround=true;
       }
     }
     function shipGround(){
@@ -272,13 +273,13 @@
       // beyond the westmost tile, leaving the entire circuit and branches clear.
       var stern=[[min+.2,low+3.3],[min+2.5,low+1.3],[min+2.5,high-1.3],[min+.2,high-3.3]];
       painted([stern],.42,'#775438','raised-stern');pattern([stern],.43,true);
-      block(2.3,.55,high-low-6.6,'#775438',min+1.35,.145,cz,0,false);
+      block(2.3,.55,high-low-6.6,'#775438',min+1.35,.145,cz,0,false).userData.reefGround=true;
       view.regionShipBounds={minX:min,maxX:max+3.2,minZ:low,maxZ:high};
     }
     if(id==='town') strip(4,4,'#c5bba5','#777e79',.8);
     else if(id==='lagoon') main.forEach(function(s,i){
-      add(cyl(i%3===0?2.2:1.6,i%3===0?2.4:1.75,.26,11),'#c7d8ae',s.x,-.37,s.z);
-      add(cyl(i%3===0?1.85:1.35,i%3===0?2:1.5,.06,11),'#dfdab7',s.x,-.21,s.z);
+      add(cyl(i%3===0?2.2:1.6,i%3===0?2.4:1.75,.26,11),'#c7d8ae',s.x,-.37,s.z).userData.reefGround=true;
+      add(cyl(i%3===0?1.85:1.35,i%3===0?2:1.5,.06,11),'#dfdab7',s.x,-.21,s.z).userData.reefGround=true;
     });
     else if(id==='caves') strip(4,4,'#657987','#3d5d6d',.8);
     else if(id==='patterns') strip(4,4,'#8bb8ae','#5a9d9c',1.1);

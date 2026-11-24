@@ -12,7 +12,8 @@ var ReefCraftedWorld = (function(){
     mauve: ['#8a77b0', '#aa91cc', '#c3a3df', '#e6c9f5', '#ecd8fa']
   };
   function enabled(region, night){
-    return !region && !night && new URLSearchParams(window.location.search).get('art') !== 'classic';
+    var search = (window.location && window.location.search) || '';
+    return !region && !night && new URLSearchParams(search).get('art') !== 'classic';
   }
   function random(n){
     var x = Math.sin(n * 621.127 + 7.17) * 31214.823;
