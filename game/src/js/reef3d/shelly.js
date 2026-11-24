@@ -31,7 +31,8 @@
   }
 
   function reef3dShellyLoad(){
-    if(!window.REEF_SHELLY_PREVIEW && new URLSearchParams(window.location.search).get('shelly') === 'procedural') return Promise.resolve(null);
+    var search = (window.location && window.location.search) || '';
+    if(!window.REEF_SHELLY_PREVIEW && new URLSearchParams(search).get('shelly') === 'procedural') return Promise.resolve(null);
     if(R3shelly) return R3shelly;
     R3shelly = reef3dLoad().then(function(){
       reefInstallGLTF();
@@ -42,8 +43,8 @@
       var timeout = new Promise(function(resolve){ timer = setTimeout(function(){
         if(controller) controller.abort();
         resolve(null);
-      }, 6000); });
-      var crafted = new URLSearchParams(window.location.search).get('art') !== 'classic';
+      }, 10000); });
+      var crafted = new URLSearchParams(search).get('art') !== 'classic';
       // The crafted preview has its own authored creature. Never substitute the
       // older portable inline asset for it, even when that payload is present.
       var inline = !crafted && document.getElementById('reef-shelly-inline');
@@ -69,9 +70,10 @@
       return Promise.race([request, timeout]).then(function(gltf){
         clearTimeout(timer);
         if(gltf){ gltf.userData = gltf.userData || {}; gltf.userData.reefShellyVariant = crafted ? 'crafted-organic-3' : 'natural-1'; }
+        else R3shelly = null;
         return gltf;
       });
-    }).catch(function(){ return null; });
+    }).catch(function(){ R3shelly = null; return null; });
     return R3shelly;
   }
 

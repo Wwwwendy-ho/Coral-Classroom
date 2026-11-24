@@ -138,7 +138,13 @@
     var bounds={ width:size.x, height:size.y, depth:size.z, centerX:center.x-origin.x,
       centerY:center.y-origin.y, centerZ:center.z-origin.z, top:box.max.y-origin.y,
       radius:Math.hypot(Math.max(Math.abs(box.min.x-origin.x),Math.abs(box.max.x-origin.x)),Math.max(Math.abs(box.min.z-origin.z),Math.abs(box.max.z-origin.z))) };
-    actor.userData.regionBounds=bounds; return bounds;
+    actor.userData.regionBounds=bounds;
+    if(typeof R3!=='undefined' && R3.view && R3.view.encounter && R3.view.encounter.actor===actor &&
+       typeof regionEncounterSightline==='function' && typeof Promise==='function'){
+      var v=R3.view;
+      Promise.resolve().then(function(){ if(R3.view===v && v.encounter && v.encounter.actor===actor) regionEncounterSightline(v); });
+    }
+    return bounds;
   }
   // Choose the near side first, then move outward until the entire footprint
   // clears the surrounding tiles. The ray prefers the open central basin.
@@ -645,7 +651,7 @@
     var placed=[], wrapRect=p.wrapRect;
     function project(button,object){
       if(!button || !object) return;
-      var b=object.userData.regionBounds, v=object.position.clone(); v.y+=b ? b.top+.2 : 2.2; v.project(view.cam);
+      var b=object.userData.regionBounds, v=(p.scratchPos || (p.scratchPos=new window.THREE.Vector3())).copy(object.position); v.y+=b ? b.top+.2 : 2.2; v.project(view.cam);
       var x=(v.x+1)*w/2,y=(1-v.y)*h/2;
       var inFrame=x>0 && x<w;
       if(!button.regionPeopleSize && !button.hidden && button.offsetWidth)

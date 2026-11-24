@@ -210,11 +210,25 @@ body.reef-calm .r3-dice-tip, body.reef-calm .r3-dice-num{ animation:none !import
 .r3-shop .r3-panel-row{ margin-top:10px; }
 .r3-shop .r3-panel-row .r3-btn{ padding:8px 20px; }
 @media (max-width:520px){
-  .r3-shop .r3-panel-card{ padding:12px 12px; }
-  .r3-shop-head h3{ font-size:1.2rem; }
-  .r3-shop-list{ gap:6px; }
-  .r3-shop-list li:not(.r3-shop-feat){ grid-template-columns:auto minmax(0, 1fr); row-gap:5px; column-gap:6px; padding:7px 8px; }
-  .r3-shop-list li:not(.r3-shop-feat) .r3-btn{ grid-column:1 / -1; width:100%; padding:5px 8px; font-size:.86rem; }
+  .r3-shop .r3-panel-card{ padding:10px 10px; }
+  .r3-shop-head h3{ font-size:1.15rem; }
+  .r3-shop-list{ margin-top:6px; gap:5px; }
+  .r3-shop-list li.r3-shop-feat{ padding:5px 8px; }
+  .r3-shop-list li:not(.r3-shop-feat){ grid-template-columns:auto minmax(0, 1fr); row-gap:4px; column-gap:6px; padding:5px 7px; }
+  .r3-shop-t b{ font-size:.88rem; }
+  .r3-shop-t small{ font-size:.72rem; }
+  .r3-shop-list .r3-btn{ padding:5px 9px; font-size:.84rem; }
+  .r3-shop-list li:not(.r3-shop-feat) .r3-btn{ grid-column:1 / -1; width:100%; padding:4px 8px; font-size:.84rem; }
+  .r3-shop .r3-panel-row{ margin-top:8px; }
+  .r3-shop .r3-panel-row .r3-btn{ padding:7px 16px; }
+}
+@media (max-height:560px){
+  .r3-panel{ padding:10px 12px; }
+  .r3-panel-card{ padding:12px 14px; }
+  .r3-panel-e{ font-size:2.2rem; }
+  .r3-panel-card h3{ font-size:1.3rem; margin:2px 0 4px; }
+  .r3-wheel-wrap{ width:min(170px, 42vh); margin:4px auto; }
+  .r3-panel-row{ margin-top:8px; }
 }
 .r3-wheel-wrap{ position:relative; width:min(240px, 62vw); aspect-ratio:1; margin:6px auto 8px; }
 .r3-wheel{ position:absolute; inset:0; border-radius:50%; box-shadow:inset 0 0 0 6px rgba(255,255,255,.6), 0 6px 0 rgba(0,0,0,.15); transition:transform 3.2s cubic-bezier(.15,.85,.2,1); }
@@ -265,9 +279,10 @@ body.reef-calm .r3-panel-card, body.reef-calm .r3-bub, body.reef-calm .r3-shellp
 body.reef-calm .r3-prize-card, body.reef-calm .r3-prize-e, body.reef-calm .r3-prize-rays{ animation:none !important; }
 .rw.has-3d .rw-scene{ display:none; }
 /* treasure map */
-.r3-map{ position:fixed; inset:0; z-index:9000; background:rgba(20,40,45,.55); display:flex; align-items:flex-start; justify-content:center; overflow:auto; padding:24px 16px; }
-.r3-map-card{ width:min(460px, 100%); border-radius:22px; padding:16px 18px 22px; color:#4a3115;
+.r3-map{ position:fixed; inset:0; z-index:9000; background:rgba(20,40,45,.55); display:flex; align-items:center; justify-content:center; overflow:auto; padding:12px; }
+.r3-map-card{ width:min(460px, 100%); max-height:calc(100dvh - 24px); display:flex; flex-direction:column; overflow:hidden; box-sizing:border-box; border-radius:22px; padding:14px 16px 16px; color:#4a3115;
   background:radial-gradient(120% 80% at 30% 20%, #fbf0d2, #ecd6a4 70%, #dcbf85); box-shadow:inset 0 0 40px rgba(140,90,30,.35), 0 20px 40px rgba(0,0,0,.35); animation:r3Pop2 .35s var(--reef-pop) both; }
+.r3-map-cove{ min-height:0; overflow-y:auto; }
 @keyframes r3Pop2{ from{ opacity:0; transform:translateY(16px) scale(.96); } to{ opacity:1; transform:none; } }
 .r3-map-head{ display:flex; align-items:center; justify-content:space-between; }
 .r3-map-head b{ font:800 1.5rem 'Baloo 2',sans-serif; }
@@ -688,24 +703,48 @@ body.r3-full .r3-musicbtn, body.r3-full .r3-themebtn, body.r3-full .r3-gamesbtn{
 @keyframes ccTourRing{ 50%{ box-shadow:0 0 0 200vmax rgba(4,30,36,.55), 0 0 0 4px #ffe08a, 0 0 30px 10px rgba(255,211,107,.7); } }
 .cc-tour.calm, .cc-tour.calm *{ animation:none !important; transition:none !important; }
 /* The sea chart (seamap.js): a second page of the treasure map */
-.r3-map-tabs{ display:flex; gap:6px; margin:6px 0 10px; padding:4px; border-radius:999px; background:rgba(122,79,34,.12); }
-.r3-map-tab{ flex:1; min-height:40px; border:none; border-radius:999px; background:none; color:#7a4f22; font:800 1rem 'Baloo 2',sans-serif; cursor:pointer; transition:background .2s, color .2s, box-shadow .2s; }
+.r3-map-tabs{ display:flex; gap:6px; margin:4px 0 8px; padding:4px; border-radius:999px; background:rgba(122,79,34,.12); flex:none; }
+.r3-map-tab{ flex:1; min-height:36px; border:none; border-radius:999px; background:none; color:#7a4f22; font:800 .96rem 'Baloo 2',sans-serif; cursor:pointer; transition:background .2s, color .2s, box-shadow .2s; }
 .r3-map-tab.on{ background:#fff8e6; color:#4a3115; box-shadow:0 2px 0 #b08d5a; }
 .r3-sea{ display:none; }
-.r3-map.sea-on .r3-sea{ display:block; animation:r3SeaIn .35s ease-out both; }
+.r3-map.sea-on .r3-sea{ display:flex; flex-direction:column; min-height:0; animation:r3SeaIn .35s ease-out both; }
 .r3-map.sea-on .r3-map-cove{ display:none; }
 @keyframes r3SeaIn{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
-.r3-sea-chart{ position:relative; aspect-ratio:300 / 390; border-radius:16px; overflow:hidden;
+.r3-sea-chart{ position:relative; width:min(100%, calc((100dvh - 340px) * 300 / 390)); max-height:350px; margin:0 auto; aspect-ratio:300 / 390; border-radius:16px; overflow:hidden; flex:none;
   background:radial-gradient(90% 70% at 50% 50%, rgba(127,189,184,.28), rgba(127,189,184,.1) 70%, transparent), repeating-linear-gradient(0deg, rgba(122,79,34,.05) 0 1px, transparent 1px 26px), repeating-linear-gradient(90deg, rgba(122,79,34,.05) 0 1px, transparent 1px 26px); box-shadow:inset 0 0 0 2px rgba(122,79,34,.25); }
 .r3-sea-chart svg{ position:absolute; inset:0; width:100%; height:100%; }
-.r3-sea-isle{ position:absolute; transform:translate(-50%, -50%); width:54px; height:54px; border:2px solid transparent; border-radius:50%; background:none; padding:0; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.r3-sea-isle{ position:absolute; transform:translate(-50%, -50%); width:50px; height:50px; border:2px solid transparent; border-radius:50%; background:none; padding:0; cursor:pointer; -webkit-tap-highlight-color:transparent; }
 .r3-sea-isle.picked{ border-color:#e8a33d; background:rgba(255,248,230,.15); }
-.r3-sea-me{ position:absolute; transform:translate(-50%, -50%); width:30px; animation:r3SeaBob 2.4s ease-in-out infinite; pointer-events:none; }
+.r3-sea-me{ position:absolute; transform:translate(-50%, -50%); width:28px; animation:r3SeaBob 2.4s ease-in-out infinite; pointer-events:none; }
 @keyframes r3SeaBob{ 50%{ transform:translate(-50%, calc(-50% - 4px)); } }
-.r3-sea-info{ margin-top:10px; padding:12px 14px; border-radius:16px; background:rgba(255,248,230,.75); box-shadow:inset 0 0 0 1px rgba(122,79,34,.18); min-height:96px; }
-.r3-sea-info b{ display:block; font:800 1.15rem 'Baloo 2',sans-serif; }
-.r3-sea-info small{ display:block; font-weight:800; color:#8a6a44; margin-top:-2px; }
-.r3-sea-info p{ margin:6px 0 10px; font-weight:600; line-height:1.4; }
+.r3-sea-side{ display:flex; flex-direction:column; gap:7px; margin-top:8px; min-width:0; }
+.r3-sea-skills{ display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:4px; }
+.r3-sea-skill{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; padding:4px 2px; border-radius:12px; background:rgba(255,248,230,.82); color:#5a3d1d; box-shadow:inset 0 0 0 1px rgba(122,79,34,.2); font-size:.72rem; line-height:1.1; }
+.r3-sea-skill i{ font-style:normal; font-size:.86rem; line-height:1; }
+.r3-sea-skill b{ font-weight:800; }
+.r3-sea-skill em{ font-style:normal; font-weight:800; padding:0 5px; border-radius:999px; background:rgba(28,140,147,.14); color:#135d63; font-variant-numeric:tabular-nums; }
+.r3-sea-skill.weak{ background:#ffeaa7; color:#6b4400; box-shadow:inset 0 0 0 2px #e8a33d; }
+.r3-sea-skill.weak em{ background:#b5452f; color:#fff; }
+.r3-sea-info{ margin-top:0; padding:9px 12px; border-radius:16px; background:rgba(255,248,230,.75); box-shadow:inset 0 0 0 1px rgba(122,79,34,.18); min-height:0; }
+.r3-sea-info b{ display:block; font:800 1.08rem 'Baloo 2',sans-serif; line-height:1.2; }
+.r3-sea-info small{ display:block; font-weight:800; color:#8a6a44; margin-top:1px; font-size:.82rem; }
+.r3-sea-info p{ margin:4px 0 8px; font-weight:600; font-size:.88rem; line-height:1.32; }
 .r3-sea-soon{ display:inline-flex; align-items:center; gap:6px; font-weight:800; color:#8a6a44; }
-.r3-sea-info .r3-btn{ display:inline-flex; align-items:center; gap:6px; }
+.r3-sea-info .r3-btn{ display:inline-flex; align-items:center; gap:6px; min-height:40px; padding:7px 14px; font-size:.95rem; }
+@media (min-width:720px){
+  .r3-map.sea-on .r3-map-card{ width:min(760px, 100%); }
+  .r3-map.sea-on .r3-sea{ display:grid; grid-template-columns:minmax(0, 1.05fr) minmax(0, .95fr); grid-template-rows:auto 1fr; gap:8px 16px; align-items:start; }
+  .r3-map.sea-on .r3-map-hint{ grid-column:1 / -1; margin:0; }
+  .r3-map.sea-on .r3-sea-chart{ grid-column:1; grid-row:2; width:min(100%, calc((100dvh - 190px) * 300 / 390)); max-height:min(450px, calc(100dvh - 190px)); }
+  .r3-map.sea-on .r3-sea-side{ grid-column:2; grid-row:2; margin-top:0; gap:10px; }
+  .r3-map.sea-on .r3-sea-skills{ grid-template-columns:repeat(3, minmax(0, 1fr)); gap:6px; }
+  .r3-map.sea-on .r3-sea-skill{ flex-direction:row; gap:4px; padding:5px 7px; font-size:.78rem; }
+  .r3-map.sea-on .r3-sea-info{ padding:12px 14px; }
+  .r3-map.sea-on .r3-sea-info p{ margin:6px 0 10px; font-size:.92rem; line-height:1.38; }
+}
+@media (max-width:719px){
+  .r3-map-head b{ font-size:1.32rem; }
+  .r3-map-close{ width:38px; height:38px; }
+  .r3-map-hint{ margin:0 0 6px; font-size:.86rem; }
+}
 body.reef-calm .r3-map.sea-on .r3-sea, body.reef-calm .r3-sea-me{ animation:none; }

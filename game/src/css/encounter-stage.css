@@ -7,16 +7,18 @@
 .r3.rpg-stage-intro .r3-person-panel .r3-panel-card{
   width:min(560px,100%);
   max-height:min(45dvh,440px);
-  padding:16px 18px;
+  padding:14px 16px;
 }
 .r3.rpg-stage-intro .r3-shop .r3-panel-card{
   width:min(600px,100%);
-  max-height:min(48dvh,440px);
-  padding:14px 16px;
+  max-height:min(52dvh,440px);
+  padding:12px 14px;
 }
 .r3.rpg-stage-intro .r3-person-panel .r3-person-portrait-art,
 .r3.rpg-stage-intro .r3-shop .r3-person-portrait-art{display:none}
-.r3.rpg-stage-intro .r3-person-panel .r3-panel-card h3{margin-top:0}
+.r3.rpg-stage-intro .r3-person-panel .r3-panel-card h3{margin-top:0;font-size:1.32rem}
+.r3.rpg-stage-intro .r3-person-panel .r3-panel-card p{margin:4px 0 8px;font-size:.95rem;line-height:1.3}
+.r3.rpg-stage-intro .r3-panel-row{margin-top:8px;gap:8px}
 .r3.rpg-stage-intro .r3-hud,
 .r3.rpg-stage-intro .r3-people-labels,
 .r3.rpg-stage-intro .r3-person-guide,
@@ -85,8 +87,8 @@ body.rpg-lesson .ask-btn:not(.ask-inline){left:max(12px,env(safe-area-inset-left
   body.rpg-lesson .rpg-stage-host{grid-template-rows:40dvh minmax(0,1fr)}
 }
 @media (max-width:480px){
-  .r3.rpg-stage-intro .r3-person-panel .r3-panel-card{max-height:45dvh;padding:12px 14px}
-  .r3.rpg-stage-intro .r3-shop .r3-panel-card{max-height:min(50dvh,420px);padding:12px 12px}
+  .r3.rpg-stage-intro .r3-person-panel .r3-panel-card{max-height:45dvh;padding:11px 13px}
+  .r3.rpg-stage-intro .r3-shop .r3-panel-card{max-height:min(54dvh,430px);padding:10px 10px}
   .r3.rpg-stage-intro .r3-panel-card p{line-height:1.25}
   body.rpg-lesson .rpg-dialogue{padding-top:12px}
 }

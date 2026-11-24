@@ -719,14 +719,16 @@
         Object.keys(g.attributes).forEach(function(n){ if(n !== 'position' && n !== 'color' && !(n === 'uv' && (pc.mat.map || surfaced)) && !(n === 'reefSurface' && surfaced)) g.deleteAttribute(n); });
         g.morphAttributes = {}; g.groups = [];
         g.computeBoundingBox(); g.boundingBox.getCenter(ctr);
-        var mat = surfaced ? reef3dSurfaceMaterial(cache, pc.mat) : reef3dBakedMat(cache, pc.mat), key = mat.uuid + '@' + Math.floor(ctr.z / REEF3D_CHUNK) + ',' + Math.floor(ctr.x / REEF3D_CHUNK);
-        (buckets[key] = buckets[key] || { mat: mat, geos: [] }).geos.push(g);
+        var ground = !!(m.userData && m.userData.reefGround);
+        var mat = surfaced ? reef3dSurfaceMaterial(cache, pc.mat) : reef3dBakedMat(cache, pc.mat), key = (ground ? 'g:' : '') + mat.uuid + '@' + Math.floor(ctr.z / REEF3D_CHUNK) + ',' + Math.floor(ctr.x / REEF3D_CHUNK);
+        var bucket = buckets[key] || (buckets[key] = { mat: mat, geos: [], ground: ground });
+        bucket.geos.push(g);
       });
     });
     Object.keys(buckets).forEach(function(k){
       var b = buckets[k], merged = null;
       try { merged = U.mergeBufferGeometries(b.geos, false); } catch(e){}
-      if(merged){ var mm = new THREE.Mesh(merged, b.mat); mm.matrixAutoUpdate = false; mm.renderOrder = b.mat.transparent ? 1 : 0; out.add(mm); }
+      if(merged){ var mm = new THREE.Mesh(merged, b.mat); mm.matrixAutoUpdate = false; mm.renderOrder = b.mat.transparent ? 1 : 0; if(b.ground) mm.userData.reefGround = true; out.add(mm); }
       b.geos.forEach(function(g){ g.dispose(); });
     });
     return out;
@@ -929,14 +931,14 @@
       var tile = reef3dTile(big ? 'classic' : 'shell', s, R, top, icon, night, kit, M, mesh);   // Wendy's mix: decks keep the sandy pedestal, the spaces between are seashells
       if(s.y){ tile.parts.forEach(function(pt){ pt.position.y += s.y; }); tile.face.position.y += s.y; if(tile.hit) tile.hit.position.y += s.y; }
       var face = tile.face;
-      tile.parts.forEach(function(p){ statics.add(p); });
+      tile.parts.forEach(function(p){ p.userData.reefGround = true; statics.add(p); });
       if(kit.tileArt){
         // Paint all tops from one atlas and merge their visible geometry. A
         // lightweight non-rendering proxy preserves every tile's hit identity.
-        var painted = tile.hit ? face : face.clone(); painted.userData.noFootprint = true; statics.add(painted);
+        var painted = tile.hit ? face : face.clone(); painted.userData.noFootprint = true; painted.userData.reefGround = true; statics.add(painted);
         face = tile.hit || face;
         face.material = tileHitMaterial; face.updateMatrixWorld(true);
-      } else { reef3dBakeObject(face, rig, bake); scene.add(face); }
+      } else { reef3dBakeObject(face, rig, bake); face.userData.reefGround = true; scene.add(face); }
       face.userData.space = s.i; hitables.push(face);
       if(s.kind === 'surprise'){ // a floating "?" block over every surprise space
         s.qKey = reef3dQKey(spaces, s, region);
@@ -1302,7 +1304,7 @@
     var THREE = window.THREE, calm = reefCalm(), t = (now - view.t0) / 1000;
     var dt = Math.min(.05, Math.max(0, (now - view.lastT) / 1000)); view.lastT = now;
     reef3dSize(view);
-    var tp = new THREE.Vector3(), tl = new THREE.Vector3();
+    var tp = view._tp || (view._tp = new THREE.Vector3()), tl = view._tl || (view._tl = new THREE.Vector3());
     reef3dCamTarget(view, tp, tl);
     var up = view.themeFx || view.themeIn ? reef3dThemeFrame(view, now, t) : 0;
     if(!up && view.wrap.classList.contains('r3-sky')) view.wrap.classList.remove('r3-sky');
@@ -1330,6 +1332,17 @@
     if(!view.zoomNow && view.fog0){ view.scene.fog.near = view.fog0.near; view.scene.fog.far = view.fog0.far; view.cam.far = view.fog0.cam; view.cam.updateProjectionMatrix(); view.fog0 = null; }
     var g = view.guide.position;
     view.sun.position.set(g.x + 6, 18, g.z + 8); view.sun.target.position.set(g.x, 0, g.z - 2);
+    if(view.motes){
+      view.motes.visible = !calm && !view.encounter;
+      if(view.motes.visible){
+        var mp = view.motes.geometry.attributes.position, md = view.motes.userData.seeds;
+        for(var mi = 0; mi < md.length; mi++){
+          var ms = md[mi];
+          mp.setXYZ(mi, g.x + ms.ox + Math.sin(t * .6 + ms.p) * .9, ms.y + Math.sin(t * .9 + ms.p * 1.3) * .45, g.z + ms.oz + Math.cos(t * .5 + ms.p) * .9);
+        }
+        mp.needsUpdate = true;
+      }
+    }
     if(!calm){
       var body = view.guide.userData.body, q = reef3dPose(), em = view.emote;
       if(em){ var ep = (now - em.t0) / em.dur; if(ep >= 1 || view.moving){ view.emote = null; view.emoteEnd = now; if(em.after) em.after(); } else REEF3D_EMOTES[em.name].pose(ep, q, t); }
@@ -1357,17 +1370,6 @@
       });
       view.bubbles.instanceMatrix.needsUpdate = true;
       if(view.plume) reef3dPlume(view.plume, view.dummy, t);
-      if(view.motes){
-        view.motes.visible = !calm && !view.encounter;
-        if(view.motes.visible){
-          var mp = view.motes.geometry.attributes.position, md = view.motes.userData.seeds;
-          for(var mi = 0; mi < md.length; mi++){
-            var ms = md[mi];
-            mp.setXYZ(mi, g.x + ms.ox + Math.sin(t * .6 + ms.p) * .9, ms.y + Math.sin(t * .9 + ms.p * 1.3) * .45, g.z + ms.oz + Math.cos(t * .5 + ms.p) * .9);
-          }
-          mp.needsUpdate = true;
-        }
-      }
       if(view.lamp){ var lf = .5 + Math.sin(t * 1.6) * .5, fk = Math.sin(t * 7.3) * .5 + Math.sin(t * 11.1) * .5;   // a slow breath plus a candle flicker
         view.lamp.pool.material.opacity = .85 + lf * .12 + fk * .03; if(view.lamp.glow) view.lamp.glow.material.color.setHSL(.12, 1, .68 + lf * .08);
         if(view.lamp.halo){ view.lamp.halo.scale.setScalar(3.4 + lf * .5 + fk * .12); view.lamp.halo.material.opacity = .62 + fk * .08; } }
@@ -1479,7 +1481,7 @@
     regionEncounterTick(view, now);
     if(view.post && view.post.on){
       // the sharp band of the miniature blur follows her on screen; pulled out over the map, the whole reef goes miniature
-      var fp = view.guide.position.clone().project(view.cam), fy = Math.min(.8, Math.max(.2, (fp.y + 1) / 2)), zk = Math.min(1, view.zoomNow || 0);
+      var fp = (view._fp || (view._fp = new THREE.Vector3())).copy(view.guide.position).project(view.cam), fy = Math.min(.8, Math.max(.2, (fp.y + 1) / 2)), zk = Math.min(1, view.zoomNow || 0);
       fy += (.5 - fy) * zk;   // pulled out over the map: the sharp band moves to the middle and widens, so the whole board reads
       view.post.U.focusY.value += (fy - view.post.U.focusY.value) * (calm ? 1 : .12);
       view.post.band = .2 + zk * .16; view.post.extraTilt = 0;
@@ -1492,23 +1494,27 @@
     view.idle = !busy && !view.emote && !view.dice && !view.themeFx && !view.themeIn && now - (view.touchAt || 0) > 2000 &&
       !view.schools.some(function(sc){ return sc.flee; });
   }
+  var R3moteTex = null;
   function reef3dAmbientMotes(scene, region, night){
     var THREE = window.THREE; if(!THREE || !scene) return null;
     var cols = { town:'#ffefc7', lagoon:'#ffe694', caves:'#9ef7ff', patterns:'#ffb8d0', beach:'#fff1c2', light:'#ffe082', captain:'#dff7ff' };
     var col = night ? '#9cecff' : (region && cols[region.id]) || '#fff5c4';
-    var n = 28, pos = new Float32Array(n * 3), seeds = [];
+    var n = R3.q >= 2 ? 18 : 28, pos = new Float32Array(n * 3), seeds = [];
     for(var i = 0; i < n; i++){
       var s = { ox: (Math.random() - .5) * 20, y: .9 + Math.random() * 4.5, oz: (Math.random() - .5) * 20, p: Math.random() * 6.28 };
       seeds.push(s); pos[i * 3] = s.ox; pos[i * 3 + 1] = s.y; pos[i * 3 + 2] = s.oz;
     }
-    var cv = document.createElement('canvas'); cv.width = cv.height = 32;
-    var g = cv.getContext('2d'), gr = g.createRadialGradient(16, 16, 1, 16, 16, 15);
-    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.4, 'rgba(255,255,255,.55)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
-    g.fillStyle = gr; g.fillRect(0, 0, 32, 32);
-    var tex = new THREE.CanvasTexture(cv), geo = new THREE.BufferGeometry();
+    if(!R3moteTex){
+      var cv = document.createElement('canvas'); cv.width = cv.height = 32;
+      var g = cv.getContext('2d'), gr = g.createRadialGradient(16, 16, 1, 16, 16, 15);
+      gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.4, 'rgba(255,255,255,.55)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = gr; g.fillRect(0, 0, 32, 32);
+      R3moteTex = new THREE.CanvasTexture(cv);
+    }
+    var geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    var mat = new THREE.PointsMaterial({ color: col, map: tex, size: .38, transparent: true, opacity: .78, depthWrite: false, blending: THREE.AdditiveBlending });
-    var pts = new THREE.Points(geo, mat); pts.frustumCulled = false; pts.userData.seeds = seeds;
+    var mat = new THREE.PointsMaterial({ color: col, map: R3moteTex, size: .38, transparent: true, opacity: .78, depthWrite: false, blending: THREE.AdditiveBlending });
+    var pts = new THREE.Points(geo, mat); pts.frustumCulled = false; pts.userData.seeds = seeds; pts.raycast = function(){};
     scene.add(pts);
     return pts;
   }

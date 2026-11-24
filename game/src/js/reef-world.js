@@ -417,8 +417,10 @@
     var key = (S.profile && S.profile.id) + '|' + say.dataset.reefSay;
     if(reefHeadSaid[key]) return;
     reefHeadSaid[key] = true;
-    setTimeout(function(){
+    var tries = 0;
+    function trySay(){
       if(!document.body.contains(head) || document.querySelector('.cc-shelly-dive')) return;
+      if(document.body.classList.contains('r3-loading') && tries++ < 12){ setTimeout(trySay, 500); return; }
       // on the 3D board Shelly is already there: she waves and says it
       var v = typeof R3 !== 'undefined' && R3.view;
       if(v && v.wrap && document.body.contains(v.wrap)){
@@ -433,5 +435,6 @@
       var gone = function(){ if(!d.parentNode || d.classList.contains('out')) return; d.classList.add('out'); setTimeout(function(){ d.remove(); }, 900); };
       setTimeout(function(){ try { Speech.speakThen(say.dataset.reefSay, function(){ setTimeout(gone, 500); }); } catch(e){ gone(); } }, 700);
       setTimeout(gone, 8000);   // never stays on screen
-    }, 900);
+    }
+    setTimeout(trySay, 900);
   }
