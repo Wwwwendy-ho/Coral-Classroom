@@ -210,28 +210,53 @@
     } catch(e){ coveToast('Downloads aren\'t available here.'); }
   }
   function coveRestoreAll(file){
+    if(S.activeProfileId && S.profile && S.profile.mode === 'child' && !S.editMode && !reefNoPin()){
+      coveToast('Enter Edit Mode or switch to the profile picker to restore a backup.');
+      return;
+    }
     if(file && file.size > COVE_MAX_BACKUP_BYTES){ coveToast('That backup file is too large.'); return; }
     var rd = new FileReader();
     rd.onload = function(){
       var res = validateBackupPayload(String(rd.result || ''));
       if(!res.ok){ coveToast(res.reason || 'That file isn\'t a Coral Classroom backup.'); return; }
-      var verify = res.digest
-        ? sha256Hex(res.rawItemsJson).then(function(h){ return timingSafeEqual(h, res.digest); }, function(){ return true; })
-        : Promise.resolve(true);
-      verify.then(function(valid){
+      if(!res.digest || !/^[0-9a-f]{64}$/i.test(res.digest)){
+        coveToast('Backup integrity check failed. Missing or invalid signature.');
+        return;
+      }
+      sha256Hex(res.rawItemsJson).then(function(h){ return timingSafeEqual(h, res.digest); }, function(){ return false; }).then(function(valid){
         if(!valid){ coveToast('Backup integrity check failed. File may have been modified.'); return; }
         var when = res.savedAt ? new Date(res.savedAt).toLocaleString() : 'an unknown date';
-        if(!window.confirm('Replace everything on this device with the backup from '+when+'? What is here now will be lost.')) return;
-        var prev = {};
-        try { for(var i = 0; i < localStorage.length; i++){ var pk = localStorage.key(i); prev[pk] = localStorage.getItem(pk); } } catch(e){}
-        try {
-          localStorage.clear();
-          Object.keys(res.items).forEach(function(k){ localStorage.setItem(k, res.items[k]); });
-        } catch(e){
-          try { localStorage.clear(); Object.keys(prev).forEach(function(pk){ localStorage.setItem(pk, prev[pk]); }); } catch(e2){}
-          coveToast('Couldn\'t restore: this device\'s storage is full or blocked.'); return;
-        }
-        coveToast('Restored. Reopening…'); setTimeout(function(){ location.reload(); }, 600);
+        showDialog({
+          title: 'Restore backup?',
+          message: 'Replace Coral Classroom data on this device with the backup from ' + when + '? Current progress will be replaced.',
+          confirmLabel: 'Restore backup',
+          danger: true
+        }).then(function(confirmed){
+          if(!confirmed) return;
+          var prev = {}, existingKeys = [];
+          try {
+            for(var i = 0; i < localStorage.length; i++){
+              var pk = localStorage.key(i);
+              if(isAllowedStorageKey(pk)){ existingKeys.push(pk); prev[pk] = localStorage.getItem(pk); }
+            }
+          } catch(e){}
+          try {
+            existingKeys.forEach(function(pk){ localStorage.removeItem(pk); });
+            Object.keys(res.items).forEach(function(k){
+              if(isAllowedStorageKey(k)) localStorage.setItem(k, res.items[k]);
+            });
+          } catch(e){
+            try {
+              for(var j = localStorage.length - 1; j >= 0; j--){
+                var rk = localStorage.key(j);
+                if(isAllowedStorageKey(rk)) localStorage.removeItem(rk);
+              }
+              Object.keys(prev).forEach(function(pk){ localStorage.setItem(pk, prev[pk]); });
+            } catch(e2){}
+            coveToast('Couldn\'t restore: this device\'s storage is full or blocked.'); return;
+          }
+          coveToast('Restored. Reopening…'); setTimeout(function(){ location.reload(); }, 600);
+        });
       });
     };
     rd.onerror = function(){ coveToast('Couldn\'t read that file.'); };
@@ -442,7 +467,7 @@
     Promise.all([S.store.getStats(), S.store.getSettings(), S.store.getSessionTally(), S.store.getBadges()]).then(function(results){
       // unlockedSounds defaults to [] for any stats doc saved before the Word Feed sound shop existed.
       S.stats = Object.assign({ unlockedSounds: [] }, results[0]);
-      S.settings = Object.assign({ algorithm:'sm2_speed', difficulty:'medium', readingSupport:false }, results[1] || {});
+      S.settings = Object.assign({ algorithm:'fsrs6', difficulty:'medium', readingSupport:false }, results[1] || {});
       S.sessionTally = results[2] || null;
       S.badges = results[3] || {};
       applyReadingSupport();
@@ -656,7 +681,7 @@
       });
     }).then(function(){
       draft.photoId = uploaded.id;
-      draft.photoUrl = uploaded.url;
+      draft.photoUrl = safePhotoUrl(uploaded.url);
       S.profilePhotoUploading = false;
       render();
     }).catch(function(){
@@ -669,8 +694,9 @@
 
   function renderNewProfileForm(){
     var d = S.newProfileDraft || (S.newProfileDraft = { name:'', mode:'child', photoId:'', photoUrl:'' });
-    var photoBlock = d.photoUrl
-      ? '<img class="profile-avatar avatar-lg" src="'+esc(d.photoUrl)+'" alt="">'
+    var pUrl = safePhotoUrl(d.photoUrl);
+    var photoBlock = pUrl
+      ? '<img class="profile-avatar avatar-lg" src="'+esc(pUrl)+'" alt="">'
       : '<div class="profile-avatar avatar-lg avatar-fallback">'+(d.name.trim() ? esc(d.name.trim().charAt(0).toUpperCase()) : '🐬')+'</div>';
     var modeBtn = function(m, label, blurb){
       return '<button type="button" class="algo-opt'+(d.mode===m?' active':'')+'" data-new-mode="'+m+'">' +
@@ -733,7 +759,7 @@
       var name = d.name.trim();
       if(!name || (d.mode==='child' && !d.consent)) return;
       var goal = (d.learnGoal || '').trim();   // a learning goal switches Coral Classroom on for this profile
-      S.store.addProfile({ name: name, mode: d.mode, initialMode: d.mode, photoId: d.photoId||'', photoUrl: d.photoUrl||'', order: S.profiles.length, learnGoal: goal, courseOn: !!goal }).then(function(){
+      S.store.addProfile({ name: name, mode: d.mode, initialMode: d.mode, photoId: d.photoId||'', photoUrl: safePhotoUrl(d.photoUrl||''), order: S.profiles.length, learnGoal: goal, courseOn: !!goal }).then(function(){
         S.newProfileDraft = null;
         S.creatingProfile = false;
         render();
@@ -1265,13 +1291,8 @@
      which is tab- or comma-separated with optional "#"-prefixed header lines -- NOT the zipped
      .apkg format, which would need a SQLite reader Coral Cove has no way to load. */
   function stripAnkiHtml(s){
-    s = String(s == null ? '' : s);
-    s = s.replace(/\[sound:[^\]]*\]/gi, '');
-    s = s.replace(/<[^>]+>/g, ' ');
-    var ta = document.createElement('textarea');
-    ta.innerHTML = s;
-    s = ta.value;
-    return s.replace(/\s+/g, ' ').trim();
+    s = String(s == null ? '' : s).replace(/\[sound:[^\]]*\]/gi, '');
+    return safePlainText(s);
   }
 
   function parseAnkiPlainText(text){

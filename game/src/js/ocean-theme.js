@@ -514,8 +514,8 @@
   // cards scale the thresholds to their own timer instead: first 35% = fast, up to 75% = normal.
   function timedChoiceRating(tc, correct, elapsed){
     if(!correct || !tc || !tc.custom) return autoRating('timedchoice', correct, elapsed);
-    var algo = S.settings.algorithm || 'sm2_speed';
-    if(algo !== 'sm2_speed') return 'good';
+    var algo = S.settings.algorithm || 'fsrs6';
+    if(algo !== 'sm2_speed' && algo !== 'fsrs6') return 'good';
     var total = tc.totalSeconds * 1000;
     if(elapsed <= total * 0.35) return 'easy';
     if(elapsed <= total * 0.75) return 'good';

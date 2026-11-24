@@ -279,7 +279,7 @@
     var isHappy = mood === 'happy';
     view.encounter.react = { mood: isHappy ? 'happy' : 'encourage', t0: performance.now(), dur: isHappy ? 550 : 450 };
     if(typeof regionResidentPlayReact === 'function'){
-      regionResidentPlayReact(view, view.encounter.actor, mood);
+      regionResidentPlayReact(view, mood);
     } else if(typeof regionResidentReact === 'function'){
       regionResidentReact(view, view.encounter.actor, mood);
     } else if(typeof regionResidentStates === 'function'){

@@ -75,7 +75,7 @@
   function whatsNewKey(){ return 'cc-new-seen-' + (S.profile && S.profile.id || 'guest'); }
   function whatsNewSeen(){
     var raw = null; try { raw = localStorage.getItem(whatsNewKey()); } catch(e){}
-    if(raw){ try { return JSON.parse(raw) || []; } catch(e){ return []; } }
+    if(raw){ var parsed = safeJsonParse(raw, null); return Array.isArray(parsed) ? parsed : []; }
     // first time for this profile: older entries count as seen
     var cut = Date.now() - WN_RECENT_DAYS * 864e5, seen = REEF_WHATS_NEW.filter(function(e){ return Date.parse(e.date) < cut; }).map(function(e){ return e.id; });
     whatsNewSave(seen); return seen;

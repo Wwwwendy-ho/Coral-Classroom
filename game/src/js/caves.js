@@ -22,7 +22,7 @@
   var CAVES_ICON = { pairs: 'ear', shadow: 'mic', rules: 'bulb' };
   function cavesStoreKey(){ return 'cc-caves-' + (S.profile && S.profile.id || 'guest'); }
   function cavesData(){
-    var d = null; try { d = JSON.parse(localStorage.getItem(cavesStoreKey()) || 'null'); } catch(e){}
+    var d = null; try { d = safeJsonParse(localStorage.getItem(cavesStoreKey()), null); } catch(e){}
     d = d && typeof d === 'object' ? d : {};
     d.c = d.c || {}; d.rules = d.rules || {}; d.said = d.said || {};
     return d;

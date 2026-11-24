@@ -29,7 +29,7 @@
       if(!mem.byProfile[id]) mem.byProfile[id] = {
         decks: [], cards: {}, deckListeners: [], cardListeners: {},
         stats: { streak:0, stars:0, lastReviewDateISO:null, totalReviews:0, unlockedSounds:[] },
-        settings: { sessionActive:false, sessionStartedAt:null, algorithm:'sm2_speed', difficulty:'medium' },
+        settings: { sessionActive:false, sessionStartedAt:null, algorithm:'fsrs6', difficulty:'medium' },
         sessionTally: null, history: [], badges: {}
       };
       return mem.byProfile[id];
@@ -97,29 +97,44 @@
               return db.collection(base+'/plan').get().then(function(snap){ return Promise.all(snap.docs.map(function(d){ return db.collection(base+'/plan').doc(d.id).delete().catch(function(){}); })); }).catch(function(){});
             }).then(function(){
               return db.collection('profiles').doc(id).delete();
+            }).then(function(){
+              try {
+                if(typeof Learner !== 'undefined' && typeof Learner.dropProfile === 'function') Learner.dropProfile(id);
+                else { localStorage.removeItem('cc-learner-' + id); localStorage.removeItem('cc-events-' + id); }
+              } catch(e){}
             }).catch(reportStoreError('delete profile'));
           }
           mem.profiles = mem.profiles.filter(function(x){ return x.id!==id; });
           delete mem.byProfile[id];
+          try {
+            if(typeof Learner !== 'undefined' && typeof Learner.dropProfile === 'function') Learner.dropProfile(id);
+            else { localStorage.removeItem('cc-learner-' + id); localStorage.removeItem('cc-events-' + id); }
+          } catch(e){}
           notifyProfiles();
           return Promise.resolve();
         },
         // cove: read-only export of everything stored for one profile ("Download my data").
         exportProfile: function(id){
-          var strip = function(o){ if(o && typeof o === 'object'){ o = JSON.parse(JSON.stringify(o)); if(!Array.isArray(o)) delete o.pinHash; } return o; };
+          var strip = function(o){ if(o && typeof o === 'object'){ o = safeJsonParse(JSON.stringify(o), null); if(o && !Array.isArray(o)) delete o.pinHash; } return o; };
+          var learnerData = (function(){
+            try {
+              if(typeof Learner !== 'undefined' && typeof Learner.exportProfile === 'function') return Learner.exportProfile(id);
+            } catch(e){}
+            return { model: null, events: [] };
+          })();
           if(live){
             var base = 'profiles/'+id;
             var docData = function(path){ return db.doc(path).get().then(function(sn){ return sn.exists ? strip(sn.data()) : null; }).catch(function(){ return null; }); };
             var colData = function(path){ return db.collection(path).get().then(function(sn){ return sn.docs.map(function(d){ return Object.assign({ id:d.id }, strip(d.data())); }); }).catch(function(){ return []; }); };
             return Promise.all([ docData('profiles/'+id), colData(base+'/decks'), colData(base+'/history'), docData(base+'/stats/summary'), docData(base+'/settings/study'), docData(base+'/settings/plan'), docData(base+'/session/current'), docData(base+'/badges/summary'), colData(base+'/plan'), docData(base+'/settings/wordbank') ]).then(function(r){
               return Promise.all(r[1].map(function(deck){ return colData(base+'/decks/'+deck.id+'/cards').then(function(cards){ return Object.assign({}, deck, { cards: cards }); }); })).then(function(decks){
-                return { profile: r[0], decks: decks, history: r[2], stats: r[3], studySettings: r[4], planSettings: r[5], session: r[6], badges: r[7], dailyPlans: r[8], wordBank: r[9] };
+                return { profile: r[0], decks: decks, history: r[2], stats: r[3], studySettings: r[4], planSettings: r[5], session: r[6], badges: r[7], dailyPlans: r[8], wordBank: r[9], learner: learnerData.model, learnerEvents: learnerData.events };
               });
             });
           }
           var m = mem.byProfile[id] || {};
           var prof = mem.profiles.find(function(x){ return x.id === id; }) || null;
-          return Promise.resolve({ profile: strip(prof), decks: (m.decks||[]).map(function(d){ return Object.assign({}, strip(d), { cards: strip((m.cards||{})[d.id]||[]) }); }), history: strip(m.history||[]), stats: strip(m.stats||null), studySettings: strip(m.settings||null), badges: strip(m.badges||null) });
+          return Promise.resolve({ profile: strip(prof), decks: (m.decks||[]).map(function(d){ return Object.assign({}, strip(d), { cards: strip((m.cards||{})[d.id]||[]) }); }), history: strip(m.history||[]), stats: strip(m.stats||null), studySettings: strip(m.settings||null), badges: strip(m.badges||null), learner: learnerData.model, learnerEvents: learnerData.events });
         },
         /* ---------- app-wide grown-up password digest (not per-profile).
            The legacy pinHash field is retained for saved-data compatibility. ---------- */
@@ -251,7 +266,7 @@
         },
         getSettings: function(){
           if(live) return db.doc('profiles/'+pid+'/settings/study').get().then(function(snap){
-            return snap.exists ? snap.data() : { sessionActive:false, sessionStartedAt:null, algorithm:'sm2_speed', difficulty:'medium' };
+            return snap.exists ? snap.data() : { sessionActive:false, sessionStartedAt:null, algorithm:'fsrs6', difficulty:'medium' };
           });
           return Promise.resolve(Object.assign({}, ensureProfileMem(pid).settings));
         },
@@ -307,10 +322,10 @@
         },
         getPlanDay: function(date){
           if(live) return db.doc('profiles/'+pid+'/plan/'+date).get().then(function(snap){ return snap.exists ? snap.data() : null; });
-          var m = ensureProfileMem(pid); return Promise.resolve(m.planDays && m.planDays[date] ? JSON.parse(JSON.stringify(m.planDays[date])) : null);
+          var m = ensureProfileMem(pid); return Promise.resolve(m.planDays && m.planDays[date] ? safeJsonParse(JSON.stringify(m.planDays[date]), null) : null);
         },
         setPlanDay: function(date, data){
-          var clean = JSON.parse(JSON.stringify(data));
+          var clean = safeJsonParse(JSON.stringify(data), null);
           if(live) return db.doc('profiles/'+pid+'/plan/'+date).set(clean).catch(reportStoreError('save today\'s plan'));
           var m = ensureProfileMem(pid); m.planDays = m.planDays || {}; m.planDays[date] = clean;
           return Promise.resolve();
@@ -328,7 +343,7 @@
           return Promise.resolve(ensureProfileMem(pid).wordBank || null);
         },
         setWordBank: function(data){
-          var clean = JSON.parse(JSON.stringify(data));
+          var clean = safeJsonParse(JSON.stringify(data), null);
           if(live) return db.doc('profiles/'+pid+'/settings/wordbank').set(clean).catch(reportStoreError('save the Word Bank'));
           ensureProfileMem(pid).wordBank = clean;
           return Promise.resolve();
@@ -466,7 +481,7 @@
     currentCardId: null,
     cardShownAt: null,
     cardFlippedAt: null,
-    settings: { sessionActive:false, sessionStartedAt:null, algorithm:'sm2_speed', difficulty:'medium', readingSupport:false },
+    settings: { sessionActive:false, sessionStartedAt:null, algorithm:'fsrs6', difficulty:'medium', readingSupport:false },
     profiles: [],           // every profile's top-level metadata (name/mode/photo/order), loaded once at boot
     unsubProfiles: null,
     activeProfileId: null,  // null = showing the profile picker; otherwise the id of the profile in use

@@ -218,6 +218,9 @@
     regionEncounterEnd(view);
     regionPeopleDispose(view);
     reef3dShellyDispose(view);
+    if(typeof reefCrabDispose === 'function'){
+      reefCrabDispose(view.crab); reefCrabDispose(view.spareCrab); reefCrabDispose(view.leaving);
+    }
     if(typeof reef3dSurfaceDispose==='function') reef3dSurfaceDispose(view.bake);
     clearTimeout(view.homeT);
     if(view.raf) cancelAnimationFrame(view.raf);

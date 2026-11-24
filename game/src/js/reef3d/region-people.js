@@ -384,8 +384,8 @@
         line(-.07,.18,-.07,.15,.3,-.06,.07,body);
         oval(.1,accent,.15,.29,-.06,.5,.4,.7);
         if(personId==='cafe'){
-          cyl(parent,.105,.09,.18,'#fff7e7',.33,1.0,.27);
-          part(parent,geo('marine-cup-handle',function(){ return new T.TorusGeometry(.055,.016,5,10); }),accent,.46,1,.27);
+          cyl(parent,.105,.09,.18,'#fff7e7',.25,1.0,.20);
+          part(parent,geo('marine-cup-handle',function(){ return new T.TorusGeometry(.055,.016,5,10); }),accent,.37,1.0,.20);
         }
       } else if(species==='sea otter' || species==='seal' || species==='walrus'){
         var large=species==='walrus', sleek=species==='seal';
@@ -397,16 +397,17 @@
         oval(.065,dark,0,1.35,.5,1,.65,.55); mouth(0,1.25,.48);
         [-1,1].forEach(function(d){
           var fin=oval(.25,body,d*(large?.59:.47),.76,.16,.57,1.28,.34); fin.rotation.z=d*.42;
-          oval(.18,body,d*.26,.12,-.21,1,.35,1.25);
+          if(personId==='restaurant' && d===1){ fin.rotation.x=-.35; fin.position.z=.22; }
+          oval(.18,body,d*.26,sleek||personId==='restaurant'?.063:.12,-.21,1,.35,1.25);
           if(!sleek) oval(.09,body,d*.27,1.73,-.02,.75,.67,.55);
           if(large){ line(d*.08,1.26,.48,d*.12,.98,.52,.035,belly); }
           else { line(d*.12,1.35,.48,d*.32,1.39,.5,.009,dark); line(d*.12,1.31,.48,d*.32,1.27,.5,.009,dark); }
         });
-        if(sleek){ var tail=oval(.23,body,0,.13,-.66,1.5,.35,.8); tail.rotation.y=.3; }
+        if(sleek){ var tail=oval(.23,body,0,.085,-.66,1.5,.35,.8); tail.rotation.y=.3; }
         else oval(.16,body,0,.25,-.64,.8,.45,1.8);
         if(personId==='restaurant'){
-          cyl(parent,.19,.19,.035,accent,.5,.68,.29);
-          cyl(parent,.13,.13,.025,'#fff8df',.5,.71,.29);
+          cyl(parent,.19,.19,.035,accent,.46,.67,.22);
+          cyl(parent,.13,.13,.025,'#fff8df',.46,.70,.22);
         }
         if(large){
           oval(.12,dark,0,1.31,.48,1.45,.67,.55);
@@ -461,8 +462,8 @@
         line(0,.81,-.35,0,.15,-.79,.052,dark);
         eyes(0,1.05,.34,.19); mouth(0,.88,.43);
         if(personId==='subway'){
-          box(parent,.48,.10,.07,accent,0,.70,.42);
-          var rayScarf=box(parent,.11,.24,.08,accent,.14,.57,.45); rayScarf.rotation.z=.15;
+          box(parent,.48,.10,.07,accent,0,.72,.36);
+          var rayScarf=box(parent,.11,.24,.08,accent,.14,.60,.38); rayScarf.rotation.z=.15;
         }
       } else if(species==='royal gramma'){
         var fishGeo=geo('royal-gramma-body',function(){
@@ -492,8 +493,8 @@
         }else{ eyes(0,1.04,.52,.34); mouth(0,.78,.59); }
         oval(.075,dark,0,1.4,-.12,1,.28,.55);
         if(personId==='hotel'){
-          oval(.2,accent,0,1.47,-.08,1.2,.22,.67);
-          box(parent,.27,.03,.13,accent,0,1.43,.17);
+          oval(.2,accent,0,1.41,.08,1.2,.22,.67);
+          box(parent,.27,.03,.13,accent,0,1.37,.32);
         }
       } else if(species==='shrimp'){
         [-2,-1,0,1,2].forEach(function(i){
@@ -509,9 +510,9 @@
         });
         oval(.17,accent,0,.64,-.38,1.3,.55,.6);
         if(personId==='pharmacy'){
-          box(parent,.13,.13,.025,'#fff8e6',.24,1.27,.33);
-          box(parent,.025,.09,.031,accent,.24,1.27,.355);
-          box(parent,.09,.025,.031,accent,.24,1.27,.36);
+          box(parent,.13,.13,.025,'#fff8e6',.11,1.18,.22);
+          box(parent,.025,.09,.031,accent,.11,1.18,.245);
+          box(parent,.09,.025,.031,accent,.11,1.18,.25);
         }
       } else if(species==='sea turtle'){
         oval(.49,body,0,.46,0,1.1,.5,.95);

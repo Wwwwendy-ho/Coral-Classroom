@@ -22,7 +22,12 @@
       try {
         var night = reefNight(), view = RL.view;
         if(!view || view.night !== night){
-          if(view){ view.renderer.dispose(); view.renderer.forceContextLoss && view.renderer.forceContextLoss(); }
+          if(view){
+            if(typeof reefCrabDispose === 'function'){
+              reefCrabDispose(view.crab); reefCrabDispose(view.spareCrab); reefCrabDispose(view.leaving);
+            }
+            view.renderer.dispose(); view.renderer.forceContextLoss && view.renderer.forceContextLoss();
+          }
           view = RL.view = reefLobbyBuild(models, night);
         }
         document.body.classList.add('r3-lobby');

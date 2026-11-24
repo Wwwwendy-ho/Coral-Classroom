@@ -16,7 +16,7 @@
   var BB_KEEP = 80;   // letters kept in the journal: plenty for a trip, and small in storage
   function bbStoreKey(){ return 'cc-bottles-' + (S.profile && S.profile.id || 'guest'); }
   function bbData(){
-    var d = null; try { d = JSON.parse(localStorage.getItem(bbStoreKey()) || 'null'); } catch(e){}
+    var d = null; try { d = safeJsonParse(localStorage.getItem(bbStoreKey()), null); } catch(e){}
     d = d && typeof d === 'object' ? d : {}; d.l = Array.isArray(d.l) ? d.l : [];
     return d;
   }

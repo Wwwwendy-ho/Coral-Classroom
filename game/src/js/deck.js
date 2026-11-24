@@ -20,7 +20,7 @@
   function deckToday(){ var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
   function deckDayNum(){ var d = new Date(); return Math.floor((d.getTime() - d.getTimezoneOffset() * 6e4) / 864e5); }
   function deckData(){
-    var d = null; try { d = JSON.parse(localStorage.getItem(deckStoreKey()) || 'null'); } catch(e){}
+    var d = null; try { d = safeJsonParse(localStorage.getItem(deckStoreKey()), null); } catch(e){}
     d = d && typeof d === 'object' ? d : {};
     d.legs = Array.isArray(d.legs) ? d.legs : []; d.done = d.done || {}; d.cp = d.cp || {};
     return d;

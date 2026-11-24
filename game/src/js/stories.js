@@ -808,7 +808,7 @@
       var cards = [].concat.apply([], lists);
       var lang = storyLangFor(cards);
       var recent = [];
-      try { recent = JSON.parse(localStorage.getItem(storyRecentKey()) || '[]'); } catch(e){}
+      try { recent = safeJsonParse(localStorage.getItem(storyRecentKey()), []); if(!Array.isArray(recent)) recent = []; } catch(e){}
       var words = StoryMaker.applyLevels(StoryMaker.collectWords(cards), wbBuild(decks, lists, lang === 'ko' ? 'ko' : 'en', marks));
       var story = StoryMaker.make({ lang: lang, words: words, recent: recent });
       try { localStorage.setItem(storyRecentKey(), JSON.stringify([story.arc].concat(recent.filter(function(a){ return a !== story.arc; })).slice(0, 6))); } catch(e){}

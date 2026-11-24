@@ -20,7 +20,7 @@
   var PAT_MASTERED = 0.8;
   function patStoreKey(){ return 'cc-patterns-' + (S.profile && S.profile.id || 'guest'); }
   function patData(){
-    var d = null; try { d = JSON.parse(localStorage.getItem(patStoreKey()) || 'null'); } catch(e){}
+    var d = null; try { d = safeJsonParse(localStorage.getItem(patStoreKey()), null); } catch(e){}
     d = d && typeof d === 'object' ? d : {};
     d.m = d.m || {}; d.r = d.r || {}; d.s = d.s || {};
     return d;

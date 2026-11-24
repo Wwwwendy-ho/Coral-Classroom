@@ -476,7 +476,7 @@
         '</button>';
     }).join('');
 
-    var currentAlgo = S.settings.algorithm || 'sm2_speed';
+    var currentAlgo = S.settings.algorithm || 'fsrs6';
     var algoOptsHTML = ALGORITHMS.map(function(a){
       return '' +
         '<button type="button" class="algo-opt'+(a.id===currentAlgo?' active':'')+'" data-algo="'+a.id+'">' +
@@ -1004,7 +1004,7 @@
       downscalePhoto(file, 1600).then(function(blob){
         return Assets.upload(blob);
       }).then(function(res){
-        S.cardFormDraft = Object.assign({}, draft, { photoId: res.id, photoUrl: res.url });
+        S.cardFormDraft = Object.assign({}, draft, { photoId: res.id, photoUrl: safePhotoUrl(res.url) });
         S.photoUploading = false;
         render();
         // An earlier unsaved upload from this same form session, now superseded, is a clean orphan.
@@ -1034,7 +1034,7 @@
       if(mode !== 'read' && mode !== 'blend' && mode !== 'listen' && mode !== 'echo' && !back) return;
       if(requiresChoices && choicesArr.length < 1) return;
       var photoId = draft.photoId || '';
-      var photoUrl = draft.photoUrl || '';
+      var photoUrl = safePhotoUrl(draft.photoUrl || '');
       var tcSecondsEl = document.getElementById('cardTcSeconds');
       var tcSecondsVal = tcSecondsEl ? parseInt(tcSecondsEl.value, 10) : NaN;
       var listenAnsSel = document.getElementById('cardListenAnswer');

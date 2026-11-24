@@ -11,7 +11,7 @@
     if(loading) return loading;
     loading = new Promise(function(resolve){
       var inline = document.getElementById('coralWordsData');
-      if(inline){ try { D = JSON.parse(inline.textContent); } catch(e){ D = null; } resolve(D); return; }
+      if(inline){ try { var sec = window.CoralCoveSecurity; D = sec && typeof sec.safeJsonParse === 'function' ? sec.safeJsonParse(inline.textContent, null) : JSON.parse(inline.textContent, function(k, v){ return (k === '__proto__' || k === 'constructor' || k === 'prototype') ? undefined : v; }); } catch(e){ D = null; } resolve(D); return; }
       if(window.CORAL_WORDS){ D = window.CORAL_WORDS; resolve(D); return; }
       var s = document.createElement('script');
       s.src = 'words-data.js?v=' + (window.CORAL_WORDS_VERSION || '1');

@@ -45,33 +45,46 @@
     setCourseOn: function(on){ if(!S.profile) return Promise.resolve(false); S.profile.courseOn = !!on;
       return Promise.resolve(S.store.updateProfile(S.profile.id, { courseOn: !!on })).then(function(){ return true; }, function(){ return false; }); },
     needsGrownUpCheck: function(){ return !reefNoPin() && !reefInsideAdult('library'); },
+    gate: typeof window.CoralCoveGate !== 'undefined' ? window.CoralCoveGate : null,
     // the learner model (learner.js), read-only: what this profile knows, per word and per skill
     learner: {
       summary: function(){ return Learner.summary(); },
       item: function(t){ return Learner.item(t); },
-      due: function(now, ch){ return Learner.due(now, ch); }
+      due: function(now, ch){ return Learner.due(now, ch); },
+      weakest: function(t, now){ return Learner.weakest(t, now); },
+      focus: function(now){ return Learner.regionFocus(now); },
+      events: function(limit){ return Learner.events(limit); }
     }
   };
   // Runs at the end of renderHome(): outside Edit Mode the deck menu becomes the reef (every profile).
   function reefHome(){
     if(!reefGame() || S.editMode) return;
+    clearTimeout(reefHome.coverT);
+    var pid = S.profile && S.profile.id;
+    if(reefHome.pid !== pid){ reefHome.pid = pid; reefHome.at = Date.now(); reefHome.timedOut = false; }
     var zones = reefZones();
     if(!zones.length){
       // Just opened and the decks (or their card counts) aren't in yet: keep the calm-water cover up instead of
-      // flashing the plain screen. Once loaded, render a Coral Cove Welcome stop so players always enter the 3D map.
-      var pid = S.profile && S.profile.id;
-      if(reefHome.pid !== pid){ reefHome.pid = pid; reefHome.at = Date.now(); }
+      // flashing the plain screen. Once loaded (or immediately in local mode), render a Coral Cove Welcome stop
+      // so 0-deck profiles always enter the crafted 3D Coral Cove map and upgraded Shelly.
       var counting = S.decks.some(function(d){ return !d.archived && !S.dueCounts[d.id]; });
-      var fresh = !S.decks.length && Date.now() - reefHome.at < 2500;
-      if((counting || fresh) && !R3.failed){
+      var liveWait = !!(S.store && S.store.live);
+      var fresh = liveWait && !S.decks.length && Date.now() - reefHome.at < 2500;
+      if((counting || fresh) && !reefHome.timedOut && !R3.failed){
         document.body.classList.add('r3-full', 'r3-loading');
-        clearTimeout(reefHome.coverT); reefHome.coverT = setTimeout(function(){ if(!document.querySelector('.r3')) document.body.classList.remove('r3-full', 'r3-loading'); }, counting ? 8000 : 2500 - (Date.now() - reefHome.at));
+        reefHome.coverT = setTimeout(function(){
+          reefHome.timedOut = true;
+          if(!document.querySelector('.r3') && S.view === 'home' && !S.editMode && reefGame() && !R3.failed) render();
+          else if(!document.querySelector('.r3')) document.body.classList.remove('r3-full', 'r3-loading');
+        }, counting ? 8000 : Math.max(0, 2500 - (Date.now() - reefHome.at)));
         return;
       }
       zones = [{
         id: 'other', label: 'Coral Cove', place: reefPlaceFor('other', 'Coral Cove'),
         items: [{ d: { id:'__portal:library', name:'Deck Library', emoji:'📚', regionPortal:'library' }, dc: { due: 0, total: 1 }, kind: 'Explore', state: 'ready' }]
       }];
+    } else {
+      reefHome.timedOut = false;
     }
     ['.subject-tabs', '.deck-grid', '.empty-filter-note'].forEach(function(sel){ var e = app.querySelector(sel); if(e) e.hidden = true; });
     var holder = document.createElement('div');

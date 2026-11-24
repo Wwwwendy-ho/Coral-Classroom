@@ -12,7 +12,7 @@
      m, the notes read. Losing it only loses the ticks. */
   function lhStoreKey(){ return 'cc-light-' + (S.profile && S.profile.id || 'guest'); }
   function lhData(){
-    var d = null; try { d = JSON.parse(localStorage.getItem(lhStoreKey()) || 'null'); } catch(e){}
+    var d = null; try { d = safeJsonParse(localStorage.getItem(lhStoreKey()), null); } catch(e){}
     d = d && typeof d === 'object' ? d : {}; d.s = d.s || {}; d.m = d.m || {};
     return d;
   }

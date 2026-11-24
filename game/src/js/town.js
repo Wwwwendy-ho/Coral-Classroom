@@ -21,7 +21,7 @@
     return String(gloss || '').split(';').map(function(p){ var b = p.split('='); return { ko: b[0], en: b[1] || '', base: b[2] || '' }; });
   }
   function townDoneKey(){ return 'cc-town-done-' + (S.profile && S.profile.id || 'guest'); }
-  function townDone(){ try { return JSON.parse(localStorage.getItem(townDoneKey()) || '{}') || {}; } catch(e){ return {}; } }
+  function townDone(){ try { var d = safeJsonParse(localStorage.getItem(townDoneKey()), null); return d && typeof d === 'object' && !Array.isArray(d) ? d : {}; } catch(e){ return {}; } }
   function townMarkDone(id, good){
     var d = townDone(); d[id] = { at: Date.now(), good: good };
     try { localStorage.setItem(townDoneKey(), JSON.stringify(d)); } catch(e){}

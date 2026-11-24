@@ -1291,10 +1291,9 @@
   function commitGrade(rating, skipSound){
     if(S.view !== 'study' || !S.currentDeckId || !S.studyQueue.length) return; // cove: left mid-answer
     var card = S.studyQueue.shift();
-    // 'leitner' uses its own fixed-box engine; the other two options share the SM-2 engine and only
-    // differ upstream, in whether autoRating() let response time influence the rating at all. Either
-    // way, the parent-set difficulty (round size aside) shapes how far a good answer is spaced out
-    // and how hard a struggling card gets reinforced — see DIFFICULTIES up top.
+    // 'fsrs6' is the default 21-weight scheduler; 'leitner' uses fixed boxes; 'sm2_speed'/'sm2_plain'
+    // use SM-2 (differing only in whether autoRating() weighs response time). Either way, the
+    // parent-set difficulty shapes target retention / spacing and struggle reinforcement.
     var algo = S.settings.algorithm || 'fsrs6';
     var diff = currentDifficulty();
     var updates = card._practice ? {} : (
@@ -1308,12 +1307,14 @@
     updates.timesCorrect = (card.timesCorrect || 0) + (rating !== 'again' ? 1 : 0);
     if(!card._myWords) S.store.updateCard(S.currentDeckId, card.id, updates);   // My words cards are made for the round and never saved
     planNoteAnswer(card, rating);
+    if(!S.sessionReviewed) S.roundCorrectStreak = 0;
     S.sessionReviewed += 1;
     S.sessionStars += STARS[rating];
     // Snapshot this card as the one swipe-back target — captured before choiceState/cardFlipped
     // reset below, and overwritten on every answer, so there's always exactly one card of "undo peek."
     var gradedMode = (CARD_MODES.indexOf(card.mode) !== -1) ? card.mode : 'flip';
-    learnerNoteAnswer(card, gradedMode, rating);   // the learner model (learner.js) records alongside the scheduler
+    var elapsedMs = S.cardShownAt ? Math.max(0, Date.now() - S.cardShownAt) : 0;
+    learnerNoteAnswer(card, gradedMode, rating, { ms: elapsedMs, mode: gradedMode });   // the learner model (learner.js) records alongside the scheduler
     myWordsNoteAnswer(card, gradedMode, rating);   // a missed Korean card joins My words (my-words.js)
     var isDragGraded = gradedMode === 'match' || gradedMode === 'blank';
     var tcGraded = gradedMode === 'timedchoice' ? S.timedChoiceState : null;
@@ -1347,10 +1348,21 @@
       }, 900);
     }
     if(S.roundTally) S.roundTally[rating] = (S.roundTally[rating] || 0) + 1;
+    if(rating === 'again') S.roundCorrectStreak = 0;
+    else S.roundCorrectStreak = (S.roundCorrectStreak || 0) + 1;
     if(!skipSound){
       if(rating === 'again') Sound.wrong();
       else if(rating === 'hard') Sound.tap();
       else Sound.correct();
+    }
+    if(S.roundCorrectStreak >= 2){
+      try {
+        if(Sound.isEnabled() && typeof Sound.streak === 'function'){
+          var streakN = S.roundCorrectStreak;
+          if(!skipSound) setTimeout(function(){ if(S.view === 'study' && Sound.isEnabled()) Sound.streak(streakN); }, 190);
+          else Sound.streak(streakN);
+        }
+      } catch(e){}
     }
     if(S.sessionTally){
       S.sessionTally.reviewedCount += 1;
@@ -1395,6 +1407,7 @@
     // without this guard a single round could be counted twice (double stars, double history).
     if(S.finishingRound) return;
     S.finishingRound = true;
+    S.roundCorrectStreak = 0;
     deckTick('cards', S.currentDeckId);   // a leg of Captain's Deck's voyage, if today's has this deck (or My words)
     var t = S.roundTally || { again:0, hard:0, good:0, easy:0 };
     var total = S.sessionReviewed;

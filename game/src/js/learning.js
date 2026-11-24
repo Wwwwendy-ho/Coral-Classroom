@@ -1,4 +1,4 @@
-  /* ============ scheduler (Anki-style SM-2) ============ */
+  /* ============ scheduler (FSRS-6 primary, Anki-style SM-2 & Leitner) ============ */
   var LEARN_STEPS_MIN = [1, 10];      // new cards step through these (minutes) before graduating
   var RELEARN_STEPS_MIN = [10];       // a lapsed review card steps through these before returning to review
   var GRADUATING_DAYS = 1;            // interval a card gets when it finishes the learn steps on "Good"
@@ -196,8 +196,8 @@
 
   // Parents can pick which of these runs in Manage Decks → ⚙️ Scheduling. The choice is stored as
   // S.settings.algorithm and is app-wide (not per-deck). Two axes differ on purpose: how the
-  // scheduling math works (adaptive SM-2 vs. fixed Leitner boxes), and whether answer speed factors
-  // into grading at all (only 'sm2_speed' looks at elapsed time).
+  // scheduling math works (FSRS-6, adaptive SM-2, or fixed Leitner boxes), and whether answer speed
+  // factors into grading at all ('fsrs6' and 'sm2_speed' look at elapsed time).
   var ALGORITHMS = [
     {
       id: 'fsrs6',
@@ -338,10 +338,11 @@
     var streak = g === 1 ? priorStreak + 1 : 0;
     var mem = null;
     if(card.fsrsS && card.fsrsD){
-      mem = { s: card.fsrsS, d: card.fsrsD, last: card.fsrsLast || now };
+      mem = { s: card.fsrsS, d: card.fsrsD, last: Math.min(now, card.fsrsLast || now) };
     } else if((card.interval || 0) > 0){
       var estD = typeof fsrsClampD === 'function' ? fsrsClampD(11 - (card.ease || EASE_START) * 2.4) : 5;
-      mem = { s: Math.max(0.5, card.interval), d: estD, last: (card.due || now) - card.interval * 86400000 };
+      var estLast = Math.min(now, (card.due || now) - card.interval * 86400000);
+      mem = { s: Math.max(0.5, card.interval), d: estD, last: estLast };
     }
     var ret = fsrs6RetentionForDiff(diff);
     var res = fsrsReview(mem, g, now, { retention: ret });
@@ -403,7 +404,7 @@
   // Every per-card mode other than plain 'flip' (the fallback for anything unrecognised).
   var CARD_MODES = ['read', 'choice', 'match', 'blank', 'timedchoice', 'blend', 'listen', 'echo', 'build', 'hanja', 'numsys'];
 
-  /* ============ automatic grading: derive the SM-2 rating from correct/incorrect + time taken ============ */
+  /* ============ automatic grading: derive the rating from correct/incorrect + time taken ============ */
   /* No more asking the kid to self-judge "was that easy or hard" — we just need right vs. wrong (still
      self-reported for flip/read cards, since there's no way to grade an open-ended answer automatically;
      fully automatic for multiple-choice, since the app already knows). Response time then decides how
@@ -454,8 +455,9 @@
     }
 
     function tone(freq, start, dur, type, peak){
+      if(!enabled) return;
       var c = ensureCtx();
-      if(!c || !enabled) return;
+      if(!c) return;
       try {
         var osc = c.createOscillator();
         var gain = c.createGain();
@@ -471,8 +473,9 @@
     }
 
     function slideTone(freqStart, freqEnd, start, dur, type, peak){
+      if(!enabled) return;
       var c = ensureCtx();
-      if(!c || !enabled) return;
+      if(!c) return;
       try {
         var osc = c.createOscillator();
         var gain = c.createGain();
@@ -516,8 +519,13 @@
     return {
       isEnabled: function(){ return enabled; },
       setEnabled: function(v){
-        enabled = v;
-        try { localStorage.setItem('coralCoveSound', v ? '1' : '0'); } catch(e){}
+        enabled = !!v;
+        try { localStorage.setItem('coralCoveSound', enabled ? '1' : '0'); } catch(e){}
+        if(!enabled){
+          try { if(typeof Ambience !== 'undefined' && Ambience.stop) Ambience.stop(); } catch(e){}
+          try { if(typeof Speech !== 'undefined' && Speech.stop) Speech.stop(); } catch(e){}
+        }
+        try { if(typeof reefMusicUpdate === 'function') reefMusicUpdate(); } catch(e){}
       },
       unlock: function(){ ensureCtx(); startSilentUnlock(); }, // call on first user gesture so mobile browsers allow audio later
       // Shares this one AudioContext with the Ambience module below, rather than each spinning up
@@ -560,6 +568,7 @@
       sessionStart: function(){ tone(523, 0, 0.10, 'triangle', 0.15); tone(659, 0.09, 0.10, 'triangle', 0.15); tone(784, 0.18, 0.18, 'triangle', 0.16); vibrate([20, 50, 20]); },
       sessionEnd: function(){ tone(784, 0, 0.12, 'triangle', 0.16); tone(659, 0.11, 0.10, 'triangle', 0.14); tone(523, 0.20, 0.18, 'triangle', 0.15); vibrate([30, 60, 30, 60, 30]); },
       streak: function(n){
+        if(!enabled) return;
         var notes = [523.25, 587.33, 659.25, 783.99, 880, 1046.5];
         var f = notes[Math.min(notes.length - 1, Math.max(0, (n || 1) - 1))];
         tone(f, 0, 0.11, 'triangle', 0.11);
@@ -607,7 +616,10 @@
     function loadPack(p){
       if(packs[p]) return Promise.resolve(packs[p]);
       if(packLoads[p]) return packLoads[p];
-      packLoads[p] = fetch(BASE + index.packs[p] + '?v=' + (index.v || 1)).then(function(r){
+      var file = index && index.packs && index.packs[p];
+      var safeFile = typeof isSafeAssetFilename === 'function' ? isSafeAssetFilename(file, /\.mp3$/i) : (typeof file === 'string' && file.length <= 128 && /^[A-Za-z0-9][A-Za-z0-9._-]*\.mp3$/i.test(file) && file.indexOf('..') === -1);
+      if(!safeFile) return Promise.resolve(null);
+      packLoads[p] = fetch(BASE + file + '?v=' + encodeURIComponent(index.v || 1)).then(function(r){
         if(!r.ok) throw new Error('pack ' + p);
         return r.arrayBuffer();
       }).then(function(buf){ packs[p] = buf; delete packLoads[p]; return buf; })
@@ -796,8 +808,8 @@
       return loose.length ? pickBest(loose) : null;
     }
 
-    function doSpeak(text, lang, rate, token){
-      if(token !== speakToken) return;
+    function doSpeak(text, lang, rate, token, onEnd){
+      if(token !== speakToken){ if(onEnd) onEnd(); return; }
       try {
         playerGen++; if(player) player.pause();
         var synth = window.speechSynthesis;
@@ -812,16 +824,19 @@
         utter.pitch = 1;  // natural pitch: raising it made voices sound thinner and less clear
         utter.volume = 1;
         lastUtter = utter;
-        utter.onend = utter.onerror = function(){ if(lastUtter === utter) lastUtter = null; };
+        var fired = false;
+        function done(){ if(fired) return; fired = true; if(lastUtter === utter) lastUtter = null; if(onEnd) onEnd(); }
+        utter.onend = done;
+        utter.onerror = done;
         // iOS Safari can drop a line spoken in the same instant as cancel(); give it a beat only then.
-        if(busy) setTimeout(function(){ if(token === speakToken && lastUtter === utter) synth.speak(utter); }, 60);
+        if(busy) setTimeout(function(){ if(token === speakToken && lastUtter === utter) synth.speak(utter); else done(); }, 60);
         else synth.speak(utter);
-      } catch(e){}
+      } catch(e){ if(onEnd) onEnd(); }
     }
 
-    function speakSynth(str, rate, token){
-      if(token !== speakToken) return;
-      if(!supported) return;
+    function speakSynth(str, rate, token, onEnd){
+      if(token !== speakToken){ if(onEnd) onEnd(); return; }
+      if(!supported){ if(onEnd) onEnd(); return; }
       var lang = detectLang(str);
       if(!voices.length){
         refreshVoices();
@@ -830,18 +845,18 @@
           // browser's un-loaded default happens to be (or silently failing if it has none yet).
           var tries = 0;
           var wait = setInterval(function(){
-            if(token !== speakToken){ clearInterval(wait); return; }
+            if(token !== speakToken){ clearInterval(wait); if(onEnd) onEnd(); return; }
             refreshVoices();
             tries++;
             if(voices.length || tries > 10){
               clearInterval(wait);
-              doSpeak(str, lang, rate, token);
+              doSpeak(str, lang, rate, token, onEnd);
             }
           }, 150);
           return;
         }
       }
-      doSpeak(str, lang, rate, token);
+      doSpeak(str, lang, rate, token, onEnd);
     }
 
     function listVoices(lang){
@@ -855,7 +870,26 @@
     // may play again later -- so the first touch anywhere plays a silent blip on it, and the automatic
     // read-alouds (a card settling, a story page turning) keep working after that.
     var SILENT_MP3 = 'data:audio/mpeg;base64,//NExAAAAANIAAAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMu//NExFMAAANIAAAAADEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMu//NExKYAAANIAAAAADEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NExKwAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NExKwAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV';
-    var player = null, playerGen = 0, speakToken = 0, unlocked = false;
+    var player = null, playerGen = 0, speakToken = 0, unlocked = false, activeDuckRelease = null;
+    function beginSpeechDuck(maxMs){
+      if(activeDuckRelease) activeDuckRelease();
+      var done = false, timer = null;
+      function release(){
+        if(done) return;
+        done = true;
+        if(timer){ clearTimeout(timer); timer = null; }
+        if(activeDuckRelease === release) activeDuckRelease = null;
+        if(typeof reefMusicSpeechDuck === 'function'){
+          try { reefMusicSpeechDuck(false); } catch(e){}
+        }
+      }
+      activeDuckRelease = release;
+      if(typeof reefMusicSpeechDuck === 'function'){
+        try { reefMusicSpeechDuck(true); } catch(e){}
+        timer = setTimeout(release, maxMs || 15000);
+      }
+      return release;
+    }
     function getPlayer(){
       if(!player){
         player = new Audio();
@@ -877,6 +911,8 @@
     ['pointerdown', 'touchend', 'keydown'].forEach(function(ev){ document.addEventListener(ev, unlockAudio, true); });
     function stop(){
       speakToken++; playerGen++;
+      if(activeDuckRelease) activeDuckRelease();
+      else if(typeof reefMusicSpeechDuck === 'function'){ try { reefMusicSpeechDuck(false, true); } catch(e){} }
       try { if(player) player.pause(); } catch(e){}
       try { if(supported) window.speechSynthesis.cancel(); } catch(e){}
     }
@@ -917,18 +953,19 @@
       return String(str).replace(/[\u{1F000}-\u{1FFFF}\u2600-\u27BF\uFE0F]/gu, '').replace(/([.!?:])\s+/g, '$1\n').split('\n')
         .map(function(x){ return x.trim(); }).filter(function(x){ return /[\p{L}\p{N}]/u.test(x); });
     }
-    function speakParts(str, rate, variant, token, onEnd){
+    function speakParts(str, rate, variant, token, onEnd, synthOnEnd){
       var parts = sentences(str);
-      if(parts.length < 2){ if(onEnd) speakSynthCb(str, onEnd, token); else speakSynth(str, rate, token); return; }
+      if(parts.length < 2){ if(onEnd) speakSynthCb(str, onEnd, token); else speakSynth(str, rate, token, synthOnEnd); return; }
       Promise.all(parts.map(function(pt){ return resolveClip(pt, variant).catch(function(){ return null; }); })).then(function(clips){
-        if(token !== speakToken){ if(onEnd) onEnd(); return; }
-        if(!clips.some(Boolean)){ if(onEnd) speakSynthCb(str, onEnd, token); else speakSynth(str, rate, token); return; }   // nothing to stitch: one smooth device reading
+        if(token !== speakToken){ if(onEnd) onEnd(); else if(synthOnEnd) synthOnEnd(); return; }
+        if(!clips.some(Boolean)){ if(onEnd) speakSynthCb(str, onEnd, token); else speakSynth(str, rate, token, synthOnEnd); return; }   // nothing to stitch: one smooth device reading
         var i = 0;
         (function next(){
-          if(token !== speakToken || i >= parts.length){ if(onEnd) onEnd(); return; }
+          if(token !== speakToken || i >= parts.length){ if(onEnd) onEnd(); else if(synthOnEnd) synthOnEnd(); return; }
           var pt = parts[i], c = clips[i]; i++;
-          if(c) playUrl(c.url, clipRate(c, rate, variant), next).catch(function(){ speakSynthCb(pt, next, token); });
-          else speakSynthCb(pt, next, token);
+          if(c) playUrl(c.url, clipRate(c, rate, variant), next).catch(function(){ if(onEnd) speakSynthCb(pt, next, token); else speakSynth(pt, rate, token, next); });
+          else if(onEnd) speakSynthCb(pt, next, token);
+          else speakSynth(pt, rate, token, next);
         })();
       });
     }
@@ -937,13 +974,20 @@
       var str = String(text);
       var rate = opts && opts.rate, variant = opts && opts.variant;
       var token = ++speakToken;
+      var releaseDuck = beginSpeechDuck(15000);
       resolveClip(str, variant).then(function(clip){
-        if(token !== speakToken) return; // a newer line was asked for while this one was loading
+        if(token !== speakToken){ releaseDuck(); return; } // a newer line was asked for while this one was loading
         if(clip){
-          playUrl(clip.url, clipRate(clip, rate, variant)).catch(function(){ if(token === speakToken) speakSynth(str, rate, token); });
+          playUrl(clip.url, clipRate(clip, rate, variant), releaseDuck).catch(function(){
+            if(token === speakToken) speakSynth(str, rate, token, releaseDuck);
+            else releaseDuck();
+          });
           return;
         }
-        speakParts(str, rate, variant, token);
+        speakParts(str, rate, variant, token, null, releaseDuck);
+      }).catch(function(){
+        if(token === speakToken) speakSynth(str, rate, token, releaseDuck);
+        else releaseDuck();
       });
     }
     // Equation Feed needs to know exactly when a spoken line actually finishes (real clip or
@@ -1005,9 +1049,11 @@
       // 'end' event, which used to leave anything waiting on onEnd -- like a Sound Blend card's
       // auto-advance -- stuck forever. onEnd now fires once, either when playback really ends or
       // after a generous length-based timeout, whichever comes first.
+      var maxMs = Math.min(rate ? 14000 : 9000, (2600 + str.length * 110) / Math.min(1, rate || 1));
+      var releaseDuck = beginSpeechDuck(maxMs + 500);
       var origEnd = onEnd, endFired = false;
-      var watchdog = setTimeout(function(){ onEnd(); }, Math.min(rate ? 14000 : 9000, (2600 + str.length * 110) / Math.min(1, rate || 1)));
-      onEnd = function(){ if(endFired) return; endFired = true; clearTimeout(watchdog); if(origEnd) origEnd(); };
+      var watchdog = setTimeout(function(){ onEnd(); }, maxMs);
+      onEnd = function(){ if(endFired) return; endFired = true; clearTimeout(watchdog); releaseDuck(); if(origEnd) origEnd(); };
       var token = ++speakToken;
       resolveClip(str, variant).then(function(clip){
         if(token !== speakToken){ onEnd(); return; }
@@ -1208,6 +1254,7 @@
     }
 
     function play(id){
+      if(!Sound.isEnabled()) return;
       var track = SOUND_TRACKS.filter(function(t){ return t.id === id; })[0];
       if(!track) return;
       stop();

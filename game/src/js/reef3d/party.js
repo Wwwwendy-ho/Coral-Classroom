@@ -12,7 +12,9 @@
   var reefBoardQ = Promise.resolve();
   function reefBoardSave(){
     if(!S.store || !S.profile) return;
-    var snap = JSON.parse(JSON.stringify(reefBoard())), store = S.store, profileId = S.profile.id;
+    var rawSnap = JSON.stringify(reefBoard());
+    var snap = typeof safeJsonParse === 'function' ? safeJsonParse(rawSnap, {}) : JSON.parse(rawSnap, function(k, v){ return (k === '__proto__' || k === 'constructor' || k === 'prototype') ? undefined : v; });
+    var store = S.store, profileId = S.profile.id;
     reefBoardQ = reefBoardQ.then(function(){
       return store.getStats(profileId).then(function(st){
         return store.setStats(Object.assign({}, st || {}, { board: snap }), profileId);
@@ -381,7 +383,7 @@
     var sk = el.querySelector('[data-skip]'); if(sk) sk.addEventListener('click', function(){ shut(); if(done) done(); });
   }
   function reefShuffle(a){ for(var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
-  function reefPlainText(h){ var d = document.createElement('div'); d.innerHTML = String(h || ''); return (d.textContent || '').replace(/\s+/g, ' ').trim(); }
+  function reefPlainText(h){ return typeof safePlainText === 'function' ? safePlainText(h) : String(h == null ? '' : h).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim(); }
   // Card Match: three pairs of sea friends as pictures (she can't read the words yet). Each card says its
   // friend's name when it turns over, and again when a pair is found.
   function reefGameMatch(play, finish){

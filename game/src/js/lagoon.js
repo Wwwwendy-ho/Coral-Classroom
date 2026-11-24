@@ -21,7 +21,7 @@
   }
   function lagoonStory(id){ return LAGOON_STORIES.find(function(s){ return s.id === id; }) || null; }
   function lagoonDoneKey(){ return 'cc-lagoon-done-' + (S.profile && S.profile.id || 'guest'); }
-  function lagoonDone(){ try { return JSON.parse(localStorage.getItem(lagoonDoneKey()) || '{}') || {}; } catch(e){ return {}; } }
+  function lagoonDone(){ try { var d = safeJsonParse(localStorage.getItem(lagoonDoneKey()), null); return d && typeof d === 'object' && !Array.isArray(d) ? d : {}; } catch(e){ return {}; } }
   function lagoonMarkDone(id, right){
     var d = lagoonDone(); d[id] = { at: Date.now(), right: right };
     try { localStorage.setItem(lagoonDoneKey(), JSON.stringify(d)); } catch(e){}

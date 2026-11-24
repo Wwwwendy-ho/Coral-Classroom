@@ -585,25 +585,37 @@
       '</div>';
     var inp = app.querySelector('#adultGateInput'), form = app.querySelector('.reef-password-form');
     var button = app.querySelector('[data-gate="check"]'), message = app.querySelector('#adultGateMsg');
-    function readLock(){
-      try {
-        if(typeof localStorage === 'undefined') return { fails:0, until:0 };
-        var r = localStorage.getItem('cc-gate-lock');
-        var o = r ? JSON.parse(r) : null;
-        return o && typeof o.fails === 'number' && typeof o.until === 'number' ? o : { fails:0, until:0 };
-      } catch(e){ return { fails:0, until:0 }; }
-    }
-    function writeLock(o){
-      try { if(typeof localStorage !== 'undefined') localStorage.setItem('cc-gate-lock', JSON.stringify(o)); } catch(e){}
-    }
+    var gate = window.CoralCoveGate || {
+      checkLock: function(){
+        try {
+          if(typeof localStorage === 'undefined') return { locked:false, waitSecs:0, fails:0, until:0 };
+          var r = localStorage.getItem('cc-gate-lock');
+          var o = r ? JSON.parse(r, function(k, v){ return (k === '__proto__' || k === 'constructor' || k === 'prototype') ? undefined : v; }) : null;
+          var fails = o && typeof o.fails === 'number' && o.fails >= 0 ? Math.floor(o.fails) : 0;
+          var until = o && typeof o.until === 'number' && o.until >= 0 ? o.until : 0;
+          var now = Date.now(), locked = until > now;
+          return { locked:locked, waitSecs: locked ? Math.ceil((until - now) / 1000) : 0, fails:fails, until:until };
+        } catch(e){ return { locked:false, waitSecs:0, fails:0, until:0 }; }
+      },
+      recordFailure: function(){
+        var cur = this.checkLock(), nf = cur.fails + 1;
+        var secs = nf >= 5 ? Math.min(300, 15 * Math.pow(2, Math.min(nf - 5, 10))) : 0;
+        var until = secs ? Date.now() + secs * 1000 : 0;
+        try { if(typeof localStorage !== 'undefined') localStorage.setItem('cc-gate-lock', JSON.stringify({ fails:nf, until:until })); } catch(e){}
+        return { fails:nf, secs:secs, until:until };
+      },
+      resetLock: function(){
+        try { if(typeof localStorage !== 'undefined') localStorage.setItem('cc-gate-lock', JSON.stringify({ fails:0, until:0 })); } catch(e){}
+      }
+    };
     function current(){ return S.adultGate === g && S.pinPromptFor === kind && inp.isConnected; }
     function ready(text){ g.pending=false; inp.disabled=false; button.disabled=false; form.removeAttribute('aria-busy'); message.textContent=text; inp.focus(); }
     function check(){
       if(g.pending || !current()) return;
-      var lk = readLock(), now = Date.now();
-      if(lk.until > now){
-        var wait = Math.ceil((lk.until - now) / 1000);
-        message.textContent = 'Too many attempts. Wait ' + wait + 's and try again.';
+      var lk = gate.checkLock();
+      if(lk.locked){
+        inp.value='';
+        message.textContent = 'Too many attempts. Wait ' + lk.waitSecs + 's and try again.';
         return;
       }
       var value=inp.value; inp.value='';
@@ -611,13 +623,11 @@
       g.pending=true; inp.disabled=true; button.disabled=true; form.setAttribute('aria-busy','true'); message.textContent='Checking password…';
       Promise.resolve().then(function(){ return reefCheckGrownUpPassword(value); }).then(function(ok){
         if(!current()) return;
-        if(ok){ writeLock({ fails:0, until:0 }); S.adultGate=null; grownUpPassed(kind); }
+        if(ok){ gate.resetLock(); S.adultGate=null; grownUpPassed(kind); }
         else {
-          var nf = (lk.fails || 0) + 1;
-          var secs = nf >= 5 ? Math.min(300, 15 * Math.pow(2, nf - 5)) : 0;
-          writeLock({ fails:nf, until: secs ? Date.now() + secs * 1000 : 0 });
+          var failRes = gate.recordFailure();
           inp.setAttribute('aria-invalid','true');
-          ready(secs ? 'Incorrect password. Too many attempts — wait ' + secs + 's.' : 'Incorrect password. Try again.');
+          ready(failRes.secs ? 'Incorrect password. Too many attempts — wait ' + failRes.secs + 's.' : 'Incorrect password. Try again.');
         }
       },function(){ if(current()) ready('Password verification is unavailable. Reload and try again.'); });
     }
@@ -719,11 +729,11 @@
      through Web Audio so it can fade out on the iPad too. Without the file, the usual chime plays. ---------- */
   var reefWinBuf = null, reefWinLoading = null, reefWinNode = null;
   function reefWinLoad(){
+    try { if(!Sound.isEnabled()) return null; } catch(e){ return null; }
     if(reefWinBuf || reefWinLoading) return reefWinLoading;
     var ctx = null; try { ctx = Sound.getCtx(); } catch(e){}
     if(!ctx || !window.fetch) return null;
-    // packed in a script file first, for the same reason as the songs (see reefMusicBytes)
-    reefWinLoading = (window.CORAL_COVE_SEED ? Promise.reject() : reefMusicScript('win')).catch(function(){ return fetch('win.mp3').then(function(r){ if(!r.ok) throw new Error('no music file'); return r.arrayBuffer(); }); })
+    reefWinLoading = fetch('win.mp3').then(function(r){ if(!r.ok) throw new Error('no music file'); return r.arrayBuffer(); })
       .then(function(b){ return new Promise(function(res, rej){ ctx.decodeAudioData(b, res, rej); }); })
       .then(function(buf){ reefWinBuf = buf; return buf; })
       .catch(function(){ reefWinLoading = 'none'; return null; });
@@ -734,7 +744,7 @@
     if(!(S.profile && S.profile.mode === 'child')){ try { Sound.correct(); } catch(e){} return; }   // the "I Like to Move It" clip is just for the child's profile
     var ctx = null; try { ctx = Sound.getCtx(); } catch(e){}
     if(!ctx) return;
-    if(!reefWinBuf){ var p = reefWinLoad(); if(p && p.then) p.then(function(buf){ if(buf && full) reefWinSound(true); }); else { try { Sound.correct(); } catch(e){} } return; }
+    if(!reefWinBuf){ var p = reefWinLoad(); if(p && p.then) p.then(function(buf){ if(buf && full && Sound.isEnabled()) reefWinSound(true); }); else { try { if(Sound.isEnabled()) Sound.correct(); } catch(e){} } return; }
     try {
       if(ctx.state === 'suspended' && ctx.resume) ctx.resume();
       if(reefWinNode){ try { reefWinNode.stop(); } catch(e){} }
@@ -916,7 +926,7 @@
       done();
     });
   }
-  function askPlainText(h){ var d = document.createElement('div'); d.innerHTML = String(h || ''); return (d.textContent || '').trim(); }
+  function askPlainText(h){ return safePlainText(h); }
   var KO_EN_STOP = /^(what|whats|is|are|does|do|mean|means|meaning|the|a|an|how|say|said|in|korean|word|words|of|to|i|it|this|that|can|could|you|please|tell|me|about|explain|translate|hear|heard|someone|someones|sound|sounds|like|thing|again|and|or|for|my|was|by|with|use|using|when|hey|hi|shelly|lumi)$/;
   // The closest Korean words to Korean typed in English letters, best first: [{ ko, en, rom, typed, d }]
   function koRomanCandidates(q){
