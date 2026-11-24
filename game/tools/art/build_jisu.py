@@ -135,75 +135,73 @@ def make_mesh(lod,mat,rig):
     obj=m.create(mat,rig);obj.name='Jisu | authored shell, crab and postal kit';obj.data.name='Jisu organic production mesh'
     return obj
 
+def smoothstep(a,b,x):
+    t=np.clip((x-a)/(b-a),0.0,1.0)
+    return t*t*(3.0-2.0*t)
+
 def paint(name,u,v):
-    noise=(np.sin(u*179+np.sin(v*51))*np.sin(v*251+u*13)+np.sin(u*773+v*431)*.4)
-    rgb=np.zeros((*u.shape,3),np.float32);rough=np.full(u.shape,.66);metal=np.zeros(u.shape)
+    rgb=np.zeros((*u.shape,3),np.float32);rough=np.full(u.shape,.68,dtype=np.float32);metal=np.zeros(u.shape,dtype=np.float32)
     def color(c):rgb[:]=c
     def overlay(c,a):
-        a=np.clip(a,0,1)[...,None];rgb[:]=rgb*(1-a)+np.array(c)*a
+        a=np.clip(a,0.0,1.0)[...,None];rgb[:]=rgb*(1.0-a)+np.array(c,dtype=np.float32)*a
     if name=='shell':
-        color((214,210,197));cloud=h.cloud(u*1.2,v*.78)*.65+.25*np.sin(u*311+v*83)*np.sin(v*91+u*14)
-        patches=np.clip((cloud-.03)*1.7,0,.75)
-        overlay((128,116,100),patches)
-        overlay((103,100,88),(np.sin(u*511+v*331)*np.sin(v*431-u*191)>.83)*.16)
-        ridge=.5+.5*np.cos(TAU*(u*91+v*5.89))
-        overlay((113,107,96),(.5+.5*np.cos(TAU*(u*91+v*5.89)+.8))**15*.23)
-        overlay((246,243,227),ridge**14*.36)
-        fine=(.5+.5*np.cos(u*TAU*364+v*61))**26
-        overlay((114,110,101),fine*.18)
-        rgb+=noise[...,None]*2.1
+        # Silky warm ivory-cream shell with smooth sand-caramel spiral bands (zero dark speckle noise)
+        color((246,238,224))
+        band=(0.5+0.5*np.cos(TAU*(u*5.0+v*1.15)))**2
+        overlay((208,186,154),band*0.48)
+        overlay((255,248,236),smoothstep(0.70,0.98,v)*0.42)
+        rough[:]=0.64
     elif name in ('limb','claw','body'):
-        rough[:]=.50 if name=='claw' else .58
-        color((24,35,59));overlay((48,65,92),(.5+.5*np.sin(u*11+v*22))*.32)
+        rough[:]=0.58 if name=='claw' else 0.64
+        color((36,56,98))
+        overlay((54,82,134),smoothstep(0.15,0.85,v)*0.65)
         if name=='limb':
-            bands=(np.abs(np.sin(TAU*(v*2.45+.03*np.sin(u*9))))<.48).astype(float)
-            overlay((16,115,226),bands*.95)
-            overlay((47,159,249),bands*(.5+.5*np.sin(u*TAU))**3*.37)
+            bands=smoothstep(0.35,0.55,0.5+0.5*np.sin(TAU*(v*2.45+0.03*np.sin(u*9.0))))
+            overlay((28,134,242),bands*0.94)
+            overlay((84,182,255),bands*smoothstep(0.2,0.9,v)*0.32)
         elif name=='body':
-            spots=(np.sin(u*91+np.sin(v*81)*3)*np.sin(v*113+u*11)>.78)
-            overlay((23,139,235),spots*.80)
-        freckles=(np.sin(u*143+np.sin(v*91)*4)*np.sin(v*191+u*47)>.74)
-        overlay((175,192,208),freckles*(.86 if name=='claw' else .23))
-        rgb+=noise[...,None]*2.1
+            overlay((52,136,234),smoothstep(0.30,0.85,v)*0.45)
+        elif name=='claw':
+            overlay((64,96,152),smoothstep(0.45,0.95,v)*0.52)
     elif name=='eye':
-        color((71,68,91));rad=v
-        iris=np.clip((.43-rad)*120,0,1)
-        irisrgb=np.zeros_like(rgb);irisrgb[:]=(52,49,72)
-        fil=np.sin(u*TAU*69+np.sin(v*51)*2)*np.sin(u*TAU*107-v*13)
-        irisrgb+=fil[...,None]*7
-        limbal=np.clip((rad-.37)*80,0,1)
-        irisrgb=irisrgb*(1-limbal[...,None]) + np.array((52,50,73))*limbal[...,None]
-        rgb=rgb*(1-iris[...,None])+irisrgb*iris[...,None]
-        overlay((6,12,22),np.clip((.31-rad)*150,0,1))
-        rough[:]=.20
-        # A-eye clear bright catchlights in painted atlas; actual lighting adds glints.
-        x=np.sin(v*math.pi)*np.cos(u*TAU);z=np.sin(v*math.pi)*np.sin(u*TAU)
-        overlay((252,255,255),np.clip((.091-np.sqrt((x+.145)**2+(z-.21)**2))*180,0,1))
-        overlay((194,225,235),np.clip((.035-np.sqrt((x-.13)**2+(z+.11)**2))*160,0,1)*.65)
+        # Crisp warm pearl-white sclera + glowing golden-amber iris + twin Nintendo catchlights
+        color((255,252,246));rad=v
+        iris=np.clip((0.430-rad)*140.0,0.0,1.0);a=u*TAU
+        honey_w=np.clip(0.35+0.48*np.clip((rad-0.22)/0.19,0.0,1.0)-0.24*np.sin(a),0.0,1.0)
+        irisrgb=np.array((132,62,22),dtype=np.float32)*(1.0-honey_w[...,None])+np.array((248,174,54),dtype=np.float32)*honey_w[...,None]
+        limbal=np.clip((rad-0.39)*110.0,0.0,1.0)
+        irisrgb=irisrgb*(1.0-0.75*limbal[...,None])+np.array((52,34,24),dtype=np.float32)*(0.75*limbal[...,None])
+        rgb=rgb*(1.0-iris[...,None])+irisrgb*iris[...,None]
+        overlay((16,14,22),np.clip((0.270-rad)*160.0,0.0,1.0))
+        rough[:]=0.14
+        x=np.sin(v*math.pi)*np.cos(a);z=np.sin(v*math.pi)*np.sin(a)
+        overlay((255,255,250),np.clip((0.118-np.sqrt((x+0.16)**2+(z-0.22)**2))*160.0,0.0,1.0))
+        overlay((255,252,245),np.clip((0.054-np.sqrt((x-0.15)**2+(z+0.16)**2))*160.0,0.0,0.85))
     elif name=='cloth':
-        color((231,95,16));weave=np.sin(u*TAU*118)*np.sin(v*TAU*131)
-        rgb+=weave[...,None]*6+noise[...,None]*2
-        seam=np.minimum(np.minimum(u,1-u),np.minimum(v,1-v))
-        overlay((143,56,10),np.exp(-seam*65)*.45)
-        stitch=(np.abs(seam-.035)<.007)&(np.sin((u+v)*TAU*46)>.08)
-        overlay((255,205,109),stitch*.92)
-        rough[:]=.86
+        # Clean silky tangerine-orange postal pouch + golden stitch trim
+        fold=0.5+0.5*np.sin(u*math.pi)*np.sin(v*math.pi)
+        color((226,98,22))
+        overlay((248,128,36),fold*0.72)
+        seam=np.minimum(np.minimum(u,1.0-u),np.minimum(v,1.0-v))
+        overlay((186,76,16),np.exp(-seam*55.0)*0.35)
+        stitch=(np.abs(seam-0.036)<0.007)&(np.sin((u+v)*TAU*36.0)>0.08)
+        overlay((255,218,128),stitch*0.90)
+        rough[:]=0.80
     elif name=='paper':
-        color((238,229,208));rgb+=noise[...,None]*1.3
-        # Real envelope fold outlines, as restrained creased fibers.
-        d=np.minimum(np.abs(v-(1-u*.78)),np.abs(v-(.22+u*.78)))
-        crease=np.exp(-d*155)*.45
-        overlay((164,153,131),crease)
-        overlay((255,249,230),np.exp(-np.abs(d-.009)*190)*.24)
-        rough[:]=.88
+        color((248,240,224))
+        d=np.minimum(np.abs(v-(1.0-u*0.78)),np.abs(v-(0.22+u*0.78)))
+        overlay((214,200,176),np.exp(-d*140.0)*0.42)
+        rough[:]=0.82
     elif name=='orange':
-        color((246,111,15));rgb+=noise[...,None]*2;rough[:]=.48
-        overlay((255,159,36),(.5+.5*np.sin(u*TAU))*.23)
-    elif name=='metal':color((193,155,75));rough[:]=.39;metal[:]=.55
+        color((248,122,28))
+        overlay((255,168,54),(0.5+0.5*np.sin(u*TAU))*0.28)
+        rough[:]=0.52
+    elif name=='metal':color((224,178,84));rough[:]=0.34;metal[:]=0.50
     elif name=='dark':
-        color((141,134,120));overlay((33,38,44),np.clip(v*1.7,0,1));rgb+=noise[...,None]*1.6;rough[:]=.87
-    else:color((232,232,217))
-    return np.clip(rgb,0,255),rough,metal
+        color((156,146,136));overlay((44,48,56),np.clip(v*1.55,0.0,1.0));rough[:]=0.85
+    else:color((242,238,226))
+    return np.clip(rgb,0.0,255.0),rough,metal
+paint_mp=paint
 
 def atlas(output,size):
     color=np.full((size,size,3),128,dtype=np.uint8);surface=np.zeros_like(color);factor=size/1024

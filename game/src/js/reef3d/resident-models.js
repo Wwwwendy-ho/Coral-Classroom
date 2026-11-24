@@ -2,7 +2,7 @@
      a failed or unfinished model leaves the procedural resident in place. */
   // Only validated assets belong in the active registry. Multiple residents can
   // share a region; a dormant candidate never triggers download or decoding.
-  var REGION_RESIDENT_MODELS = { town:[{ id:'taxi', url:'assets/models/taxi-squid.glb', closeUrl:'assets/models/taxi-squid-close.glb' }] };
+  var REGION_RESIDENT_MODELS = { town:[{ id:'taxi', url:'assets/models/taxi-squid.glb?v=mp-1', closeUrl:'assets/models/taxi-squid-close.glb?v=mp-1' }] };
   var REGION_RESIDENT_CANDIDATES = {
     'cafe-seahorse':{ region:'town', id:'cafe-seahorse', target:'cafe', url:'assets/models/cafe-seahorse.glb?v=mp-1', closeUrl:'assets/models/cafe-seahorse-close.glb?v=mp-1' },
     jisu:{ region:'beach', id:'jisu', target:'host', url:'assets/models/jisu.glb?v=mp-2', closeUrl:'assets/models/jisu-close.glb?v=mp-2' },
@@ -145,6 +145,14 @@
     gltf.scene.traverse(function(o){
       if(!o.isMesh) return;
       o.castShadow=false;o.receiveShadow=true;
+      if(!o.userData.residentRaycastGuarded && o.raycast){
+        var baseRaycast=o.raycast;
+        o.raycast=function(raycaster,intersects){
+          for(var p=this;p;p=p.parent) if(p.visible===false) return;
+          return baseRaycast.call(this,raycaster,intersects);
+        };
+        o.userData.residentRaycastGuarded=true;
+      }
       (Array.isArray(o.material) ? o.material : [o.material]).forEach(function(m){
         if(!m) return;
         var pigment=!!(weights && masked.indexOf(m)>=0);
@@ -228,7 +236,7 @@
         state.mixer=new T.AnimationMixer(model); state.action=state.mixer.clipAction(idle); state.action.play();
         var react=gltf.animations.find(function(a){return a.name==='React';});
         if(react){ state.react=state.mixer.clipAction(react); state.react.setLoop(T.LoopOnce,1);
-          state.mixer.addEventListener('finished',function(e){ if(e.action===state.react){state.action.reset().play();state.react.crossFadeTo(state.action,.18,false);} }); }
+          state.mixer.addEventListener('finished',function(e){ if(e.action===state.react){state.action.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).play();state.react.crossFadeTo(state.action,.18,false);} }); }
       }
     }
     state.lastTime=0;
@@ -271,6 +279,8 @@
       state.detailed=detailed;
       if(state.root) state.root.visible=detailed && !close;
       if(state.fallback) state.fallback.forEach(function(item){item.object.visible=!detailed && !close && item.visible;});
+    } else if(close && state.root && state.root.visible){
+      state.root.visible=false;
     }
     var player=close || state;
     if(!player.mixer || !detailed || reefCalm()){player.lastTime=0; return;}
@@ -278,11 +288,34 @@
     var dt=elapsed>0 && elapsed<.25 ? Math.min(.1,elapsed) : 0;
     player.lastTime=now; player.mixer.update(dt);
   }
+  function regionResidentFindState(target){
+    if(!target) return null;
+    if(target.entry && target.target) return target;
+    var view=(target.regionPeople && target.scene) ? target : (typeof R3!=='undefined' && R3.view);
+    var actor=target.encounter ? target.encounter.actor : (target.isObject3D || target.position) ? target : null;
+    if(!view || !actor) return null;
+    return regionResidentStates(view).find(function(item){return item.target && item.target.object===actor;}) || null;
+  }
+  function regionResidentPlayReact(stateOrActor,mood){
+    if(typeof reefCalm==='function' && reefCalm()) return false;
+    var state=regionResidentFindState(stateOrActor);
+    if(!state || state.disposed) return false;
+    var view=(stateOrActor && stateOrActor.regionPeople && stateOrActor.scene) ? stateOrActor : (typeof R3!=='undefined' && R3.view);
+    if(view && !regionResidentAlive(view,state)) return false;
+    var player=(state.close && state.close.root) ? state.close : (state.root && state.detailed ? state : null);
+    if(!player || !player.mixer || !player.react) return false;
+    var speed=mood==='happy' ? 1.15 : mood==='encourage' ? .92 : 1;
+    player.react.reset().setEffectiveTimeScale(speed).setEffectiveWeight(1).play();
+    if(player.action && player.action!==player.react && player.action.isRunning()){
+      player.action.crossFadeTo(player.react,.14,false);
+    }
+    return true;
+  }
   function regionResidentEncounter(view,actor){
     var state=regionResidentStates(view).find(function(item){return item.target.object===actor;});
     if(!state || !regionResidentAlive(view,state)) return;
     if(state.root && !state.detailed){ state.detailed=true; state.root.visible=true; state.fallback.forEach(function(item){item.object.visible=false;}); }
-    if(state.react && !reefCalm()){state.react.reset().play(); state.action.crossFadeTo(state.react,.18,false);}
+    regionResidentPlayReact(state);
     regionResidentCloseRequest(view,state);
   }
   // The close asset is scoped to one encounter. The board model stays cached,
@@ -360,9 +393,12 @@
       // Preserve the current board idle phase on a smooth quality swap.
       if(state.action && state.action.getClip().name===idle.name && state.action.getClip().duration>0) close.action.time=state.action.time/state.action.getClip().duration*idle.duration;
       var react=(gltf.animations || []).find(function(a){return a.name==='React';});
-      if(react && e.phase==='intro' && !reefCalm()){
-        close.react=close.mixer.clipAction(react);close.react.setLoop(T.LoopOnce,1);close.react.play();close.action.crossFadeTo(close.react,.18,false);
-        close.mixer.addEventListener('finished',function(ev){if(ev.action===close.react){close.action.reset().play();close.react.crossFadeTo(close.action,.18,false);}});
+      if(react){
+        close.react=close.mixer.clipAction(react);close.react.setLoop(T.LoopOnce,1);
+        close.mixer.addEventListener('finished',function(ev){if(ev.action===close.react){close.action.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).play();close.react.crossFadeTo(close.action,.18,false);}});
+        if(e.phase==='intro' && !reefCalm()){
+          close.react.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).play();close.action.crossFadeTo(close.react,.18,false);
+        }
       }
     }
   }
