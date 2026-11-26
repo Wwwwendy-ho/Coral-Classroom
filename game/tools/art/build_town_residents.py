@@ -2183,15 +2183,15 @@ def seal_mesh(close, mat, rig):
     )
 
     for s, suf in ((-1, 'L'), (1, 'R')):
-        # v42 MIN-9: Tall unmistakable Mario Party vertical pill-oval eyes (aspect=0.58, warm chestnut-violet + vertical sparkle)!
-        shelly_eye(b, s, q(18, 28), q(12, 18), seal_eye, .136, seal_head, (q(34, 56), q(20, 34)), depth=.110, swell=.046)
-        # Plump sculpted cream whisker pads + 3 clean sturdy tapered whiskers per side.
+        # v49: Proportionate cute Mario Party vertical pill-oval eyes seated cleanly inside skull contour!
+        shelly_eye(b, s, q(18, 28), q(12, 18), seal_eye, .104, seal_head, (q(34, 56), q(20, 34)), depth=.095, swell=.042)
+        # Plump sculpted cream whisker pads + 3 clean delicate tapered whiskers per side.
         b.ellipsoid((s * .076, -.632, .852), (.098, .084, .072), 'ivory', 'Head', q(14, 22), q(8, 14))
-        for i, (dz_w, pitch_w, len_w) in enumerate(((.022, .055, .165), (0.0, -.005, .180), (-.022, -.060, .155))):
+        for i, (dz_w, pitch_w, len_w) in enumerate(((.020, .045, .118), (0.0, -.005, .128), (-.020, -.050, .112))):
             root = Vector((s * .115, -.685, .845 + dz_w))
             b.tube(
-                lambda t, s=s, root=root, pitch_w=pitch_w, len_w=len_w: root + Vector((s * len_w * t, -.030 * t + .055 * (t ** 2), pitch_w * t - .025 * (t ** 2))),
-                lambda t: .0068 * (1.0 - .64 * t) * math.sqrt(max(0.0, 1.0 - max(0.0, (t - .85) / .15) ** 2)),
+                lambda t, s=s, root=root, pitch_w=pitch_w, len_w=len_w: root + Vector((s * len_w * t, -.025 * t + .045 * (t ** 2), pitch_w * t - .020 * (t ** 2))),
+                lambda t: .0048 * (1.0 - .64 * t) * math.sqrt(max(0.0, 1.0 - max(0.0, (t - .85) / .15) ** 2)),
                 q(4, 6), q(6, 10), 'ivory', 'Head'
             )
         # Gracefully curved plush teardrop paddle fore-flippers resting naturally along the flanks.
@@ -2244,7 +2244,7 @@ def seal_mesh(close, mat, rig):
             x = s * .132 * t
             # Joyful raised upturned 'w' smile: cute shallow center cusp (0.838) -> soft dip (0.826) -> high happy upturned cheek corners (0.870)!
             z = .838 - .022 * math.sin(t * math.pi * .88) + .038 * (t ** 1.45)
-            y = _seal_muzzle_y(x, z) - .007
+            y = _seal_muzzle_y(x, z) - .011
             return Vector((x, y, z))
         b.tube(
             seal_smile_pt,
@@ -2253,28 +2253,28 @@ def seal_mesh(close, mat, rig):
             uvfn=lambda u, v: (u, .62 + .32 * v)
         )
 
-    # Cozy coral-and-cream striped harbor neckerchief with smooth Head<->Torso collar weights so it moves naturally with the seal's neck!
+    # Cozy coral-and-cream striped harbor neckerchief fitted flush around the seal's neck!
     def kerchief_ring(u, v):
         a = T * u
         b_ang = T * v
-        rc_x = .272 + .050 * math.cos(b_ang)
-        rc_y = .256 + .050 * math.cos(b_ang)
-        z_ring = .658 - .052 * math.cos(a) + .050 * math.sin(b_ang)
-        return Vector((rc_x * math.sin(a), -.25 - rc_y * math.cos(a), z_ring))
+        rc_x = .245 + .042 * math.cos(b_ang)
+        rc_y = .228 + .042 * math.cos(b_ang)
+        z_ring = .658 - .046 * math.cos(a) + .042 * math.sin(b_ang)
+        return Vector((rc_x * math.sin(a), -.22 - rc_y * math.cos(a), z_ring))
     def seal_kerchief_w(p, u, v):
         wh = smooth_w(.55, .80, p.z) * .48
         return {'Head': wh, 'Torso': 1.0 - wh}
     b.grid(kerchief_ring, q(28, 44), q(10, 16), 'cloth', seal_kerchief_w, True, False, uvfn=lambda u, v: (u, v))
-    # Neat sculpted bandana knot tucked cleanly to the LEFT-FRONT SIDE (x=-0.245, well clear of chin/mouth!).
-    knot_c = Vector((-.248, -.402, .622))
-    b.ellipsoid(knot_c, (.068, .062, .062), 'cloth', lambda p, u, v: {'Head': .20, 'Torso': .80}, q(12, 18), q(8, 12), uvfn=lambda u, v: (.20 + .30 * u, .50))
-    # Two short adorable flared triangular kerchief ends fluttering cleanly outward to the left side!
-    for dy_k, dz_k, tilt_k, L_k in ((-.02, .01, .28, .22), (.04, -.06, -.22, .19)):
+    # Neat sculpted bandana knot tucked cleanly to the LEFT-FRONT SIDE flush against the collar!
+    knot_c = Vector((-.210, -.355, .622))
+    b.ellipsoid(knot_c, (.056, .052, .052), 'cloth', lambda p, u, v: {'Head': .20, 'Torso': .80}, q(12, 18), q(8, 12), uvfn=lambda u, v: (.20 + .30 * u, .50))
+    # Two short adorable flared triangular kerchief ends draped naturally downward & slightly left!
+    for dy_k, dz_k, tilt_k, L_k in ((-.02, -.11, .28, .12), (.03, -.14, -.22, .10)):
         u_w = Vector((0.0, math.sin(tilt_k), math.cos(tilt_k)))
         u_t = Vector((0.0, -math.cos(tilt_k), math.sin(tilt_k)))
         def k_tail(u, v, dy_k=dy_k, dz_k=dz_k, u_w=u_w, u_t=u_t, L_k=L_k):
             a = T * u
-            c = knot_c + Vector((-.02 - L_k * v, dy_k * v - .04 * (v ** 1.5), dz_k * v - .04 * (v ** 2)))
+            c = knot_c + Vector((-.01 - L_k * v, dy_k * v - .02 * (v ** 1.5), dz_k * v - .03 * (v ** 2)))
             w = (.034 + .054 * v) * math.sqrt(max(0.0, 1.0 - (v ** 7.0)))
             th = .015 * math.sqrt(max(0.0, 1.0 - (v ** 5.0)))
             return c + u_w * (w * math.cos(a)) + u_t * (th * math.sin(a))

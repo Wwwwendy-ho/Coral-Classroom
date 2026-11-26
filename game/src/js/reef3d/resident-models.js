@@ -2,7 +2,7 @@
      a failed or unfinished model leaves the procedural resident in place. */
   // Only validated assets belong in the active registry. Multiple residents can
   // share a region; a dormant candidate never triggers download or decoding.
-  var REGION_RESIDENT_MODELS = { town:[{ id:'taxi', url:'assets/models/taxi-squid.glb?v=mp-40', closeUrl:'assets/models/taxi-squid-close.glb?v=mp-40' }] };
+  var REGION_RESIDENT_MODELS = { town:[{ id:'taxi', url:'assets/models/taxi-squid.glb?v=mp-43', closeUrl:'assets/models/taxi-squid-close.glb?v=mp-43' }] };
   var REGION_RESIDENT_CANDIDATES = {
     'cafe-seahorse':{ region:'town', id:'cafe-seahorse', target:'cafe', localFwdYaw:-0.58, url:'assets/models/cafe-seahorse.glb?v=mp-39', closeUrl:'assets/models/cafe-seahorse-close.glb?v=mp-39' },
     jisu:{ region:'beach', id:'jisu', target:'host', boardScale:1.75, url:'assets/models/jisu.glb?v=mp-39', closeUrl:'assets/models/jisu-close.glb?v=mp-39' },
@@ -16,7 +16,7 @@
     'hotel-whale':{ region:'town', id:'hotel-whale', target:'hotel', boardScale:0.85, url:'assets/models/hotel-whale.glb?v=mp-40', closeUrl:'assets/models/hotel-whale-close.glb?v=mp-40' },
     'pharmacy-shrimp':{ region:'town', id:'pharmacy-shrimp', target:'pharmacy', boardScale:1.45, url:'assets/models/pharmacy-shrimp.glb?v=mp-39', closeUrl:'assets/models/pharmacy-shrimp-close.glb?v=mp-39' },
     'subway-ray':{ region:'town', id:'subway-ray', target:'subway', boardScale:0.38, url:'assets/models/subway-ray.glb?v=mp-41', closeUrl:'assets/models/subway-ray-close.glb?v=mp-41' },
-    'friend-seal':{ region:'town', id:'friend-seal', target:'friend', boardScale:0.68, url:'assets/models/friend-seal.glb?v=mp-40', closeUrl:'assets/models/friend-seal-close.glb?v=mp-40' },
+    'friend-seal':{ region:'town', id:'friend-seal', target:'friend', boardScale:0.68, url:'assets/models/friend-seal.glb?v=mp-41', closeUrl:'assets/models/friend-seal-close.glb?v=mp-41' },
     bok:{ regions:['town','lagoon','caves','patterns','beach','light','captain'], id:'bok', target:'shopkeeper', url:'assets/models/bok.glb?v=mp-39', closeUrl:'assets/models/bok-close.glb?v=mp-39' }
   };
   // Call only after validating both the asset and its cast/reaction contract.
@@ -38,6 +38,7 @@
   // geometry, texture, performance and cast review. Drafts stay dormant.
   var REGION_RESIDENT_VALIDATED_IDS = ['cafe-seahorse','jisu','shop-octopus','mira','echo','pip','hana','captain-bay','bok','restaurant-otter','hotel-whale','pharmacy-shrimp','subway-ray','friend-seal'];
   REGION_RESIDENT_VALIDATED_IDS.forEach(regionResidentEnable);
+  var regionResidentInFlightCount=0, REGION_RESIDENT_MAX_INFLIGHT=1;
   var regionResidentInFlight=false;
 
   // Cached per-renderer procedural sunlit sky/ocean PMREM environment map for
@@ -203,8 +204,8 @@
     p.resident=p.residents[0] || null;
   }
   function regionResidentRequest(view,state){
-    if(state.requested || regionResidentInFlight || !regionResidentAlive(view,state)) return;
-    state.requested=true; regionResidentInFlight=true;
+    if(state.requested || regionResidentInFlightCount>=REGION_RESIDENT_MAX_INFLIGHT || !regionResidentAlive(view,state)) return;
+    state.requested=true; regionResidentInFlightCount++; regionResidentInFlight=regionResidentInFlightCount>=REGION_RESIDENT_MAX_INFLIGHT;
     var finished=false;
     var isEncounterFocus=!!(view.encounter && view.encounter.actor===state.target.object);
     var staggerParse=regionResidentCanDefer(view) && !isEncounterFocus;
@@ -213,7 +214,8 @@
         finished=true;
         clearTimeout(state.timer); state.timer=null;
         if(state.parseRaf && typeof cancelAnimationFrame==='function'){ cancelAnimationFrame(state.parseRaf); state.parseRaf=null; }
-        regionResidentInFlight=false;
+        if(regionResidentInFlightCount>0) regionResidentInFlightCount--;
+        regionResidentInFlight=regionResidentInFlightCount>=REGION_RESIDENT_MAX_INFLIGHT;
       }
     }
     state.cancel=finish;
@@ -684,6 +686,8 @@
     view._crabMoveCache=null;
     view._crabSpotCache=null;
     if(matchingIntro) encounter.actorBounds=actor.userData.regionBounds;
+    actor.userData.hasResidentGlb=true;
+    if(!matchingIntro) actor.rotation.y=0;
     state.pending=null; state.root=fit; state.fitAnchor={baseX:old.centerX/scale,baseY:fitBaseY,baseZ:old.centerZ/scale,cx:center.x*factor,cy:center.y*factor,cz:center.z*factor}; state.appliedYaw=0; state.appliedPitch=0; state.appliedPitchYaw=0; state.appliedRoll=0; state.appliedYOff=0; state.appliedXOff=0; state.appliedZOff=0; state.appliedEuler=false;
     state.fallback=fallback.map(function(o,i){return {object:o,visible:fallbackVisibility[i]};}); state.detailed=true;
     if(matchingIntro && encounter && encounter.interior && typeof regionEncounterInteriorPlaceActor==='function'){
@@ -730,8 +734,9 @@
         }
         if(gp){ var dx=actor.position.x-gp.x, dz=actor.position.z-gp.z; d2=dx*dx+dz*dz; }
       }
-      var t=state.entry.target;
-      return {vis:vis,d2:d2,pri:t==='host'?0:(t==='shopkeeper'?2:1)};
+      var t=state.entry.target, id=state.entry.id;
+      var heroFg=(t==='host' || id==='hotel-whale' || id==='friend-seal' || id==='pharmacy-shrimp');
+      return {vis:vis,d2:d2,pri:heroFg?0:(t==='shopkeeper'?2:1)};
     }
     var ranks=new Map();
     states.forEach(function(state){ranks.set(state,rank(state));});
@@ -759,7 +764,7 @@
     var isEncActor=!!(view.encounter && view.encounter.actor===actor);
     var focused=!view.encounter || isEncActor;
     var allowRequest=isEncActor || !tickBudget || tickBudget.canRequestBoard;
-    if(focused && allowRequest && !state.requested && (isEncActor || dx*dx+dz*dz<52*52)){
+    if(focused && allowRequest && !state.requested && !state.root && (isEncActor || dx*dx+dz*dz<52*52)){
       regionResidentRequest(view,state);
       if(tickBudget && !isEncActor) tickBudget.canRequestBoard=false;
     }
@@ -848,11 +853,11 @@
     if(typeof document.getElementById==='function' && document.getElementById('reef-resident-inline-'+entry.id) &&
        !document.getElementById('reef-resident-inline-'+entry.id+'-close')) return;
     if(!entry.closeUrl || !e || e.actor!==state.target.object || !regionEncounterActive(view) ||
-       (e.phase!=='intro' && e.phase!=='lesson') || state.close || regionResidentInFlight) return;
+       (e.phase!=='intro' && e.phase!=='lesson') || state.close || regionResidentInFlight || regionResidentInFlightCount>=REGION_RESIDENT_MAX_INFLIGHT) return;
     var close=state.close={encounter:e,root:null,controller:typeof AbortController==='function'?new AbortController():null,lastTime:0};
-    regionResidentInFlight=true;
+    regionResidentInFlightCount++; regionResidentInFlight=regionResidentInFlightCount>=REGION_RESIDENT_MAX_INFLIGHT;
     var finished=false;
-    function finish(){if(!finished){finished=true;clearTimeout(close.timer);regionResidentInFlight=false;}}
+    function finish(){if(!finished){finished=true;clearTimeout(close.timer);if(regionResidentInFlightCount>0) regionResidentInFlightCount--;regionResidentInFlight=regionResidentInFlightCount>=REGION_RESIDENT_MAX_INFLIGHT;}}
     close.cancel=finish;
     close.timer=setTimeout(function(){if(close.controller) close.controller.abort();finish();},10000);
     function valid(){return !finished && regionResidentAlive(view,state) && state.close===close &&

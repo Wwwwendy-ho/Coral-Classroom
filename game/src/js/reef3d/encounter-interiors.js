@@ -2060,7 +2060,7 @@
       g.fillStyle = grad;
       g.fillRect(0, 0, w, h);
     });
-    return new T.MeshBasicMaterial({ map: tex, transparent: true, opacity: opacity, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+    return new T.MeshBasicMaterial({ map: tex, transparent: true, opacity: opacity, depthWrite: false, depthTest: true, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
   }
 
   function regionInteriorContactCoreMat(opacity){
@@ -2208,7 +2208,7 @@
     return new T.MeshBasicMaterial({
       map: tex, transparent: true, side: T.DoubleSide,
       opacity: opacityOverride != null ? opacityOverride : (night ? 0.16 : 0.28),
-      depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1
+      depthWrite: false, depthTest: true, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1
     });
   }
 
@@ -2298,7 +2298,7 @@
     return new T.MeshBasicMaterial({
       map: tex, transparent: true, side: T.DoubleSide,
       opacity: opacityOverride != null ? opacityOverride : (night ? 0.18 : 0.32),
-      blending: T.NormalBlending, depthWrite: false,
+      blending: T.NormalBlending, depthWrite: false, depthTest: true,
       polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1
     });
   }
@@ -2445,6 +2445,13 @@
     regionInteriorAdd(group, new T.SphereGeometry(0.018, 8, 6), kit.M(brightBrass), hatX, y + 0.956, z);
   }
 
+  function regionInteriorAddApothecaryHerbJar(kit, group, x, y, z, glazeColor){
+    var T = window.THREE;
+    regionInteriorAddCyl(kit, group, 0.062, 0.056, 0.135, 12, glazeColor || 0xf4efe2, x, y + 0.068, z);
+    regionInteriorAddCyl(kit, group, 0.066, 0.066, 0.024, 12, 0xb88b5a, x, y + 0.145, z);
+    regionInteriorAddBox(kit, group, 0.058, 0.042, 0.012, 0xfaf6ec, x, y + 0.072, z + 0.058);
+  }
+
   function regionInteriorAddApothecaryCabinet(kit, group, x, y, z){
     var wood = 0x6f4325;
     var drawerWood = 0x9c6d42;
@@ -2460,6 +2467,23 @@
         regionInteriorAdd(group, new window.THREE.SphereGeometry(0.018, 6, 6), kit.M(0xd4a348), dx, dy - 0.045, z + 0.245);
       }
     }
+    // Upper 3-shelf apothecary display hutch stocked with jewel-toned bottles & ceramic herb jars
+    regionInteriorAddBox(kit, group, 0.92, 1.18, 0.08, 0x5c361d, x, y + 2.13, z - 0.16);
+    regionInteriorAddBox(kit, group, 1.00, 0.08, 0.38, 0x56341c, x, y + 2.74, z - 0.02);
+    [1.92, 2.32].forEach(function(sy){
+      regionInteriorAddBox(kit, group, 0.88, 0.045, 0.30, 0x56341c, x, y + sy, z - 0.02);
+    });
+    [
+      [-0.30, 1.54, 0x3ec99b, 0.20], [-0.08, 1.54, 'jar', 0xf2ebd9], [0.14, 1.54, 0xe86c8a, 0.18], [0.32, 1.54, 0x46b2e8, 0.21],
+      [-0.28, 1.94, 0x9c7ae0, 0.19], [-0.06, 1.94, 0xe8ae3c, 0.21], [0.16, 1.94, 'jar', 0xd6eadf], [0.34, 1.94, 0x58b896, 0.18],
+      [-0.28, 2.34, 'jar', 0xf4e4c8], [-0.06, 2.34, 0xde6d7d, 0.20], [0.16, 2.34, 0x5893c4, 0.18], [0.34, 2.34, 0xe2ad44, 0.20]
+    ].forEach(function(item){
+      if(item[2] === 'jar'){
+        regionInteriorAddApothecaryHerbJar(kit, group, x + item[0], y + item[1], z + 0.04, item[3]);
+      } else {
+        regionInteriorAddApothecaryBottle(kit, group, x + item[0], y + item[1], z + 0.04, item[3], item[2]);
+      }
+    });
   }
 
   function regionInteriorAddApothecaryBottle(kit, group, x, y, z, h, color, emissive){
@@ -2698,10 +2722,13 @@
       var b = regionInteriorAdd(group, new T.SphereGeometry(0.036, 8, 6), kit.M(bi % 2 ? 0x5c341d : 0x452412), x + bn[0], y + 0.365 + (bi === 4 ? 0.02 : 0), z + bn[1]);
       b.scale.set(1.15, 0.72, 0.85);
     });
-    // Small woven burlap coffee sack leaning beside barrel
-    var sk = regionInteriorAddCyl(kit, group, 0.11, 0.14, 0.24, 12, 0xd8c196, x + 0.35, y + 0.12, z + 0.05, 0.08, 0.18);
-    void sk;
-    regionInteriorAdd(group, new T.TorusGeometry(0.105, 0.014, 6, 12), kit.M(0x4b8f7a), x + 0.33, y + 0.21, z + 0.05, Math.PI / 2);
+    // Plump, 100% opaque sculpted woven burlap coffee sack beside barrel
+    var sackMat = new T.MeshToonMaterial({ color: 0xb98b56, gradientMap: kit.grad, transparent: false, depthWrite: true });
+    var sk = regionInteriorAdd(group, new T.SphereGeometry(0.145, 14, 10), sackMat, x + 0.36, y + 0.12, z + 0.02);
+    sk.scale.set(1.05, 0.92, 0.92);
+    regionInteriorAdd(group, new T.CylinderGeometry(0.052, 0.076, 0.065, 12), sackMat, x + 0.36, y + 0.235, z + 0.02);
+    var ribbonMat = new T.MeshToonMaterial({ color: 0x4b8f7a, gradientMap: kit.grad, transparent: false, depthWrite: true });
+    regionInteriorAdd(group, new T.TorusGeometry(0.056, 0.013, 6, 12), ribbonMat, x + 0.36, y + 0.24, z + 0.02, Math.PI / 2);
   }
 
   function regionInteriorAddBistroWineCask(kit, group, x, y, z){
@@ -4221,26 +4248,26 @@
       rugX: 1.50, rugZ: -0.28
     },
     restaurant: {
-      actorX: 0.52, actorZ: -1.58, actorYawFrac: 0.70, hoverY: null,
+      actorX: 0.52, actorZ: -1.58, actorYawFrac: 0.94, hoverY: null, floorLift: -0.085,
       maxY: 1.78, targetY: 1.70, maxXZ: 2.85, targetXZ: 2.70,
       shellyX: -1.72, shellyZ: -0.18,
       rugX: -1.72, rugZ: -0.18
     },
     shop: {
-      actorX: 0.18, actorZ: -1.88, actorYawFrac: 0.68, hoverY: null,
+      actorX: 0.25, actorZ: -1.78, actorYawFrac: 1.05, hoverY: null,
       maxY: 1.76, targetY: 1.68, maxXZ: 2.80, targetXZ: 2.65,
-      shellyX: -1.82, shellyZ: -0.24,
-      rugX: -1.82, rugZ: -0.24
+      shellyX: -1.20, shellyZ: -0.24,
+      rugX: -1.20, rugZ: -0.24
     },
     taxi: {
-      actorX: 1.72, actorZ: -1.62, actorYawFrac: 0.70, hoverY: 0.52,
+      actorX: 1.72, actorZ: -1.62, actorYawFrac: 0.92, hoverY: 0.34,
       maxY: 1.62, targetY: 1.56, maxXZ: 2.85, targetXZ: 2.70,
       shellyX: -1.62, shellyZ: -0.26,
       rugX: -1.62, rugZ: -0.26
     },
     subway: {
-      actorX: 1.20, actorZ: -1.68, actorYawFrac: 0.70, hoverY: 0.78,
-      maxY: 1.38, targetY: 1.28, maxXZ: 2.35, targetXZ: 2.28,
+      actorX: 0.78, actorZ: -1.75, actorYawFrac: 0.70, hoverY: 0.90,
+      maxY: 1.32, targetY: 1.24, maxXZ: 2.05, targetXZ: 1.98,
       shellyX: -0.88, shellyZ: -0.56,
       rugX: -0.88, rugZ: -0.56
     },
@@ -4251,7 +4278,7 @@
       rugX: -1.48, rugZ: -0.14
     },
     pharmacy: {
-      actorX: 1.24, actorZ: -1.72, actorYawFrac: 0.70, hoverY: 0.62,
+      actorX: 1.24, actorZ: -1.92, actorYawFrac: 0.70, hoverY: 0.38,
       maxY: 1.34, targetY: 1.34, maxXZ: 2.85, targetXZ: 2.70,
       shellyX: -1.58, shellyZ: -0.28,
       rugX: -1.58, rugZ: -0.28
@@ -4284,47 +4311,100 @@
     if(ry) cab.rotation.y = ry;
     var cabYellow = 0xf4c438;
     var cabBright = 0xfad456;
+    var cabWarm = 0xe8b228;
     var slate = 0x242d36;
     var chrome = 0xdbe3ea;
     var glassMat = kit.M(0xa8e6f5, { emissive: 0x163846 });
-    // Lower chassis & wheel arches (grounded strictly at y = 0 via 4 chunky tires r = 0.20)
-    regionInteriorAddBox(kit, cab, 1.98, 0.36, 0.96, cabYellow, 0, 0.34, 0);
-    regionInteriorAddBox(kit, cab, 0.62, 0.32, 0.92, cabYellow, 0.94, 0.32, 0); // hood
-    regionInteriorAddBox(kit, cab, 0.44, 0.30, 0.92, cabYellow, -0.96, 0.31, 0); // trunk
+    function addRoundedCapBar(len, r, col, px, py, pz, rx, ry2, rz){
+      regionInteriorAddCyl(kit, cab, r, r, len, 12, col, px, py, pz, rx || 0, rz || 0, ry2 || 0);
+    }
+    // Sculpted rounded Mario Party cab lower chassis (curved side flanks, rounded hood & trunk domes)
+    regionInteriorAddBox(kit, cab, 1.56, 0.30, 0.88, cabYellow, 0, 0.33, 0);
+    // Rounded front & rear horizontal body cylinders + domed hood & trunk
+    regionInteriorAddCyl(kit, cab, 0.16, 0.16, 0.88, 12, cabYellow, 0.78, 0.33, 0, Math.PI / 2);
+    regionInteriorAddCyl(kit, cab, 0.16, 0.16, 0.88, 12, cabYellow, -0.78, 0.33, 0, Math.PI / 2);
+    var hoodDome = regionInteriorAdd(cab, new T.SphereGeometry(0.42, 14, 10), kit.M(cabBright), 0.88, 0.31, 0);
+    hoodDome.scale.set(1.05, 0.56, 1.06);
+    var trunkDome = regionInteriorAdd(cab, new T.SphereGeometry(0.38, 14, 10), kit.M(cabYellow), -0.88, 0.31, 0);
+    trunkDome.scale.set(0.95, 0.54, 1.06);
+    // Softly rounded side door panels & lower rocker trim
+    [-0.45, 0.45].forEach(function(sz){
+      var flank = regionInteriorAdd(cab, new T.SphereGeometry(0.46, 12, 8), kit.M(cabYellow), 0.0, 0.33, sz * 0.78);
+      flank.scale.set(1.95, 0.42, 0.38);
+      regionInteriorAddBox(kit, cab, 1.50, 0.05, 0.04, cabWarm, 0.0, 0.19, sz * 1.04);
+    });
+    // Rounded wheel-well fender arches framing all 4 tires
+    [[-0.68, -0.45], [0.70, -0.45], [-0.68, 0.45], [0.70, 0.45]].forEach(function(wf){
+      var arch = regionInteriorAdd(cab, new T.TorusGeometry(0.24, 0.045, 8, 14, Math.PI), kit.M(cabBright), wf[0], 0.22, wf[1]);
+      arch.rotation.y = 0;
+    });
     // Iconic black-and-yellow checkered cab stripe along both side doors
-    [-0.488, 0.488].forEach(function(sz){
+    [-0.485, 0.485].forEach(function(sz){
       for(var ci = -4; ci <= 4; ci++){
-        regionInteriorAddBox(kit, cab, 0.16, 0.08, 0.02, (ci % 2 === 0) ? slate : cabBright, ci * 0.16, 0.36, sz);
+        regionInteriorAddBox(kit, cab, 0.15, 0.075, 0.025, (ci % 2 === 0) ? slate : cabBright, ci * 0.155, 0.35, sz);
       }
     });
-    // Rounded passenger cabin & windows
-    regionInteriorAddBox(kit, cab, 1.12, 0.40, 0.86, cabBright, -0.06, 0.70, 0);
-    regionInteriorAddBox(kit, cab, 1.06, 0.08, 0.84, cabYellow, -0.06, 0.91, 0);
-    // Front & rear windshields + side cabin windows
-    var frontGlass = regionInteriorAddBox(kit, cab, 0.05, 0.34, 0.76, glassMat, 0.51, 0.70, 0);
-    frontGlass.rotation.z = 0.24;
-    regionInteriorAddBox(kit, cab, 0.05, 0.32, 0.74, glassMat, -0.62, 0.70, 0);
-    [-0.44, 0.44].forEach(function(sz){
-      regionInteriorAddBox(kit, cab, 0.42, 0.26, 0.03, glassMat, 0.18, 0.71, sz);
-      regionInteriorAddBox(kit, cab, 0.42, 0.26, 0.03, glassMat, -0.30, 0.71, sz);
+    // Rounded Mario Party passenger cabin: domed roof + sloped front/rear windshield pillars + glossy windows
+    var cabinCore = regionInteriorAddBox(kit, cab, 0.94, 0.34, 0.80, cabBright, -0.06, 0.65, 0);
+    cabinCore.scale.set(1, 1, 1);
+    var roofDome = regionInteriorAdd(cab, new T.SphereGeometry(0.48, 16, 12), kit.M(cabBright), -0.06, 0.80, 0);
+    roofDome.scale.set(1.22, 0.34, 0.92);
+    // Rounded roof drip-rail rim
+    regionInteriorAddCyl(kit, cab, 0.04, 0.04, 0.94, 8, cabYellow, -0.06, 0.84, -0.40, 0, Math.PI / 2);
+    regionInteriorAddCyl(kit, cab, 0.04, 0.04, 0.94, 8, cabYellow, -0.06, 0.84, 0.40, 0, Math.PI / 2);
+    // Sloped front & rear windshields + matching sloped A/C pillars
+    var frontGlass = regionInteriorAddBox(kit, cab, 0.05, 0.33, 0.72, glassMat, 0.45, 0.66, 0);
+    frontGlass.rotation.z = 0.36;
+    var rearGlass = regionInteriorAddBox(kit, cab, 0.05, 0.31, 0.70, glassMat, -0.57, 0.66, 0);
+    rearGlass.rotation.z = -0.32;
+    [-0.38, 0.38].forEach(function(pz){
+      var aPillar = regionInteriorAddCyl(kit, cab, 0.032, 0.036, 0.38, 8, cabYellow, 0.45, 0.67, pz);
+      aPillar.rotation.z = 0.36;
+      var cPillar = regionInteriorAddCyl(kit, cab, 0.032, 0.038, 0.36, 8, cabYellow, -0.57, 0.67, pz);
+      cPillar.rotation.z = -0.32;
     });
-    // Glowing backlit TAXI roof topper beacon!
-    regionInteriorAddBox(kit, cab, 0.24, 0.04, 0.38, slate, -0.04, 0.97, 0);
-    regionInteriorAddBox(kit, cab, 0.20, 0.12, 0.34, kit.M(0xffe878, { emissive: 0x6e5210 }), -0.04, 1.04, 0);
-    // Chrome front bumper, grille & twin glowing round headlights
-    regionInteriorAddBox(kit, cab, 0.10, 0.10, 1.00, chrome, 1.26, 0.22, 0);
-    regionInteriorAddBox(kit, cab, 0.06, 0.16, 0.44, slate, 1.24, 0.34, 0);
-    [-0.32, 0.32].forEach(function(hz){
-      regionInteriorAddCyl(kit, cab, 0.085, 0.085, 0.08, 12, chrome, 1.24, 0.36, hz, 0, Math.PI / 2);
-      regionInteriorAddCyl(kit, cab, 0.072, 0.072, 0.09, 12, kit.M(0xfff6c4, { emissive: 0x725a14 }), 1.26, 0.36, hz, 0, Math.PI / 2);
-      regionInteriorAddBox(kit, cab, 0.06, 0.08, 0.14, 0xe0483e, -1.18, 0.34, hz);
+    // Rounded side cabin windows with dark perimeter trim & diagonal glass sheen
+    [-0.415, 0.415].forEach(function(sz){
+      var sSign = sz > 0 ? 1 : -1;
+      regionInteriorAddBox(kit, cab, 0.41, 0.27, 0.025, slate, 0.16, 0.67, sz - sSign * 0.004);
+      regionInteriorAddBox(kit, cab, 0.41, 0.27, 0.025, slate, -0.28, 0.67, sz - sSign * 0.004);
+      regionInteriorAddBox(kit, cab, 0.37, 0.23, 0.032, glassMat, 0.16, 0.67, sz);
+      regionInteriorAddBox(kit, cab, 0.37, 0.23, 0.032, glassMat, -0.28, 0.67, sz);
+      var sh1 = regionInteriorAddBox(kit, cab, 0.055, 0.21, 0.036, kit.M(0xeefaff, { emissive: 0x325866 }), 0.12, 0.67, sz + sSign * 0.002);
+      sh1.rotation.z = -0.35;
+      var sh2 = regionInteriorAddBox(kit, cab, 0.055, 0.21, 0.036, kit.M(0xeefaff, { emissive: 0x325866 }), -0.32, 0.67, sz + sSign * 0.002);
+      sh2.rotation.z = -0.35;
     });
-    // Rear chrome bumper
-    regionInteriorAddBox(kit, cab, 0.10, 0.10, 0.98, chrome, -1.18, 0.22, 0);
-    // Four chunky tires with silver hubcaps strictly touching y = 0
-    [[-0.68, -0.48], [0.72, -0.48], [-0.68, 0.48], [0.72, 0.48]].forEach(function(wh){
-      regionInteriorAddCyl(kit, cab, 0.20, 0.20, 0.14, 14, slate, wh[0], 0.20, wh[1], Math.PI / 2);
-      regionInteriorAddCyl(kit, cab, 0.11, 0.11, 0.16, 12, chrome, wh[0], 0.20, wh[1], Math.PI / 2);
+    // Glowing backlit TAXI roof topper beacon with rounded housing
+    regionInteriorAddBox(kit, cab, 0.22, 0.035, 0.36, slate, -0.05, 0.95, 0);
+    regionInteriorAddBox(kit, cab, 0.18, 0.11, 0.32, kit.M(0xffe878, { emissive: 0x6e5210 }), -0.05, 1.02, 0);
+    var beaconCap = regionInteriorAdd(cab, new T.SphereGeometry(0.11, 10, 8), kit.M(0xffe878, { emissive: 0x6e5210 }), -0.05, 1.06, 0);
+    beaconCap.scale.set(0.82, 0.42, 1.45);
+    // Chrome front & rear rounded bumper bars with spherical end-caps
+    addRoundedCapBar(0.94, 0.052, chrome, 1.28, 0.20, 0, Math.PI / 2, 0, 0);
+    addRoundedCapBar(0.92, 0.050, chrome, -1.21, 0.20, 0, Math.PI / 2, 0, 0);
+    [-0.47, 0.47].forEach(function(bz){
+      regionInteriorAdd(cab, new T.SphereGeometry(0.052, 8, 8), kit.M(chrome), 1.28, 0.20, bz);
+      regionInteriorAdd(cab, new T.SphereGeometry(0.050, 8, 8), kit.M(chrome), -1.21, 0.20, bz);
+    });
+    // Chrome-framed front grille + twin glowing round headlights & round taillights
+    regionInteriorAddBox(kit, cab, 0.06, 0.15, 0.42, chrome, 1.25, 0.33, 0);
+    regionInteriorAddBox(kit, cab, 0.07, 0.12, 0.36, slate, 1.26, 0.33, 0);
+    [-0.31, 0.31].forEach(function(hz){
+      regionInteriorAddCyl(kit, cab, 0.088, 0.088, 0.08, 14, chrome, 1.24, 0.35, hz, 0, Math.PI / 2);
+      regionInteriorAddCyl(kit, cab, 0.072, 0.072, 0.095, 14, kit.M(0xfff6c4, { emissive: 0x725a14 }), 1.26, 0.35, hz, 0, Math.PI / 2);
+      regionInteriorAddCyl(kit, cab, 0.065, 0.065, 0.06, 12, chrome, -1.19, 0.34, hz, 0, Math.PI / 2);
+      regionInteriorAddCyl(kit, cab, 0.052, 0.052, 0.075, 12, 0xe0483e, -1.20, 0.34, hz, 0, Math.PI / 2);
+    });
+    // Four sculpted multi-ring tires with silver rims & domed chrome hubcaps strictly touching y = 0
+    [[-0.68, -0.47], [0.70, -0.47], [-0.68, 0.47], [0.70, 0.47]].forEach(function(wh){
+      var sideSign = wh[1] > 0 ? 1 : -1;
+      regionInteriorAddCyl(kit, cab, 0.20, 0.20, 0.14, 16, slate, wh[0], 0.20, wh[1], Math.PI / 2);
+      var tread = regionInteriorAdd(cab, new T.TorusGeometry(0.165, 0.036, 8, 16), kit.M(0x1b2229), wh[0], 0.20, wh[1]);
+      tread.rotation.y = 0;
+      regionInteriorAddCyl(kit, cab, 0.12, 0.12, 0.155, 14, chrome, wh[0], 0.20, wh[1], Math.PI / 2);
+      var cap = regionInteriorAdd(cab, new T.SphereGeometry(0.085, 10, 8), kit.M(0xeef4f8), wh[0], 0.20, wh[1] + sideSign * 0.07);
+      cap.scale.set(1, 1, 0.38);
     });
     group.add(cab);
   }
@@ -4394,10 +4474,12 @@
       var bx = sx + Math.cos(ang) * (sw * 0.44);
       var bz = sz - Math.sin(ang) * (sw * 0.44);
       if(i === 0){ bx0 = bx; bz0 = bz; }
-      regionInteriorAddCyl(kit, group, 0.018, 0.022, 0.74, 8, brass, bx, sy + 0.37, bz);
-      regionInteriorAdd(group, new T.SphereGeometry(0.026, 8, 6), kit.M(brightBrass), bx, sy + 0.74, bz);
+      if(i <= 6){
+        regionInteriorAddCyl(kit, group, 0.018, 0.022, 0.74, 8, brass, bx, sy + 0.37, bz);
+        regionInteriorAdd(group, new T.SphereGeometry(0.026, 8, 6), kit.M(brightBrass), bx, sy + 0.74, bz);
+      }
       // Continuous curved mahogany banister rail connecting step balusters
-      if(i > 0){
+      if(i > 0 && i <= 6){
         var pt = (i - 1) / (steps - 1);
         var psy = i * 0.19;
         var pang = -0.32 + pt * 0.68;
@@ -4482,13 +4564,15 @@
       regionInteriorAddBox(kit, room, 0.14, 4.6, 7.6, wallMat, 4.7, 2.3, 0.65);
       regionInteriorAddBox(kit, room, 0.12, 0.13, 7.6, theme.windowFrame, 4.64, 0.065, 0.65);
     } else {
-      floorSlabSpec = { w: 9.4, d: 7.4, x: 0, z: 0.65 };
+      floorSlabSpec = (kind === 'shop') ? { w: 9.4, d: 11.4, x: 0, z: 2.65 } : { w: 9.4, d: 7.4, x: 0, z: 0.65 };
+      var sideFloorD = (kind === 'shop') ? 11.4 : 7.4;
+      var sideFloorZ = (kind === 'shop') ? 2.65 : 0.65;
       regionInteriorAddBox(kit, room, 9.4, 0.13, 0.12, theme.windowFrame, 0, 0.065, -2.94);
       regionInteriorAddBox(kit, room, 9.4, 0.05, 0.10, theme.trim, 0, 0.155, -2.95);
-      regionInteriorAddBox(kit, room, 0.12, 0.13, 7.4, theme.windowFrame, -4.64, 0.065, 0.65);
-      regionInteriorAddBox(kit, room, 0.10, 0.05, 7.4, theme.trim, -4.65, 0.155, 0.65);
-      regionInteriorAddBox(kit, room, 0.12, 0.13, 7.4, theme.windowFrame, 4.64, 0.065, 0.65);
-      regionInteriorAddBox(kit, room, 0.10, 0.05, 7.4, theme.trim, 4.65, 0.155, 0.65);
+      regionInteriorAddBox(kit, room, 0.12, 0.13, sideFloorD, theme.windowFrame, -4.64, 0.065, sideFloorZ);
+      regionInteriorAddBox(kit, room, 0.10, 0.05, sideFloorD, theme.trim, -4.65, 0.155, sideFloorZ);
+      regionInteriorAddBox(kit, room, 0.12, 0.13, sideFloorD, theme.windowFrame, 4.64, 0.065, sideFloorZ);
+      regionInteriorAddBox(kit, room, 0.10, 0.05, sideFloorD, theme.trim, 4.65, 0.155, sideFloorZ);
     }
 
     // 2. Venue-specific mat/inlay directly beneath Shelly (zero repeated round rug template!)
@@ -4833,9 +4917,9 @@
       // Curved Boutique Showcase Gallery, Octagonal Display Pedestal, Sunburst Arch!
       // =========================================================================
       var shopWainMat = regionInteriorWainscotMat(kit, 'shop', theme);
-      regionInteriorAddBox(kit, room, 9.4, 4.6, 0.14, wallMat, 0, 2.3, -3.02);
-      regionInteriorAddBox(kit, room, 0.14, 4.6, 7.4, wallMat, -4.7, 2.3, 0.65);
-      regionInteriorAddBox(kit, room, 0.14, 4.6, 7.4, wallMat, 4.7, 2.3, 0.65);
+      regionInteriorAddBox(kit, room, 9.4, 7.6, 0.14, wallMat, 0, 3.8, -3.02);
+      regionInteriorAddBox(kit, room, 0.14, 7.6, 11.4, wallMat, -4.7, 3.8, 2.65);
+      regionInteriorAddBox(kit, room, 0.14, 7.6, 11.4, wallMat, 4.7, 3.8, 2.65);
       // Scalloped coastal aqua-seafoam vertical beadboard paneling & sculpted pearl wave chair rail!
       regionInteriorAddBox(kit, room, 9.3, 1.24, 0.05, shopWainMat, 0, 0.72, -2.93);
       regionInteriorAddBox(kit, room, 0.05, 1.24, 7.3, shopWainMat, -4.62, 0.72, 0.65);
@@ -4897,8 +4981,9 @@
           regionInteriorAddCyl(kit, sg, 0.11, 0.13, 0.06, 10, 0xd4a348, 0.42, 0.76, 0.02);
           regionInteriorAdd(sg, new T.SphereGeometry(0.10, 10, 8), kit.M(0xfff9ee), 0.42, 0.87, 0.02);
           [[-0.58, 0xff7f66], [-0.18, 0x55b8d4], [0.22, 0x73c992], [0.60, 0xe6b85c]].forEach(function(jr){
-            regionInteriorAddCyl(kit, sg, 0.09, 0.09, 0.24, 8, jr[1], jr[0], 1.51, -0.02);
-            regionInteriorAddCyl(kit, sg, 0.06, 0.06, 0.05, 8, 0x8c6239, jr[0], 1.65, -0.02);
+            regionInteriorAddCyl(kit, sg, 0.085, 0.10, 0.18, 10, jr[1], jr[0], 1.48, -0.02);
+            regionInteriorAddCyl(kit, sg, 0.038, 0.085, 0.08, 10, jr[1], jr[0], 1.61, -0.02);
+            regionInteriorAdd(sg, new T.SphereGeometry(0.046, 8, 6), kit.M(0xf7ecd2), jr[0], 1.68, -0.02);
           });
           regionInteriorAddCyl(kit, sg, 0.16, 0.12, 0.06, 10, 0xf28c74, -0.36, 2.04, -0.02);
           regionInteriorAdd(sg, new T.SphereGeometry(0.08, 10, 8), kit.M(0xfff9ee), -0.36, 2.11, -0.02);
@@ -4913,7 +4998,9 @@
           regionInteriorAddBox(kit, sg, 0.34, 0.18, 0.24, 0x52b6c8, 0.44, 0.82, 0.02);
           regionInteriorAddBox(kit, sg, 0.36, 0.04, 0.26, 0xf2c24b, 0.44, 0.92, 0.02);
           [[-0.56, 0xe87b88], [-0.14, 0xf3c64f], [0.28, 0x55b8d4], [0.62, 0xf28c74]].forEach(function(jr){
-            regionInteriorAddCyl(kit, sg, 0.085, 0.10, 0.20, 10, jr[1], jr[0], 1.49, -0.02);
+            regionInteriorAddCyl(kit, sg, 0.075, 0.10, 0.18, 10, jr[1], jr[0], 1.48, -0.02);
+            regionInteriorAddCyl(kit, sg, 0.035, 0.075, 0.07, 10, jr[1], jr[0], 1.60, -0.02);
+            regionInteriorAdd(sg, new T.SphereGeometry(0.044, 8, 6), kit.M(0xfff4dc), jr[0], 1.67, -0.02);
           });
           regionInteriorAddBox(kit, sg, 1.44, 0.56, 0.05, regionInteriorArtMat(kit, 'shop', theme), 0, 2.32, -0.06);
         }
@@ -5408,20 +5495,26 @@
         }
       }
       // Upper tiered wooden apothecary bottle gallery hutch rising to y = 3.16!
-      regionInteriorAddBox(kit, room, 2.32, 1.52, 0.38, 0x7c4e2c, dwx, 2.36, dwz - 0.06);
+      // Recessed back panel (z = dwz - 0.18, depth 0.10) so shelves & bottles sit cleanly in front of the backing!
+      regionInteriorAddBox(kit, room, 2.32, 1.52, 0.10, 0x7c4e2c, dwx, 2.36, dwz - 0.18);
       regionInteriorAddBox(kit, room, 2.46, 0.12, 0.46, 0x56341c, dwx, 3.16, dwz - 0.04);
       [2.08, 2.60].forEach(function(sy){
         regionInteriorAddBox(kit, room, 2.22, 0.055, 0.34, 0x56341c, dwx, sy, dwz - 0.02);
       });
-      // Stocked colorful pastel LatheGeometry apothecary elixir bottles across all 3 upper wooden shelves!
+      // Stocked colorful pastel/jewel LatheGeometry apothecary elixir bottles & ceramic herb jars across all 3 upper shelves!
       [
-        [-3.96, 1.62, 0x3ec99b, 0.22], [-3.62, 1.62, 0xe86c8a, 0.19], [-3.28, 1.62, 0xe8ae3c, 0.23],
-        [-2.94, 1.62, 0x9c7ae0, 0.20], [-2.60, 1.62, 0x46b2e8, 0.22], [-2.26, 1.62, 0xe88258, 0.18],
-        [-3.90, 2.11, 0xd9843b, 0.21], [-3.50, 2.11, 0x58b896, 0.22], [-3.10, 2.11, 0x9b7ad4, 0.19],
-        [-2.70, 2.11, 0x649ec9, 0.21], [-2.32, 2.11, 0xe6c242, 0.20],
-        [-3.76, 2.63, 0x49ab88, 0.20], [-3.26, 2.63, 0xde6d7d, 0.22], [-2.76, 2.63, 0x5893c4, 0.19], [-2.34, 2.63, 0xe2ad44, 0.21]
+        [-3.96, 1.62, 0x3ec99b, 0.22], [-3.64, 1.62, 'jar', 0xf4efe2], [-3.30, 1.62, 0xe8ae3c, 0.23],
+        [-2.96, 1.62, 0x9c7ae0, 0.20], [-2.62, 1.62, 'jar', 0xd7ece2], [-2.28, 1.62, 0xe88258, 0.19],
+        [-3.90, 2.11, 0xd9843b, 0.21], [-3.52, 2.11, 0x58b896, 0.22], [-3.12, 2.11, 'jar', 0xf6e7cc],
+        [-2.72, 2.11, 0x649ec9, 0.21], [-2.32, 2.11, 0xe6c242, 0.20],
+        [-3.82, 2.63, 'jar', 0xe2efe8], [-3.40, 2.63, 0xde6d7d, 0.22], [-2.96, 2.63, 0x5893c4, 0.19],
+        [-2.56, 2.63, 0x49ab88, 0.20], [-2.22, 2.63, 0xe2ad44, 0.21]
       ].forEach(function(bt){
-        regionInteriorAddApothecaryBottle(kit, room, bt[0], bt[1], dwz + 0.04, bt[3], bt[2]);
+        if(bt[2] === 'jar'){
+          regionInteriorAddApothecaryHerbJar(kit, room, bt[0], bt[1], dwz + 0.05, bt[3]);
+        } else {
+          regionInteriorAddApothecaryBottle(kit, room, bt[0], bt[1], dwz + 0.05, bt[3], bt[2]);
+        }
       });
       // Brass rolling library ladder rail + petite wooden ladder leaning cleanly against far-left apothecary cabinet!
       regionInteriorAddCyl(kit, room, 0.016, 0.016, 2.40, 8, 0xd4a348, dwx, 3.04, dwz + 0.20, 0, Math.PI / 2);
@@ -5595,6 +5688,49 @@
     root.add(floorMesh);
     var disposables = [floorGeo, floorMat];
     root.userData.disposables = disposables;
+    if(kind === 'taxi'){
+      var taxiCounterShadGeo = new T.PlaneGeometry(1.12, 0.64);
+      var taxiCounterShadMat = regionInteriorRadialShadowMat(0.32);
+      disposables.push(taxiCounterShadGeo, taxiCounterShadMat);
+      var taxiCounterShad = new T.Mesh(taxiCounterShadGeo, taxiCounterShadMat);
+      taxiCounterShad.rotation.x = -Math.PI / 2;
+      taxiCounterShad.position.set(1.66, 0.502, -0.82);
+      taxiCounterShad.renderOrder = 3;
+      root.add(taxiCounterShad);
+    } else if(kind === 'pharmacy'){
+      // Grounded 3D celadon ceramic & gilded brass apothecary pedestal tide-basin at (1.24, 0, -1.92)
+      var phPedGeo = new T.CylinderGeometry(0.30, 0.42, 0.52, 20);
+      var phPedMat = kit.M(0x3a846c);
+      var phTrimGeo = new T.TorusGeometry(0.36, 0.035, 8, 20);
+      var phTrimMat = kit.M(0xd8ae52);
+      var phBowlBodyGeo = new T.CylinderGeometry(0.56, 0.34, 0.28, 24);
+      var phBowlBodyMat = kit.M(0x4ca888);
+      var phBowlRimGeo = new T.TorusGeometry(0.56, 0.048, 10, 24);
+      var phBowlRimMat = kit.M(0xd8ae52);
+      var phBowlWaterGeo = new T.CircleGeometry(0.52, 24);
+      var phBowlWaterMat = new T.MeshBasicMaterial({ color: 0x3ec8d2, transparent: true, opacity: 0.90 });
+      disposables.push(phPedGeo, phTrimGeo, phBowlBodyGeo, phBowlRimGeo, phBowlWaterGeo, phBowlWaterMat);
+      var phPed = new T.Mesh(phPedGeo, phPedMat);
+      phPed.position.set(1.24, 0.26, -1.92);
+      root.add(phPed);
+      [0.05, 0.50].forEach(function(ty){
+        var phTr = new T.Mesh(phTrimGeo, phTrimMat);
+        phTr.rotation.x = -Math.PI / 2;
+        phTr.position.set(1.24, ty, -1.92);
+        root.add(phTr);
+      });
+      var phBowlBody = new T.Mesh(phBowlBodyGeo, phBowlBodyMat);
+      phBowlBody.position.set(1.24, 0.64, -1.92);
+      root.add(phBowlBody);
+      var phBowlRim = new T.Mesh(phBowlRimGeo, phBowlRimMat);
+      phBowlRim.rotation.x = -Math.PI / 2;
+      phBowlRim.position.set(1.24, 0.78, -1.92);
+      root.add(phBowlRim);
+      var phBowlWater = new T.Mesh(phBowlWaterGeo, phBowlWaterMat);
+      phBowlWater.rotation.x = -Math.PI / 2;
+      phBowlWater.position.set(1.24, 0.75, -1.92);
+      root.add(phBowlWater);
+    }
 
     // Soft feathered radial contact shadows under Shelly's body & outstretched flippers oriented along her aim toward the resident!
     var shX = layout.shellyX, shZ = layout.shellyZ;
@@ -5713,12 +5849,12 @@
         ]
       },
       restaurant: {
-        beamOp: night ? 0.12 : 0.22,
-        sheenOp: night ? 0.13 : 0.22,
+        beamOp: night ? 0.20 : 0.30,
+        sheenOp: night ? 0.21 : 0.30,
         patches: [
-          { style: 'arch2x2', x0:  2.78, x1:  4.08, zB: -2.10, zF: 1.50, slant: -1.72, op: night ? 0.18 : 0.32, mullOp: night ? 0.16 : 0.26 },
-          { style: 'arch2x2', x0: -3.48, x1: -2.18, zB: -2.10, zF: 1.45, slant: -1.18, op: night ? 0.18 : 0.30, mullOp: night ? 0.16 : 0.25 },
-          { style: 'grid2x2', x0: -0.14, x1:  1.24, zB: -2.05, zF: 1.15, slant: -0.88, op: night ? 0.18 : 0.28, mullOp: night ? 0.16 : 0.24 }
+          { style: 'arch2x2', x0:  2.78, x1:  4.08, zB: -2.10, zF: 1.50, slant: -1.72, op: night ? 0.26 : 0.40, mullOp: night ? 0.24 : 0.34 },
+          { style: 'arch2x2', x0: -3.48, x1: -2.18, zB: -2.10, zF: 1.45, slant: -1.18, op: night ? 0.26 : 0.38, mullOp: night ? 0.24 : 0.33 },
+          { style: 'grid2x2', x0: -0.14, x1:  1.24, zB: -2.05, zF: 1.15, slant: -0.88, op: night ? 0.26 : 0.36, mullOp: night ? 0.24 : 0.32 }
         ],
         sheens: [[2.15, -0.42, 2.45, 2.10, -0.44], [-0.35, -0.45, 2.15, 1.70, -0.28]],
         beams: [
@@ -5739,11 +5875,11 @@
         ]
       },
       taxi: {
-        beamOp: night ? 0.12 : 0.21,
-        sheenOp: night ? 0.13 : 0.21,
+        beamOp: night ? 0.20 : 0.29,
+        sheenOp: night ? 0.21 : 0.29,
         patches: [
-          { style: 'pergola', x0: -3.72, x1: -1.56, zB: -2.10, zF: 1.48, slant: 1.62, op: night ? 0.18 : 0.30, mullOp: night ? 0.16 : 0.25 },
-          { style: 'pergola', x0: -1.42, x1:  0.66, zB: -2.10, zF: 1.48, slant: 1.62, op: night ? 0.18 : 0.30, mullOp: night ? 0.16 : 0.25 }
+          { style: 'pergola', x0: -3.72, x1: -1.56, zB: -2.10, zF: 1.48, slant: 1.62, op: night ? 0.26 : 0.38, mullOp: night ? 0.24 : 0.33 },
+          { style: 'pergola', x0: -1.42, x1:  0.66, zB: -2.10, zF: 1.48, slant: 1.62, op: night ? 0.26 : 0.38, mullOp: night ? 0.24 : 0.33 }
         ],
         sheens: [[-0.55, -0.38, 3.10, 2.15, 0.44], [0.95, 0.22, 2.10, 1.60, 0.36]],
         beams: [
@@ -5752,11 +5888,11 @@
         ]
       },
       subway: {
-        beamOp: night ? 0.12 : 0.20,
-        sheenOp: night ? 0.13 : 0.22,
+        beamOp: night ? 0.24 : 0.38,
+        sheenOp: night ? 0.25 : 0.40,
         patches: [
-          { style: 'grid3x2', x0: -0.92, x1: 0.50, zB: -2.10, zF: 1.48, slant: -1.26, op: night ? 0.18 : 0.30, mullOp: night ? 0.16 : 0.25 },
-          { style: 'grid3x2', x0:  1.12, x1: 2.58, zB: -2.10, zF: 1.48, slant: -1.28, op: night ? 0.18 : 0.30, mullOp: night ? 0.16 : 0.25 }
+          { style: 'grid3x2', x0: -0.92, x1: 0.50, zB: -2.10, zF: 1.48, slant: -1.26, op: night ? 0.30 : 0.48, mullOp: night ? 0.26 : 0.38 },
+          { style: 'grid3x2', x0:  1.12, x1: 2.58, zB: -2.10, zF: 1.48, slant: -1.28, op: night ? 0.30 : 0.48, mullOp: night ? 0.26 : 0.38 }
         ],
         sheens: [[0.42, -0.38, 2.65, 2.05, -0.38], [1.65, 0.18, 2.10, 1.65, -0.38]],
         beams: [
@@ -5777,11 +5913,11 @@
         ]
       },
       pharmacy: {
-        beamOp: night ? 0.12 : 0.21,
-        sheenOp: night ? 0.13 : 0.22,
+        beamOp: night ? 0.20 : 0.29,
+        sheenOp: night ? 0.21 : 0.30,
         patches: [
-          { style: 'grid3x2', x0: -0.80, x1: 1.15, zB: -1.15, zF: 2.05, slant: -1.10, op: night ? 0.18 : 0.40, mullOp: night ? 0.16 : 0.34 },
-          { style: 'arch2x2', x0:  1.35, x1: 3.25, zB: -1.15, zF: 2.05, slant: -1.10, op: night ? 0.18 : 0.40, mullOp: night ? 0.16 : 0.34 }
+          { style: 'grid3x2', x0: -0.80, x1: 1.15, zB: -1.15, zF: 2.05, slant: -1.10, op: night ? 0.26 : 0.48, mullOp: night ? 0.24 : 0.42 },
+          { style: 'arch2x2', x0:  1.35, x1: 3.25, zB: -1.15, zF: 2.05, slant: -1.10, op: night ? 0.26 : 0.48, mullOp: night ? 0.24 : 0.42 }
         ],
         sheens: [[0.24, -0.36, 3.10, 2.15, -0.42], [2.10, 0.10, 2.25, 1.75, -0.42]],
         beams: [
@@ -6056,10 +6192,11 @@
         guide.userData.body.scale.set(1, 1, 1);
       }
       guide.scale.copy(e.savedGuide.scale).multiplyScalar(0.741);
-      var shellyWorld = regionInteriorToWorld(base.position, yaw, layout.shellyX, 0, layout.shellyZ);
+      var mobShopShellyShift = (kind === 'shop' && view.cam && view.cam.aspect < 0.75) ? 0.42 : 0;
+      var shellyWorld = regionInteriorToWorld(base.position, yaw, layout.shellyX + mobShopShellyShift, 0, layout.shellyZ);
       guide.position.copy(shellyWorld);
       // Directive #364 (Mutual Eye Contact): Orient Shelly directly toward the resident's exact room position!
-      var shellyAimYaw = Math.atan2(layout.actorX - layout.shellyX, layout.actorZ - layout.shellyZ);
+      var shellyAimYaw = Math.atan2(layout.actorX - (layout.shellyX + mobShopShellyShift), layout.actorZ - layout.shellyZ);
       guide.rotation.set(0, yaw + shellyAimYaw, 0);
       guide.updateMatrixWorld(true);
 
@@ -6104,12 +6241,22 @@
     if(!base) return false;
     var yaw = e.interior.yaw;
     var aspect = Math.max(0.45, view.cam && view.cam.aspect ? view.cam.aspect : 1.33);
-    var dist = Math.max(4.75, 4.10 / Math.min(1.0, aspect * 0.78));
+    var isMobShop = (aspect < 1.1 && e.interior.kind === 'shop');
+    var dist = isMobShop
+      ? Math.max(5.8, 4.15 / Math.max(0.58, Math.min(1.0, aspect * 0.85)))
+      : Math.max(4.75, 4.65 / Math.max(0.68, Math.min(1.0, aspect * 0.78)));
+    var lxOff = -0.04 + (isMobShop ? -0.30 : 0);
+    var lyCam = (e.interior.kind === 'hotel') ? 1.84 : (isMobShop ? 1.14 : 1.42);
+    var lyLook = (e.interior.kind === 'hotel') ? 0.86 : (0.92 + (isMobShop ? -0.04 : 0));
 
-    var camPos = regionInteriorToWorld(base.position, yaw, -0.04, 1.42, dist);
-    var target = regionInteriorToWorld(base.position, yaw, -0.04, 0.92, -0.78);
+    var camPos = regionInteriorToWorld(base.position, yaw, lxOff, lyCam, dist);
+    var target = regionInteriorToWorld(base.position, yaw, lxOff, lyLook, -0.78);
     out.copy(camPos);
     look.copy(target);
+    if(view.cam && view.cam.aspect < 1.1){
+      if(e.interior.kind === 'cafe') look.x += 0.22;
+    }
+    e.interior._lastAspect = aspect;
     view.camMode = 'encounter';
     return true;
   }
@@ -6120,6 +6267,9 @@
     if(view._jamboreeVisuals && view._jamboreeVisuals.root) view._jamboreeVisuals.root.visible = false;
     if(view._jamboree && view._jamboree.group) view._jamboree.group.visible = false;
     if(!view.camPin && view.cam && view.camPos && view.camLook){
+      if(Math.abs((view.cam.aspect || 1.33) - (e.interior._lastAspect || 0)) > 0.01){
+        regionEncounterInteriorCamera(view, view.camPos, view.camLook);
+      }
       view.drift = 0;
       view.cam.position.copy(view.camPos);
       view.cam.lookAt(view.camLook);

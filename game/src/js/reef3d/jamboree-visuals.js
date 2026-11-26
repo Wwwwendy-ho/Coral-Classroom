@@ -229,7 +229,7 @@ var JamboreeVisuals = (function(){
     var foamMat = trackRes(st, new THREE.MeshBasicMaterial({
       color: 0xeefcff,
       transparent: true,
-      opacity: 0.24,
+      opacity: 0.14,
       depthWrite: false,
       side: THREE.DoubleSide,
       fog: true
@@ -240,7 +240,7 @@ var JamboreeVisuals = (function(){
     var foamData = [];
     for(var f = 0; f < FOAM_N; f++){
       var fa = (f / FOAM_N) * Math.PI * 2;
-      var fr = 10 + (f % 3) * 6;
+      var fr = 17 + (f % 3) * 7;
       var fx = center.x + Math.cos(fa) * fr;
       var fz = center.z + Math.sin(fa) * fr;
       foamData.push({
@@ -273,6 +273,13 @@ var JamboreeVisuals = (function(){
     caus1.position.set(center.x, 0.05, center.z);
     caus2.position.set(center.x, 0.06, center.z);
     caus2.rotation.y = 0.65;
+    var initRid = view && view.region && view.region.id;
+    if(initRid === 'captain' || initRid === 'light' || initRid === 'town' || initRid === 'beach' || initRid === 'caves'){
+      caus1.visible = false;
+      caus2.visible = false;
+      foam.visible = false;
+      if(initRid === 'captain') glints.visible = false;
+    }
     group.add(caus1, caus2);
 
     st.root.add(group);
@@ -865,11 +872,19 @@ var JamboreeVisuals = (function(){
 
     // 2. Ocean sparkles, foam rings, and caustic scroll
     var oc = st.ocean;
-    if(oc && !calm){
-      oc.causTex1.offset.x = (t * 0.018) % 1;
-      oc.causTex1.offset.y = (t * 0.012) % 1;
-      oc.causTex2.offset.x = (-t * 0.014) % 1;
-      oc.causTex2.offset.y = (t * 0.016) % 1;
+    if(oc){
+      var rid = view && view.region && view.region.id;
+      if(rid === 'captain' || rid === 'light' || rid === 'town' || rid === 'beach' || rid === 'caves'){
+        if(oc.caus1) oc.caus1.visible = false;
+        if(oc.caus2) oc.caus2.visible = false;
+        if(oc.foam) oc.foam.visible = false;
+        if(rid === 'captain' && oc.glints) oc.glints.visible = false;
+      } else if(!calm){
+        oc.causTex1.offset.x = (t * 0.018) % 1;
+        oc.causTex1.offset.y = (t * 0.012) % 1;
+        oc.causTex2.offset.x = (-t * 0.014) % 1;
+        oc.causTex2.offset.y = (t * 0.016) % 1;
+      }
     }
     st._instAccum = (st._instAccum || 0) + step;
     var doInst = !st._instInit || calm || st._instAccum >= 0.048;

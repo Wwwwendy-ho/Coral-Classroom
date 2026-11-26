@@ -671,7 +671,8 @@ var JamboreeRegions = (function(){
       roughness: 0.18
     }));
     var tideMesh = new THREE.Mesh(tideGeo, tideMat);
-    tideMesh.position.set(0, -0.32, -5.5);
+    tideMesh.position.set(-14, -0.62, -5.5);
+    tideMesh.visible = false;
     st.group.add(tideMesh);
     st.tideMesh = tideMesh;
 
@@ -684,6 +685,7 @@ var JamboreeRegions = (function(){
       sm.position.set(-2.4 + i * 1.2, -0.28, -3.2 + (i % 2) * 0.35);
       sbGrp.add(sm);
     }
+    sbGrp.visible = false;
     st.group.add(sbGrp);
     st.sandbarGroup = sbGrp;
 
@@ -694,8 +696,9 @@ var JamboreeRegions = (function(){
     }));
     for(var b = 0; b < 3; b++){
       var bm = new THREE.Mesh(bottleGeo, bottleMat);
-      bm.position.set(-3.2 + b * 3.2, -0.15, -4.6);
+      bm.position.set(-13.5 + b * 2.2, -0.58, -4.6);
       bm.rotation.z = 0.35;
+      bm.visible = false;
       st.group.add(bm);
       st.tideBottles.push({ mesh: bm, baseZ: -4.6, phase: b * 1.7 });
     }
@@ -1262,15 +1265,15 @@ var JamboreeRegions = (function(){
       var wave = calm ? 0 : Math.sin(st.tideTime);
       st.tidePhase = wave < -0.35 ? 'low' : (wave > 0.35 ? 'high' : 'mid');
       if(st.tideMesh){
-        st.tideMesh.position.y = -0.34 + wave * 0.16;
+        st.tideMesh.position.y = -0.62 + wave * 0.03;
       }
       if(st.sandbarGroup){
-        st.sandbarGroup.visible = true;
+        st.sandbarGroup.visible = false;
       }
       st.tideBottles.forEach(function(tb){
         var highPush = st.tidePhase === 'high' ? 1.1 : 0;
         tb.mesh.position.z = tb.baseZ + highPush + (calm ? 0 : Math.sin(st.tideTime * 2 + tb.phase) * 0.25);
-        tb.mesh.position.y = -0.22 + wave * 0.16 + (calm ? 0 : Math.sin(st.tideTime * 3 + tb.phase) * 0.04);
+        tb.mesh.position.y = -0.58 + wave * 0.03 + (calm ? 0 : Math.sin(st.tideTime * 3 + tb.phase) * 0.02);
       });
       for(var i = st.tossedBottles.length - 1; i >= 0; i--){
         var b = st.tossedBottles[i];

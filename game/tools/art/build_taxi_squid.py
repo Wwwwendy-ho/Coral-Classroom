@@ -16,7 +16,7 @@ from mathutils import Vector, Quaternion
 spec = importlib.util.spec_from_file_location('supporting_hosts', str(Path(__file__).with_name('build_supporting_hosts.py')))
 H = importlib.util.module_from_spec(spec); spec.loader.exec_module(H)
 T = math.tau; Z = Vector((0, 0, 1)); PI = math.pi
-TILES = {'skin': (0, 0, 512, 1024), 'eye': (512, 0, 256, 256), 'cap': (512, 256, 512, 384), 'arm': (512, 640, 256, 384),
+TILES = {'skin': (0, 0, 512, 1024), 'eye_l': (512, 0, 256, 256), 'eye_r': (512, 0, 256, 256), 'cap': (512, 256, 512, 384), 'arm': (512, 640, 256, 384),
          'rim': (768, 640, 256, 384), 'dark': (768, 0, 128, 128), 'gold': (896, 0, 128, 128), 'mouth': (768, 128, 128, 128), 'fin': (896, 128, 128, 128)}
 H.TILES = TILES   # H.uv() reads the module-global tile table
 
@@ -26,7 +26,7 @@ def smooth(a, b, x):
 # ---------------------------------------------------------------- textures
 def paint_tile(name, u, v):
     n = H.cloud(u, v); zero = np.zeros_like(u); rough = np.full_like(u, .84); metal = zero
-    if name == 'eye':
+    if name in ('eye', 'eye_l', 'eye_r'):
         # Shelly-grade continuous skin-blended eye (shared conforming_eye.paint_eye), warm espresso-amber iris.
         rgb, rough = H.CE.paint_eye('taxi-squid', u, v)
     elif name == 'skin':
@@ -91,11 +91,11 @@ def atlas(out, size):
     return mat
 
 # ---------------------------------------------------------------- geometry
-ZC, RW, RD, RH = 1.42, .76, .72, 1.03    # softly lowered upper mantle (-8% height) for peak Nintendo cuteness
+ZC, RW, RD, RH = 1.56, .66, .64, 1.26    # tall sleek torpedo squid mantle for unmistakable silhouette
 def egg(u, v, extra=0.):
     a = T * u; t = PI * (.001 + .998 * v); s = math.sin(t); c = math.cos(t)
-    width = RW * s * (1 - .14 * c); depth = RD * s * (1 - .12 * c)
-    lean = .26 * max(0., c) ** 1.5
+    width = RW * s * (1 - .30 * c); depth = RD * s * (1 - .28 * c)
+    lean = .20 * max(0., c) ** 1.5
     p = Vector((width * math.sin(a), lean - depth * math.cos(a), ZC + RH * c))
     return p + Vector((math.sin(a), -math.cos(a), .3 * c)) * extra
 
@@ -106,7 +106,7 @@ def squid_eye(side):
     cen = egg_point(side * .56, 1.14); n = Vector((side * .42, -.90, .09)).normalized(); h = Z.cross(n).normalized(); v = n.cross(h).normalized()
     return cen, h, v, n
 
-CAP_C = Vector((0, .135, 2.09)); CAP_S = (.59, .58, .40)
+CAP_C = Vector((0, .06, 2.54)); CAP_S = (.46, .46, .34)
 ARM_N = 8
 def arm_path(i):
     th = T * i / ARM_N + .26; length = (1.34, 1.06)[i % 2]; curl = (3.6, 3.0)[i % 2]
@@ -146,16 +146,16 @@ def squid_mesh(close, mat, rig):
     b.grid(egg, q(36, 56), q(24, 38), 'skin', 'Head', True, True)
     for s in (-1, 1):
         H.eye(b, s, q(22, 32), q(14, 22), squid_eye, .215, egg, 'taxi-squid', lambda us, vs: paint_tile('skin', us, vs)[0], (q(36, 56), q(24, 38)))
-        # Cute plush rounded triangular-diamond squid mantle fins at upper-rear mantle beneath the checkered cap.
+        # Cute plush symmetrical spearhead/diamond squid mantle fins centered on upper mantle axis.
         suf = 'L' if s < 0 else 'R'
         def squid_fin(u, v, layer, s=s):
-            th_a = -PI * .48 + PI * .96 * u
-            r_out = .36 + .28 * math.exp(-((th_a - .16) / .38) ** 2)
-            dx = r_out * math.cos(th_a) * v
-            dz = r_out * math.sin(th_a) * .76 * v
-            y_mid = .22 + .24 * v + .14 * v * math.cos(th_a - .20)
-            dy = layer * .092 * (math.sin(PI * v) ** .55) * (.40 + .60 * (math.sin(PI * u) ** .50))
-            return Vector((s * (.43 + dx), y_mid + dy, 1.74 + dz))
+            th_a = -PI * .45 + PI * .90 * u
+            r_out = .36 * (math.sin(PI * u) ** 1.05)
+            dx = (.14 + r_out) * v
+            dz = .42 * math.sin(th_a) * v
+            y_mid = .02 + .03 * v
+            dy = layer * .065 * (math.sin(PI * v) ** .60) * (.35 + .65 * (math.sin(PI * u) ** .55))
+            return Vector((s * (.34 + dx), y_mid + dy, 2.02 + dz))
         for layer in (-1, 1):
             b.grid(lambda u, v, layer=layer: squid_fin(u, v, layer), q(12, 18), q(6, 10), 'fin', 'Fin.' + suf, reverse=(layer * s < 0))
     # Friendly curved smile.
@@ -172,13 +172,13 @@ def squid_mesh(close, mat, rig):
            q(28, 44), q(8, 14), 'cap', 'Head', True, True, uvfn=lambda u, v: (u, v))
     # Cap lower band (thick rounded rim) overlaps slightly upward into dome to eliminate any seam gap.
     b.grid(lambda u, v: CAP_C + Vector(((CAP_S[0] + .008) * math.sin(T * u), -(CAP_S[1] + .008) * math.cos(T * u), .015 - .110 * v)) , q(28, 44), q(2, 3), 'dark', 'Head', True, False)
-    th = .20
+    th = .32
     def visor(u, v):
         a = T * u; t = PI * (.002 + .996 * v)
-        x = .48 * math.sin(t) * math.sin(a); y = -.29 * math.sin(t) * math.cos(a); z = .062 * math.cos(t)
-        return Vector((x, y * math.cos(th) - z * math.sin(th) + -.72, y * math.sin(th) + z * math.cos(th) + 2.035))
+        x = .42 * math.sin(t) * math.sin(a); y = -.20 * math.sin(t) * math.cos(a); z = .052 * math.cos(t)
+        return Vector((x, y * math.cos(th) - z * math.sin(th) - .40, y * math.sin(th) + z * math.cos(th) + 2.46))
     b.grid(visor, q(24, 36), q(10, 16), 'dark', 'Head', True, True)
-    b.ellipsoid((0, .135, 2.495), (.065, .065, .055), 'gold', 'Head', q(10, 16), q(6, 10))
+    b.ellipsoid((0, .06, 2.89), (.060, .060, .050), 'gold', 'Head', q(10, 16), q(6, 10))
     b.v = [Vector(p) + Vector((0, 0, OFFZ)) for p in b.v]
     return b.object(mat, rig, 'Taxi Squid')
 

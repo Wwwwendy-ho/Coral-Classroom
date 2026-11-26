@@ -635,6 +635,348 @@
         "MAJ-4 (Echo Caves Echo facing away)",
         "MAJ-5 (Subway Ray cap pedestal & dent)"
       ]
+    },
+    {
+      "iteration": 39,
+      "rubric": "v3.0-jamboree",
+      "score": 7.94,
+      "dimensions": {
+        "D1": 7.4,
+        "D2": 8.4,
+        "D3": 8.1,
+        "D4": 7.0,
+        "D5": 7.8,
+        "D6": 9.2
+      },
+      "crit": 1,
+      "maj": 13,
+      "min": 7,
+      "verdict": "FAIL (1 CRIT: floating Jisu legs; 13 MAJ across expanded loops, caustics in Captain's Cabin, lollipop tree, halo rings, cast eye shapes)",
+      "label": "Expanded World + 60 FPS Overhaul + Tile Brightness (Zero-Context Adversarial Re-Grade)"
+    },
+    {
+      "iteration": 40,
+      "rubric": "v3.0-jamboree",
+      "score": 7.56,
+      "dimensions": {
+        "D1": 7.4,
+        "D2": 7.9,
+        "D3": 8.4,
+        "D4": 5.2,
+        "D5": 7.6,
+        "D6": 9.2
+      },
+      "crit": 5,
+      "maj": 8,
+      "min": 8,
+      "verdict": "FAIL (5 CRIT: Friend Seal float, Hotel Whale sailboat clip, Jisu board float, Captain Bay float, Pharmacy Shrimp encounter float)",
+      "label": "Jisu Encounter Grounded + Indoor Captain's Cabin + Golden Tile Rim (Iter 40)"
+    },
+    {
+      "iteration": 41,
+      "rubric": "v3.0-jamboree",
+      "score": 7.45,
+      "dimensions": {
+        "D1": 7.4,
+        "D2": 8.2,
+        "D3": 7.8,
+        "D4": 5.8,
+        "D5": 7.3,
+        "D6": 7.8
+      },
+      "crit": 4,
+      "maj": 13,
+      "min": 7,
+      "verdict": "FAIL (4 CRIT: Friend Seal float, Mobile Shrimp fallback, Subway Ray wing/terminal clip, Pharmacy Shrimp tail/counter clip)",
+      "label": "Captain Bay + Jisu + Hotel Whale Fixed; 4 CRIT Remaining (Iter 41)"
+    },
+    {
+      "iteration": 42,
+      "rubric": "v3.0-jamboree",
+      "score": 8.68,
+      "dimensions": {
+        "D1": 9.1,
+        "D2": 8.3,
+        "D3": 8.4,
+        "D4": 8.7,
+        "D5": 8.5,
+        "D6": 9.4
+      },
+      "crit": 0,
+      "maj": 3,
+      "min": 6,
+      "verdict": "PASS (0 CRIT! 3 MAJ: Story Lagoon book collisions, Bottle Beach cork/rope/glass edge, Mobile Shop card height)",
+      "label": "Zero CRIT Pass! All 4 CRITs Cleared (Iter 42)"
+    },
+    {
+      "iteration": 49,
+      "rubric": "v3.0-jamboree",
+      "score": 8.98,
+      "dimensions": {
+        "D1": 9.2,
+        "D2": 9.0,
+        "D3": 9.1,
+        "D4": 8.9,
+        "D5": 8.6,
+        "D6": 9.0
+      },
+      "crit": 0,
+      "maj": 3,
+      "min": 11,
+      "verdict": "PASS (0 CRIT, 3 MAJ, 11 MIN: Lagoon white sky beam wedge, Harbor Town Sua nose/Whale crop, pip.glb >6500 tris)",
+      "label": "0 CRIT Jamboree Benchmark Pass (8.98/10) \u2014 Grounded Jisu, Clean Cab, Lagoon & Lighthouse (Iter 49)"
+    },
+    {
+      "iteration": 43,
+      "rubric": "v3.0-jamboree",
+      "score": 8.22,
+      "dimensions": {
+        "D1": 8.6,
+        "D2": 8.6,
+        "D3": 8.7,
+        "D4": 6.3,
+        "D5": 8.0,
+        "D6": 9.0
+      },
+      "crit": 2,
+      "maj": 4,
+      "min": 6,
+      "verdict": "FAIL (2 CRIT: Hotel Whale sailboat clip, Friend Seal float; Lagoon books & Mobile Shop fixed)",
+      "label": "Lagoon Books + Bottle Cork/Rope + Mobile Shop Fixed; 2 Harbor CRITs Caught (Iter 43)"
+    },
+    {
+      "iteration": 44,
+      "rubric": "v3.0-jamboree",
+      "score": 8.06,
+      "dimensions": {
+        "D1": 8.8,
+        "D2": 7.9,
+        "D3": 8.6,
+        "D4": 6.2,
+        "D5": 7.8,
+        "D6": 9.3
+      },
+      "crit": 2,
+      "maj": 8,
+      "min": 12,
+      "verdict": "FAIL (2 CRIT: Friend Seal float, Hotel Whale sailboat touch; MAJ-1 Bottle Beach off-frame)",
+      "label": "Iter 44 Audit: 2 Harbor CRITs + Bottle Beach Framing Regression Caught"
+    },
+    {
+      "iteration": 46,
+      "rubric": "v3.0-jamboree",
+      "score": 8.57,
+      "dimensions": {
+        "D1": 8.7,
+        "D2": 8.6,
+        "D3": 8.4,
+        "D4": 8.3,
+        "D5": 8.2,
+        "D6": 9.4
+      },
+      "crit": 0,
+      "maj": 6,
+      "min": 9,
+      "verdict": "PASS (0 CRIT! 8.57/10; 6 MAJ: Bottle Beach teal plane, Tugboat/Sua proximity, Shrimp tail angle, Mobile Shop zoom, Shop Octopus gaze, Cabin sunbeam texture)",
+      "label": "0 CRIT Pass! Harbor GLBs, Grounded Seal, Cabin Sunbeams & Bottle Beach Hero (Iter 46)"
+    },
+    {
+      "iteration": 47,
+      "rubric": "v3.0-jamboree",
+      "score": 8.38,
+      "dimensions": {
+        "D1": 8.6,
+        "D2": 8.5,
+        "D3": 7.9,
+        "D4": 8.0,
+        "D5": 8.3,
+        "D6": 9.0
+      },
+      "crit": 0,
+      "maj": 6,
+      "min": 10,
+      "verdict": "FAIL (0 CRIT; 6 MAJ: Mobile WebGL horizontal squash, Bottle Beach bottle off-frame + cyan slab, Tugboat/Sua overlap, Shrimp tail balance, Taxi Squid asymmetric fin, Hotel Whale ripple hover)",
+      "label": "Shop Gaze & Cabin Sunbeams Fixed; Mobile Aspect Squash & 5 MAJ Caught (Iter 47)"
+    },
+    {
+      "iteration": 48,
+      "rubric": "v3.0-jamboree",
+      "score": 8.63,
+      "dimensions": {
+        "D1": 8.6,
+        "D2": 8.5,
+        "D3": 8.8,
+        "D4": 8.4,
+        "D5": 8.4,
+        "D6": 9.4
+      },
+      "crit": 0,
+      "maj": 5,
+      "min": 11,
+      "verdict": "PASS (0 CRIT! 8.63/10; Mobile 1:1 WebGL fixed, Tugboat/Sua & Hotel Whale waterline fixed; 5 MAJ: Bottle Beach half-pipe + cyan slab, Shrimp upright pitch, Taxi Squid dome silhouette, Friend Seal close-up eyes/bow)",
+      "label": "0 CRIT Pass! Mobile Aspect Fixed + Tugboat/Whale Grounded (Iter 48)"
+    },
+    {
+      "iteration": 49,
+      "rubric": "v3.0-jamboree",
+      "score": 8.58,
+      "dimensions": {
+        "D1": 8.7,
+        "D2": 8.4,
+        "D3": 8.8,
+        "D4": 8.2,
+        "D5": 8.3,
+        "D6": 9.4
+      },
+      "crit": 0,
+      "maj": 7,
+      "min": 11,
+      "verdict": "PASS (0 CRIT! 8.58/10; Friend Seal kerchief/face & Taxi Squid torpedo silhouette fixed; 7 MAJ: Bottle Beach foreground wall + tunnel cork, Shrimp dry-air hover, Lagoon sky cutout/tree/stalk, Jisu detached shadows, Hotel Whale fluke angle, Taxi Squid cap/visor)",
+      "label": "0 CRIT Pass! Friend Seal & Torpedo Squid Fixed (Iter 49)"
+    },
+    {
+      "iteration": 50,
+      "rubric": "v3.0-jamboree",
+      "score": 8.69,
+      "dimensions": {
+        "D1": 8.8,
+        "D2": 8.6,
+        "D3": 8.9,
+        "D4": 8.3,
+        "D5": 8.4,
+        "D6": 9.4
+      },
+      "crit": 0,
+      "maj": 7,
+      "min": 14,
+      "verdict": "PASS (0 CRIT! 8.69/10; Bottle Beach sightline, Jisu leg shadows & Taxi Squid cap/visor fixed; 7 MAJ: Shrimp basin y-scale + counter bowl, Bottle Beach tunnel cork, Lagoon sky wedge/lotus/stalk/tree, Hotel Whale fluke angle, Cafe Seahorse gaze, Echo Caves framing, Sand/shelf detail)",
+      "label": "0 CRIT Pass! Bottle Sightline, Jisu Shadows & Squid Cap Fixed (Iter 50)"
+    },
+    {
+      "iteration": 51,
+      "rubric": "v3.0-jamboree",
+      "score": 8.62,
+      "dimensions": {
+        "D1": 8.7,
+        "D2": 8.5,
+        "D3": 8.6,
+        "D4": 8.4,
+        "D5": 8.4,
+        "D6": 9.4
+      },
+      "crit": 0,
+      "maj": 5,
+      "min": 14,
+      "verdict": "PASS (0 CRIT! 8.62/10; Cafe Seahorse gaze, Pharmacy counter bowl & Shop shelf stoppers fixed; 5 MAJ: Shrimp world-space basin, Echo Caves host framing, Bottle Beach dome/cork tunnel, Lagoon foreground gate/lotus/tree, Hotel Whale fluke angle)",
+      "label": "0 CRIT Pass! Cafe Gaze, Pharmacy Bowl & Shop Bottles Fixed (Iter 51)"
+    },
+    {
+      "iteration": 52,
+      "rubric": "v3.0-jamboree",
+      "score": 8.55,
+      "dimensions": {
+        "D1": 8.6,
+        "D2": 8.3,
+        "D3": 8.4,
+        "D4": 8.5,
+        "D5": 8.5,
+        "D6": 9.4
+      },
+      "crit": 0,
+      "maj": 7,
+      "min": 13,
+      "verdict": "PASS (0 CRIT! 8.55/10; Harbor Town Shrimp tide-basin, Cabin sunbeam sheen, Lagoon gate/lotus & Bottle sky wedge fixed; 7 MAJ: Echo Caves host/stall, Bottle Beach silhouette, Hotel Whale fluke roll, Lagoon Banyan spheres, Mobile Shop left crop, Path spline rim poke)",
+      "label": "0 CRIT Pass! Shrimp Basin, Cabin Sheen & Lagoon Stalk Fixed (Iter 52)"
+    },
+    {
+      "iteration": 53,
+      "rubric": "v3.0-jamboree",
+      "score": 8.06,
+      "dimensions": {
+        "D1": 8.3,
+        "D2": 7.8,
+        "D3": 7.7,
+        "D4": 7.7,
+        "D5": 8.0,
+        "D6": 9.4
+      },
+      "crit": 0,
+      "maj": 10,
+      "min": 9,
+      "verdict": "FAIL (0 CRIT; 10 MAJ regressions/leftovers: Bottle Beach shattered rings + foreground cyan wall, Captain right bulkhead + beige ribbon, Jisu buried legs/chin, Echo backward/left crop + crystal in pool, Hotel Whale rolled 32 deg, Mobile Shop left crop, Pharmacy flat saucer, Lagoon boat/lotus)",
+      "label": "Iter 53 Regression Audit (8.06 FAIL -> Recovery Plan Ready)"
+    },
+    {
+      "iteration": 54,
+      "rubric": "v3.0-jamboree",
+      "score": 7.84,
+      "dimensions": {
+        "D1": 7.9,
+        "D2": 7.7,
+        "D3": 7.7,
+        "D4": 7.2,
+        "D5": 7.7,
+        "D6": 9.4
+      },
+      "crit": 1,
+      "maj": 13,
+      "min": 14,
+      "verdict": "FAIL (1 CRIT: Bottle Beach Kiko on ? tile; 13 MAJ: Bottle Beach shattered rings + cyan slab, Echo Caves 180 deg away + crystal in pool, Captain Bay/Bok facing + Kiko bottom crop, Hotel Whale tail droop, Pharmacy white bowl, Lagoon tree, Mobile Shop crop/waste, Pattern Reef Bok on tile, Mobile Town planter/Shrimp)",
+      "label": "Iter 54 Audit (7.84 FAIL: 08-hotel/09-pharm/15-jisu/11-lagoon improved; 1 CRIT + Bottle/Echo/Cabin caught)"
+    },
+    {
+      "iteration": 55,
+      "rubric": "v3.0-jamboree",
+      "score": 8.06,
+      "dimensions": {
+        "D1": 8.1,
+        "D2": 7.9,
+        "D3": 7.8,
+        "D4": 7.8,
+        "D5": 7.9,
+        "D6": 9.4
+      },
+      "crit": 0,
+      "maj": 13,
+      "min": 12,
+      "verdict": "FAIL (0 CRIT \u2014 cleared CRIT-1! 13 MAJ: Bottle Beach cyan slab + sky bottle, Echo Caves left crop/180 deg/crystal, Captain Bay/Bok facing + ceiling/sunbeams, Mobile Town planter, Mobile Shop crop/waste, Hotel Whale tail, Lagoon sphere tree, Jisu shadows, Pattern Reef Bok)",
+      "label": "0 CRIT Restored (8.06): Kiko ?-tile CRIT Cleared, Pharmacy Basin & Lagoon Boats Fixed"
+    },
+    {
+      "iteration": 56,
+      "rubric": "v3.0-jamboree",
+      "score": 8.18,
+      "dimensions": {
+        "D1": 7.9,
+        "D2": 8.5,
+        "D3": 8.6,
+        "D4": 8.6,
+        "D5": 7.3,
+        "D6": 8.0
+      },
+      "crit": 0,
+      "maj": 11,
+      "min": 13,
+      "verdict": "FAIL (0 CRIT; +0.12 -> 8.18! Captain Cabin ceiling/chandeliers/Bay+Bok facing, Mobile Shop card, Mobile Town planter, Echo left crystal cleared; 11 MAJ left)",
+      "label": "Cabin Ceiling & Crew Facing + Mobile Shop/Town + Echo Clearing Fixed (8.18, Iter 56)"
+    },
+    {
+      "iteration": 57,
+      "rubric": "v3.0-jamboree",
+      "score": 8.64,
+      "dimensions": {
+        "D1": 8.7,
+        "D2": 8.8,
+        "D3": 8.6,
+        "D4": 8.2,
+        "D5": 8.1,
+        "D6": 9.6
+      },
+      "crit": 0,
+      "maj": 8,
+      "min": 13,
+      "verdict": "PASS (0 CRIT, 8.64/10! +0.46 from 8.18: Bottle Beach cyan slab eliminated, horizon ribbed bottle + cork grounded, Jisu clean, smooth Banyan restored, Cabin sunbeams + Kiko forward; 8 MAJ left)",
+      "label": "0 CRIT PASS! Bottle Beach Cyan Slab Fixed, Horizon Bottle & Cabin Sunbeams (8.64, Iter 57)"
     }
   ]
 }

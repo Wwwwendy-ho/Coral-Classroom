@@ -1740,10 +1740,11 @@
     pathLines.forEach(function(ln){ var cur = []; ln.forEach(function(s){ if(s.stair){ if(cur.length) ribbonLines.push(cur); cur = []; } else cur.push(s); }); if(cur.length) ribbonLines.push(cur); });
     if(!crafted) ribbonLines.forEach(function(ln){
       if(ln.length < 2) return;
+      if(region && !spaces.lighthouse) return;
       var has3dY = !!spaces.lighthouse || ln.some(function(s){ return Math.abs(s.y || 0) > .05; });
       if(spaces.lighthouse || (region && has3dY)){
         var treadOff = (spaces.lighthouse && typeof spaces.lighthouse.treadTopOffset === 'number') ? spaces.lighthouse.treadTopOffset : 0;
-        var curve3 = new THREE.CatmullRomCurve3(ln.map(function(s){ return new THREE.Vector3(s.x, (s.y || 0) + treadOff + .06, s.z); }));
+        var curve3 = new THREE.CatmullRomCurve3(ln.map(function(s){ return new THREE.Vector3(s.x, (s.y || 0) + treadOff - .04, s.z); }));
         var ribbon3 = mesh(reef3dElevatedRibbonGeo(THREE, curve3, ln.length * 10, .46, .08), M(night ? '#6b5640' : '#ead4a2'));
         ribbon3.name = 'Board space ribbon';
         scene.add(ribbon3); reef3dBakeObject(ribbon3, rig, bake);
@@ -1765,7 +1766,7 @@
       var curve = new THREE.CatmullRomCurve3(ln.map(function(s){ return new THREE.Vector3(s.x, (s.y || 0) / .12, s.z); }));   // the tube is squashed to .12 high
       var ribbon = mesh(new THREE.TubeGeometry(curve, ln.length * 8, .55, 8), M(night ? '#6b5640' : '#efdcb4'));
       ribbon.name = 'Board space ribbon';
-      ribbon.scale.y = .12; ribbon.position.y = .02; scene.add(ribbon); reef3dBakeObject(ribbon, rig, bake);
+      ribbon.scale.y = .12; ribbon.position.y = -.09; scene.add(ribbon); reef3dBakeObject(ribbon, rig, bake);
     });
     var hitables = [], deckObjs = [], swayers = [], chestModel = null, spinners = [];
     var tileHitMaterial = new THREE.MeshBasicMaterial({ visible: false });
@@ -1780,7 +1781,7 @@
         : s.kind === 'surprise' ? (night ? '#2fa8b0' : '#2ac2bc')
         : s.kind === 'plain' ? (night ? '#3c7fa6' : '#3ea4ec')
         : (s.zone ? s.zone.place.hue : (night ? '#c99a2e' : '#f2be3e'));
-      var R = big ? (region ? 1.14 : 1.25) : (region ? .78 : .86), icon = s.kind === 'deck' ? s.item.d.emoji : s.kind === 'surprise' ? '?' : s.kind === 'treasure' ? '🧰' : s.kind === 'story' ? '🍾' : s.kind === 'start' ? '🐚' : s.kind === 'chance' ? '!' : s.kind === 'whirl' ? '🌀' : s.kind === 'shop' ? '🛍️' : '';
+      var R = big ? (region ? 1.14 : 1.25) : (region ? .78 : .86), icon = s.kind === 'deck' ? s.item.d.emoji : s.kind === 'surprise' ? '?' : s.kind === 'treasure' ? '🧰' : s.kind === 'story' ? '🍾' : s.kind === 'start' ? '⭐' : s.kind === 'chance' ? '!' : s.kind === 'whirl' ? '🌀' : s.kind === 'shop' ? '🛍️' : '';
       var tile = reef3dTile(style, s, R, top, icon, night, kit, M, mesh);   // Wendy's mix: decks keep the sandy pedestal, the spaces between are seashells
       var isCraftedTile = !!(kit.tileArt && tile.hit);
       if(s.y){ tile.parts.forEach(function(pt){ pt.position.y += s.y; }); tile.face.position.y += s.y; if(tile.hit) tile.hit.position.y += s.y; }
@@ -1857,6 +1858,7 @@
         }
         placeProp(side);
         var skipProp = false;
+        if(region && region.id === 'town' && s.item && s.item.d && s.item.d.regionActivity && s.item.d.regionActivity.id === 'pharmacy') skipProp = true;
         if(region && region.id === 'light'){
           var nearStart = function(){
             return [spaces[0], spaces[1]].some(function(ts){ return ts && Math.hypot(o.position.x - ts.x, o.position.z - ts.z) < 3.2 && Math.abs(o.position.y - (ts.y || 0)) < 2.2; });
@@ -2099,7 +2101,7 @@
     }
     var fishMixers = [], schools = [], schoolCols = night ? ['#6fb3c9', '#8a7fc4', '#5fa39a'] : ['#ff9a6b', '#ffd166', '#7fc8f0'];
     for(var sI = 0; !region && sI < 3; sI++){
-      var sch = { fish: [], ph: r() * 6, rad: 3.5 + r() * 2.5, h: 2.2 + r() * 1.6, spd: (.16 + r() * .1) * (sI % 2 ? -1 : 1), off: (r() - .5) * 8, hx: null, hz: null };
+      var sch = { fish: [], ph: r() * 6, rad: 3.5 + r() * 2.5, h: 0.95 + r() * 0.55, spd: (.16 + r() * .1) * (sI % 2 ? -1 : 1), off: (r() - .5) * 8, hx: null, hz: null };
       for(var fI = 0; fI < (models.fish1 ? 3 : 5); fI++){
         var fm = reef3dModel(models, ['fish1', 'fish2', 'fish1'][sI], .36, kit.grad, sI === 2 ? '#ffd166' : null), mx = null;
         if(fm){ // a real swimming fish: its own copy of the swim animation, started at a random point
@@ -2119,7 +2121,7 @@
       bw.userData.whale = bigOne;
       bigOne = bw;
       var ba0 = 1.24;
-      bw.position.set(Math.cos(ba0) * 10 - 5.2, night ? .10 : -.22, spaces[0].z - 25 + Math.sin(ba0) * 3);
+      bw.position.set(Math.cos(ba0) * 10 - 5.2, night ? .10 : -.78, spaces[0].z - (night ? 25 : 17) + Math.sin(ba0) * 3);
       bw.rotation.y = Math.atan2(-Math.sin(ba0) * 10, Math.cos(ba0) * 3);
       scene.add(bigOne);
       var innerW = bw.children[0];
@@ -2242,7 +2244,7 @@
     if(!crafted && !night && !region) reef3dCoveDetail(dress);
     scene.add(reef3dMerge(statics, rig, bake));
     var guide = B.guide(); reef3dOutline(guide, night ? '#173d5c' : '#1f3a2c', night ? .035 : .05); scene.add(guide);
-    var crabFit = reefCrabExtent(guide) * .7; reefCrabFit(crab, crabFit);   // the crab is about 70% of Shelly's (or Lumi's) size
+    var crabFit = reefCrabExtent(guide) * .60; reefCrabFit(crab, crabFit);   // compact companion fit inside tile bevel rims
     function moverBlob(r, mat){ var g = new THREE.PlaneGeometry(r * 2, r * 2); g.rotateX(-Math.PI / 2); var b = new THREE.Mesh(g, mat || blobMat); b.renderOrder = 2; scene.add(b); return b; }
     var crabBlobMat = crab ? new THREE.MeshBasicMaterial({ map: reef3dBlobTex(false, true), color: night ? '#051016' : '#243630', transparent: true, opacity: night ? .5 : .42, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 }) : null;
     var blobG = moverBlob(1.1), blobC = crab ? moverBlob(.68, crabBlobMat) : null, glowG = null;
@@ -2251,8 +2253,10 @@
       glowG = new THREE.Mesh(gg, new THREE.MeshBasicMaterial({ map: gtex, color: '#5ff0e0', transparent: true, opacity: .55, depthWrite: false, blending: THREE.AdditiveBlending, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 }));
       glowG.renderOrder = 3; scene.add(glowG);
     }
-    var ring = new THREE.Mesh(new THREE.TorusGeometry(1.45, .08, 8, 40), new THREE.MeshBasicMaterial({ color: night ? '#ffe29a' : '#ffffff', transparent: true, opacity: .8 }));
-    ring.rotation.x = Math.PI / 2; ring.visible = false; scene.add(ring);
+    var ringGeo = new THREE.RingGeometry((region ? 1.14 : 1.25) - .02, (region ? 1.14 : 1.25) + .08, 40);
+    ringGeo.rotateX(-Math.PI / 2);
+    var ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: night ? '#ffe29a' : '#ffd966', transparent: true, opacity: .45, depthWrite: false }));
+    ring.visible = false; scene.add(ring);
 
     // HTML labels for the decks (crisp text, real buttons for touch and screen readers).
     var labels = wrap.querySelector('.r3-labels');
@@ -2290,6 +2294,10 @@
       skyDome: skyDome, motes: reef3dAmbientMotes(scene, region, night), _tileEnvRT: tileEnvRT
     };
     view.post = null; // Direct MSAA render avoids 5 offscreen RenderTargets + 9 shader passes per frame.
+    if(view.crab){
+      var initCrabSpot = reef3dCrabSpot(view);
+      view.crab.position.set(initCrabSpot.x, initCrabSpot.y != null ? initCrabSpot.y : (view.guide.position.y - .3 - (view.craftedPavilion ? .07 : 0)), initCrabSpot.z);
+    }
     reef3dLifeBuild(view);
     reef3dStyleStarBeam(view);
     var who = S.profile && S.profile.id;
@@ -2843,6 +2851,7 @@
     var used = !!(s.qb && s.qb.userData && s.qb.userData.used);
     var qy0 = (used ? (REEF3D_QY - .12) : REEF3D_QY) + (s.y || 0), qx = s.x, qy = qy0, qz = s.z, qScale = 1;
     if(view.at === s.i) qy += 1.06;
+    if(view.crab && view._crabTile === s.i) qy += 0.95;
     if(view && view.regionPeople && !view.regionPeople.disposed && view.regionPeople.stall && view.at !== s.i){
       var stSh = reef3dQBlockStallShift(view, s, projCam, qx, qy, qz, qScale, view._qbStOut || (view._qbStOut = {}));
       qy += stSh.dy;
@@ -2862,18 +2871,33 @@
     var lh = !!(spaces && spaces.lighthouse);
     var prev = null;
     if(cur.branch){
-      var backId = (cur.links || []).find(function(k){ return k < cur.i; });
+      var backId = (cur.links || []).find(function(k){ return k !== cur.i && k < cur.i; });
       prev = backId != null ? spaces[backId] : spaces[cur.jn];
+      if(prev && (prev === cur || Math.hypot(prev.x - cur.x, prev.z - cur.z) < 2.0) && spaces[cur.jn] && spaces[cur.jn] !== cur){
+        prev = spaces[cur.jn];
+      }
     } else if(cur.i > 0){
       prev = spaces[cur.i - 1];
     } else if(spaces.loop && !lh){
       prev = spaces[mN - 1];
     }
+    if(prev && prev.kind === 'surprise'){
+      var prev2 = prev.i > 0 ? spaces[prev.i - 1] : (spaces.loop && !lh ? spaces[mN - 1] : null);
+      if(prev2 && prev2 !== cur && prev2.kind !== 'surprise' && Math.hypot(prev2.x - cur.x, prev2.z - cur.z) >= 2.0){
+        prev = prev2;
+      } else {
+        prev = null;
+      }
+    }
+    if(prev && (prev === cur || Math.hypot(prev.x - cur.x, prev.z - cur.z) < 2.0)){
+      prev = null;
+    }
+    view._crabTile = prev ? prev.i : -1;
     if(prev){
       var isCrafted = !!view.craftedPavilion;
       var hasTileArt = !!(view.kit && view.kit.tileArt);
       var bigPrev = prev.kind === 'deck' || prev.kind === 'treasure' || prev.kind === 'story' || prev.kind === 'start' || prev.kind === 'shop';
-      var discTop = isCrafted ? 0.352 : (hasTileArt ? 0.360 : (bigPrev ? 0.345 : 0.335));
+      var discTop = isCrafted ? 0.352 : (hasTileArt ? 0.326 : (bigPrev ? 0.345 : 0.335));
       var tileTopY = (prev.y || 0) + discTop;
       return { x: prev.x, z: prev.z, y: tileTopY, tileIndex: prev.i, onTile: true };
     }
@@ -2932,7 +2956,7 @@
     patterns: [5.8, 13.0, 2.9, 1.25],
     beach:    [5.8, 12.0, 3.6, 1.40],
     light:    [4.9, 15.6, 2.7, 1.15],
-    captain:  [5.9, 13.4, 2.2, 1.05]
+    captain:  [4.65, 12.2, 2.7, 1.48]
   };
   if(typeof window !== 'undefined') window.REEF3D_REGION_CAMERA = REEF3D_REGION_CAMERA;
   function reef3dCamTarget(view, out, look){
@@ -3016,7 +3040,7 @@
         }
       }
       if(view.region && view.region.id === 'captain' && view._shipPoly){
-        var capWallPad = 0.85;
+        var capWallPad = 2.45;
         if(!reef3dPointInPoly(view._shipPoly, out.x, out.z) || reef3dDistToPolyEdge(view._shipPoly, out.x, out.z) < capWallPad){
           var capLo = .35, capHi = 1.0;
           for(var capIt = 0; capIt < 10; capIt++){
@@ -3094,10 +3118,10 @@
     return 42;
   }
   function reef3dSize(view){
-    if(!view._sizeObsInit){
+    if(!view._sizeObsInit || (!view._sizeObs && !view._onWinResize)){
       view._sizeObsInit = true;
       view._sizeDirty = true;
-      if(typeof ResizeObserver === 'function' && view.wrap){
+      if(typeof ResizeObserver === 'function' && view.wrap && !view._sizeObs){
         view._sizeObs = new ResizeObserver(function(entries){
           var cr = entries && entries[0] && entries[0].contentRect;
           if(cr && cr.width > 0 && cr.height > 0){
@@ -3107,8 +3131,9 @@
           view._sizeDirty = true;
         });
         view._sizeObs.observe(view.wrap);
-      } else if(typeof window !== 'undefined'){
-        view._onWinResize = function(){ view._sizeDirty = true; };
+      }
+      if(typeof window !== 'undefined' && !view._onWinResize){
+        view._onWinResize = function(){ view._wrapW = 0; view._wrapH = 0; view._sizeDirty = true; };
         window.addEventListener('resize', view._onWinResize);
       }
     }
@@ -3117,8 +3142,8 @@
       if(view.cam.fov !== wantFovCached){ view.cam.fov = wantFovCached; view.cam.updateProjectionMatrix(); view.dirty = true; }
       return;
     }
-    var w = view._wrapW || (view.wrap && view.wrap.clientWidth) || 1;
-    var h = view._wrapH || (view.wrap && view.wrap.clientHeight) || 1;
+    var w = (view.wrap && view.wrap.clientWidth) || view._wrapW || 1;
+    var h = (view.wrap && view.wrap.clientHeight) || view._wrapH || 1;
     view._sizeDirty = false;
     var wantFov = reef3dWantFov(view, w);
     if(view.w === w && view.h === h){
@@ -3388,7 +3413,7 @@
       for(var fmi = 0; fmi < view.fishMixers.length; fmi++) view.fishMixers[fmi].update(dt);
       if(view.bigOne){
         var ba = t * .05 + 1.24;
-        view.bigOne.position.set(Math.cos(ba) * 10 - 5.2, (view.night ? .10 + Math.sin(t * .3) * .22 : -.21 + Math.sin(t * .3) * .11), g.z - 25 + Math.sin(ba) * 3);
+        view.bigOne.position.set(Math.cos(ba) * 10 - 5.2, (view.night ? .10 + Math.sin(t * .3) * .22 : -.78 + Math.sin(t * .3) * .11), g.z - (view.night ? 25 : 17) + Math.sin(ba) * 3);
         view.bigOne.rotation.y = Math.atan2(-Math.sin(ba) * 10, Math.cos(ba) * 3);
         var wh = view.bigOne.userData && view.bigOne.userData.whale;
         if(wh && wh.userData && wh.userData.tailPivot){
@@ -3455,6 +3480,24 @@
         var st = Math.min(dist, dt * crabSpeed);
         cp.x += dx / dist * st; cp.z += dz / dist * st;
       }
+      // Hard minimum separation guard from Shelly so Kiko never clips into her neck/flippers.
+      var sx = cp.x - g.x, sz = cp.z - g.z, sDist = Math.hypot(sx, sz);
+      if(sDist < 1.65){
+        if(sDist > 0.1){
+          cp.x = g.x + (sx / sDist) * 1.65;
+          cp.z = g.z + (sz / sDist) * 1.65;
+        } else {
+          var txDirX = tx - g.x, txDirZ = tz - g.z, txDirLen = Math.hypot(txDirX, txDirZ);
+          if(txDirLen > 0.1){
+            cp.x = g.x + (txDirX / txDirLen) * 1.65;
+            cp.z = g.z + (txDirZ / txDirLen) * 1.65;
+          } else {
+            var sy = view.guide.rotation.y || 0;
+            cp.x = g.x - Math.sin(sy) * 1.65;
+            cp.z = g.z - Math.cos(sy) * 1.65;
+          }
+        }
+      }
       cp.y += (crabY - cp.y) * (calm ? 1 : Math.min(1, dt * 10));   // the crab keeps to her level (stairs, the hold, sand curb)
       if(entering && dist < .3){ view.crab.userData.entering = false; view.crabBusy = false; reef3dCrabAct(view, 'Dance', true); }
       var walking = dist > .25 && !calm;
@@ -3466,7 +3509,7 @@
         var shellyYaw = Math.atan2(g.x - cp.x, g.z - cp.z);
         var camYaw = Math.atan2(view.cam.position.x - cp.x, view.cam.position.z - cp.z);
         var diffSC = Math.atan2(Math.sin(camYaw - shellyYaw), Math.cos(camYaw - shellyYaw));
-        var idleYaw = shellyYaw + diffSC * 0.35;
+        var idleYaw = shellyYaw + diffSC * 0.86;
         var dIdle = Math.atan2(Math.sin(idleYaw - view.crab.rotation.y), Math.cos(idleYaw - view.crab.rotation.y));
         view.crab.rotation.y += dIdle * Math.min(1, dt * 6);
       }
@@ -3694,7 +3737,7 @@
     if(view.raf) return;
     var firstTick = true;
     function tick(now){
-      if(!document.body.contains(view.wrap)){ view.raf = null; if(view._sizeObs){ try{ view._sizeObs.disconnect(); }catch(e){} view._sizeObs = null; } if(view._onWinResize){ window.removeEventListener('resize', view._onWinResize); view._onWinResize = null; } if(window.JamboreeBridge && JamboreeBridge.onDispose) JamboreeBridge.onDispose(view); if(view._tileEnvRT && view._tileEnvRT.dispose){ view._tileEnvRT.dispose(); view._tileEnvRT = null; } reef3dAmbience(view, false); if(!document.querySelector('.r3')) document.body.classList.remove('r3-full'); return; }
+      if(!document.body.contains(view.wrap)){ view.raf = null; if(view._sizeObs){ try{ view._sizeObs.disconnect(); }catch(e){} view._sizeObs = null; } if(view._onWinResize){ window.removeEventListener('resize', view._onWinResize); view._onWinResize = null; } view._sizeObsInit = false; view._wrapW = 0; view._wrapH = 0; view._sizeDirty = true; if(window.JamboreeBridge && JamboreeBridge.onDispose) JamboreeBridge.onDispose(view); if(view._tileEnvRT && view._tileEnvRT.dispose){ view._tileEnvRT.dispose(); view._tileEnvRT = null; } reef3dAmbience(view, false); if(!document.querySelector('.r3')) document.body.classList.remove('r3-full'); return; }
       if(firstTick){ firstTick = false; view.lastT = now; view.drawNext = now; }
       view.tick = (view.tick || 0) + 1;
       if(window.__reefTx){ if(view.qs) view.qs.hold = now + 800; view.drawNext = null; }

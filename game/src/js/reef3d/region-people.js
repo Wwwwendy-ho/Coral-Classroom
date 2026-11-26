@@ -244,6 +244,11 @@
     var sh=actor && actor.userData && actor.userData.contactShadow;
     if(!sh) return;
     var b=actor.userData.regionBounds;
+    if(sh.userData && sh.userData.isFixedBasin){
+      sh.position.x=actor.position.x+(b ? b.centerX : 0);
+      sh.position.z=actor.position.z+(b ? b.centerZ : 0);
+      return;
+    }
     var cx=b ? b.centerX : 0, cz=b ? b.centerZ : 0;
     var yaw=typeof actor.userData.boardYaw==='number' ? actor.userData.boardYaw : 0;
     if(sh.userData && sh.userData.isWaterRipple){
@@ -439,7 +444,7 @@
       var ferryCenter=ferryObsH.length ? ferryObsH[0] : null;
       var nonFerryObs=obstacles.filter(function(o){ return !(o.r && o.r>=2.0); });
       var wMinY=(bounds.centerY||0)-(bounds.height||0)*.5;
-      var waterYOff=-.765-wMinY;
+      var waterYOff=-1.22-wMinY-(space.y||0);
       // Anatomical whale silhouette envelope for v34 0.85x board model (~1.96w x 3.35l, snout +Z, flukes -Z).
       var wHalfX=Math.min(1.00,Math.max(.82,(bounds.width||1.96)*.5));
       var wHalfZ=Math.min(1.68,Math.max(1.25,(bounds.depth||3.35)*.5));
@@ -464,7 +469,8 @@
           var obsPen=horizObsPen(wcx,wcz,radius*.64,nonFerryObs,.40,2800);
           var ferryPen=0;
           if(ferryCenter){
-            var fcy=Math.cos(.22), fsy=Math.sin(.22);
+            var fyaw=(view && typeof view._ferryYaw==='number') ? view._ferryYaw : -.38;
+            var fcy=Math.cos(fyaw), fsy=Math.sin(fyaw);
             for(var fi4=0;fi4<hullPts.length;fi4++){
               var hpx4=wcx+hullPts[fi4][0]*wCy+hullPts[fi4][1]*wSy;
               var hpz4=wcz-hullPts[fi4][0]*wSy+hullPts[fi4][1]*wCy;
@@ -519,9 +525,9 @@
             var hxC=(probe.x+1)*512, hyC=(1-probe.y)*320;
             if(hxC<sMinX) sMinX=hxC; if(hxC>sMaxX) sMaxX=hxC;
             if(hyC<sMinY) sMinY=hyC; if(hyC>sMaxY) sMaxY=hyC;
-            // Keep ENTIRE whale (snout, bellhop hat, flippers & tail) comfortably inside screenPx X >= 172..350 & below ferry hull (Y >= 438..595).
-            if(badZ || sMinX<172 || sMaxX>350 || sMinY<438 || sMaxY>595) camPen+=3800;
-            if(sMinX<182) camPen+=(182-sMinX)*2.0;
+            // Keep ENTIRE whale (snout, bellhop hat, flippers & tail) comfortably inside screenPx X >= 245..350 & below ferry hull (Y >= 438..595).
+            if(badZ || sMinX<245 || sMaxX>350 || sMinY<438 || sMaxY>595) camPen+=3800;
+            if(sMinX<252) camPen+=(252-sMinX)*2.0;
             if(sMinY<442) camPen+=(442-sMinY)*2.5;
             for(var hb=0;hb<hotelPierBoxes.length;hb++){
               var hpb=hotelPierBoxes[hb];
@@ -555,7 +561,7 @@
       }
       if(best){
         var wCamAz=camBackAz(frameCam,best.x,best.z,-1.53);
-        best.boardYaw=wCamAz+.21;
+        best.boardYaw=wCamAz+.54;
         return best;
       }
     }
@@ -596,7 +602,7 @@
         var fb=buildFerry2D(c); if(fb) ferryBoxes.push(fb);
       });
       var rMinY=(bounds.centerY||0)-(bounds.height||0)*.5;
-      var rayYOff=-.64-rMinY;
+      var rayYOff=-.52-rMinY;
       for(var gx=-11.5;gx<=11.5;gx+=.5){
         for(var gz=-7.5;gz<=7.5;gz+=.25){
           var rx2=sf.cx+gx, rz2=sf.cz+gz;
@@ -655,14 +661,17 @@
         // Keep all real obstacles (ferry, boats, bollards, planters) + pier crate/barrel center.
         var sealObs=obstacles.filter(function(o){ return Math.hypot(o.x-pierMidX,o.z-pierMidZ)>=2.4; });
         sealObs.push({x:pierMidX,z:pierMidZ,r:.95});
-        // Midway between sp[26] & sp[27] at outD = -1.92..-2.15 puts the seal's entire belly & oval contact shadow
-        // squarely on flat cobblestones (y=-0.314) completely clear of the -0.070 stone quay curb (outD=-2.70..-3.04) and tile rims (r=1.15).
-        [-1.95,-2.02,-2.10,-1.88,-2.20].forEach(function(outD,oi){
+        // Pull Sua inward onto flat sunlit cobblestones clear of the quay rail & ferry bow.
+        [-1.50,-1.60,-1.70,-1.80].forEach(function(outD,oi){
           [-1.40,-1.28,-1.52,1.40,1.25].forEach(function(along,ai){
             var fx=ps.x+pf.nx*outD+pf.tx*along, fz=ps.z+pf.nz*outD+pf.tz*along;
             var minF=minTileDist(fx,fz), defF=Math.max(0,2.34-minF);
             var shpF=(view && view._shopPos && Math.hypot(view._shopPos.x-fx,view._shopPos.z-fz)<4.2) ? 2000 : 0;
             var obsF=horizObsPen(fx,fz,radius*.62,sealObs,.35);
+            for(var foi=0;foi<sealObs.length;foi++){
+              var fop=sealObs[foi];
+              if(fop.r>=2.0 && Math.hypot(fx-fop.x,fz-fop.z)<fop.r+1.8) obsF+=2400;
+            }
             var pplF=placedPenalty(fx,fz);
             var camF=0;
             if(cam){
@@ -678,8 +687,8 @@
         var fStartCam=regionPeopleCamAt(view,regionPeopleStartIndex(view)) || cam;
         best.boardYaw=(fStartCam && fStartCam.position) ? Math.atan2(fStartCam.position.x-best.x,fStartCam.position.z-best.z)+0.16 : -.4;
         var fMinY=(bounds.centerY||0)-(bounds.height||0)*.5;
-        // Raise static belly bottom to -0.275 so even at the lowest Idle dip (-0.043u) belly rests ON cobblestones (-0.314) with zero sinking.
-        best.boardYOffset=-.275-fMinY;
+        // Seat Friend Seal's belly solidly on -0.314 Harbor Town cobblestones (compensating for space.y & GLB root offset).
+        best.boardYOffset=-.415-fMinY-(space.y||0);
         return best;
       }
     }
@@ -688,10 +697,10 @@
     // 6 walking legs, fanned 5-petal tail, and gripped emerald bottle read clearly from the overhead 02-harbor-town camera.
     if(isLoop && regionId==='town' && actId==='pharmacy'){
       var pf2=regionPeopleLoopFrame(view,space);
-      [1.45,1.55,1.65,1.75,1.85,1.92].forEach(function(outDist,di){
-        [1.40,1.15,1.65,.85,1.85,.5,0].forEach(function(along,ai){
+      [1.72,1.82,1.92,1.62,1.52].forEach(function(outDist,di){
+        [1.55,1.35,1.75,1.15,1.95].forEach(function(along,ai){
           var px=space.x+pf2.nx*outDist+pf2.tx*along, pz=space.z+pf2.nz*outDist+pf2.tz*along;
-          var curbPen=(Math.abs(outDist-3.05)<1.08 || outDist>1.94) ? 2800 : 0;
+          var curbPen=(Math.abs(outDist-3.05)<1.25 || outDist>2.05) ? 2800 : 0;
           var cand=evalPoint(px,pz,1,di*.45+ai*.2+curbPen,{mx:.68,minY:-.60,maxY:.45});
           if(!best || cand.score<best.score) best=cand;
         });
@@ -700,10 +709,10 @@
         var phCam=regionPeopleCamAt(view,space.i) || cam;
         var phCamAz=camBackAz(phCam,best.x,best.z,-1.65);
         best.boardPitchYaw=phCamAz;
-        best.boardYaw=phCamAz-.96;
-        best.boardPitch=-.50;
+        best.boardYaw=phCamAz-.10;
+        best.boardPitch=-.35;
         var pMinY=(bounds.centerY||0)-(bounds.height||0)*.5;
-        best.boardYOffset=-.312-pMinY+.24;
+        best.boardYOffset=-.28-pMinY-(space.y||0);
         // m6: Shift "Talk to Pharmacist" outward along street normal onto open cobblestones clear of the clipboard tile edge.
         best.labelOffset={x:pf2.nx*1.15,y:.10,z:pf2.nz*1.15};
         return best;
@@ -1100,25 +1109,26 @@
       var echoGrotto=!!((view && view._echoPool) || Math.hypot(cvAnchor.x-(-15.95),cvAnchor.z-(-11.15))<4.0);
       function evalEcho(ex,ez){
         if(!regionPeopleInPoly(cavePoly,ex,ez)) return;
-        var minE=minTileDist(ex,ez), defE=Math.max(0,radius+1.30-minE);
-        var shpE=(view && view._shopPos && Math.hypot(view._shopPos.x-ex,view._shopPos.z-ez)<4.5) ? 2500 : 0;
+        var minE=minTileDist(ex,ez), defE=Math.max(0,Math.max(1.6,radius+.80)-minE);
+        var shpE=(view && view._shopPos && Math.hypot(view._shopPos.x-ex,view._shopPos.z-ez)<4.2) ? 2500 : 0;
         var poolPen=0;
         for(var pi3=0;pi3<cavePools.length;pi3++){
-          if(Math.hypot(ex-cavePools[pi3].x,ez-cavePools[pi3].z)<3.60){ poolPen=4500; break; }
+          if(Math.hypot(ex-cavePools[pi3].x,ez-cavePools[pi3].z)<2.40){ poolPen=4500; break; }
         }
-        var obsE=poolPen+horizObsPen(ex,ez,radius*.40,caveSolid,.15,2200);
+        var obsE=poolPen+horizObsPen(ex,ez,radius*.65,caveSolid,.45,3600);
         var pplE=placedPenalty(ex,ez);
-        var camE=0, distBias=Math.hypot(ex-space.x,ez-space.z)*.35, archPen=0;
+        var camE=0, distBias=Math.hypot(ex-cvCur.x,ez-cvCur.z)*.20, archPen=0;
         if(cvCam && probe){
           var ey=(space.y||0)+(bounds.centerY||0);
           probe.set(ex,ey,ez).project(cvCam);
-          if(probe.z<-1 || probe.z>1 || probe.x<-.58 || probe.x>.58 || probe.y<-.45 || probe.y>.42) camE+=2400;
+          if(probe.z<-1 || probe.z>1 || probe.x<-.36 || probe.x>-.08 || probe.y<-.18 || probe.y>.24) camE+=2400;
           // Stay clear of bottom-left "Ask Shelly" and bottom-right "Meet Bok" / "Treasure map" HUD pills.
           if(probe.x<-.40 && probe.y<-.40) camE+=3000;
           if(probe.x>.48 && probe.y<-.43) camE+=3000;
-          var camDist=cvCam.position.distanceTo ? Math.hypot(cvCam.position.x-ex,cvCam.position.y-ey,cvCam.position.z-ez) : 20;
-          // m10: Bias Echo ~0.65u forward/left away from the dark indigo cavern arch so the tail fluke has generous daylight.
-          distBias=camDist*.75+Math.hypot(ex-space.x,ez-space.z)*.30+Math.hypot(probe.x-.40,probe.y-(-.39))*3.2;
+          var camDist=cvCam.position.distanceTo ? Math.hypot(cvCam.position.x-ex,cvCam.position.y-ey,cvCam.position.z-ez) : 9;
+          if(camDist<6.5 || camDist>13.0) camE+=(camDist<6.5?(6.5-camDist):(camDist-13.0))*600+1200;
+          // Bias Echo prominently into the center-left open cavern clearing (6.5..13u from cvCam).
+          distBias=Math.abs(camDist-9.0)*1.0+Math.hypot(ex-cvCur.x,ez-cvCur.z)*.20+Math.hypot(probe.x-(-.22),probe.y-(.02))*8.0;
           var tcX=cvCam.position.x-ex, tcZ=cvCam.position.z-ez, tcL=Math.hypot(tcX,tcZ)||1;
           tcX/=tcL; tcZ/=tcL;
           for(var ai2=0;ai2<caveSolid.length;ai2++){
@@ -1130,45 +1140,39 @@
             }
           }
         }
-        var epX=(view && view._echoPool) ? view._echoPool.x : -18.50, epZ=(view && view._echoPool) ? view._echoPool.z : -6.00;
-        var grottoBias=echoGrotto ? Math.hypot(ex-epX,ez-epZ)*4.5 : 0;
-        var scE=defE*8000+shpE+obsE+pplE+camE+distBias+archPen+grottoBias;
+        var scE=defE*8000+shpE+obsE+pplE+camE+distBias+archPen;
         if(!best || scE<best.score) best={x:ex,z:ez,side:1,score:scE};
       }
-      // CRIT-2: Lock Echo squarely over the center of view._echoPool (echoPoolX, echoPoolZ) on production 09-caves
-      // (both procedural & echo.glb; resident-models.js centers echo.glb's local centerX/centerZ at baseX/baseZ).
-      var echoPoolX=(view && view._echoPool) ? view._echoPool.x : -18.50, echoPoolZ=(view && view._echoPool) ? view._echoPool.z : -6.00;
-      if(echoGrotto &&
-         minTileDist(echoPoolX,echoPoolZ)>=1.10 &&
-         !(view && view._shopPos && Math.hypot(view._shopPos.x-echoPoolX,view._shopPos.z-echoPoolZ)<4.5)){
-        best={x:echoPoolX,z:echoPoolZ,side:1,score:0};
-      } else {
-        var baseX=Math.round(cvAnchor.x*2)/2, baseZ=Math.round(cvAnchor.z*2)/2;
-        if(echoGrotto) evalEcho(echoPoolX,echoPoolZ);
-        for(var ecx=-8;ecx<=8;ecx+=.5){
-          for(var ecz=-8;ecz<=8;ecz+=.5){
-            evalEcho(baseX+ecx,baseZ+ecz);
-          }
+      // MAJ-4: Place Echo prominently in the midground-left open cavern clearing relative to sp[0] / cvCam
+      // (probe.x in [-0.58, -0.18], probe.y in [-0.18, 0.28], 6..12u from cvCam, minTileDist >= 2.2, clear of crystals).
+      var baseX=Math.round(cvAnchor.x*2)/2, baseZ=Math.round(cvAnchor.z*2)/2;
+      for(var ecx=-10;ecx<=10;ecx+=.5){
+        for(var ecz=-10;ecz<=10;ecz+=.5){
+          evalEcho(baseX+ecx,baseZ+ecz);
         }
-        if(!best || best.score>1000){
-          for(var ecx2=-14;ecx2<=14;ecx2+=.75){
-            for(var ecz2=-10;ecz2<=10;ecz2+=.75){
-              evalEcho((space.x+cvCur.x)*.5+ecx2,(space.z+cvCur.z)*.5+ecz2);
-            }
+      }
+      var curBaseX=Math.round(cvCur.x*2)/2, curBaseZ=Math.round(cvCur.z*2)/2;
+      for(var ecxC=-12;ecxC<=12;ecxC+=.5){
+        for(var eczC=-12;eczC<=12;eczC+=.5){
+          evalEcho(curBaseX+ecxC,curBaseZ+eczC);
+        }
+      }
+      if(!best || best.score>1000){
+        for(var ecx2=-14;ecx2<=14;ecx2+=.75){
+          for(var ecz2=-12;ecz2<=12;ecz2+=.75){
+            evalEcho((space.x+cvCur.x)*.5+ecx2,(space.z+cvCur.z)*.5+ecz2);
           }
         }
       }
       if(best){
-        // CRIT-2: echo.glb's verified local forward axis is +Z (Eye.L/R z=+1.004, Head z=+0.350, Tail z=-0.680).
-        // Aim Echo 50% toward Shelly + 50% toward the 09-echo-caves camera (without +Math.PI!) so her smiling beluga face beams forward!
         var echoCamAz=camBackAz(cvCam,best.x,best.z,Math.atan2(-cvF.nx,-cvF.nz));
-        var echoToShelly=Math.atan2(cvAnchor.x-best.x,cvAnchor.z-best.z);
+        var echoToShelly=Math.atan2(cvCur.x-best.x,cvCur.z-best.z);
         var echoToCam=(cvCam && cvCam.position && cvCam.position.lengthSq()>.01)
           ? Math.atan2(cvCam.position.x-best.x,cvCam.position.z-best.z) : echoCamAz;
         var echoDelta=Math.atan2(Math.sin(echoToShelly-echoToCam),Math.cos(echoToShelly-echoToCam));
         var eMinY=(bounds.centerY||0)-(bounds.height||0)*.5;
         best.boardPitchYaw=echoToCam;
-        best.boardYaw=echoToCam+echoDelta*.50;
+        best.boardYaw=echoToCam+echoDelta*.45;
         best.boardPitch=-.14;
         best.boardYOffset=-.160-eMinY;
         // m6: Float "Practice a sound" cleanly above Echo's head to the left of the dark indigo crystal cave arch.
@@ -1197,7 +1201,8 @@
       var cCenter=regionPeopleLoopFrame(view,cCur);
       var capCam=cam;
       if(window.THREE){
-        var cTab=(typeof REEF3D_REGION_CAMERA==='object' && REEF3D_REGION_CAMERA && REEF3D_REGION_CAMERA.captain) || [5.7,9.8,4.2,1.25];
+        var cTab=(typeof REEF3D_REGION_CAMERA==='object' && REEF3D_REGION_CAMERA && REEF3D_REGION_CAMERA.captain) || [4.65,12.2,2.7,1.48];
+        cTab=[4.65,12.2,2.7,1.48];
         capCam=new window.THREE.PerspectiveCamera(42,1.6,.1,300);
         capCam.position.set(cCur.x-fx*cTab[1],(cCur.y||0)+cTab[0],cCur.z-fz*cTab[1]);
         capCam.lookAt(cCur.x+fx*cTab[2],(cCur.y||0)+.3+(cTab[3]!=null?cTab[3]:1.25),cCur.z+fz*cTab[2]);
@@ -1283,7 +1288,7 @@
               }
               var inwardDist=Math.hypot(cx2-cCenter.cx,cz2-cCenter.cz);
               var anchorDist=Math.hypot(anchor.x-cCenter.cx,anchor.z-cCenter.cz);
-              var sideBias=sdi*.9+(inwardDist>anchorDist ? .4 : 0);
+              var sideBias=sdi*8.0+(inwardDist>anchorDist ? .4 : 0);
               var scC=defC*8000+deckPen+shpC+obsC+pplC+camC+tileOcclPen+si*1.4+di*.35+fi*.25+sideBias;
               if(!best || scC<best.score) best={x:cx2,z:cz2,side:sd,step:spec.st,score:scC};
             });
@@ -1298,10 +1303,10 @@
         var capToCam=(capCamRef && capCamRef.position && capCamRef.position.lengthSq()>.01)
           ? Math.atan2(capCamRef.position.x-best.x,capCamRef.position.z-best.z) : capToShelly;
         var capDelta=Math.atan2(Math.sin(capToShelly-capToCam),Math.cos(capToShelly-capToCam));
-        best.boardYaw=capToCam+capDelta*.72;
+        best.boardYaw=capToCam+capDelta*.35;
         var capMinY=(bounds.centerY||0)-(bounds.height||0)*.5;
-        // iter20 Minor #9: Seat Captain Bay's belly & flippers solidly on the -0.12 wooden deck planks (accounting for -0.033u Idle bob).
-        best.boardYOffset=-.086-capMinY;
+        // Seat Captain Bay's belly & flippers solidly on the -0.12 wooden deck planks (accounting for space.y elevation).
+        best.boardYOffset=-.118-capMinY-(space.y||0);
         return best;
       }
     }
@@ -1344,35 +1349,40 @@
         return best;
       }
     }
-    // Story Lagoon Host (08-lagoon, M7): frame Mira in the open mid-right turquoise lagoon clearing
-    // strictly clear of "3 legs today" chip, cattails, tiles & tube corals so her face & silhouette are 100% unobstructed.
+    // Story Lagoon Host (08-lagoon, MAJ-2): frame Mira in the open foreground-left / mid-left turquoise water clearing
+    // strictly clear of floating storybooks, reeds, tiles & tube corals so her friendly face is 100% visible.
     if(isLoop && regionId==='lagoon'){
       var lgMain=view.spaces.mainN || view.spaces.length;
       var lgCam=regionPeopleCamAt(view,Math.min(5,lgMain-1)) || cam;
-      var lgRefX=-8.60, lgRefZ=-14.70;
-      for(var lgx=-10.2;lgx<=-7.4;lgx+=.2){
-        for(var lgz=-15.9;lgz<=-13.7;lgz+=.2){
-          var lMinT=minTileDist(lgx,lgz), lDef=Math.max(0,radius+1.25-lMinT);
+      var lgSp0=view.spaces[0];
+      var lgBaseX=lgSp0 ? lgSp0.x : space.x, lgBaseZ=lgSp0 ? lgSp0.z : space.z;
+      for(var lgdx=-9.6;lgdx<=6.4;lgdx+=.4){
+        for(var lgdz=-8.0;lgdz<=8.0;lgdz+=.4){
+          var lgx=lgBaseX+lgdx, lgz=lgBaseZ+lgdz;
+          var lMinT=minTileDist(lgx,lgz), lDef=Math.max(0,radius+1.85-lMinT);
+          var lSp0Pen=(lgSp0 && Math.hypot(lgx-lgSp0.x,lgz-lgSp0.z)<3.4) ? 8000 : 0;
           var lShp=(view && view._shopPos && Math.hypot(view._shopPos.x-lgx,view._shopPos.z-lgz)<4.5) ? 2000 : 0;
-          var lObs=horizObsPen(lgx,lgz,radius*.70,obstacles,.32,2600);
+          var lObs=horizObsPen(lgx,lgz,radius*.85,obstacles,.45,5000);
           var lPpl=placedPenalty(lgx,lgz);
-          var lCam=0;
+          var lCam=0, lBias=0;
           if(lgCam && probe){
             probe.set(lgx,(space.y||0)+(bounds.centerY||0),lgz).project(lgCam);
-            if(probe.z<-1 || probe.z>1 || probe.x<.05 || probe.x>.55 || probe.y<-.32 || probe.y>.22) lCam+=2200;
+            if(probe.z<-1 || probe.z>1 || probe.x<-.68 || probe.x>-.10 || probe.y<-.52 || probe.y>.25) lCam+=2400;
+            lBias=Math.hypot(probe.x-(-.38),probe.y-(-.14))*4.0;
           }
-          var lBias=Math.hypot(lgx-lgRefX,lgz-lgRefZ)*2.5;
-          var lSc=lDef*8000+lShp+lObs+lPpl+lCam+lBias;
+          if(lgSp0) lBias+=Math.abs(Math.hypot(lgx-lgSp0.x,lgz-lgSp0.z)-4.8)*1.2;
+          var lSc=lDef*8000+lSp0Pen+lShp+lObs+lPpl+lCam+lBias;
           if(!best || lSc<best.score) best={x:lgx,z:lgz,side:1,score:lSc};
         }
       }
       if(best){
-        // iter19 M4: Orient Mira toward the 08-lagoon camera with gentle nose-up pitch so her smiling face, 76% iris eyes,
-        // raised forehead goggles, and coral storyteller satchel read clearly from the overhead board camera.
         var lgCamAz=camBackAz(lgCam,best.x,best.z,.86);
+        var lgToSp0=lgSp0 ? Math.atan2(lgSp0.x-best.x,lgSp0.z-best.z) : lgCamAz;
+        var lgToCam=(lgCam && lgCam.position && lgCam.position.lengthSq()>.01) ? Math.atan2(lgCam.position.x-best.x,lgCam.position.z-best.z) : lgCamAz;
+        var lgDelta=Math.atan2(Math.sin(lgToCam-lgToSp0),Math.cos(lgToCam-lgToSp0));
         best.boardPitchYaw=lgCamAz;
-        best.boardYaw=lgCamAz-.24;
-        best.boardPitch=-.36;
+        best.boardYaw=lgToSp0+lgDelta*.35;
+        best.boardPitch=0;
         best.labelOffset={y:.38};
         return best;
       }
@@ -1411,10 +1421,10 @@
         var bhCamAz=camBackAz(bhCam,best.x,best.z,.62);
         best.boardPitchYaw=bhCamAz;
         best.boardYaw=bhCamAz-.16;
-        best.boardPitch=-.18;
+        best.boardPitch=0;
         var jMinY=(bounds.centerY||0)-(bounds.height||0)*.5;
-        // Seat all 6 hermit-crab legs solidly in the -0.316 golden beach sand contact shadow.
-        best.boardYOffset=-.316-jMinY;
+        // Seat all 6 hermit-crab legs solidly in the -0.316 golden beach sand contact shadow (compensating for space.y elevation & Idle pose leg lift).
+        best.boardYOffset=-.414-jMinY-(space.y||0);
         best.labelOffset={y:.28};
         return best;
       }
@@ -1612,6 +1622,11 @@
         if(typeof sObj.traverse === 'function') sObj.traverse(function(c){ hideObj(c); });
       });
     }
+    if(view.guide) hideObj(view.guide);
+    if(view.crab) hideObj(view.crab);
+    if(view.blobG) hideObj(view.blobG);
+    if(view.blobC) hideObj(view.blobC);
+    if(view.glowG) hideObj(view.glowG);
 
     // 1b. MIN-6 / MIN-1: Hide Bottle Beach's Driftwood stall (including all child meshes/props) & Bok/marker props
     // so stall bottles/tabletop items never float behind Jisu's camera frustum.
@@ -1674,11 +1689,11 @@
           return;
         }
         if(/static|palm|dock|pier/i.test(nm)) return;
-        if(!/bottle|tile|slab|prop|clam|star|crate|stall/i.test(nm)) return;
+        if(!/bottle|tile|slab|prop|clam|star|crate|stall|coral|flower|shell|rim|petal|stone/i.test(nm)) return;
         var vx = tmpPos.x - out.x, vz = tmpPos.z - out.z;
         var along = vx * fx + vz * fz;
         var lat = Math.abs(vx * (-fz) + vz * fx);
-        if(blocksSight(tmpPos.x, tmpPos.z, 2.65, 1.75) || (along > -0.25 && lat < 2.4 + Math.max(0, along) * 0.6)) hideObj(o);
+        if(blocksSight(tmpPos.x, tmpPos.z, 2.65, 1.75) || (along > -0.25 && lat < 2.4 + Math.max(0, along) * 0.6) || (along > -1.0 && Math.hypot(tmpPos.x - cx, tmpPos.z - cz) < 8.5 && tmpPos.y > -0.45) || (tmpPos.x < look.x - 1.2 && tmpPos.z > look.z - 2.6)) hideObj(o);
       });
     }
   }
@@ -1785,8 +1800,8 @@
       [0.50, 'rgba(64, 38, 16, 0.36)'],
       [1.0, 'rgba(64, 38, 16, 0.0)']
     ]);
-    var shCoreMat = shCoreTex ? track(new T.MeshBasicMaterial({ map: shCoreTex, transparent: true, opacity: 0.56, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 })) : null;
-    var shSoftMat = shSoftTex ? track(new T.MeshBasicMaterial({ map: shSoftTex, transparent: true, opacity: 0.38, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })) : null;
+    var shCoreMat = shCoreTex ? track(new T.MeshBasicMaterial({ map: shCoreTex, transparent: true, opacity: 0.82, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 })) : null;
+    var shSoftMat = shSoftTex ? track(new T.MeshBasicMaterial({ map: shSoftTex, transparent: true, opacity: 0.62, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })) : null;
     var plane1 = track(new T.PlaneGeometry(1, 1));
     plane1.rotateX(-Math.PI / 2);
 
@@ -1816,8 +1831,8 @@
     // 2. Crisp multi-lobe grounded contact shadow directly beneath Jisu's body, shell, all 6 planted leg tips & front-left claw tip!
     addShadow(0, -0.02, 1.12, 0.88, false, 0.0045);
     addShadow(0, -0.02, 0.74, 0.58, true, 0.0055);
-    [[-0.34, 0.11], [-0.38, -0.01], [-0.30, -0.14], [0.34, 0.11], [0.38, -0.01], [0.30, -0.14]].forEach(function(lp){
-      addShadow(lp[0], lp[1], 0.20, 0.16, true, 0.006);
+    [[-0.24, 0.08], [-0.28, -0.02], [-0.22, -0.10], [0.24, 0.08], [0.28, -0.02], [0.22, -0.10]].forEach(function(lp){
+      addShadow(lp[0], lp[1], 0.11, 0.09, false, 0.006);
     });
     // MIN-11: Subtle grounded contact shadow beneath Jisu's front-left claw tip so it feels resting cleanly on the sand!
     addShadow(-0.42, 0.22, 0.30, 0.22, false, 0.0052);
@@ -1850,12 +1865,12 @@
     var sandCrestMat = propMat(0xf4daa2);
     var sandCrestWarm = propMat(0xecc98b);
     [
-      [-0.64, 0.28, 0.62, 0.014, 0.14, 0.18, sandCrestMat],
-      [ 0.18, 0.36, 0.78, 0.015, 0.15, -0.10, sandCrestWarm],
-      [-0.22, 0.54, 0.86, 0.016, 0.16, 0.12, sandCrestMat],
-      [ 0.68, 0.56, 0.68, 0.015, 0.14, -0.16, sandCrestWarm],
-      [-0.58, 0.74, 0.74, 0.016, 0.15, 0.08, sandCrestWarm],
-      [ 0.12, 0.78, 0.90, 0.017, 0.16, -0.06, sandCrestMat]
+      [-0.64, 0.48, 0.62, 0.014, 0.14, 0.18, sandCrestMat],
+      [ 0.18, 0.54, 0.78, 0.015, 0.15, -0.10, sandCrestWarm],
+      [-0.22, 0.64, 0.86, 0.016, 0.16, 0.12, sandCrestMat],
+      [ 0.68, 0.66, 0.68, 0.015, 0.14, -0.16, sandCrestWarm],
+      [-0.58, 0.78, 0.74, 0.016, 0.15, 0.08, sandCrestWarm],
+      [ 0.12, 0.82, 0.90, 0.017, 0.16, -0.06, sandCrestMat]
     ].forEach(function(sr){
       addProp(new T.SphereGeometry(0.5, 14, 8, 0, Math.PI * 2, 0, Math.PI * 0.5), sr[6], sr[0], 0.0, sr[1], 0, sr[5], 0, sr[2], sr[3] * 2.0, sr[4]);
     });
@@ -1959,17 +1974,24 @@
       if(!ok) return false;
       var e = view && view.encounter;
       if(e && !e.interior && e.region === 'beach' && e.actor && e.actor.userData && e.actor.userData.species === 'hermit crab'){
-        // CRIT-1 / MAJ-8 / MIN-3: Warm medium close-up (~1.16x distance -> ~38-42% frame height),
-        // grounded directly onto Bottle Beach's sand plane (-0.312) via live world Box3.min.y measurement.
+        // CRIT-1: Anchor Jisu's outdoor beach stage cleanly +0.014u above Bottle Beach's -0.312 sand plane
+        // so stage props sit 100% on top of the sand and Jisu's 6 leg tips touch her dark contact shadows.
         var beachSandY = -0.312;
-        var sandY = beachSandY + 0.002;
+        var T3 = window.THREE;
+        var jb = T3 ? new T3.Box3().setFromObject(e.actor) : null;
+        if(jb && Number.isFinite(jb.min.y) && (jb.min.y < -0.314 || jb.min.y > -0.298)){
+          e.actor.position.y += (-0.306 - jb.min.y);
+          e.actor.updateMatrixWorld(true);
+          jb.setFromObject(e.actor);
+        }
+        var sandY = (jb && Number.isFinite(jb.min.y)) ? (jb.min.y - 0.002) : -0.308;
         var b = e.actorBounds || e.actor.userData.regionBounds;
         var h = (b && b.height) || 0.52;
         var ep = e.actor.userData.encounterPose;
         var yLift = (ep && ep.allowOutdoor && typeof ep.yLift === 'number') ? ep.yLift : 0;
         var cx = look.x, cy = look.y + yLift, cz = look.z;
         var baseDist = Math.hypot(out.x - cx, out.z - cz) || 1.3;
-        var pull = 1.16;
+        var pull = 0.82;
         var dist = baseDist * pull;
         var aspect = (view.cam && view.cam.aspect) ? view.cam.aspect : 1.6;
         // Orbit slightly toward the nearest adjacent tile so the camera looks away from that foreground tile slab.
@@ -2103,26 +2125,44 @@
       bestFit={score:0,side:1,stallX:lhShopLand.stallX,stallZ:lhShopLand.stallZ,bokX:lhShopLand.bokX,bokZ:lhShopLand.bokZ};
     } else if(isLoopBoard && id==='caves'){
       // Seat Bok's Crystal Counter squarely on its stepped limestone kiosk plinth (shop.x - 1.0, shop.z - 4.0)
-      // and keep the stall & Bok strictly clear of Echo's bioluminescent echo-grotto-pool at (-18.50, -6.00).
-      var cavePlinthSX=shop.x-1.0, cavePlinthSZ=shop.z-4.0, cavePlinthBX=cavePlinthSX-bokDx, cavePlinthBZ=cavePlinthSZ+bokDz;
+      // and keep the stall & Bok strictly clear of Echo's bioluminescent echo-grotto-pool at (-18.50, -6.00)
+      // and cleanly clear of any foreground chime pavilion / shrine columns (>= 3.4u from center, >= 1.2u from pillars).
+      var cavesShrine = view && view._cavesShrine;
+      function cavesPavilionPen(sx,sz,bx,bz){
+        var pen=0;
+        if(cavesShrine && typeof cavesShrine.x==='number' && typeof cavesShrine.z==='number'){
+          if(Math.hypot(sx-cavesShrine.x,sz-cavesShrine.z)<3.40) pen+=4500;
+          if(Math.hypot(bx-cavesShrine.x,bz-cavesShrine.z)<3.40) pen+=4500;
+        }
+        if(Math.hypot(sx-shop.x,sz-shop.z)<3.40) pen+=3500;
+        for(var oi=0;oi<stallObs.length;oi++){
+          var o=stallObs[oi], or=o.r||.8;
+          if(or>=.85 && Math.hypot(sx-o.x,sz-o.z)<3.40) pen+=3500;
+          if(Math.hypot(bx-o.x,bz-o.z)<or+1.25) pen+=3500;
+        }
+        return pen;
+      }
+      var cavePlinthSX=shop.x-1.0, cavePlinthSZ=shop.z-4.0, cavePlinthBX=cavePlinthSX-1.15, cavePlinthBZ=cavePlinthSZ+2.55;
       var cavePlinthOk=minTile(cavePlinthSX,cavePlinthSZ)>=2.60 && minTile(cavePlinthBX,cavePlinthBZ)>=2.30 &&
         stallObsPen(cavePlinthSX,cavePlinthSZ,1.1)===0 && stallObsPen(cavePlinthBX,cavePlinthBZ,.75)===0 &&
-        stallHudPen(cavePlinthSX,cavePlinthSZ,cavePlinthBX,cavePlinthBZ)===0;
+        stallHudPen(cavePlinthSX,cavePlinthSZ,cavePlinthBX,cavePlinthBZ)===0 &&
+        cavesPavilionPen(cavePlinthSX,cavePlinthSZ,cavePlinthBX,cavePlinthBZ)===0;
       if(cavePlinthOk){
         bestFit={score:0,side:1,stallX:cavePlinthSX,stallZ:cavePlinthSZ,bokX:cavePlinthBX,bokZ:cavePlinthBZ};
       } else {
-        for(var cdx=-6.0;cdx<=6.0;cdx+=.5){
-          for(var cdz=-5.5;cdz<=6.0;cdz+=.5){
+        for(var cdx=-7.0;cdx<=7.0;cdx+=.5){
+          for(var cdz=-6.5;cdz<=6.5;cdz+=.5){
             var csx=shop.x+cdx, csz=shop.z+cdz;
             [-1,1].forEach(function(csd){
-              var cbx=csx-csd*bokDx, cbz=csz+bokDz;
+              var cbx=csx-csd*1.15, cbz=csz+2.55;
               var cDef=Math.max(0,2.60-minTile(csx,csz))+Math.max(0,2.30-minTile(cbx,cbz));
               var cObs=stallObsPen(csx,csz,1.1)+stallObsPen(cbx,cbz,.75);
               var epSX=(view && view._echoPool) ? view._echoPool.x : -18.50, epSZ=(view && view._echoPool) ? view._echoPool.z : -6.00;
               var cPool=(Math.hypot(csx-epSX,csz-epSZ)<4.8 || Math.hypot(cbx-epSX,cbz-epSZ)<4.5) ? 4500 : 0;
               var cHud=stallHudPen(csx,csz,cbx,cbz);
+              var cPav=cavesPavilionPen(csx,csz,cbx,cbz);
               var cSep=stallSepPen(csx,csz,cbx,cbz);
-              var cSc=cDef*8000+cObs+cPool+cHud+cSep+Math.hypot(cdx,cdz)*.5;
+              var cSc=cDef*8000+cObs+cPool+cHud+cPav+cSep+Math.hypot(cdx,cdz)*.5;
               if(!bestFit || cSc<bestFit.score) bestFit={score:cSc,side:csd,stallX:csx,stallZ:csz,bokX:cbx,bokZ:cbz};
             });
           }
@@ -2198,7 +2238,7 @@
             var sx=shop.x+sd*(3.8+extra), sz=shop.z+STALL_DZ+dzOff;
             for(var bi2=0;bi2<bsdTries.length;bi2++){
               var bsd=sd*bsdTries[bi2], bx=sx-bsd*bokDx, bz=sz+bokDz;
-              var deficit=Math.max(0,2.60-minTile(sx,sz))+Math.max(0,2.30-minTile(bx,bz));
+              var deficit=Math.max(0,2.60-minTile(sx,sz))+Math.max(0,(id==='patterns'?2.65:2.30)-minTile(bx,bz));
               var obsPen=stallObsPen(sx,sz,1.2)+stallObsPen(bx,bz,.8);
               var basinPen=(townBasinPoly && (regionPeopleInPoly(townBasinPoly,sx,sz) || regionPeopleInPoly(townBasinPoly,bx,bz))) ? 4500 : 0;
               var sepPen=isLoopBoard ? stallSepPen(sx,sz,bx,bz) : 0;
@@ -2428,6 +2468,14 @@
       if(cvBokCam && cvBokCam.position && cvBokCam.position.lengthSq()>.01){
         actor.userData.boardYaw=Math.atan2(cvBokCam.position.x-bokX,cvBokCam.position.z-bokZ)-.22;
       }
+    } else if(isLoopBoard && id==='captain'){
+      var cbB=actor.userData.regionBounds;
+      var cbMinY=cbB ? ((cbB.centerY||0)-(cbB.height||0)*.5) : 0;
+      var capBokCam=regionPeopleCamAt(view,regionPeopleStartIndex(view)) || stallCam || regionPeopleCamAt(view,shop.i);
+      if(capBokCam && capBokCam.position && capBokCam.position.lengthSq()>.01){
+        actor.userData.boardYaw=Math.atan2(capBokCam.position.x-bokX,capBokCam.position.z-bokZ);
+      }
+      actor.userData.boardYOffset=-.118-cbMinY-(shop.y||0);
     } else if(lhShopLand){
       // Giant Spiral Lighthouse: seat Bok flush at true 3D shopLanding.floorY on the cantilevered oak merchant balcony,
       // warmly angled 3/4 toward both the ascending stairs (shop) and opening rotunda view (spaces[0]).
@@ -2800,9 +2848,21 @@
           [1,'rgba(196,248,255,0.0)']
         ]
       });
+    } else if(isLoopBoard && id==='caves'){
+      addWaterRipple(actor,-.290,{rippleFwd:.10,rippleScale:1.18,opacity:.88});
+    } else if(isLoopBoard && id==='captain'){
+      var cbB=actor.userData.regionBounds;
+      var cbMinY=cbB ? ((cbB.centerY||0)-(cbB.height||0)*.5) : 0;
+      var capBokCam=regionPeopleCamAt(view,regionPeopleStartIndex(view)) || stallCam || regionPeopleCamAt(view,shop.i);
+      if(capBokCam && capBokCam.position && capBokCam.position.lengthSq()>.01){
+        actor.userData.boardYaw=Math.atan2(capBokCam.position.x-bokX,capBokCam.position.z-bokZ);
+      }
+      actor.userData.boardYOffset=-.118-cbMinY-(shop.y||0);
     } else if(lhShopLand){
       // Warm contact shadow grounding Bok solidly on the elevated oak merchant balcony at true 3D shop.y.
       addStreetShadow(actor,base+.012,.50,{shadowScale:[1.18,1.12]});
+    } else if(isLoopBoard && id==='captain'){
+      addStreetShadow(actor,-.110,.68,{shadowScale:[1.35,1.35]});
     }
     if(id==='town'){
       // Place hotel-whale before subway-ray so hotel keeps lower-left open basin and subway claims mid-left basin around it.
@@ -2838,36 +2898,49 @@
         root.add(npc);
         // Translucent waterline ripple ring grounding hotel-whale & subway-ray naturally in Harbor Town basin water (M6 / iter19 M2).
         if(person.id==='hotel'){
-          // Slight 3/4 lobby view showcasing Whale's twin-lobe fluke & dorsal hump cleanly centered behind the semicircular concierge desk.
-          npc.userData.encounterPose={yaw:-.30,pitch:.05,roll:-.02,yLift:.10,roomX:-.04,roomZ:.10};
+          // Upright dignified Whale behind concierge desk with crisp horizontal forked flukes & warm eye contact.
+          npc.userData.encounterPose={yaw:-.52,pitch:-.14,roll:0,yLift:.10,roomX:-.04,roomZ:.12};
         } else if(person.id==='cafe'){
-          // MAJ-2: Compensate cafe-seahorse GLB's built-in -0.58 rad (-33 deg) rest yaw so Seahorse turns cleanly SCREEN-RIGHT (+X/+Z) directly toward Shelly!
-          npc.userData.encounterPose={yaw:.62,modelForwardFix:true};
+          // MAJ-2: Compensate cafe-seahorse GLB's built-in -0.58 rad (-33 deg) rest yaw so Seahorse turns down-right directly toward Shelly!
+          npc.userData.encounterPose={yaw:.42,pitch:.14,modelForwardFix:true};
+        } else if(person.id==='shop'){
+          npc.userData.encounterPose={yaw:-.20,pitch:.06,modelForwardFix:true};
         } else if(person.id==='pharmacy'){
-          // iter22 Minor #8 assist: Subtle room-space encounter offset (-0.10u left, +0.08u up) coordinating with the shifted balance scale for wide open tail-fan daylight.
-          npc.userData.encounterPose={roomX:-.10,yLift:.08};
+          // Seat Pharmacist Shrimp cleanly inside the grounded 3D ceramic apothecary pedestal bowl.
+          npc.userData.encounterPose={roomX:-.10,yLift:-.06};
         }
         if(isLoopBoard && person.id==='hotel'){
           addWaterRipple(npc,-.605,{rippleScale:[1.02,1.52],opacity:.76});
         } else if(isLoopBoard && person.id==='subway'){
           addWaterRipple(npc,-.605,{rippleFwd:.10,rippleScale:[1.65,1.25],opacity:.80});
         } else if(isLoopBoard && person.id==='friend'){
-          // iter22 Minor #6: Rich warm-slate AO contact shadow seated cleanly above -0.314 cobblestones beneath friend-seal.
-          addStreetShadow(npc,(s.y||0)-.290,.72,{
+          // MAJ-3: Grounded dark oval contact shadow seated cleanly on cobblestones (y = -0.310) beneath friend-seal Sua.
+          addStreetShadow(npc,-.310,.78,{
             shadowScale:[1.50,1.40],
-            stops:[[0,'rgba(22,18,14,0.92)'],[.46,'rgba(22,18,14,0.84)'],[.68,'rgba(22,18,14,0.56)'],[.85,'rgba(22,18,14,0.22)'],[1,'rgba(22,18,14,0.0)']]
+            stops:[[0,'rgba(22,18,14,0.94)'],[.46,'rgba(22,18,14,0.84)'],[.68,'rgba(22,18,14,0.56)'],[.85,'rgba(22,18,14,0.22)'],[1,'rgba(22,18,14,0.0)']]
           });
         } else if(isLoopBoard && person.id==='pharmacy'){
-          // iter32 MIN 2: Soft, grounded dark-warm cobblestone contact shadow (+0.015 above -0.314 paving) directly beneath
-          // the hovering Pharmacy Shrimp so she reads clearly as purposefully buoyant above Harbor Town plaza.
-          addStreetShadow(npc,(s.y||0)-.299,.68,{
-            shadowScale:[1.14,1.28],
-            shadowFwd:.22,
-            stops:[[0,'rgba(28,18,12,0.92)'],[.38,'rgba(28,18,12,0.74)'],[.64,'rgba(28,18,12,0.40)'],[.84,'rgba(28,18,12,0.14)'],[1,'rgba(28,18,12,0.0)']]
-          });
+          // Shallow ceramic & turquoise apothecary tide-basin mounted in world space (root) so GLB swap never hides it.
+          var phT=window.THREE;
+          if(phT){
+            var phBasin=new phT.Group();
+            phBasin.position.set(where.x,-0.308,where.z);
+            var phPed=new phT.Mesh(new phT.CylinderGeometry(0.84,0.90,0.08,20),new phT.MeshToonMaterial({color:'#d8c29e',gradientMap:view.kit&&view.kit.grad}));
+            phPed.position.y=0.01; phBasin.add(phPed);
+            var phRim=new phT.Mesh(new phT.TorusGeometry(0.82,0.10,10,24),new phT.MeshToonMaterial({color:'#efe0c4',gradientMap:view.kit&&view.kit.grad}));
+            phRim.rotation.x=Math.PI/2; phRim.position.y=0.05; phBasin.add(phRim);
+            var phPool=new phT.Mesh(new phT.CircleGeometry(0.78,24),new phT.MeshBasicMaterial({color:'#4ec9cb',transparent:true,opacity:0.88}));
+            phPool.rotation.x=-Math.PI/2; phPool.position.y=0.065; phBasin.add(phPool);
+            phBasin.userData.isContactShadow=true;
+            phBasin.userData.isFixedBasin=true;
+            npc.userData.contactShadow=phBasin;
+            regionPeopleSyncShadow(npc);
+            extraShadows.push(phBasin);
+            root.add(phBasin);
+          }
         } else if(isLoopBoard){
           // Soft grounded contact shadow disc beneath every Harbor Town street resident on the cobblestones (m7 / iter19 M1).
-          addStreetShadow(npc,(s.y||0)-.304,person.id==='cafe'?.38:.48);
+          addStreetShadow(npc,-.310,person.id==='cafe'?.38:.48);
         }
         npc.traverse(function(o){ if(o.isMesh) o.userData.regionPerson='town:'+person.id; });
         view.hitables.push(npc); towns.push({ object:npc, space:s, meta:person, skin:skinState });
@@ -2891,14 +2964,18 @@
       if(typeof markerWhere.boardPitchYaw==='number') marker.userData.boardPitchYaw=markerWhere.boardPitchYaw;
       if(typeof markerWhere.boardYOffset==='number') marker.userData.boardYOffset=markerWhere.boardYOffset;
       if(id==='beach' && isLoopBoard){
-        var jisuEncY=(typeof markerWhere.boardYOffset==='number' ? markerWhere.boardYOffset : -.44)-0.015;
+        var jisuEncY=(typeof markerWhere.boardYOffset==='number' ? markerWhere.boardYOffset : -.44) + 0.045;
         marker.userData.encounterPose={yLift:jisuEncY,allowOutdoor:true};
       }
       if(markerWhere.labelOffset) marker.userData.labelOffset=markerWhere.labelOffset;
       regionPeopleTrackPlaced(view,marker,deck,markerWhere.x,markerWhere.z,markerBounds.radius);
       root.add(marker);
       // Translucent crystal water ripple ring grounding Keeper Hana directly over her crystal tidepool at true 3D space.y.
-      if(isLoopBoard && id==='light'){
+      if(isLoopBoard && id==='lagoon'){
+        var lgMMinY=(markerBounds.centerY||0)-(markerBounds.height||0)*.5;
+        marker.userData.boardYOffset=-(markerY)-.56-lgMMinY;
+        addWaterRipple(marker,-.565,{rippleFwd:.08,rippleScale:1.18,opacity:.82});
+      } else if(isLoopBoard && id==='light'){
         var lhHana=view.spaces && view.spaces.lighthouse && view.spaces.lighthouse.hanaLanding;
         var hanaRippleY=(lhHana && typeof lhHana.y==='number') ? (lhHana.y+.008) : -.262;
         addWaterRipple(marker,hanaRippleY,{rippleFwd:0,rippleScale:1.08,opacity:.52});
@@ -2941,15 +3018,17 @@
           shCtx.fillStyle=shGr; shCtx.fillRect(0,0,128,128);
           var shTex=new T.CanvasTexture(shCv);
           var shGeo=new T.PlaneGeometry(2,2); shGeo.rotateX(-Math.PI/2);
-          var shMat=new T.MeshBasicMaterial({map:shTex,transparent:true,opacity:id==='captain'?.58:.38,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
+          var shMat=new T.MeshBasicMaterial({map:shTex,transparent:true,opacity:id==='captain'?.58:.62,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
           hostShadow=new T.Mesh(shGeo,shMat);
-          hostShadow.position.y=id==='captain'?-.112:(y-.306);
+          hostShadow.position.y=id==='captain'?-.112:-.310;
           hostShadow.renderOrder=2;
           hostShadow.raycast=function(){};
           hostShadow.userData.isContactShadow=true;
           if(id==='captain'){
             hostShadow.userData.shadowScale=[1.26,.94];
             hostShadow.userData.shadowFwd=.44;
+          } else if(id==='beach'){
+            hostShadow.userData.shadowScale=[1.15,.95];
           }
           marker.userData.contactShadow=hostShadow;
           regionPeopleSyncShadow(marker);
@@ -3108,13 +3187,14 @@
         if(dP<7.5){
           var toSh=Math.atan2(dxP, dzP), restY=po.userData.boardYaw;
           var diffY=Math.atan2(Math.sin(toSh-restY), Math.cos(toSh-restY));
-          var wantY=restY+diffY*0.32;
+          var wantY=po.userData.hasResidentGlb ? (diffY*0.25) : (restY+diffY*0.32);
           po.rotation.y+=Math.atan2(Math.sin(wantY-po.rotation.y), Math.cos(wantY-po.rotation.y))*0.18;
           if(!po.userData._greetAt || now-po.userData._greetAt>12000){
             po.userData._greetAt=now; po.userData._greetY0=po.position.y;
           }
         } else if(dP>9.0){
-          var dBack=Math.atan2(Math.sin(po.userData.boardYaw-po.rotation.y), Math.cos(po.userData.boardYaw-po.rotation.y));
+          var restTarget=po.userData.hasResidentGlb ? 0 : po.userData.boardYaw;
+          var dBack=Math.atan2(Math.sin(restTarget-po.rotation.y), Math.cos(restTarget-po.rotation.y));
           po.rotation.y+=dBack*0.12;
         }
         if(po.userData._greetAt){
