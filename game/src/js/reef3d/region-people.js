@@ -484,7 +484,7 @@
           if(!regionPeopleInPoly(seawallPoly,wcx,wcz)) swPen+=6000;
           else {
             var minSw=distSeawall(wcx,wcz);
-            if(minSw<1.16) swPen+=3200+(1.16-minSw)*2500;
+            if(minSw<1.80) swPen+=3200+(1.80-minSw)*2500;
             // Verify all anatomical hull points stay strictly inside the 4.26 stone seawall coping.
             for(var ci=0;ci<hullPts.length;ci++){
               var cxw=wcx+hullPts[ci][0]*wCy+hullPts[ci][1]*wSy;
@@ -492,7 +492,7 @@
               if(!regionPeopleInPoly(seawallPoly,cxw,czw)) swPen+=4500;
               else {
                 var cSw=distSeawall(cxw,czw);
-                if(cSw<.36) swPen+=2600+(.36-cSw)*3000;
+                if(cSw<.85) swPen+=2600+(.85-cSw)*3000;
               }
             }
           }
@@ -1172,9 +1172,9 @@
         var echoDelta=Math.atan2(Math.sin(echoToShelly-echoToCam),Math.cos(echoToShelly-echoToCam));
         var eMinY=(bounds.centerY||0)-(bounds.height||0)*.5;
         best.boardPitchYaw=echoToCam;
-        best.boardYaw=echoToCam+echoDelta*.45;
+        best.boardYaw=echoToCam+echoDelta*.68;
         best.boardPitch=-.14;
-        best.boardYOffset=-.160-eMinY;
+        best.boardYOffset=-.250-eMinY;
         // m6: Float "Practice a sound" cleanly above Echo's head to the left of the dark indigo crystal cave arch.
         if(cvCam && cvCam.position && cvCam.position.lengthSq()>.01){
           var eToCamX=cvCam.position.x-best.x, eToCamZ=cvCam.position.z-best.z, eL=Math.hypot(eToCamX,eToCamZ)||1;
@@ -1201,8 +1201,8 @@
       var cCenter=regionPeopleLoopFrame(view,cCur);
       var capCam=cam;
       if(window.THREE){
-        var cTab=(typeof REEF3D_REGION_CAMERA==='object' && REEF3D_REGION_CAMERA && REEF3D_REGION_CAMERA.captain) || [4.65,12.2,2.7,1.48];
-        cTab=[4.65,12.2,2.7,1.48];
+        var cTab=(typeof REEF3D_REGION_CAMERA==='object' && REEF3D_REGION_CAMERA && REEF3D_REGION_CAMERA.captain) || [4.85,12.8,2.4,1.38];
+        cTab=[4.85,12.8,2.4,1.38];
         capCam=new window.THREE.PerspectiveCamera(42,1.6,.1,300);
         capCam.position.set(cCur.x-fx*cTab[1],(cCur.y||0)+cTab[0],cCur.z-fz*cTab[1]);
         capCam.lookAt(cCur.x+fx*cTab[2],(cCur.y||0)+.3+(cTab[3]!=null?cTab[3]:1.25),cCur.z+fz*cTab[2]);
@@ -2464,10 +2464,13 @@
       actor.userData.boardYOffset=-1.16;
     } else if(isLoopBoard && id==='caves'){
       // m6 assist: Orient Bok 3/4 toward the 09-caves camera so his face reads cleanly and his pectoral fin never projects as an edge-on spike.
+      var cvBokB=actor.userData.regionBounds;
+      var cvBokMinY=cvBokB ? ((cvBokB.centerY||0)-(cvBokB.height||0)*.5) : 0;
       var cvBokCam=stallCam || regionPeopleCamAt(view,shop.i);
       if(cvBokCam && cvBokCam.position && cvBokCam.position.lengthSq()>.01){
         actor.userData.boardYaw=Math.atan2(cvBokCam.position.x-bokX,cvBokCam.position.z-bokZ)-.22;
       }
+      actor.userData.boardYOffset=-.26-cvBokMinY-(shop.y||0);
     } else if(isLoopBoard && id==='captain'){
       var cbB=actor.userData.regionBounds;
       var cbMinY=cbB ? ((cbB.centerY||0)-(cbB.height||0)*.5) : 0;
@@ -2475,7 +2478,7 @@
       if(capBokCam && capBokCam.position && capBokCam.position.lengthSq()>.01){
         actor.userData.boardYaw=Math.atan2(capBokCam.position.x-bokX,capBokCam.position.z-bokZ);
       }
-      actor.userData.boardYOffset=-.118-cbMinY-(shop.y||0);
+      actor.userData.boardYOffset=.22-cbMinY-(shop.y||0);
     } else if(lhShopLand){
       // Giant Spiral Lighthouse: seat Bok flush at true 3D shopLanding.floorY on the cantilevered oak merchant balcony,
       // warmly angled 3/4 toward both the ascending stairs (shop) and opening rotunda view (spaces[0]).
@@ -2849,7 +2852,21 @@
         ]
       });
     } else if(isLoopBoard && id==='caves'){
-      addWaterRipple(actor,-.290,{rippleFwd:.10,rippleScale:1.18,opacity:.88});
+      var cvT=window.THREE;
+      if(cvT){
+        var caveBokBasin=new cvT.Group();
+        caveBokBasin.position.set(actor.position.x,-0.312,actor.position.z);
+        var cbPed=new cvT.Mesh(new cvT.CylinderGeometry(1.06,1.16,0.10,22),new cvT.MeshToonMaterial({color:'#39546e',gradientMap:view.kit&&view.kit.grad}));
+        cbPed.position.y=0.02; caveBokBasin.add(cbPed);
+        var cbRim=new cvT.Mesh(new cvT.TorusGeometry(1.02,0.09,8,22),new cvT.MeshToonMaterial({color:'#4c6b86',gradientMap:view.kit&&view.kit.grad}));
+        cbRim.rotation.x=Math.PI/2; cbRim.position.y=0.06; caveBokBasin.add(cbRim);
+        var cbPool=new cvT.Mesh(new cvT.CircleGeometry(0.98,22),new cvT.MeshBasicMaterial({color:'#3fd2e0',transparent:true,opacity:0.90}));
+        cbPool.rotation.x=-Math.PI/2; cbPool.position.y=0.072; caveBokBasin.add(cbPool);
+        var cbRing=new cvT.Mesh(new cvT.TorusGeometry(0.68,0.026,6,20),new cvT.MeshBasicMaterial({color:'#a8fdff',transparent:true,opacity:0.86}));
+        cbRing.rotation.x=Math.PI/2; cbRing.position.y=0.076; caveBokBasin.add(cbRing);
+        caveBokBasin.userData.isContactShadow=true; caveBokBasin.userData.isFixedBasin=true;
+        actor.userData.contactShadow=caveBokBasin; regionPeopleSyncShadow(actor); extraShadows.push(caveBokBasin); root.add(caveBokBasin);
+      }
     } else if(isLoopBoard && id==='captain'){
       var cbB=actor.userData.regionBounds;
       var cbMinY=cbB ? ((cbB.centerY||0)-(cbB.height||0)*.5) : 0;
@@ -2857,12 +2874,35 @@
       if(capBokCam && capBokCam.position && capBokCam.position.lengthSq()>.01){
         actor.userData.boardYaw=Math.atan2(capBokCam.position.x-bokX,capBokCam.position.z-bokZ);
       }
-      actor.userData.boardYOffset=-.118-cbMinY-(shop.y||0);
+      actor.userData.boardYOffset=.22-cbMinY-(shop.y||0);
     } else if(lhShopLand){
       // Warm contact shadow grounding Bok solidly on the elevated oak merchant balcony at true 3D shop.y.
       addStreetShadow(actor,base+.012,.50,{shadowScale:[1.18,1.12]});
     } else if(isLoopBoard && id==='captain'){
-      addStreetShadow(actor,-.110,.68,{shadowScale:[1.35,1.35]});
+      var tbT=window.THREE;
+      if(tbT){
+        var capTub=new tbT.Group();
+        capTub.position.set(actor.position.x,-0.118,actor.position.z);
+        var oakMat=new tbT.MeshToonMaterial({color:'#6b4428',gradientMap:view.kit&&view.kit.grad});
+        var darkOakMat=new tbT.MeshToonMaterial({color:'#52321c',gradientMap:view.kit&&view.kit.grad});
+        var brassMat=new tbT.MeshToonMaterial({color:'#e2b652',gradientMap:view.kit&&view.kit.grad});
+        var tubBody=new tbT.Mesh(new tbT.CylinderGeometry(0.86,0.78,0.56,20),oakMat);
+        tubBody.position.y=0.28; capTub.add(tubBody);
+        [0.16,0.42].forEach(function(hy){
+          var hp=new tbT.Mesh(new tbT.TorusGeometry(0.85,0.042,8,24),brassMat);
+          hp.rotation.x=Math.PI/2; hp.position.y=hy; capTub.add(hp);
+        });
+        var tubRim=new tbT.Mesh(new tbT.TorusGeometry(0.86,0.058,8,24),darkOakMat);
+        tubRim.rotation.x=Math.PI/2; tubRim.position.y=0.55; capTub.add(tubRim);
+        var tubWat=new tbT.Mesh(new tbT.CircleGeometry(0.82,24),new tbT.MeshBasicMaterial({color:'#3dc8d0',transparent:true,opacity:0.90}));
+        tubWat.rotation.x=-Math.PI/2; tubWat.position.y=0.52; capTub.add(tubWat);
+        var tubRip=new tbT.Mesh(new tbT.TorusGeometry(0.56,0.025,6,20),new tbT.MeshBasicMaterial({color:'#aef8fc',transparent:true,opacity:0.85}));
+        tubRip.rotation.x=Math.PI/2; tubRip.position.y=0.53; capTub.add(tubRip);
+        var tubSh=new tbT.Mesh(new tbT.CircleGeometry(1.06,20),new tbT.MeshBasicMaterial({color:'#160d06',transparent:true,opacity:0.58,depthWrite:false}));
+        tubSh.rotation.x=-Math.PI/2; tubSh.position.y=0.008; capTub.add(tubSh);
+        capTub.userData.isContactShadow=true; capTub.userData.isFixedBasin=true;
+        actor.userData.contactShadow=capTub; regionPeopleSyncShadow(actor); extraShadows.push(capTub); root.add(capTub);
+      }
     }
     if(id==='town'){
       // Place hotel-whale before subway-ray so hotel keeps lower-left open basin and subway claims mid-left basin around it.
@@ -2980,20 +3020,23 @@
         var hanaRippleY=(lhHana && typeof lhHana.y==='number') ? (lhHana.y+.008) : -.262;
         addWaterRipple(marker,hanaRippleY,{rippleFwd:0,rippleScale:1.08,opacity:.52});
       } else if(isLoopBoard && id==='caves'){
-        // MAJ 6: Soft bioluminescent cyan-aqua water-ripple ring directly beneath Echo's belly over echo-grotto-pool (y = -0.298).
-        addWaterRipple(marker,-.284,{
-          rippleFwd:.12,
-          rippleScale:[1.42,1.78],
-          opacity:.86,
-          stops:[
-            [0,'rgba(18,54,84,0.44)'],
-            [.42,'rgba(28,118,154,0.34)'],
-            [.64,'rgba(116,244,255,0.92)'],
-            [.78,'rgba(184,254,255,0.68)'],
-            [.90,'rgba(92,228,246,0.26)'],
-            [1,'rgba(92,228,246,0.0)']
-          ]
-        });
+        var ecT=window.THREE;
+        if(ecT){
+          var echoBasin=new ecT.Group();
+          echoBasin.position.set(marker.position.x,-0.312,marker.position.z);
+          var ebPed=new ecT.Mesh(new ecT.CylinderGeometry(1.52,1.64,0.12,24),new ecT.MeshToonMaterial({color:'#39546e',gradientMap:view.kit&&view.kit.grad}));
+          ebPed.position.y=0.02; echoBasin.add(ebPed);
+          var ebRim=new ecT.Mesh(new ecT.TorusGeometry(1.48,0.11,8,24),new ecT.MeshToonMaterial({color:'#4c6b86',gradientMap:view.kit&&view.kit.grad}));
+          ebRim.rotation.x=Math.PI/2; ebRim.position.y=0.06; echoBasin.add(ebRim);
+          var ebPool=new ecT.Mesh(new ecT.CircleGeometry(1.42,24),new ecT.MeshBasicMaterial({color:'#3fd2e0',transparent:true,opacity:0.90}));
+          ebPool.rotation.x=-Math.PI/2; ebPool.position.y=0.072; echoBasin.add(ebPool);
+          [1.05,0.62].forEach(function(rr){
+            var ebR=new ecT.Mesh(new ecT.TorusGeometry(rr,0.030,6,24),new ecT.MeshBasicMaterial({color:'#a8fdff',transparent:true,opacity:0.88}));
+            ebR.rotation.x=Math.PI/2; ebR.position.y=0.078; echoBasin.add(ebR);
+          });
+          echoBasin.userData.isContactShadow=true; echoBasin.userData.isFixedBasin=true;
+          marker.userData.contactShadow=echoBasin; regionPeopleSyncShadow(marker); extraShadows.push(echoBasin); root.add(echoBasin);
+        }
       }
       // Soft grounded contact shadow disc beneath grounded region hosts (Captain Bay on 06-captains-deck, Jisu on 11-beach).
       if((id==='captain' || id==='beach') && typeof document!=='undefined' && typeof document.createElement==='function'){

@@ -4260,7 +4260,7 @@
       rugX: -1.20, rugZ: -0.24
     },
     taxi: {
-      actorX: 1.72, actorZ: -1.62, actorYawFrac: 0.92, hoverY: 0.34,
+      actorX: 1.72, actorZ: -1.62, actorYawFrac: 0.92, hoverY: 0.22,
       maxY: 1.62, targetY: 1.56, maxXZ: 2.85, targetXZ: 2.70,
       shellyX: -1.62, shellyZ: -0.26,
       rugX: -1.62, rugZ: -0.26
@@ -6192,7 +6192,7 @@
         guide.userData.body.scale.set(1, 1, 1);
       }
       guide.scale.copy(e.savedGuide.scale).multiplyScalar(0.741);
-      var mobShopShellyShift = (kind === 'shop' && view.cam && view.cam.aspect < 0.75) ? 0.42 : 0;
+      var mobShopShellyShift = (kind === 'shop' && view.cam && view.cam.aspect < 0.75) ? 0.46 : 0;
       var shellyWorld = regionInteriorToWorld(base.position, yaw, layout.shellyX + mobShopShellyShift, 0, layout.shellyZ);
       guide.position.copy(shellyWorld);
       // Directive #364 (Mutual Eye Contact): Orient Shelly directly toward the resident's exact room position!
@@ -6243,10 +6243,10 @@
     var aspect = Math.max(0.45, view.cam && view.cam.aspect ? view.cam.aspect : 1.33);
     var isMobShop = (aspect < 1.1 && e.interior.kind === 'shop');
     var dist = isMobShop
-      ? Math.max(5.8, 4.15 / Math.max(0.58, Math.min(1.0, aspect * 0.85)))
+      ? Math.max(6.4, 4.85 / Math.max(0.58, Math.min(1.0, aspect * 0.85)))
       : Math.max(4.75, 4.65 / Math.max(0.68, Math.min(1.0, aspect * 0.78)));
-    var lxOff = -0.04 + (isMobShop ? -0.30 : 0);
-    var lyCam = (e.interior.kind === 'hotel') ? 1.84 : (isMobShop ? 1.14 : 1.42);
+    var lxOff = -0.04 + (isMobShop ? -0.34 : 0);
+    var lyCam = (e.interior.kind === 'hotel') ? 1.84 : (isMobShop ? 1.18 : 1.42);
     var lyLook = (e.interior.kind === 'hotel') ? 0.86 : (0.92 + (isMobShop ? -0.04 : 0));
 
     var camPos = regionInteriorToWorld(base.position, yaw, lxOff, lyCam, dist);

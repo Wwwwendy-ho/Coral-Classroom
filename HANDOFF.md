@@ -3,7 +3,7 @@
 **Updated:** 2026-11-26 (08:35 PST)  
 **Branch:** `upgrade/integrated-2026-11-24`  
 **Remote:** `https://github.com/Wwwwendy-ho/Coral-Classroom.git`  
-**Current Formal Rubric v3.0 Score:** **`8.64 / 10` (`PASS`)** (Iteration 57, `0 CRIT`, `8 MAJ`, `13 MIN`; `D6 = 9.6 / 10`; 60 FPS Overhaul + Tile Brightness committed in `25187d3`; overnight loop continuing toward `>= 9.8 / 10` until ~09:45 PST).
+**Current Formal Rubric v3.0 Score:** **`8.86 / 10` (`PASS`)** (Iteration 58, `0 CRIT`, `6 MAJ`, `14 MIN`; `D2 = 9.1`, `D3 = 9.2`, `D6 = 9.5`; 60 FPS Overhaul + Tile Brightness committed in `25187d3`; overnight loop continuing toward `>= 9.8 / 10` until ~09:45 PST).
 
 ---
 

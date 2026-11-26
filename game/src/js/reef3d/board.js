@@ -1658,7 +1658,7 @@
       : ridFog === 'town' ? 50 : region ? 54 : crafted ? 36 : 34;
     var fogFar = night ? (region ? 165 : 92)
       : isLight ? 220 : isCaves ? 185 : isCaptain ? 175
-      : ridFog === 'town' ? 180 : ridFog === 'lagoon' ? 195 : ridFog === 'patterns' ? 190 : ridFog === 'beach' ? 200 : crafted ? 96 : 112;
+      : ridFog === 'town' ? 150 : ridFog === 'lagoon' ? 148 : ridFog === 'patterns' ? 150 : ridFog === 'beach' ? 145 : crafted ? 96 : 112;
     scene.fog = new THREE.Fog(fogCol, fogNear, fogFar);
     scene.background = new THREE.Color(fogCol);
     var skyDome = reef3dSkyDome(THREE, region, night, fogCol);
@@ -1909,7 +1909,7 @@
       }
       var rimMat = THREE.MeshPhongMaterial
         ? new THREE.MeshPhongMaterial({
-            color: night ? '#dceaf2' : '#f2ece0', vertexColors: true, shininess: 68,
+            color: night ? '#dceaf2' : '#f2ece0', vertexColors: true, shininess: 94,
             specular: new THREE.Color('#8a7e64'),
             emissive: new THREE.Color(night ? '#2c4c58' : '#5a4a2c'), emissiveIntensity: night ? 0.12 : 0.06
           })
@@ -1918,7 +1918,7 @@
 
       var innerMat = THREE.MeshPhongMaterial
         ? new THREE.MeshPhongMaterial({
-            color: night ? '#dceaf2' : '#f2ece0', vertexColors: true, shininess: 68,
+            color: night ? '#dceaf2' : '#f2ece0', vertexColors: true, shininess: 88,
             specular: new THREE.Color('#8a7e64'),
             emissive: new THREE.Color(night ? '#dceaf2' : '#4a3e28'), emissiveIntensity: night ? 0.12 : 0.06
           })
@@ -1932,7 +1932,7 @@
           color: night ? '#dceef6' : '#ffffff',
           vertexColors: true,
           specular: new THREE.Color(night ? '#5a7888' : '#4a463c'),
-          shininess: 48,
+          shininess: 80,
           emissiveMap: b.map,
           emissive: new THREE.Color('#ffffff'),
           emissiveIntensity: night ? 0.18 : 0.14
@@ -1945,7 +1945,7 @@
 
       var aoMat = new THREE.MeshBasicMaterial({
         map: reef3dTileAOTex(THREE), color: night ? '#051018' : '#1b242c',
-        transparent: true, opacity: night ? .56 : .48, depthWrite: false,
+        transparent: true, opacity: night ? .62 : .58, depthWrite: false,
         polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2
       });
       addMergedLayer(tileAOGeos, aoMat, 'Board space contact AO rings', 1);
@@ -2956,7 +2956,7 @@
     patterns: [5.8, 13.0, 2.9, 1.25],
     beach:    [5.8, 12.0, 3.6, 1.40],
     light:    [4.9, 15.6, 2.7, 1.15],
-    captain:  [4.65, 12.2, 2.7, 1.48]
+    captain:  [4.85, 12.8, 2.4, 1.38]
   };
   if(typeof window !== 'undefined') window.REEF3D_REGION_CAMERA = REEF3D_REGION_CAMERA;
   function reef3dCamTarget(view, out, look){

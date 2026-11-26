@@ -977,6 +977,24 @@
       "min": 13,
       "verdict": "PASS (0 CRIT, 8.64/10! +0.46 from 8.18: Bottle Beach cyan slab eliminated, horizon ribbed bottle + cork grounded, Jisu clean, smooth Banyan restored, Cabin sunbeams + Kiko forward; 8 MAJ left)",
       "label": "0 CRIT PASS! Bottle Beach Cyan Slab Fixed, Horizon Bottle & Cabin Sunbeams (8.64, Iter 57)"
+    },
+    {
+      "iteration": 58,
+      "rubric": "v3.0-jamboree",
+      "score": 8.86,
+      "dimensions": {
+        "D1": 8.6,
+        "D2": 9.1,
+        "D3": 9.2,
+        "D4": 8.7,
+        "D5": 8.2,
+        "D6": 9.5
+      },
+      "crit": 0,
+      "maj": 6,
+      "min": 14,
+      "verdict": "PASS (0 CRIT, 8.86/10! +0.22 from 8.64: Tugboat quay clip cleared, Echo/Bok cavern tidepools, Lighthouse brass window sashes, Taxi counter contact, Bottle Beach cork foam & horizon haze; 6 MAJ left)",
+      "label": "0 CRIT PASS! 8.86/10 \u2014 Only 6 MAJ Left (Tidepools, Brass Sashes, Taxi, Haze, Iter 58)"
     }
   ]
 }

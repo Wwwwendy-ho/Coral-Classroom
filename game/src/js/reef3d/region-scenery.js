@@ -3021,7 +3021,7 @@
         }
       }
       // m4: Harbor coastal ferry & moored sailboats — slide ferry inward so ALL 8 hull/cabin/mast corners stay strictly inside x >= 6% NDC (minX >= -0.84)
-      var ferryX=cx, ferryZ=cz, camR=camRight(), camFw=[camSetup().fx,camSetup().fz], ferryFound=false, ferryGap=4.6, ferryYaw=-.38;
+      var ferryX=cx, ferryZ=cz, camR=camRight(), camFw=[camSetup().fx,camSetup().fz], ferryFound=false, ferryGap=4.6, ferryYaw=-.62;
       view._ferryYaw=ferryYaw;
       // The basin is only the water inside the street ring (inner width 3.2): keep every moved hull inside a shrunken copy of that ring.
       var basinCache={};
@@ -3035,7 +3035,7 @@
       }
       function coastalFerry(x,y,z,yaw){
         var g0=root.children.length;
-        smoothFoamRing(x,waterY+.064,z,1.88,2.92);
+        smoothFoamRing(x,waterY+.064,z,1.44,2.38);
         // Sculpted tapered-bow hull with deep marine keel, red waterline stripe & cream bulwark
         var fsh=new T.Shape();
         fsh.moveTo(-.92,-2.28); fsh.lineTo(.92,-2.28); fsh.quadraticCurveTo(1.26,-1.45,1.24,-.15);
@@ -3125,11 +3125,13 @@
       var ferryBest=null, pharmIdx=pharmSpace ? pharmSpace.i : -1;
       var ferryGrid=[];
       for(var fr=-8;fr<=20;fr+=.5) for(var ff=-12;ff<=14;ff+=.5) ferryGrid.push([fr,ff]);
-      [[-.84,6.4,5.4,true],[-.84,6.2,5.0,false],[-.84,5.8,4.8,false],[-.875,5.4,4.5,false]].forEach(function(cfg){
+      [[-.84,7.8,5.6,true],[-.84,7.4,5.2,false],[-.84,7.0,4.8,false],[-.875,6.6,4.5,false]].forEach(function(cfg){
         if(ferryFound) return;
         for(var fi=0;fi<ferryGrid.length;fi++){
           var tx0=cx+camR[0]*ferryGrid[fi][0]+camFw[0]*ferryGrid[fi][1], tz0=cz+camR[1]*ferryGrid[fi][0]+camFw[1]*ferryGrid[fi][1];
           if(!inBasin(tx0,tz0,cfg[1]) || !waterClear(tx0,tz0,cfg[2])) continue;
+          var fSin0=Math.sin(ferryYaw), fCos0=Math.cos(ferryYaw);
+          if(!inBasin(tx0+fSin0*2.8,tz0+fCos0*2.8,4.9) || !inBasin(tx0-fSin0*2.3,tz0-fCos0*2.3,4.6)) continue;
           if(!camBoxInFrame(activeIdx,tx0,tz0,1.38,2.85,-.58,3.25,ferryYaw,cfg[0],.84,-.86,.78)) continue;
           if(cfg[3] && pharmIdx>=0 && pharmIdx!==activeIdx && !camBoxInFrame(pharmIdx,tx0,tz0,1.38,2.85,-.58,3.25,ferryYaw,cfg[0],.84,-.86,.78)) continue;
           var nd=camNDC(tx0,.4,tz0);
@@ -8879,6 +8881,13 @@
         botFoamRing.rotation.z=-Math.atan2(F.z, F.x);
         botFoamRing.renderOrder=3;
         botGrp.add(botFoamRing);
+        var corkFoamRing=new T.Mesh(new T.RingGeometry(2.4, 6.2, 28), botFoamMat);
+        corkFoamRing.rotation.x=-Math.PI*0.5;
+        corkFoamRing.position.set(bMidX - 8.5 + F.x * 36.2, waterY + 0.08, bMidZ - 44.0 + F.z * 36.2);
+        corkFoamRing.scale.set(1.35, 0.85, 1.0);
+        corkFoamRing.rotation.z=-Math.atan2(F.z, F.x);
+        corkFoamRing.renderOrder=3;
+        botGrp.add(corkFoamRing);
 
         botGrp.traverse(function(o){ if(o.isMesh){ o.receiveShadow=false; o.castShadow=false; } });
         extras.add(botGrp);
@@ -9925,6 +9934,27 @@
               var tLen=Math.hypot(tRx-tLx,tRz-tLz);
               limb(tLx,yTr,tLz,tRx-tLx,0,tRz-tLz,tLen,0.048,0.048,'#c79a40',false);
             });
+            // Burnished-brass arched window perimeter sash frames (side jambs, bottom sill rail & curved arch crown)
+            [wA0 + 0.015, wA1 - 0.015].forEach(function(sAng){
+              var sBx=cxL+Math.cos(sAng)*rMulBot, sBz=czL+Math.sin(sAng)*rMulBot;
+              var rSp=rWallAt(tr.ySpring)+0.45;
+              var sTx=cxL+Math.cos(sAng)*rSp, sTz=czL+Math.sin(sAng)*rSp;
+              var sLen=Math.hypot(sTx-sBx,tr.ySpring-(tr.yBot+0.14),sTz-sBz);
+              limb(sBx,tr.yBot+0.14,sBz,sTx-sBx,tr.ySpring-(tr.yBot+0.14),sTz-sBz,sLen,0.042,0.042,'#c79a40',false);
+            });
+            var sbLx=cxL+Math.cos(wA0+0.015)*rMulBot, sbLz=czL+Math.sin(wA0+0.015)*rMulBot;
+            var sbRx=cxL+Math.cos(wA1-0.015)*rMulBot, sbRz=czL+Math.sin(wA1-0.015)*rMulBot;
+            limb(sbLx,tr.yBot+0.16,sbLz,sbRx-sbLx,0,sbRz-sbLz,Math.hypot(sbRx-sbLx,sbRz-sbLz),0.044,0.044,'#c79a40',false);
+            var nSash=5, aS0=wA0+0.015, aS1=wA1-0.015, rArchS=rWallAt(tr.ySpring)+0.45;
+            for(var si2=0;si2<nSash;si2++){
+              var ph0=si2/nSash*Math.PI, ph1=(si2+1)/nSash*Math.PI;
+              var sa0=aS0+(aS1-aS0)*(si2/nSash), sa1=aS0+(aS1-aS0)*((si2+1)/nSash);
+              var sy0=tr.ySpring+Math.sin(ph0)*(tr.yCrown-tr.ySpring-0.08);
+              var sy1=tr.ySpring+Math.sin(ph1)*(tr.yCrown-tr.ySpring-0.08);
+              var sx0=cxL+Math.cos(sa0)*rArchS, sz0=czL+Math.sin(sa0)*rArchS;
+              var sx1=cxL+Math.cos(sa1)*rArchS, sz1=czL+Math.sin(sa1)*rArchS;
+              limb(sx0,sy0,sz0,sx1-sx0,sy1-sy0,sz1-sz0,Math.hypot(sx1-sx0,sy1-sy0,sz1-sz0),0.042,0.042,'#c79a40',false);
+            }
           }
         });
         // Grand Sunlit Ribbed Cupola Dome (y = 33.8 -> 42.0) with wide open sunlit sky oculus (r = 9.4)
@@ -14122,9 +14152,23 @@
         vGrp.add(knoll);
         if(id==='town' || id==='lagoon' || id==='light' || id==='patterns' || id==='beach'){
           var cap = new T.Mesh(domeGeo, roofMat);
-          cap.scale.set(w * 0.38, h * 0.28, w * 0.35);
-          cap.position.set(vx + Math.cos(ang + 1.2) * (w * 0.14), -1.6 + h * 0.36, vz + Math.sin(ang + 1.2) * (w * 0.14));
-          vGrp.add(cap);
+          if(id==='beach'){
+            cap.scale.set(w * 0.72, h * 0.34, w * 0.66);
+            cap.position.set(vx + Math.cos(ang + 1.2) * (w * 0.10), -1.6 + h * 0.30, vz + Math.sin(ang + 1.2) * (w * 0.10));
+            vGrp.add(cap);
+            var bluff = new T.Mesh(domeGeo, new T.MeshLambertMaterial({ color: '#b89b6e' }));
+            bluff.scale.set(w * 0.44, h * 0.46, w * 0.40);
+            bluff.position.set(vx + Math.cos(ang - 0.8) * (w * 0.32), -1.6, vz + Math.sin(ang - 0.8) * (w * 0.32));
+            vGrp.add(bluff);
+            var vFoam = new T.Mesh(new T.RingGeometry(w * 0.82, w * 1.04, 24), new T.MeshBasicMaterial({ color: '#e6fcfc', side: T.DoubleSide }));
+            vFoam.rotation.x = -Math.PI * 0.5;
+            vFoam.position.set(vx, -0.58, vz);
+            vGrp.add(vFoam);
+          } else {
+            cap.scale.set(w * 0.38, h * 0.28, w * 0.35);
+            cap.position.set(vx + Math.cos(ang + 1.2) * (w * 0.14), -1.6 + h * 0.36, vz + Math.sin(ang + 1.2) * (w * 0.14));
+            vGrp.add(cap);
+          }
         }
       }
       for(var j=0; j<14; j++){

@@ -31147,7 +31147,7 @@ var ReefCraftedWorld = (function(){
       : ridFog === 'town' ? 50 : region ? 54 : crafted ? 36 : 34;
     var fogFar = night ? (region ? 165 : 92)
       : isLight ? 220 : isCaves ? 185 : isCaptain ? 175
-      : ridFog === 'town' ? 180 : ridFog === 'lagoon' ? 195 : ridFog === 'patterns' ? 190 : ridFog === 'beach' ? 200 : crafted ? 96 : 112;
+      : ridFog === 'town' ? 150 : ridFog === 'lagoon' ? 148 : ridFog === 'patterns' ? 150 : ridFog === 'beach' ? 145 : crafted ? 96 : 112;
     scene.fog = new THREE.Fog(fogCol, fogNear, fogFar);
     scene.background = new THREE.Color(fogCol);
     var skyDome = reef3dSkyDome(THREE, region, night, fogCol);
@@ -31398,7 +31398,7 @@ var ReefCraftedWorld = (function(){
       }
       var rimMat = THREE.MeshPhongMaterial
         ? new THREE.MeshPhongMaterial({
-            color: night ? '#dceaf2' : '#f2ece0', vertexColors: true, shininess: 68,
+            color: night ? '#dceaf2' : '#f2ece0', vertexColors: true, shininess: 94,
             specular: new THREE.Color('#8a7e64'),
             emissive: new THREE.Color(night ? '#2c4c58' : '#5a4a2c'), emissiveIntensity: night ? 0.12 : 0.06
           })
@@ -31407,7 +31407,7 @@ var ReefCraftedWorld = (function(){
 
       var innerMat = THREE.MeshPhongMaterial
         ? new THREE.MeshPhongMaterial({
-            color: night ? '#dceaf2' : '#f2ece0', vertexColors: true, shininess: 68,
+            color: night ? '#dceaf2' : '#f2ece0', vertexColors: true, shininess: 88,
             specular: new THREE.Color('#8a7e64'),
             emissive: new THREE.Color(night ? '#dceaf2' : '#4a3e28'), emissiveIntensity: night ? 0.12 : 0.06
           })
@@ -31421,7 +31421,7 @@ var ReefCraftedWorld = (function(){
           color: night ? '#dceef6' : '#ffffff',
           vertexColors: true,
           specular: new THREE.Color(night ? '#5a7888' : '#4a463c'),
-          shininess: 48,
+          shininess: 80,
           emissiveMap: b.map,
           emissive: new THREE.Color('#ffffff'),
           emissiveIntensity: night ? 0.18 : 0.14
@@ -31434,7 +31434,7 @@ var ReefCraftedWorld = (function(){
 
       var aoMat = new THREE.MeshBasicMaterial({
         map: reef3dTileAOTex(THREE), color: night ? '#051018' : '#1b242c',
-        transparent: true, opacity: night ? .56 : .48, depthWrite: false,
+        transparent: true, opacity: night ? .62 : .58, depthWrite: false,
         polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2
       });
       addMergedLayer(tileAOGeos, aoMat, 'Board space contact AO rings', 1);
@@ -32445,7 +32445,7 @@ var ReefCraftedWorld = (function(){
     patterns: [5.8, 13.0, 2.9, 1.25],
     beach:    [5.8, 12.0, 3.6, 1.40],
     light:    [4.9, 15.6, 2.7, 1.15],
-    captain:  [4.65, 12.2, 2.7, 1.48]
+    captain:  [4.85, 12.8, 2.4, 1.38]
   };
   if(typeof window !== 'undefined') window.REEF3D_REGION_CAMERA = REEF3D_REGION_CAMERA;
   function reef3dCamTarget(view, out, look){
@@ -37113,7 +37113,7 @@ var ReefCraftedWorld = (function(){
         }
       }
       // m4: Harbor coastal ferry & moored sailboats — slide ferry inward so ALL 8 hull/cabin/mast corners stay strictly inside x >= 6% NDC (minX >= -0.84)
-      var ferryX=cx, ferryZ=cz, camR=camRight(), camFw=[camSetup().fx,camSetup().fz], ferryFound=false, ferryGap=4.6, ferryYaw=-.38;
+      var ferryX=cx, ferryZ=cz, camR=camRight(), camFw=[camSetup().fx,camSetup().fz], ferryFound=false, ferryGap=4.6, ferryYaw=-.62;
       view._ferryYaw=ferryYaw;
       // The basin is only the water inside the street ring (inner width 3.2): keep every moved hull inside a shrunken copy of that ring.
       var basinCache={};
@@ -37127,7 +37127,7 @@ var ReefCraftedWorld = (function(){
       }
       function coastalFerry(x,y,z,yaw){
         var g0=root.children.length;
-        smoothFoamRing(x,waterY+.064,z,1.88,2.92);
+        smoothFoamRing(x,waterY+.064,z,1.44,2.38);
         // Sculpted tapered-bow hull with deep marine keel, red waterline stripe & cream bulwark
         var fsh=new T.Shape();
         fsh.moveTo(-.92,-2.28); fsh.lineTo(.92,-2.28); fsh.quadraticCurveTo(1.26,-1.45,1.24,-.15);
@@ -37217,11 +37217,13 @@ var ReefCraftedWorld = (function(){
       var ferryBest=null, pharmIdx=pharmSpace ? pharmSpace.i : -1;
       var ferryGrid=[];
       for(var fr=-8;fr<=20;fr+=.5) for(var ff=-12;ff<=14;ff+=.5) ferryGrid.push([fr,ff]);
-      [[-.84,6.4,5.4,true],[-.84,6.2,5.0,false],[-.84,5.8,4.8,false],[-.875,5.4,4.5,false]].forEach(function(cfg){
+      [[-.84,7.8,5.6,true],[-.84,7.4,5.2,false],[-.84,7.0,4.8,false],[-.875,6.6,4.5,false]].forEach(function(cfg){
         if(ferryFound) return;
         for(var fi=0;fi<ferryGrid.length;fi++){
           var tx0=cx+camR[0]*ferryGrid[fi][0]+camFw[0]*ferryGrid[fi][1], tz0=cz+camR[1]*ferryGrid[fi][0]+camFw[1]*ferryGrid[fi][1];
           if(!inBasin(tx0,tz0,cfg[1]) || !waterClear(tx0,tz0,cfg[2])) continue;
+          var fSin0=Math.sin(ferryYaw), fCos0=Math.cos(ferryYaw);
+          if(!inBasin(tx0+fSin0*2.8,tz0+fCos0*2.8,4.9) || !inBasin(tx0-fSin0*2.3,tz0-fCos0*2.3,4.6)) continue;
           if(!camBoxInFrame(activeIdx,tx0,tz0,1.38,2.85,-.58,3.25,ferryYaw,cfg[0],.84,-.86,.78)) continue;
           if(cfg[3] && pharmIdx>=0 && pharmIdx!==activeIdx && !camBoxInFrame(pharmIdx,tx0,tz0,1.38,2.85,-.58,3.25,ferryYaw,cfg[0],.84,-.86,.78)) continue;
           var nd=camNDC(tx0,.4,tz0);
@@ -42971,6 +42973,13 @@ var ReefCraftedWorld = (function(){
         botFoamRing.rotation.z=-Math.atan2(F.z, F.x);
         botFoamRing.renderOrder=3;
         botGrp.add(botFoamRing);
+        var corkFoamRing=new T.Mesh(new T.RingGeometry(2.4, 6.2, 28), botFoamMat);
+        corkFoamRing.rotation.x=-Math.PI*0.5;
+        corkFoamRing.position.set(bMidX - 8.5 + F.x * 36.2, waterY + 0.08, bMidZ - 44.0 + F.z * 36.2);
+        corkFoamRing.scale.set(1.35, 0.85, 1.0);
+        corkFoamRing.rotation.z=-Math.atan2(F.z, F.x);
+        corkFoamRing.renderOrder=3;
+        botGrp.add(corkFoamRing);
 
         botGrp.traverse(function(o){ if(o.isMesh){ o.receiveShadow=false; o.castShadow=false; } });
         extras.add(botGrp);
@@ -44017,6 +44026,27 @@ var ReefCraftedWorld = (function(){
               var tLen=Math.hypot(tRx-tLx,tRz-tLz);
               limb(tLx,yTr,tLz,tRx-tLx,0,tRz-tLz,tLen,0.048,0.048,'#c79a40',false);
             });
+            // Burnished-brass arched window perimeter sash frames (side jambs, bottom sill rail & curved arch crown)
+            [wA0 + 0.015, wA1 - 0.015].forEach(function(sAng){
+              var sBx=cxL+Math.cos(sAng)*rMulBot, sBz=czL+Math.sin(sAng)*rMulBot;
+              var rSp=rWallAt(tr.ySpring)+0.45;
+              var sTx=cxL+Math.cos(sAng)*rSp, sTz=czL+Math.sin(sAng)*rSp;
+              var sLen=Math.hypot(sTx-sBx,tr.ySpring-(tr.yBot+0.14),sTz-sBz);
+              limb(sBx,tr.yBot+0.14,sBz,sTx-sBx,tr.ySpring-(tr.yBot+0.14),sTz-sBz,sLen,0.042,0.042,'#c79a40',false);
+            });
+            var sbLx=cxL+Math.cos(wA0+0.015)*rMulBot, sbLz=czL+Math.sin(wA0+0.015)*rMulBot;
+            var sbRx=cxL+Math.cos(wA1-0.015)*rMulBot, sbRz=czL+Math.sin(wA1-0.015)*rMulBot;
+            limb(sbLx,tr.yBot+0.16,sbLz,sbRx-sbLx,0,sbRz-sbLz,Math.hypot(sbRx-sbLx,sbRz-sbLz),0.044,0.044,'#c79a40',false);
+            var nSash=5, aS0=wA0+0.015, aS1=wA1-0.015, rArchS=rWallAt(tr.ySpring)+0.45;
+            for(var si2=0;si2<nSash;si2++){
+              var ph0=si2/nSash*Math.PI, ph1=(si2+1)/nSash*Math.PI;
+              var sa0=aS0+(aS1-aS0)*(si2/nSash), sa1=aS0+(aS1-aS0)*((si2+1)/nSash);
+              var sy0=tr.ySpring+Math.sin(ph0)*(tr.yCrown-tr.ySpring-0.08);
+              var sy1=tr.ySpring+Math.sin(ph1)*(tr.yCrown-tr.ySpring-0.08);
+              var sx0=cxL+Math.cos(sa0)*rArchS, sz0=czL+Math.sin(sa0)*rArchS;
+              var sx1=cxL+Math.cos(sa1)*rArchS, sz1=czL+Math.sin(sa1)*rArchS;
+              limb(sx0,sy0,sz0,sx1-sx0,sy1-sy0,sz1-sz0,Math.hypot(sx1-sx0,sy1-sy0,sz1-sz0),0.042,0.042,'#c79a40',false);
+            }
           }
         });
         // Grand Sunlit Ribbed Cupola Dome (y = 33.8 -> 42.0) with wide open sunlit sky oculus (r = 9.4)
@@ -48214,9 +48244,23 @@ var ReefCraftedWorld = (function(){
         vGrp.add(knoll);
         if(id==='town' || id==='lagoon' || id==='light' || id==='patterns' || id==='beach'){
           var cap = new T.Mesh(domeGeo, roofMat);
-          cap.scale.set(w * 0.38, h * 0.28, w * 0.35);
-          cap.position.set(vx + Math.cos(ang + 1.2) * (w * 0.14), -1.6 + h * 0.36, vz + Math.sin(ang + 1.2) * (w * 0.14));
-          vGrp.add(cap);
+          if(id==='beach'){
+            cap.scale.set(w * 0.72, h * 0.34, w * 0.66);
+            cap.position.set(vx + Math.cos(ang + 1.2) * (w * 0.10), -1.6 + h * 0.30, vz + Math.sin(ang + 1.2) * (w * 0.10));
+            vGrp.add(cap);
+            var bluff = new T.Mesh(domeGeo, new T.MeshLambertMaterial({ color: '#b89b6e' }));
+            bluff.scale.set(w * 0.44, h * 0.46, w * 0.40);
+            bluff.position.set(vx + Math.cos(ang - 0.8) * (w * 0.32), -1.6, vz + Math.sin(ang - 0.8) * (w * 0.32));
+            vGrp.add(bluff);
+            var vFoam = new T.Mesh(new T.RingGeometry(w * 0.82, w * 1.04, 24), new T.MeshBasicMaterial({ color: '#e6fcfc', side: T.DoubleSide }));
+            vFoam.rotation.x = -Math.PI * 0.5;
+            vFoam.position.set(vx, -0.58, vz);
+            vGrp.add(vFoam);
+          } else {
+            cap.scale.set(w * 0.38, h * 0.28, w * 0.35);
+            cap.position.set(vx + Math.cos(ang + 1.2) * (w * 0.14), -1.6 + h * 0.36, vz + Math.sin(ang + 1.2) * (w * 0.14));
+            vGrp.add(cap);
+          }
         }
       }
       for(var j=0; j<14; j++){
@@ -49835,7 +49879,7 @@ var ReefCraftedWorld = (function(){
           if(!regionPeopleInPoly(seawallPoly,wcx,wcz)) swPen+=6000;
           else {
             var minSw=distSeawall(wcx,wcz);
-            if(minSw<1.16) swPen+=3200+(1.16-minSw)*2500;
+            if(minSw<1.80) swPen+=3200+(1.80-minSw)*2500;
             // Verify all anatomical hull points stay strictly inside the 4.26 stone seawall coping.
             for(var ci=0;ci<hullPts.length;ci++){
               var cxw=wcx+hullPts[ci][0]*wCy+hullPts[ci][1]*wSy;
@@ -49843,7 +49887,7 @@ var ReefCraftedWorld = (function(){
               if(!regionPeopleInPoly(seawallPoly,cxw,czw)) swPen+=4500;
               else {
                 var cSw=distSeawall(cxw,czw);
-                if(cSw<.36) swPen+=2600+(.36-cSw)*3000;
+                if(cSw<.85) swPen+=2600+(.85-cSw)*3000;
               }
             }
           }
@@ -50523,9 +50567,9 @@ var ReefCraftedWorld = (function(){
         var echoDelta=Math.atan2(Math.sin(echoToShelly-echoToCam),Math.cos(echoToShelly-echoToCam));
         var eMinY=(bounds.centerY||0)-(bounds.height||0)*.5;
         best.boardPitchYaw=echoToCam;
-        best.boardYaw=echoToCam+echoDelta*.45;
+        best.boardYaw=echoToCam+echoDelta*.68;
         best.boardPitch=-.14;
-        best.boardYOffset=-.160-eMinY;
+        best.boardYOffset=-.250-eMinY;
         // m6: Float "Practice a sound" cleanly above Echo's head to the left of the dark indigo crystal cave arch.
         if(cvCam && cvCam.position && cvCam.position.lengthSq()>.01){
           var eToCamX=cvCam.position.x-best.x, eToCamZ=cvCam.position.z-best.z, eL=Math.hypot(eToCamX,eToCamZ)||1;
@@ -50552,8 +50596,8 @@ var ReefCraftedWorld = (function(){
       var cCenter=regionPeopleLoopFrame(view,cCur);
       var capCam=cam;
       if(window.THREE){
-        var cTab=(typeof REEF3D_REGION_CAMERA==='object' && REEF3D_REGION_CAMERA && REEF3D_REGION_CAMERA.captain) || [4.65,12.2,2.7,1.48];
-        cTab=[4.65,12.2,2.7,1.48];
+        var cTab=(typeof REEF3D_REGION_CAMERA==='object' && REEF3D_REGION_CAMERA && REEF3D_REGION_CAMERA.captain) || [4.85,12.8,2.4,1.38];
+        cTab=[4.85,12.8,2.4,1.38];
         capCam=new window.THREE.PerspectiveCamera(42,1.6,.1,300);
         capCam.position.set(cCur.x-fx*cTab[1],(cCur.y||0)+cTab[0],cCur.z-fz*cTab[1]);
         capCam.lookAt(cCur.x+fx*cTab[2],(cCur.y||0)+.3+(cTab[3]!=null?cTab[3]:1.25),cCur.z+fz*cTab[2]);
@@ -51815,10 +51859,13 @@ var ReefCraftedWorld = (function(){
       actor.userData.boardYOffset=-1.16;
     } else if(isLoopBoard && id==='caves'){
       // m6 assist: Orient Bok 3/4 toward the 09-caves camera so his face reads cleanly and his pectoral fin never projects as an edge-on spike.
+      var cvBokB=actor.userData.regionBounds;
+      var cvBokMinY=cvBokB ? ((cvBokB.centerY||0)-(cvBokB.height||0)*.5) : 0;
       var cvBokCam=stallCam || regionPeopleCamAt(view,shop.i);
       if(cvBokCam && cvBokCam.position && cvBokCam.position.lengthSq()>.01){
         actor.userData.boardYaw=Math.atan2(cvBokCam.position.x-bokX,cvBokCam.position.z-bokZ)-.22;
       }
+      actor.userData.boardYOffset=-.26-cvBokMinY-(shop.y||0);
     } else if(isLoopBoard && id==='captain'){
       var cbB=actor.userData.regionBounds;
       var cbMinY=cbB ? ((cbB.centerY||0)-(cbB.height||0)*.5) : 0;
@@ -51826,7 +51873,7 @@ var ReefCraftedWorld = (function(){
       if(capBokCam && capBokCam.position && capBokCam.position.lengthSq()>.01){
         actor.userData.boardYaw=Math.atan2(capBokCam.position.x-bokX,capBokCam.position.z-bokZ);
       }
-      actor.userData.boardYOffset=-.118-cbMinY-(shop.y||0);
+      actor.userData.boardYOffset=.22-cbMinY-(shop.y||0);
     } else if(lhShopLand){
       // Giant Spiral Lighthouse: seat Bok flush at true 3D shopLanding.floorY on the cantilevered oak merchant balcony,
       // warmly angled 3/4 toward both the ascending stairs (shop) and opening rotunda view (spaces[0]).
@@ -52200,7 +52247,21 @@ var ReefCraftedWorld = (function(){
         ]
       });
     } else if(isLoopBoard && id==='caves'){
-      addWaterRipple(actor,-.290,{rippleFwd:.10,rippleScale:1.18,opacity:.88});
+      var cvT=window.THREE;
+      if(cvT){
+        var caveBokBasin=new cvT.Group();
+        caveBokBasin.position.set(actor.position.x,-0.312,actor.position.z);
+        var cbPed=new cvT.Mesh(new cvT.CylinderGeometry(1.06,1.16,0.10,22),new cvT.MeshToonMaterial({color:'#39546e',gradientMap:view.kit&&view.kit.grad}));
+        cbPed.position.y=0.02; caveBokBasin.add(cbPed);
+        var cbRim=new cvT.Mesh(new cvT.TorusGeometry(1.02,0.09,8,22),new cvT.MeshToonMaterial({color:'#4c6b86',gradientMap:view.kit&&view.kit.grad}));
+        cbRim.rotation.x=Math.PI/2; cbRim.position.y=0.06; caveBokBasin.add(cbRim);
+        var cbPool=new cvT.Mesh(new cvT.CircleGeometry(0.98,22),new cvT.MeshBasicMaterial({color:'#3fd2e0',transparent:true,opacity:0.90}));
+        cbPool.rotation.x=-Math.PI/2; cbPool.position.y=0.072; caveBokBasin.add(cbPool);
+        var cbRing=new cvT.Mesh(new cvT.TorusGeometry(0.68,0.026,6,20),new cvT.MeshBasicMaterial({color:'#a8fdff',transparent:true,opacity:0.86}));
+        cbRing.rotation.x=Math.PI/2; cbRing.position.y=0.076; caveBokBasin.add(cbRing);
+        caveBokBasin.userData.isContactShadow=true; caveBokBasin.userData.isFixedBasin=true;
+        actor.userData.contactShadow=caveBokBasin; regionPeopleSyncShadow(actor); extraShadows.push(caveBokBasin); root.add(caveBokBasin);
+      }
     } else if(isLoopBoard && id==='captain'){
       var cbB=actor.userData.regionBounds;
       var cbMinY=cbB ? ((cbB.centerY||0)-(cbB.height||0)*.5) : 0;
@@ -52208,12 +52269,35 @@ var ReefCraftedWorld = (function(){
       if(capBokCam && capBokCam.position && capBokCam.position.lengthSq()>.01){
         actor.userData.boardYaw=Math.atan2(capBokCam.position.x-bokX,capBokCam.position.z-bokZ);
       }
-      actor.userData.boardYOffset=-.118-cbMinY-(shop.y||0);
+      actor.userData.boardYOffset=.22-cbMinY-(shop.y||0);
     } else if(lhShopLand){
       // Warm contact shadow grounding Bok solidly on the elevated oak merchant balcony at true 3D shop.y.
       addStreetShadow(actor,base+.012,.50,{shadowScale:[1.18,1.12]});
     } else if(isLoopBoard && id==='captain'){
-      addStreetShadow(actor,-.110,.68,{shadowScale:[1.35,1.35]});
+      var tbT=window.THREE;
+      if(tbT){
+        var capTub=new tbT.Group();
+        capTub.position.set(actor.position.x,-0.118,actor.position.z);
+        var oakMat=new tbT.MeshToonMaterial({color:'#6b4428',gradientMap:view.kit&&view.kit.grad});
+        var darkOakMat=new tbT.MeshToonMaterial({color:'#52321c',gradientMap:view.kit&&view.kit.grad});
+        var brassMat=new tbT.MeshToonMaterial({color:'#e2b652',gradientMap:view.kit&&view.kit.grad});
+        var tubBody=new tbT.Mesh(new tbT.CylinderGeometry(0.86,0.78,0.56,20),oakMat);
+        tubBody.position.y=0.28; capTub.add(tubBody);
+        [0.16,0.42].forEach(function(hy){
+          var hp=new tbT.Mesh(new tbT.TorusGeometry(0.85,0.042,8,24),brassMat);
+          hp.rotation.x=Math.PI/2; hp.position.y=hy; capTub.add(hp);
+        });
+        var tubRim=new tbT.Mesh(new tbT.TorusGeometry(0.86,0.058,8,24),darkOakMat);
+        tubRim.rotation.x=Math.PI/2; tubRim.position.y=0.55; capTub.add(tubRim);
+        var tubWat=new tbT.Mesh(new tbT.CircleGeometry(0.82,24),new tbT.MeshBasicMaterial({color:'#3dc8d0',transparent:true,opacity:0.90}));
+        tubWat.rotation.x=-Math.PI/2; tubWat.position.y=0.52; capTub.add(tubWat);
+        var tubRip=new tbT.Mesh(new tbT.TorusGeometry(0.56,0.025,6,20),new tbT.MeshBasicMaterial({color:'#aef8fc',transparent:true,opacity:0.85}));
+        tubRip.rotation.x=Math.PI/2; tubRip.position.y=0.53; capTub.add(tubRip);
+        var tubSh=new tbT.Mesh(new tbT.CircleGeometry(1.06,20),new tbT.MeshBasicMaterial({color:'#160d06',transparent:true,opacity:0.58,depthWrite:false}));
+        tubSh.rotation.x=-Math.PI/2; tubSh.position.y=0.008; capTub.add(tubSh);
+        capTub.userData.isContactShadow=true; capTub.userData.isFixedBasin=true;
+        actor.userData.contactShadow=capTub; regionPeopleSyncShadow(actor); extraShadows.push(capTub); root.add(capTub);
+      }
     }
     if(id==='town'){
       // Place hotel-whale before subway-ray so hotel keeps lower-left open basin and subway claims mid-left basin around it.
@@ -52331,20 +52415,23 @@ var ReefCraftedWorld = (function(){
         var hanaRippleY=(lhHana && typeof lhHana.y==='number') ? (lhHana.y+.008) : -.262;
         addWaterRipple(marker,hanaRippleY,{rippleFwd:0,rippleScale:1.08,opacity:.52});
       } else if(isLoopBoard && id==='caves'){
-        // MAJ 6: Soft bioluminescent cyan-aqua water-ripple ring directly beneath Echo's belly over echo-grotto-pool (y = -0.298).
-        addWaterRipple(marker,-.284,{
-          rippleFwd:.12,
-          rippleScale:[1.42,1.78],
-          opacity:.86,
-          stops:[
-            [0,'rgba(18,54,84,0.44)'],
-            [.42,'rgba(28,118,154,0.34)'],
-            [.64,'rgba(116,244,255,0.92)'],
-            [.78,'rgba(184,254,255,0.68)'],
-            [.90,'rgba(92,228,246,0.26)'],
-            [1,'rgba(92,228,246,0.0)']
-          ]
-        });
+        var ecT=window.THREE;
+        if(ecT){
+          var echoBasin=new ecT.Group();
+          echoBasin.position.set(marker.position.x,-0.312,marker.position.z);
+          var ebPed=new ecT.Mesh(new ecT.CylinderGeometry(1.52,1.64,0.12,24),new ecT.MeshToonMaterial({color:'#39546e',gradientMap:view.kit&&view.kit.grad}));
+          ebPed.position.y=0.02; echoBasin.add(ebPed);
+          var ebRim=new ecT.Mesh(new ecT.TorusGeometry(1.48,0.11,8,24),new ecT.MeshToonMaterial({color:'#4c6b86',gradientMap:view.kit&&view.kit.grad}));
+          ebRim.rotation.x=Math.PI/2; ebRim.position.y=0.06; echoBasin.add(ebRim);
+          var ebPool=new ecT.Mesh(new ecT.CircleGeometry(1.42,24),new ecT.MeshBasicMaterial({color:'#3fd2e0',transparent:true,opacity:0.90}));
+          ebPool.rotation.x=-Math.PI/2; ebPool.position.y=0.072; echoBasin.add(ebPool);
+          [1.05,0.62].forEach(function(rr){
+            var ebR=new ecT.Mesh(new ecT.TorusGeometry(rr,0.030,6,24),new ecT.MeshBasicMaterial({color:'#a8fdff',transparent:true,opacity:0.88}));
+            ebR.rotation.x=Math.PI/2; ebR.position.y=0.078; echoBasin.add(ebR);
+          });
+          echoBasin.userData.isContactShadow=true; echoBasin.userData.isFixedBasin=true;
+          marker.userData.contactShadow=echoBasin; regionPeopleSyncShadow(marker); extraShadows.push(echoBasin); root.add(echoBasin);
+        }
       }
       // Soft grounded contact shadow disc beneath grounded region hosts (Captain Bay on 06-captains-deck, Jisu on 11-beach).
       if((id==='captain' || id==='beach') && typeof document!=='undefined' && typeof document.createElement==='function'){
@@ -57075,7 +57162,7 @@ var ReefCraftedWorld = (function(){
       rugX: -1.20, rugZ: -0.24
     },
     taxi: {
-      actorX: 1.72, actorZ: -1.62, actorYawFrac: 0.92, hoverY: 0.34,
+      actorX: 1.72, actorZ: -1.62, actorYawFrac: 0.92, hoverY: 0.22,
       maxY: 1.62, targetY: 1.56, maxXZ: 2.85, targetXZ: 2.70,
       shellyX: -1.62, shellyZ: -0.26,
       rugX: -1.62, rugZ: -0.26
@@ -59007,7 +59094,7 @@ var ReefCraftedWorld = (function(){
         guide.userData.body.scale.set(1, 1, 1);
       }
       guide.scale.copy(e.savedGuide.scale).multiplyScalar(0.741);
-      var mobShopShellyShift = (kind === 'shop' && view.cam && view.cam.aspect < 0.75) ? 0.42 : 0;
+      var mobShopShellyShift = (kind === 'shop' && view.cam && view.cam.aspect < 0.75) ? 0.46 : 0;
       var shellyWorld = regionInteriorToWorld(base.position, yaw, layout.shellyX + mobShopShellyShift, 0, layout.shellyZ);
       guide.position.copy(shellyWorld);
       // Directive #364 (Mutual Eye Contact): Orient Shelly directly toward the resident's exact room position!
@@ -59058,10 +59145,10 @@ var ReefCraftedWorld = (function(){
     var aspect = Math.max(0.45, view.cam && view.cam.aspect ? view.cam.aspect : 1.33);
     var isMobShop = (aspect < 1.1 && e.interior.kind === 'shop');
     var dist = isMobShop
-      ? Math.max(5.8, 4.15 / Math.max(0.58, Math.min(1.0, aspect * 0.85)))
+      ? Math.max(6.4, 4.85 / Math.max(0.58, Math.min(1.0, aspect * 0.85)))
       : Math.max(4.75, 4.65 / Math.max(0.68, Math.min(1.0, aspect * 0.78)));
-    var lxOff = -0.04 + (isMobShop ? -0.30 : 0);
-    var lyCam = (e.interior.kind === 'hotel') ? 1.84 : (isMobShop ? 1.14 : 1.42);
+    var lxOff = -0.04 + (isMobShop ? -0.34 : 0);
+    var lyCam = (e.interior.kind === 'hotel') ? 1.84 : (isMobShop ? 1.18 : 1.42);
     var lyLook = (e.interior.kind === 'hotel') ? 0.86 : (0.92 + (isMobShop ? -0.04 : 0));
 
     var camPos = regionInteriorToWorld(base.position, yaw, lxOff, lyCam, dist);
