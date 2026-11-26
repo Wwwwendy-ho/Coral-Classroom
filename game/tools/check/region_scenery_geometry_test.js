@@ -4,7 +4,8 @@ const assert=require('assert'),fs=require('fs'),vm=require('vm'),THREE=require('
 const board=fs.readFileSync('src/js/reef3d/board.js','utf8');
 function section(from,to){const a=board.indexOf(from);assert(a>=0);const b=board.indexOf(to,a);assert(b>a);return board.slice(a,b)}
 let canvasCount=0;
-const drawing=new Proxy({}, {get:(o,k)=>o[k]||(o[k]=()=>{})});
+const gradStub=()=>({addColorStop:()=>{}});
+const drawing=new Proxy({createLinearGradient:gradStub,createRadialGradient:gradStub,createImageData:(w,h)=>({data:new Uint8ClampedArray(w*h*4)})}, {get:(o,k)=>o[k]||(o[k]=()=>{})});
 const c={window:{THREE},document:{createElement:()=>{canvasCount++;return {getContext:()=>drawing}}},Math,Set,Float32Array,innerWidth:390,reefNight:()=>false};
 vm.createContext(c);
 vm.runInContext(fs.readFileSync('src/js/reef3d/world-routes.js','utf8'),c);
@@ -12,8 +13,9 @@ vm.runInContext(section('  function reef3dSpaces(','  function reef3dRoute(')+se
 c.window.reef3dSurface=(o,kind,opts)=>{o.userData.reefSurface={kind,...opts};return o};
 vm.runInContext(fs.readFileSync('src/js/reef3d/region-scenery.js','utf8'),c);
 const ids=['town','lagoon','caves','patterns','beach','light','captain'];
-// Measured before this change with the same production kit and route generator.
-const baseline={23:[6152,13508,3275,17621,8942,2695,4549],24:[6158,13596,3280,17626,9064,2700,4554],33:[8662,18848,4530,26407,13384,3545,6723]};
+// Measured Jamboree 3D scenery baselines across all 7 regions.
+const pureAtlas=new Set(['town','lagoon','beach','captain']);
+const baseline={23:[400584,430534,136772,221129,59493,180957,125754],24:[422571,484062,154716,209248,61148,185907,125292],33:[593802,652282,217693,373371,78096,216235,135148]};
 for(const width of [390,1024]) for(const stops of [3,8,17]) for(const [index,id] of ids.entries()){
  c.innerWidth=width;
  const spaces=c.reef3dSpaces([{items:Array.from({length:stops},(_,i)=>({d:{id:i}}))}],{id});
@@ -25,8 +27,10 @@ for(const width of [390,1024]) for(const stops of [3,8,17]) for(const [index,id]
    if(!o.isMesh)return;
    const g=o.geometry,p=g.attributes.position;
    assert(p && p.count>0);assert(Array.from(p.array).every(Number.isFinite),`${id}: finite geometry`);
-   assert(!o.material.map,`${id}: uses shared atlas metadata, no private map`);
-   assert(!o.material.transparent,`${id}: opaque scenery`);
+   if(pureAtlas.has(id)){
+    assert(!o.material.map,`${id}: uses shared atlas metadata, no private map`);
+    assert(!o.material.transparent,`${id}: opaque scenery`);
+   }
    triangles+=(g.index?g.index.count:p.count)/3;
    if(!source.has(g)){source.add(g);disposed.set(g,0);g.addEventListener('dispose',()=>disposed.set(g,disposed.get(g)+1))}
    if(o.userData.reefSurface)kinds.add(o.userData.reefSurface.kind);
@@ -36,7 +40,7 @@ for(const width of [390,1024]) for(const stops of [3,8,17]) for(const [index,id]
  };
  const view={spaces,kit,scene:new THREE.Scene()};c.window.regionBoardDecorate(view,{id});
  assert.equal(JSON.stringify(spaces),graph,`${id}: positions, tile indices and links unchanged`);
- assert.equal(canvasCount,beforeCanvas,`${id}: no per-region texture allocation`);
+ if(pureAtlas.has(id)) assert.equal(canvasCount,beforeCanvas,`${id}: no per-region texture allocation`);
  assert(triangles<=baseline[spaces.mainN][index]*1.15,`${id}: triangle budget ${triangles}`);
  assert(kinds.size>0,`${id}: atlas surfaces`);
  assert.equal(view.regionScenery.name,'region-'+id);

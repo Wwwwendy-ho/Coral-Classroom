@@ -141,7 +141,7 @@ def head_surface(u, v):
 
 
 def eye_axes(side):
-    center = Vector((side*.247, -.281, 2.606))
+    center = Vector((side*.218, -.265, 2.602))
     normal = Vector((side*.704, -.708, .058)).normalized()
     horizontal = Z.cross(normal).normalized()
     vertical = normal.cross(horizontal)
@@ -151,7 +151,7 @@ def eye_axes(side):
 def eye_point(side, u, v):
     c, h, w, n = eye_axes(side)
     phi, theta = math.pi*v, TAU*u
-    direction = .174*(math.sin(phi)*(math.cos(theta)*h+math.sin(theta)*w) + math.cos(phi)*n)
+    direction = .148*(math.sin(phi)*(math.cos(theta)*h+math.sin(theta)*w) + .56*math.cos(phi)*n)
     return c + Quaternion(Z,math.radians(5-side*37)) @ direction
 
 
@@ -161,8 +161,8 @@ def upper_orbit_point(side, u, v):
     # The upper orbital margin arches over the globe.
     end = math.radians(52-9*(abs(theta)/1.423)**1.6)
     phi = lerp(math.radians(-102), end, v)
-    return c + .179*math.sin(theta)*h + math.cos(theta)*(
-        .179*math.cos(phi)*w + .179*math.sin(phi)*n
+    return c + .153*math.sin(theta)*h + math.cos(theta)*(
+        .153*math.cos(phi)*w + .092*math.sin(phi)*n
     )
 
 
@@ -171,10 +171,10 @@ def socket_point(side, u, v):
     a = TAU*u
     x, y = math.cos(a), math.sin(a)
     sizes = curve([
-        (.166, .153, .045), (.179, .168, .044), (.191, .181, .022),
-        (.212, .199, -.031), (.224, .213, -.090)
+        (.144, .134, .016), (.154, .145, .015), (.166, .157, .005),
+        (.184, .174, -.026), (.196, .186, -.068)
     ], v*4)
-    return c + h*(sizes[0]*x) + w*(sizes[1]*y) + n*(sizes[2]+.015*y)
+    return c + h*(sizes[0]*x) + w*(sizes[1]*y) + n*(sizes[2]+.012*y)
 
 
 def apron_width(v):
@@ -576,21 +576,21 @@ def eye_paint(u,v):
     u = u % 1
     a = TAU*u
     r = math.pi*v
-    iris = np.clip((.718-r)/.032,0,1)
-    t = np.clip((r-.454)/.24,0,1)
+    iris = np.clip((.84-r)/.030,0,1)
+    t = np.clip((r-.50)/.30,0,1)
     fibers = .13*np.sin(87*a+8*r)+.12*np.sin(119*a-11*r)+.10*np.sin(38*a+37*r)
-    result = tint((255,249,236),(166,124,102),np.clip((r-.63)*.49,0,.65))
-    pigment = tint((78,36,18),(216,135,48),np.clip(.34+.45*np.sin(t*math.pi)+fibers-.30*np.sin(a),0,1))
+    result = tint((255,249,238),(176,134,112),np.clip((r-.74)*.49,0,.65))
+    pigment = tint((82,40,20),(224,142,52),np.clip(.36+.45*np.sin(t*math.pi)+fibers-.28*np.sin(a),0,1))
     result = result+(pigment-result)*iris[...,None]
-    result = paint(result,(48,25,17),np.exp(-((r-.680)/.034)**2)*.9)
-    pupil = np.clip((.505-r)/.019,0,1)
-    black = tint((20,13,12),(44,34,29),.55+.38*np.sin(a)*np.clip(r/.505,0,1))
+    result = paint(result,(48,25,17),np.exp(-((r-.80)/.032)**2)*.9)
+    pupil = np.clip((.56-r)/.018,0,1)
+    black = tint((18,12,12),(40,30,26),.55+.38*np.sin(a)*np.clip(r/.56,0,1))
     result = result+(black-result)*pupil[...,None]
     x,y = np.sin(r)*np.cos(a),np.sin(r)*np.sin(a)
-    light = np.exp(-(((x+.162)/.084)**2+((y-.229)/.071)**2))
-    low = np.exp(-(((x-.138)/.036)**2+((y+.182)/.039)**2))
-    result = paint(result,(255,250,236),np.clip((light-.23)*1.55,0,.89)+.42*low)
-    return result,.28-.097*iris+.32*np.clip((r-.97),0,1),np.zeros_like(u)
+    light = np.exp(-(((x+.162)/.105)**2+((y-.229)/.090)**2))
+    low = np.exp(-(((x-.138)/.048)**2+((y+.182)/.048)**2))
+    result = paint(result,(255,252,244),np.clip((light-.20)*1.65,0,.95)+.55*low)
+    return result,.22-.06*iris+.32*np.clip((r-.97),0,1),np.zeros_like(u)
 
 
 def other_paint(name,tile,u,v):

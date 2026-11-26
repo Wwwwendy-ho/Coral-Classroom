@@ -1,0 +1,124 @@
+{
+  "file": "kiko-mochi-close.glb",
+  "bytes": 1500324,
+  "triangles": 18812,
+  "draws": 1,
+  "materials": 1,
+  "bones": 14,
+  "textureImages": [
+    {
+      "name": "kiko-mochi-color-2048",
+      "width": 2048,
+      "height": 2048,
+      "mime": "image/jpeg",
+      "bytes": 750320
+    },
+    {
+      "name": "kiko-mochi-surface-512",
+      "width": 512,
+      "height": 512,
+      "mime": "image/png",
+      "bytes": 3656
+    }
+  ],
+  "clips": [
+    {
+      "name": "Idle",
+      "duration": 2.0333,
+      "animatedBones": [
+        "Body",
+        "Claw.L",
+        "Claw.R",
+        "Eye.L",
+        "Eye.R",
+        "Leg1.L",
+        "Leg1.R",
+        "Leg2.L",
+        "Leg2.R",
+        "Leg3.L",
+        "Leg3.R",
+        "Leg4.L",
+        "Leg4.R",
+        "Root"
+      ],
+      "channels": 42
+    },
+    {
+      "name": "Listen",
+      "duration": 1.5,
+      "animatedBones": [
+        "Body",
+        "Claw.L",
+        "Claw.R",
+        "Eye.L",
+        "Eye.R",
+        "Leg1.L",
+        "Leg1.R",
+        "Leg2.L",
+        "Leg2.R",
+        "Leg3.L",
+        "Leg3.R",
+        "Leg4.L",
+        "Leg4.R",
+        "Root"
+      ],
+      "channels": 42
+    },
+    {
+      "name": "React",
+      "duration": 1.2333,
+      "animatedBones": [
+        "Body",
+        "Claw.L",
+        "Claw.R",
+        "Eye.L",
+        "Eye.R",
+        "Leg1.L",
+        "Leg1.R",
+        "Leg2.L",
+        "Leg2.R",
+        "Leg3.L",
+        "Leg3.R",
+        "Leg4.L",
+        "Leg4.R",
+        "Root"
+      ],
+      "channels": 42
+    }
+  ],
+  "exportedVertices": 10897,
+  "unweightedExportVertices": 0,
+  "maxSerializedInfluences": 1,
+  "weightSumRange": [
+    1.0,
+    1.0
+  ],
+  "weightedBoneNames": [
+    "Body",
+    "Eye.L",
+    "Claw.L",
+    "Leg1.L",
+    "Leg2.L",
+    "Leg3.L",
+    "Leg4.L",
+    "Eye.R",
+    "Claw.R",
+    "Leg1.R",
+    "Leg2.R",
+    "Leg3.R",
+    "Leg4.R"
+  ],
+  "authorVertices": 10827,
+  "bounds": [
+    [
+      -1.1087892055511475,
+      -0.561637282371521,
+      0.055692628026008606
+    ],
+    [
+      1.1763691902160645,
+      0.47466737031936646,
+      1.392571210861206
+    ]
+  ]
+}

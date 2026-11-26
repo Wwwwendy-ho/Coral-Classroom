@@ -1,0 +1,128 @@
+{
+  "file": "kiko-hermit-board.glb",
+  "bytes": 612240,
+  "triangles": 7274,
+  "draws": 1,
+  "materials": 1,
+  "bones": 15,
+  "textureImages": [
+    {
+      "name": "kiko-hermit-color-1024",
+      "width": 1024,
+      "height": 1024,
+      "mime": "image/jpeg",
+      "bytes": 251215
+    },
+    {
+      "name": "kiko-hermit-surface-256",
+      "width": 256,
+      "height": 256,
+      "mime": "image/png",
+      "bytes": 917
+    }
+  ],
+  "clips": [
+    {
+      "name": "Idle",
+      "duration": 3.0333,
+      "animatedBones": [
+        "Antenna.L",
+        "Antenna.R",
+        "Body",
+        "Claw.L",
+        "Claw.R",
+        "Eye.L",
+        "Eye.R",
+        "Leg1.L",
+        "Leg1.R",
+        "Leg2.L",
+        "Leg2.R",
+        "Leg3.L",
+        "Leg3.R",
+        "Root",
+        "Sensors"
+      ],
+      "channels": 45
+    },
+    {
+      "name": "Listen",
+      "duration": 2.4333,
+      "animatedBones": [
+        "Antenna.L",
+        "Antenna.R",
+        "Body",
+        "Claw.L",
+        "Claw.R",
+        "Eye.L",
+        "Eye.R",
+        "Leg1.L",
+        "Leg1.R",
+        "Leg2.L",
+        "Leg2.R",
+        "Leg3.L",
+        "Leg3.R",
+        "Root",
+        "Sensors"
+      ],
+      "channels": 45
+    },
+    {
+      "name": "React",
+      "duration": 1.5,
+      "animatedBones": [
+        "Antenna.L",
+        "Antenna.R",
+        "Body",
+        "Claw.L",
+        "Claw.R",
+        "Eye.L",
+        "Eye.R",
+        "Leg1.L",
+        "Leg1.R",
+        "Leg2.L",
+        "Leg2.R",
+        "Leg3.L",
+        "Leg3.R",
+        "Root",
+        "Sensors"
+      ],
+      "channels": 45
+    }
+  ],
+  "exportedVertices": 4376,
+  "unweightedExportVertices": 0,
+  "maxSerializedInfluences": 1,
+  "weightSumRange": [
+    1.0,
+    1.0
+  ],
+  "weightedBoneNames": [
+    "Body",
+    "Sensors",
+    "Eye.L",
+    "Antenna.L",
+    "Eye.R",
+    "Antenna.R",
+    "Claw.L",
+    "Leg1.L",
+    "Leg2.L",
+    "Leg3.L",
+    "Claw.R",
+    "Leg1.R",
+    "Leg2.R",
+    "Leg3.R"
+  ],
+  "authorVertices": 4246,
+  "bounds": [
+    [
+      -0.9533540606498718,
+      -0.9243307709693909,
+      0.05599510297179222
+    ],
+    [
+      0.9548423290252686,
+      0.9200000166893005,
+      1.6177310943603516
+    ]
+  ]
+}

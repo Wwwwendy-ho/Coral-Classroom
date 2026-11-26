@@ -1,0 +1,88 @@
+{
+  "file": "jisu-board.glb",
+  "bytes": 408736,
+  "triangles": 6872,
+  "meshCount": 1,
+  "primitives": 1,
+  "materials": 1,
+  "bones": 15,
+  "maps": [
+    {
+      "width": 1024,
+      "height": 1024,
+      "bytes": 61664,
+      "mime": "image/jpeg"
+    },
+    {
+      "width": 256,
+      "height": 256,
+      "bytes": 1073,
+      "mime": "image/png"
+    }
+  ],
+  "clips": [
+    {
+      "name": "Idle",
+      "duration": 3.3,
+      "animatedBones": [
+        "Antenna.L",
+        "Antenna.R",
+        "Body",
+        "Claw.L",
+        "Claw.R",
+        "Eye.L",
+        "Eye.R",
+        "Head",
+        "Leg1.L",
+        "Leg1.R",
+        "Leg2.L",
+        "Leg2.R",
+        "Leg3.L",
+        "Leg3.R",
+        "Root"
+      ]
+    },
+    {
+      "name": "Listen",
+      "duration": 2.8333333333333335,
+      "animatedBones": [
+        "Antenna.L",
+        "Antenna.R",
+        "Body",
+        "Claw.L",
+        "Claw.R",
+        "Eye.L",
+        "Eye.R",
+        "Head",
+        "Leg1.L",
+        "Leg1.R",
+        "Leg2.L",
+        "Leg2.R",
+        "Leg3.L",
+        "Leg3.R",
+        "Root"
+      ]
+    },
+    {
+      "name": "React",
+      "duration": 1.7666666666666666,
+      "animatedBones": [
+        "Antenna.L",
+        "Antenna.R",
+        "Body",
+        "Claw.L",
+        "Claw.R",
+        "Eye.L",
+        "Eye.R",
+        "Head",
+        "Leg1.L",
+        "Leg1.R",
+        "Leg2.L",
+        "Leg2.R",
+        "Leg3.L",
+        "Leg3.R",
+        "Root"
+      ]
+    }
+  ]
+}

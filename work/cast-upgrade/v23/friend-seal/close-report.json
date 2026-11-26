@@ -1,0 +1,61 @@
+{
+  "file": "friend-seal-close.glb",
+  "bytes": 729640,
+  "triangles": 18592,
+  "meshCount": 1,
+  "primitives": 1,
+  "materials": 1,
+  "bones": 6,
+  "maps": [
+    {
+      "width": 1024,
+      "height": 1024,
+      "bytes": 55885,
+      "mime": "image/jpeg"
+    },
+    {
+      "width": 256,
+      "height": 256,
+      "bytes": 1073,
+      "mime": "image/png"
+    }
+  ],
+  "clips": [
+    {
+      "name": "Idle",
+      "duration": 3.2,
+      "animatedBones": [
+        "Fin.L",
+        "Fin.R",
+        "Head",
+        "Root",
+        "Tail",
+        "Torso"
+      ]
+    },
+    {
+      "name": "Listen",
+      "duration": 2.6,
+      "animatedBones": [
+        "Fin.L",
+        "Fin.R",
+        "Head",
+        "Root",
+        "Tail",
+        "Torso"
+      ]
+    },
+    {
+      "name": "React",
+      "duration": 1.8,
+      "animatedBones": [
+        "Fin.L",
+        "Fin.R",
+        "Head",
+        "Root",
+        "Tail",
+        "Torso"
+      ]
+    }
+  ]
+}

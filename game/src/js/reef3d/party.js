@@ -63,6 +63,11 @@
     var b = reefBoard();
     if(n > 0 && b.dblShells){ n *= 2; b.dblShells = false; }
     b.shells = Math.max(0, b.shells + n); reefBoardSave(); reef3dHud(view);
+    if(n > 0 && view && view.scene && !reefCalm()){
+      if(typeof reef3dShellArcFx === 'function') reef3dShellArcFx(view, n);
+      var shEl = view.wrap && view.wrap.querySelector('.r3-hud-shells');
+      if(shEl){ shEl.style.transform = 'scale(1.18)'; setTimeout(function(){ shEl.style.transform = ''; }, 240); }
+    }
     var pop = document.createElement('div'); pop.className = 'r3-shellpop' + (n < 0 ? ' minus' : ''); pop.setAttribute('aria-hidden', 'true');
     pop.textContent = (n > 0 ? '+' : '') + n + ' 🐚';
     view.wrap.appendChild(pop); setTimeout(function(){ pop.remove(); }, 1500);
@@ -131,6 +136,8 @@
     el.querySelector('[data-yes]').addEventListener('click', function(){
       el.remove(); b.pearls++; reef3dShells(view, -REEF_PEARL_COST);
       b.pearlAt = reef3dPearlSpot(view); reefBoardSave(); reef3dPearlShow(view); reef3dHud(view);
+      if(typeof reef3dPanToSpace === 'function' && view.spaces[b.pearlAt]) reef3dPanToSpace(view, view.spaces[b.pearlAt], 1800);
+      if(typeof reef3dDiceBurst === 'function' && view.party && view.party.pearl) reef3dDiceBurst(view, view.party.pearl.position);
       reef3dCelebrate(view); reef3dCrabAct(view, 'Dance', true); try { reefWinSound(false); } catch(e){}
       reef3dPrize(view, '🫧', 'A golden pearl!', 'You have ' + b.pearls + (b.pearls === 1 ? ' pearl' : ' pearls') + ' now. A new one appears somewhere else.');
       setTimeout(done, 3000);

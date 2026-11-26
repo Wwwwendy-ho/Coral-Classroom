@@ -82,7 +82,8 @@ async function exercise(id,region,activities,files){
   state.pending=await parse(files.board);
   assert(c.regionResidentAttach(view,state),id+' actual board GLB attaches');
   const boardRoot=state.root,boardBounds=actor.userData.regionBounds,boardTriangles=triangleCount(boardRoot);
-  assert(Math.abs(boardBounds.height-fallbackHeight)<1e-4,id+' board fit preserves procedural world height ('+fallbackHeight+' -> '+boardBounds.height+')');
+  const expectedBoardH=fallbackHeight*(state.entry.boardScale||1);
+  assert(Math.abs(boardBounds.height-expectedBoardH)<1e-4,id+' board fit preserves procedural world height ('+fallbackHeight+' -> '+boardBounds.height+')');
   assertTileClear(view,actor);
   if(id==='jisu'){
     assert.strictEqual(boardRoot.parent,motion,'Jisu board model remains inside deliveryMotion');

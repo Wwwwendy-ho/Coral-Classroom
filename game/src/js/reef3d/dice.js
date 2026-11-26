@@ -95,6 +95,12 @@
       // hovering over her head while she hops, showing how many hops are left
       d.g.position.set(gp.x, gp.y + view.guide.userData.body.position.y + 2.5, gp.z); d.g.scale.setScalar(.7); d.box.rotation.set(0, Math.atan2(view.cam.position.x - gp.x, view.cam.position.z - gp.z), 0);
     }
+    if(d.forkArrows){
+      for(var fi = 0; fi < d.forkArrows.children.length; fi++){
+        var fa = d.forkArrows.children[fi];
+        fa.position.y = (fa.userData.baseY || 1.5) + Math.sin(t * 4.2 + fi) * .16;
+      }
+    }
   }
   function reef3dDiceHit(view){
     var d = view.dice; if(!d || !d.rolling || view.moving) return;
@@ -105,6 +111,7 @@
     setTimeout(function(){
       if(view.dice !== d) return;
       d.hitAt = performance.now(); d.shown = d.n; reef3dDiceDraw(d.tex, d.n);
+      if(typeof reef3dDiceBurst === 'function') reef3dDiceBurst(view, d.g.position);
       try { Sound.bloop(880, 0, .06); Sound.bloop(1320, .09, .05); } catch(e){}
       if(!calm){
         var y0 = d.g.position.y, r0 = d.box.rotation.y;
@@ -155,11 +162,32 @@
     }
     function run(route, then){
       if(!route.length) return then();
-      reef3dTravel(view, route[route.length - 1], then, function(){ left--; if(view.dice === d) reef3dDiceDraw(d.tex, left); }, route);
+      reef3dTravel(view, route[route.length - 1], then, function(){ left--; if(view.dice === d) reef3dDiceDraw(d.tex, left); if(typeof reef3dHopLandingFx === 'function') reef3dHopLandingFx(view, sp[view.at]); }, route);
     }
     function choose(opts){
       if(left <= 0) return land();
       d.asked = true;
+      var THREE = window.THREE;
+      if(THREE && view.scene){
+        if(d.forkArrows){ view.scene.remove(d.forkArrows); d.forkArrows = null; }
+        var ag = new THREE.Group();
+        var curSp = sp[view.at] || { x: 0, y: 0, z: 0 };
+        opts.forEach(function(n){
+          var nSp = sp[n]; if(!nSp) return;
+          var br = nSp.branch;
+          var col = br === 'treasure' ? '#ffd24c' : br === 'story' ? '#5ae6e0' : '#ff8c7a';
+          var ar = new THREE.Mesh(new THREE.ConeGeometry(.28, .62, 4), new THREE.MeshBasicMaterial({ color: col }));
+          ar.rotation.x = Math.PI;
+          var baseY = (nSp.y || 0) + 1.55;
+          ar.position.set(nSp.x, baseY, nSp.z);
+          ar.userData.baseY = baseY;
+          ar.userData.forkTarget = n;
+          ar.userData.dx = nSp.x - curSp.x; ar.userData.dz = nSp.z - curSp.z;
+          ag.add(ar);
+        });
+        view.scene.add(ag);
+        d.forkArrows = ag;
+      }
       var box = document.createElement('div'); box.className = 'r3-fork'; box.setAttribute('role', 'group'); box.setAttribute('aria-label', 'Which way?');
       box.innerHTML = '<b>Which way?</b>' + opts.map(function(n){
         var br = sp[n].branch;
@@ -171,7 +199,9 @@
       try { Sound.bloop(700, 0, .05); } catch(e){}
       box.addEventListener('click', function(e){
         var b = e.target.closest('[data-fork]'); if(!b) return; e.stopPropagation();
-        box.remove(); d.fork = null; try { Sound.tap(); } catch(err){}
+        box.remove(); d.fork = null;
+        if(d.forkArrows && view.scene){ view.scene.remove(d.forkArrows); d.forkArrows = null; }
+        try { Sound.tap(); } catch(err){}
         stretch(+b.dataset.fork);
       });
     }
@@ -197,7 +227,7 @@
   }
   function reef3dDiceDone(view, d){
     if(view.dice !== d) return;
-    view.dice = null; if(d.tip) d.tip.remove(); if(d.fork) d.fork.remove(); if(d.here && d.here.qb) d.here.qb.visible = true;
+    view.dice = null; if(d.tip) d.tip.remove(); if(d.fork) d.fork.remove(); if(d.forkArrows && view.scene){ view.scene.remove(d.forkArrows); d.forkArrows = null; } if(d.here && d.here.qb) d.here.qb.visible = !(view.encounter && view.encounter.interior);
     var fin = function(){ view.scene.remove(d.g); d.box.geometry.dispose(); d.mat.dispose(); d.tex.dispose(); d.halo.material.dispose(); };
     if(reefCalm()) return fin();
     var s0 = d.g.scale.x;

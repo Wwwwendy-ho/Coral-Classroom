@@ -1,0 +1,79 @@
+{
+  "file": "hana-close.glb",
+  "bytes": 943788,
+  "triangles": 19268,
+  "meshCount": 1,
+  "primitives": 1,
+  "materials": 1,
+  "bones": 12,
+  "maps": [
+    {
+      "width": 2048,
+      "height": 2048,
+      "bytes": 179101,
+      "mime": "image/jpeg"
+    },
+    {
+      "width": 512,
+      "height": 512,
+      "bytes": 4222,
+      "mime": "image/png"
+    }
+  ],
+  "clips": [
+    {
+      "name": "Idle",
+      "duration": 3.3,
+      "animatedBones": [
+        "Bell",
+        "Eye.L",
+        "Eye.R",
+        "Float",
+        "Fringe.0",
+        "Fringe.1",
+        "Fringe.2",
+        "Fringe.3",
+        "Oral.0",
+        "Oral.1",
+        "Oral.2",
+        "Oral.3"
+      ]
+    },
+    {
+      "name": "Listen",
+      "duration": 2.8333333333333335,
+      "animatedBones": [
+        "Bell",
+        "Eye.L",
+        "Eye.R",
+        "Float",
+        "Fringe.0",
+        "Fringe.1",
+        "Fringe.2",
+        "Fringe.3",
+        "Oral.0",
+        "Oral.1",
+        "Oral.2",
+        "Oral.3"
+      ]
+    },
+    {
+      "name": "React",
+      "duration": 1.7666666666666666,
+      "animatedBones": [
+        "Bell",
+        "Eye.L",
+        "Eye.R",
+        "Float",
+        "Fringe.0",
+        "Fringe.1",
+        "Fringe.2",
+        "Fringe.3",
+        "Oral.0",
+        "Oral.1",
+        "Oral.2",
+        "Oral.3"
+      ]
+    }
+  ]
+}

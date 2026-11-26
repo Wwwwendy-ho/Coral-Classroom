@@ -1,0 +1,41 @@
+{
+  "file": "kiko-hermit-board.glb",
+  "bytes": 359320,
+  "triangles": 6760,
+  "meshCount": 1,
+  "draws": 1,
+  "materials": 1,
+  "bones": 15,
+  "textureImages": [
+    {
+      "width": 1024,
+      "height": 1024,
+      "bytes": 38426,
+      "mime": "image/jpeg"
+    },
+    {
+      "width": 256,
+      "height": 256,
+      "bytes": 1030,
+      "mime": "image/png"
+    }
+  ],
+  "clips": [
+    "Idle",
+    "Listen",
+    "React"
+  ],
+  "authorVertices": 3648,
+  "bounds": [
+    [
+      -1.119757890701294,
+      -1.0903984308242798,
+      -2.6822089438383045e-08
+    ],
+    [
+      1.119757890701294,
+      1.0399999618530273,
+      1.8099607229232788
+    ]
+  ]
+}

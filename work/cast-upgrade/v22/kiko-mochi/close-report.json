@@ -1,0 +1,41 @@
+{
+  "file": "kiko-mochi-close.glb",
+  "bytes": 551636,
+  "triangles": 10660,
+  "meshCount": 1,
+  "draws": 1,
+  "materials": 1,
+  "bones": 12,
+  "textureImages": [
+    {
+      "width": 2048,
+      "height": 2048,
+      "bytes": 118976,
+      "mime": "image/jpeg"
+    },
+    {
+      "width": 512,
+      "height": 512,
+      "bytes": 3594,
+      "mime": "image/png"
+    }
+  ],
+  "clips": [
+    "Idle",
+    "Listen",
+    "React"
+  ],
+  "authorVertices": 5630,
+  "bounds": [
+    [
+      -1.0180609226226807,
+      -0.5098099708557129,
+      -7.915369337752054e-08
+    ],
+    [
+      1.0333855152130127,
+      0.49000000953674316,
+      1.0946557521820068
+    ]
+  ]
+}

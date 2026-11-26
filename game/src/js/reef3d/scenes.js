@@ -2,7 +2,7 @@
      A game-piece block floating over each surprise space: rounded edges, a raised "?" on every side, corner
      rivets, a soft glow and a few sparkles. Gold by day, glowing teal at night. Shelly bonks it from below and
      it bursts open and keeps a plain "used" face afterwards. */
-  var REEF3D_QY = 3.2;   // high enough that the block never hides Shelly from the camera
+  var REEF3D_QY = .94;  // tightly anchored hover directly over its tile center (lifts +1.06u when Shelly stands underneath)
   function reef3dRoundBox(size, r, seg){
     var THREE = window.THREE, g = new THREE.BoxGeometry(size, size, size, seg, seg, seg), p = g.attributes.position, nrm = g.attributes.normal;
     var h = size / 2 - r, v = new THREE.Vector3(), c = new THREE.Vector3();
@@ -17,33 +17,97 @@
   }
   function reef3dQFace(night, used){
     var THREE = window.THREE, N = 256, cv = document.createElement('canvas'); cv.width = cv.height = N; var g = cv.getContext('2d');
-    var pal = night ? (used ? ['#2b5a63', '#1d434b', '#3d7580'] : ['#7ff0e4', '#2aa7b6', '#c9fff8'])
-                    : (used ? ['#c79a62', '#9c7445', '#ddb88a'] : ['#ffd75e', '#f29a2e', '#fff1b0']);
-    var bg = g.createLinearGradient(0, 0, 0, N); bg.addColorStop(0, pal[0]); bg.addColorStop(1, pal[1]);
+    var pal = night ? (used ? ['#5296a0', '#2e606b', '#a8e8ee', '#1d4652'] : ['#9efbf0', '#24a5b6', '#e4fffc', '#0e5262'])
+                    : (used ? ['#f6e4a8', '#d4b15f', '#fff8dd', '#a67f2c'] : ['#ffea8a', '#e88e22', '#fff9d6', '#9a4f10']);
+    // Luminous multi-stop pearlescent gold (or bioluminescent sea-glass) face gradient
+    var bg = g.createLinearGradient(0, 0, N * .22, N);
+    if(!used){
+      bg.addColorStop(0, pal[0]);
+      bg.addColorStop(.42, night ? '#5ae8dc' : '#ffd24c');
+      bg.addColorStop(.82, pal[1]);
+      bg.addColorStop(1, night ? '#187c92' : '#d67818');
+    } else {
+      bg.addColorStop(0, pal[0]);
+      bg.addColorStop(.55, night ? '#3f7c87' : '#e6ca7f');
+      bg.addColorStop(1, pal[1]);
+    }
     g.fillStyle = bg; g.fillRect(0, 0, N, N);
-    // a raised inner panel: light top-left edge, dark bottom-right edge
-    g.lineWidth = 10; g.strokeStyle = pal[2]; g.beginPath(); g.moveTo(26, N - 26); g.lineTo(26, 26); g.lineTo(N - 26, 26); g.stroke();
-    g.strokeStyle = 'rgba(0,0,0,.22)'; g.beginPath(); g.moveTo(N - 26, 26); g.lineTo(N - 26, N - 26); g.lineTo(26, N - 26); g.stroke();
-    // corner rivets
-    [[18, 18], [N - 18, 18], [18, N - 18], [N - 18, N - 18]].forEach(function(q){
-      var rg = g.createRadialGradient(q[0] - 3, q[1] - 3, 1, q[0], q[1], 9); rg.addColorStop(0, '#ffffff'); rg.addColorStop(.4, pal[2]); rg.addColorStop(1, pal[1]);
-      g.fillStyle = rg; g.beginPath(); g.arc(q[0], q[1], 9, 0, Math.PI * 2); g.fill();
+    // Soft diagonal pearlescent specular sheen band across the upper-left face
+    var sheen = g.createLinearGradient(0, 0, N * .88, N * .88);
+    sheen.addColorStop(0, night ? 'rgba(235,255,255,.32)' : 'rgba(255,254,242,.38)');
+    sheen.addColorStop(.36, night ? 'rgba(205,255,250,.10)' : 'rgba(255,248,215,.12)');
+    sheen.addColorStop(.52, 'rgba(255,255,255,0)');
+    sheen.addColorStop(1, 'rgba(0,0,0,.08)');
+    g.fillStyle = sheen; g.fillRect(0, 0, N, N);
+    // Outer chamfered pearlescent rim border
+    g.lineWidth = 10; g.strokeStyle = night ? 'rgba(215,255,252,.62)' : 'rgba(255,251,230,.72)';
+    g.beginPath(); g.moveTo(9, N - 9); g.lineTo(9, 9); g.lineTo(N - 9, 9); g.stroke();
+    g.strokeStyle = 'rgba(0,0,0,.18)';
+    g.beginPath(); g.moveTo(N - 9, 9); g.lineTo(N - 9, N - 9); g.lineTo(9, N - 9); g.stroke();
+    // Double-stepped raised inner bevel panel: crisp pearl-gold top-left highlight & warm shaded bottom-right groove
+    g.lineWidth = 10; g.strokeStyle = pal[2];
+    g.beginPath(); g.moveTo(26, N - 26); g.lineTo(26, 26); g.lineTo(N - 26, 26); g.stroke();
+    g.strokeStyle = 'rgba(0,0,0,.24)';
+    g.beginPath(); g.moveTo(N - 26, 26); g.lineTo(N - 26, N - 26); g.lineTo(26, N - 26); g.stroke();
+    g.lineWidth = 3; g.strokeStyle = night ? 'rgba(225,255,253,.46)' : 'rgba(255,252,235,.58)';
+    g.strokeRect(36, 36, N - 72, N - 72);
+    // Delicate mid-edge filigree diamond accents on the pearlescent gold bezel
+    g.fillStyle = pal[2];
+    [[N / 2, 16], [N / 2, N - 16], [16, N / 2], [N - 16, N / 2]].forEach(function(d){
+      g.beginPath(); g.moveTo(d[0], d[1] - 4.5); g.lineTo(d[0] + 4.5, d[1]); g.lineTo(d[0], d[1] + 4.5); g.lineTo(d[0] - 4.5, d[1]); g.closePath(); g.fill();
+    });
+    // Domed pearlescent gold corner rivets with crisp pinpoint specular catchlights
+    [[20, 20], [N - 20, 20], [20, N - 20], [N - 20, N - 20]].forEach(function(q){
+      g.fillStyle = 'rgba(0,0,0,.22)'; g.beginPath(); g.arc(q[0] + 2, q[1] + 2, 10, 0, Math.PI * 2); g.fill();
+      var rg = g.createRadialGradient(q[0] - 3.5, q[1] - 3.5, 1, q[0], q[1], 10);
+      rg.addColorStop(0, '#ffffff'); rg.addColorStop(.38, pal[2]); rg.addColorStop(.78, pal[0]); rg.addColorStop(1, pal[3]);
+      g.fillStyle = rg; g.beginPath(); g.arc(q[0], q[1], 9.5, 0, Math.PI * 2); g.fill();
+      g.fillStyle = 'rgba(255,255,255,.88)'; g.beginPath(); g.arc(q[0] - 3, q[1] - 3, 2.3, 0, Math.PI * 2); g.fill();
     });
     if(!used){
       g.font = '900 176px system-ui, -apple-system, "Segoe UI", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.fillStyle = 'rgba(0,0,0,.28)'; g.fillText('?', N / 2 + 6, N / 2 + 16);                       // drop shadow
-      g.lineJoin = 'round'; g.lineWidth = 16; g.strokeStyle = night ? '#0f4a55' : '#8a4b12'; g.strokeText('?', N / 2, N / 2 + 8);
-      g.fillStyle = '#ffffff'; g.fillText('?', N / 2, N / 2 + 8);
-      g.fillStyle = 'rgba(255,255,255,.5)'; g.fillRect(N / 2 - 30, N / 2 - 62, 18, 30);              // a glint on the "?"
+      g.fillStyle = 'rgba(0,0,0,.30)'; g.fillText('?', N / 2 + 6, N / 2 + 16);                       // drop shadow
+      g.lineJoin = 'round'; g.lineWidth = 17; g.strokeStyle = night ? '#0f4a55' : '#854610'; g.strokeText('?', N / 2, N / 2 + 8);
+      var qGrad = g.createLinearGradient(0, N / 2 - 76, 0, N / 2 + 82);
+      qGrad.addColorStop(0, '#ffffff'); qGrad.addColorStop(.65, night ? '#ebfffd' : '#fff8e2'); qGrad.addColorStop(1, night ? '#c2f7f2' : '#ffe8b4');
+      g.fillStyle = qGrad; g.fillText('?', N / 2, N / 2 + 8);
+      g.fillStyle = 'rgba(255,255,255,.65)'; g.fillRect(N / 2 - 30, N / 2 - 62, 18, 28);             // specular glint on the "?"
     } else {
-      g.fillStyle = 'rgba(0,0,0,.18)'; g.beginPath(); g.arc(N / 2, N / 2, 26, 0, Math.PI * 2); g.fill();   // a plain dimple
+      // Opened champagne-gold/pearl block with a subtle embossed 5-point star emblem
+      var cx = N / 2, cy = N / 2;
+      g.fillStyle = night ? 'rgba(180,244,250,.15)' : 'rgba(255,250,232,.30)';
+      g.beginPath(); g.arc(cx, cy, 66, 0, Math.PI * 2); g.fill();
+      g.lineWidth = 5; g.strokeStyle = night ? 'rgba(175,240,246,.42)' : 'rgba(255,248,218,.68)';
+      g.beginPath(); g.arc(cx, cy, 66, 0, Math.PI * 2); g.stroke();
+      function starPath(ox, oy, rOut, rIn){
+        g.beginPath();
+        for(var si = 0; si < 10; si++){
+          var sa = -Math.PI / 2 + si * Math.PI / 5, sr = si % 2 ? rIn : rOut;
+          g[si ? 'lineTo' : 'moveTo'](ox + Math.cos(sa) * sr, oy + Math.sin(sa) * sr);
+        }
+        g.closePath();
+      }
+      starPath(cx + 4, cy + 5, 50, 22);
+      g.fillStyle = night ? 'rgba(10,38,46,.34)' : 'rgba(124,86,24,.28)'; g.fill();
+      var sg = g.createLinearGradient(cx - 34, cy - 48, cx + 34, cy + 48);
+      sg.addColorStop(0, night ? '#c8f8fc' : '#fffcf4');
+      sg.addColorStop(.55, night ? '#82d4de' : '#f9e8b2');
+      sg.addColorStop(1, night ? '#529da8' : '#dfc170');
+      starPath(cx, cy, 50, 22);
+      g.fillStyle = sg; g.fill();
+      g.lineJoin = 'round'; g.lineWidth = 6;
+      g.strokeStyle = night ? '#1f4e58' : '#a88232'; g.stroke();
+      starPath(cx - 2, cy - 2, 34, 15);
+      g.fillStyle = night ? 'rgba(225,255,255,.24)' : 'rgba(255,255,255,.40)'; g.fill();
     }
     var t = new THREE.CanvasTexture(cv); t.anisotropy = 2; return t;
   }
   function reef3dQBlock(night){
     var THREE = window.THREE, g = new THREE.Group();
     var q = reef3dQFace(night, false), u = reef3dQFace(night, true);
-    var mat = new THREE.MeshLambertMaterial({ map: q, emissive: night ? '#38e6d6' : '#ffb347', emissiveIntensity: night ? .5 : .12 });
+    var mat = THREE.MeshPhongMaterial
+      ? new THREE.MeshPhongMaterial({ map: q, emissive: night ? '#38e6d6' : '#ffb84d', emissiveIntensity: night ? .52 : .36, specular: night ? '#dcfffb' : '#fff8d4', shininess: 72 })
+      : new THREE.MeshLambertMaterial({ map: q, emissive: night ? '#38e6d6' : '#ffb347', emissiveIntensity: night ? .5 : .34 });
     var box = new THREE.Mesh(reef3dRoundBox(night ? .9 : 1.05, .15, 4).scale(2 / 3, 2 / 3, 2 / 3), mat); g.add(box);
     // Keep the original generous tap bounds without adding a rendered object or GPU resources.
     // Sharing the geometry/material also lets normal scene disposal release everything once.
@@ -53,12 +117,14 @@
       var first = hits.length; hitProxy.raycast(raycaster, hits);
       for(var i = first; i < hits.length; i++) hits[i].object = box;
     };
-    var halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: reef3dBlobTex(true), color: night ? '#5ff0e0' : '#ffd870', transparent: true, opacity: .3, depthWrite: false, blending: THREE.AdditiveBlending }));
-    halo.scale.setScalar(1.6); halo.renderOrder = 1; g.add(halo);
+    var halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: reef3dBlobTex(true), color: night ? '#6cf5e6' : '#ffe285', transparent: true, opacity: .32, depthWrite: false, blending: THREE.AdditiveBlending }));
+    halo.scale.setScalar(1.65); halo.renderOrder = 1; g.add(halo);
     var glints = [], gt = reef3dGlintTex();
-    for(var i = 0; i < 3; i++){
-      var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: gt, color: night ? '#d9fffb' : '#fff6cc', transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }));
-      sp.scale.setScalar(.3); sp.renderOrder = 2; sp.visible = false; g.add(sp); glints.push(sp);
+    // Five delicate orbiting star-glint sparkles in tilted pearl-and-gold double orbits (all disabled when used)
+    var glintCols = night ? ['#e6fffd', '#98fff4', '#d8fffb', '#b8fff8', '#f2fffe'] : ['#fffdf0', '#ffe688', '#fff8d4', '#ffd966', '#ffffff'];
+    for(var i = 0; i < 5; i++){
+      var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: gt, color: glintCols[i], transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }));
+      sp.scale.setScalar(i % 2 ? .24 : .32); sp.renderOrder = 2; sp.visible = false; g.add(sp); glints.push(sp);
     }
     [halo].concat(glints).forEach(function(o){ o.raycast = function(){}; });   // only the block itself is tappable
     g.userData = { box: box, mat: mat, halo: halo, glints: glints, texQ: q, texUsed: u, night: night, used: 0 };
@@ -66,21 +132,29 @@
   }
   function reef3dQUsed(b){
     var d = b.userData; d.mat.map = d.texUsed; d.mat.needsUpdate = true; d.used = 1;
-    d.mat.emissiveIntensity = .04; d.halo.material.opacity = .05;
+    d.mat.emissiveIntensity = d.night ? .12 : .10; d.halo.material.opacity = .06;
     d.glints.forEach(function(gl){ gl.visible = false; });
   }
-  // Every frame: bob, turn slowly, breathe the glow, twinkle.
+  // Every frame: bob, turn slowly, breathe the glow, twinkle delicate orbiting star-glints.
   function reef3dQIdle(s, t){
     var b = s.qb, d = b.userData; if(d.bumping) return;
-    b.position.y = REEF3D_QY + (s.y || 0) + Math.sin(t * 1.6 + s.i) * .12; b.rotation.y = t * .6 + s.i;
+    var baseY = (d.used ? (REEF3D_QY - .12) : REEF3D_QY) + (s.y || 0);
+    var bobAmp = d.used ? .035 : .055;
+    b.position.y = baseY + Math.sin(t * 1.6 + s.i) * bobAmp; b.rotation.y = t * .6 + s.i;
     var pulse = .5 + .5 * Math.sin(t * 2.4 + s.i);
-    d.mat.emissiveIntensity = d.used ? .04 : (d.night ? .4 + .35 * pulse : .08 + .12 * pulse);
-    d.halo.material.opacity = d.used ? .05 : .18 + .15 * pulse; d.halo.scale.setScalar((2.2 + .3 * pulse) * 2 / 3);
+    d.mat.emissiveIntensity = d.used ? (d.night ? .12 : .10) : (d.night ? .42 + .34 * pulse : .32 + .09 * pulse);
+    d.halo.material.opacity = d.used ? .06 : .20 + .16 * pulse; d.halo.scale.setScalar((2.25 + .32 * pulse) * 2 / 3);
     d.glints.forEach(function(gl, k){
-      var a = t * 1.1 + k * 2.1, ph = (t * .7 + k * .33) % 1;
-      gl.position.set(Math.cos(a) * .52, Math.sin(t * 1.3 + k) * (.35 * 2 / 3), Math.sin(a) * .52);
-      gl.material.opacity = d.used ? 0 : Math.max(0, Math.sin(ph * Math.PI)) * .6;
-      gl.visible = R3.q < 2 && gl.material.opacity > .01;
+      var dir = k % 2 ? -1 : 1;
+      var rad = .48 + (k % 3) * .06;
+      var a = t * (1.05 + (k % 2) * .28) * dir + k * 1.2566 + (s.i || 0) * .7;
+      var tilt = (k % 2 ? .32 : -.24) * Math.sin(a + k);
+      var ph = (t * (.72 + (k % 3) * .11) + k * .21) % 1;
+      var tw = Math.pow(Math.max(0, Math.sin(ph * Math.PI)), 1.35);
+      gl.position.set(Math.cos(a) * rad, tilt + Math.sin(t * 1.4 + k * 1.3) * .14, Math.sin(a) * rad);
+      if(gl.scale && gl.scale.setScalar) gl.scale.setScalar((k % 2 ? .19 : .25) + .11 * tw);
+      gl.material.opacity = d.used ? 0 : tw * .72;
+      gl.visible = !d.used && R3.q < 2 && gl.material.opacity > .01;
     });
   }
   // Bonked from below: squash, flash, a burst of coins and sparkles, and a permanent "used" face.
@@ -162,7 +236,7 @@
     // bonk: crouch, jump straight up into the ? block, drop back down and land
     bonk: { dur: 950, pose: function(p, q){
       var a = reef3dSeg(p, 0, .16), j = reef3dSeg(p, .16, .42), f = reef3dSeg(p, .46, .78), l = reef3dSeg(p, .78, 1);
-      var top = REEF3D_QY - 1.25;   // the height where her head meets the block
+      var top = Math.max(.55, REEF3D_QY + 1.06 - 1.15);   // the height where her head meets the lifted block
       q.y = p < .42 ? top * (1 - Math.pow(1 - j, 2)) : p < .46 ? top : top * (1 - f * f);
       q.sy = 1 - .24 * reef3dBounce(a) + .2 * reef3dBounce(j) - .14 * reef3dBounce(reef3dSeg(p, .42, .5)) - .2 * reef3dBounce(l);
       q.rx = -.3 * reef3dBounce(j); q.flap = p > .16 && p < .8 ? 1 : 0; q.eyes = p > .44 ? .4 : 1;

@@ -300,7 +300,7 @@
     try { Ocean.apply(!(S.activeProfileId && S.profile && S.profile.oceanTheme === false)); } catch(e){} // on for everyone unless a profile turned it off
     applyThemeMode(reefThemeFor(S.activeProfileId && S.profile ? S.profile : null));
     if(!S.booted) return; // wait for settings to load before showing anything (avoids a lock-screen flash)
-    if(!S.splashDone) renderSplash();   // the title screen floats over the profiles (built underneath meanwhile); its tap starts the music
+    S.splashDone = true;
     reefSyncBody();
     /* coveqa: opening a deck from a scrolled home list left the new screen scrolled (header cut off) */
     try {
@@ -526,51 +526,8 @@
     goToPicker();
   }
 
-  // The title screen, once each time the app opens. Browsers won't play sound until the first tap, so this
-  // tap is it: the music starts as she dives in. It sits over the profile screen, which is built (3D sea and
-  // all) underneath while the title shows, so the dive doesn't stutter: at its middle the title is just removed.
-  function renderSplash(){
-    if(document.querySelector('.cc-splash')) return;
-    var night = reefNight(), i, h = '';
-    var wave = function(cls){ return '<svg class="ccs-wave ' + cls + '" viewBox="0 0 1200 80" preserveAspectRatio="none"><path d="M0 40 C100 14 200 14 300 40 S500 66 600 40 S800 14 900 40 S1100 66 1200 40 V80 H0 Z"/></svg>'; };
-    var cloud = '<svg viewBox="0 0 200 80"><path d="M30 70 C5 70 5 42 30 42 C32 22 62 14 78 30 C90 8 132 8 140 34 C168 26 192 44 182 64 C180 70 172 70 168 70 Z"/></svg>';
-    var fish = '<svg viewBox="0 0 60 30"><path d="M52 15 C42 2 20 2 12 15 C20 28 42 28 52 15 Z M12 15 L0 5 L2 15 L0 25 Z"/><circle class="ccs-eye" cx="43" cy="12" r="2.6"/></svg>';   // facing right, the way they swim
-    var jelly = '<svg viewBox="0 0 40 60"><path d="M4 22 C4 6 36 6 36 22 Z"/><path d="M10 22 q-3 12 2 26 M18 22 q3 14 -1 32 M26 22 q-3 12 2 28 M33 22 q3 10 -1 22" fill="none" stroke-width="2.4" stroke-linecap="round"/></svg>';
-    var sky = night ? '<span class="ccs-stars">' + (function(){ var t = ''; for(i = 0; i < 26; i++) t += '<i style="left:' + (Math.random() * 100).toFixed(1) + '%;top:' + (Math.random() * 80).toFixed(1) + '%;animation-delay:' + (Math.random() * 3).toFixed(2) + 's"></i>'; return t; })() + '</span>' : '';
-    for(i = 0; i < 9; i++) h += '<i style="left:' + (8 + Math.random() * 84).toFixed(1) + '%;top:' + (4 + Math.random() * 22).toFixed(1) + '%;animation-delay:' + (Math.random() * 2.4).toFixed(2) + 's"></i>';
-    var el = document.createElement('div');
-    el.className = 'cc-splash' + (night ? ' night' : '');
-    el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', 'Coral Classroom. Tap to dive in.');
-    el.innerHTML = '<div class="ccs-sky" aria-hidden="true">' + sky + '<span class="ccs-sun"><span class="ccs-rays"></span></span>' +
-        '<span class="ccs-cloud c1">' + cloud + '</span><span class="ccs-cloud c2">' + cloud + '</span><span class="ccs-cloud c3">' + cloud + '</span>' +
-        (night ? '' : '<span class="ccs-gull g1">︶︶</span><span class="ccs-gull g2">︶︶</span>') +
-        '<svg class="ccs-island" viewBox="0 0 220 120"><path class="ccs-sand" d="M0 120 C30 92 80 84 120 88 C160 92 196 104 220 120 Z"/><path class="ccs-trunk" d="M118 92 C116 70 120 50 132 30" fill="none" stroke-width="7" stroke-linecap="round"/>' +
-          '<path class="ccs-leaf" d="M132 30 C110 18 92 24 84 36 C102 30 118 30 132 30 Z M132 30 C126 10 140 2 156 4 C144 12 138 20 132 30 Z M132 30 C150 18 170 22 178 36 C162 30 146 30 132 30 Z M132 30 C116 32 106 46 108 58 C116 44 124 36 132 30 Z M132 30 C150 34 160 48 156 60 C150 46 142 38 132 30 Z"/></svg>' +
-      '</div>' +
-      '<div class="ccs-title" aria-hidden="true"><span class="ccs-name">Coral Classroom</span><span class="ccs-sub">' + (night ? 'A night on the shipwreck' : 'A sea of things to learn') + '</span></div>' +
-      '<div class="ccs-sea" aria-hidden="true">' + wave('w3') + wave('w2') + wave('w1') +
-        '<span class="ccs-glints">' + h + '</span><span class="ccs-shafts"></span>' +
-        '<span class="ccs-shelly"><span class="ccs-ripple"></span>' + mascotTurtleSVG('ccs-shelly-svg') + '</span>' +
-        (night ? '<span class="ccs-jelly j1">' + jelly + '</span><span class="ccs-jelly j2">' + jelly + '</span>'
-               : '<span class="ccs-fish f1">' + fish + '</span><span class="ccs-fish f2">' + fish + '</span><span class="ccs-fish f3">' + fish + '</span>') +
-        '<span class="ccs-bub b1"></span><span class="ccs-bub b2"></span><span class="ccs-bub b3"></span><span class="ccs-bub b4"></span>' +
-        '<svg class="ccs-reef" viewBox="0 0 1200 200" preserveAspectRatio="none"><path class="r2" d="M0 200 V120 C60 96 90 130 140 110 S230 70 280 100 S380 140 440 104 S560 60 620 96 S740 138 800 108 S900 70 960 100 S1080 132 1200 96 V200 Z"/>' +
-          '<path class="r1" d="M0 200 V160 C40 150 70 120 90 150 C100 120 130 110 140 150 C170 140 200 152 230 160 C260 130 290 128 300 158 C340 150 380 166 420 160 C440 120 470 118 480 156 C520 150 560 170 600 162 C630 140 650 136 660 160 C700 156 760 170 800 160 C820 126 850 122 860 158 C900 152 950 168 1000 160 C1030 132 1060 130 1070 158 C1110 152 1160 166 1200 158 V200 Z"/></svg>' +
-      '</div>' +
-      '<div class="ccs-tap" aria-hidden="true"><span class="ccs-tap-e">🐚</span> Tap to dive in</div>';
-    document.body.appendChild(el);
-    var go = function(e){
-      if(e && e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
-      if(S.splashDone) return;
-      S.splashDone = true;   // (the music itself starts from this same tap: see reefMusicStart)
-      el.classList.add('ccs-out');
-      reefGo('dive', null, function(){ el.remove(); }, true);
-      if(reefCalm()) el.remove();
-    };
-    el.addEventListener('click', go); el.addEventListener('keydown', go);
-    try { el.focus({ preventScroll: true }); } catch(e){}
-  }
   function renderProfilePicker(){
+    var night = reefNight();
     var tiles = S.profiles.map(function(p){
       return '<button type="button" class="profile-tile" data-profile="'+p.id+'">' +
           profileAvatarHTML(p) +
@@ -579,12 +536,18 @@
     }).join('');
     app.innerHTML = '' +
       coveWaterHTML('frame') +
-      '<div class="lock-screen">' +
-        '<h2>🌊 Who\'s diving in?</h2>' +
-        '<p>Pick a profile to get started.</p>' +
-        '<div class="profile-grid">'+tiles+'</div>' +
-        '<button type="button" class="btn btn-ghost" data-act="manage-profiles" style="margin-top:14px;">'+ccIcon('profiles')+' Manage Profiles</button>' +
-        '<div class="cove-foot"><button type="button" class="cove-linkbtn" data-act="cove-privacy">'+ccIcon('lock')+' Privacy and data</button></div>' +
+      '<div class="lock-screen cc-intro-screen">' +
+        '<div class="cc-intro-head">' +
+          '<h1 class="cc-intro-title">Coral Classroom</h1>' +
+          '<p class="cc-intro-sub">'+(night ? 'A night on the shipwreck · Pick a profile to dive in' : 'A sea of things to learn · Pick a profile to dive in')+'</p>' +
+        '</div>' +
+        '<div class="cc-intro-foot">' +
+          '<div class="profile-grid">'+tiles+'</div>' +
+          '<div class="cc-intro-actions">' +
+            '<button type="button" class="btn btn-ghost" data-act="manage-profiles">'+ccIcon('profiles')+' Manage Profiles</button>' +
+            '<button type="button" class="cove-linkbtn" data-act="cove-privacy">'+ccIcon('lock')+' Privacy and data</button>' +
+          '</div>' +
+        '</div>' +
       '</div>';
     app.querySelectorAll('[data-profile]').forEach(function(b){
       b.addEventListener('click', function(){

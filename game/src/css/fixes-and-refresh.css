@@ -452,8 +452,7 @@ h1,h2,h3{ font-weight:600; letter-spacing:.005em; }
 .cv3-hero .brand-title{ font-size:2.05rem; line-height:1.05; letter-spacing:.005em; text-shadow:0 1px 0 rgba(255,255,255,.55); }
 .cv3-hero .brand-tag{ margin-top:2px; }
 .cv3-hero .mascot{ width:112px; height:112px; }
-.cv3-hero .pill, .cv3-hero .icon-btn, .cv3-hero .btn-ghost{ background:color-mix(in srgb, var(--surface) 78%, transparent); border-color:var(--cv3-rim);
-  -webkit-backdrop-filter:blur(8px) saturate(1.2); backdrop-filter:blur(8px) saturate(1.2); }
+.cv3-hero .pill, .cv3-hero .icon-btn, .cv3-hero .btn-ghost{ background:color-mix(in srgb, var(--surface) 92%, transparent); border-color:var(--cv3-rim); }
 .cv3-hero.adult .mascot{ width:84px; height:84px; }
 @media (min-width:640px){
   .cv3-hero{ margin:0 0 22px; border-radius:34px; padding:24px 26px 0; border:1px solid var(--cv3-rim); }

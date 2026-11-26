@@ -298,5 +298,100 @@ function reef3dCoveDetail(o){
     }
     root.add(garden);
   });
+
+  // Compact outer-reef rim & seabed coral/shell accents for classic mode (lean
+  // triangle count, shared vertex-colored surface material, zero extra draw calls).
+  (function outerRimAccent(){
+    var minX = 1e9, maxX = -1e9, minZ = 1e9, maxZ = -1e9;
+    for(var si = 0; si < spaces.length; si++){
+      var sp = spaces[si];
+      if(sp.x < minX) minX = sp.x; if(sp.x > maxX) maxX = sp.x;
+      if(sp.z < minZ) minZ = sp.z; if(sp.z > maxZ) maxZ = sp.z;
+    }
+    var cx = (minX + maxX) * .5, cz = (minZ + maxZ) * .5;
+    var rx = Math.max(8, (maxX - minX) * .5), rz = Math.max(8, (maxZ - minZ) * .5);
+    function rimClear(x, z, spaceGap){
+      var sg = spaceGap || 6.0;
+      for(var i = 0; i < spaces.length; i++){
+        var dx = spaces[i].x - x, dz = spaces[i].z - z;
+        if(dx * dx + dz * dz < sg * sg) return false;
+      }
+      var taken = o.taken || [];
+      for(var j = 0; j < taken.length; j++){
+        var tx = taken[j][0] - x, tz = taken[j][1] - z;
+        if(tx * tx + tz * tz < 3.6 * 3.6) return false;
+      }
+      for(var k = 0; k < landmarkFeet.length; k++){
+        var lx = landmarkFeet[k][0] - x, lz = landmarkFeet[k][1] - z;
+        if(lx * lx + lz * lz < 4.5 * 4.5) return false;
+      }
+      return true;
+    }
+    function lowRock(seed, sx, sy, sz){
+      var m = surface(8, 4, function(u, v){
+        var a = u * Math.PI * 2, b = v * Math.PI, h = Math.cos(b), ring = Math.pow(Math.sin(b), .78);
+        var wobble = 1 + .09 * Math.sin(3 * a + seed) * ring + .05 * Math.cos(5 * a - b + seed);
+        return [Math.cos(a) * ring * sx * wobble, h * sy, Math.sin(a) * ring * sz * wobble, .92 + .06 * Math.sin(h * 11 + seed)];
+      }, seed % 2 ? 0 : 1, true, 'stone');
+      m.position.y = sy * .4; return m;
+    }
+    function lowBlade(seed, w, h, color){
+      return surface(6, 4, function(u, v){
+        var a = u * Math.PI * 2, taper = .2 + .8 * Math.sin(Math.PI * .5 * v);
+        return [Math.cos(a) * w * taper, h * v, Math.sin(a) * .12 * taper + .18 * v * v, .88 + .12 * v];
+      }, color);
+    }
+    function lowFan(seed, h, color){
+      return surface(8, 4, function(u, v){
+        var ang = (u - .5) * Math.PI * .8, pleat = Math.cos(ang * 7) * .07 * v;
+        var r = v * h * (.92 + .08 * Math.cos(ang * 5));
+        return [r * Math.sin(ang), r * Math.cos(ang), pleat, .86 + .14 * v];
+      }, color);
+    }
+    function lowShell(scale, color){
+      return surface(8, 6, function(u, v){
+        var a = u * Math.PI * 2, rib = Math.cos(a * 5 + v * 6);
+        var rad = scale * .32 * Math.sin(v * Math.PI) * (1 - .35 * v) * (1 + .14 * rib);
+        return [Math.cos(a) * rad, Math.sin(a) * rad + scale * .22, (v - .42) * scale * 1.1, .9 + .1 * rib];
+      }, color);
+    }
+    function lowStar(r, color){
+      return surface(15, 3, function(u, v){
+        var a = u * Math.PI * 2, arm = Math.pow(.5 + .5 * Math.cos(5 * a), 1.6);
+        var rad = v * r * (.38 + .62 * arm);
+        return [Math.cos(a) * rad, (1 - v * v) * r * .22 + .02, Math.sin(a) * rad, .88 + .12 * v];
+      }, color);
+    }
+    var rimCount = 8;
+    for(var r = 0; r < rimCount; r++){
+      var ang = r * (Math.PI * 2 / rimCount) + .22, out = 8.5 + (r % 3) * 2.0;
+      var x = cx + Math.cos(ang) * (rx + out), z = cz + Math.sin(ang) * (rz + out);
+      if(!rimClear(x, z, 6.0)) continue;
+      var rim = new T.Group();
+      rim.position.set(x, o.groundY(x, z), z);
+      rim.rotation.y = ang + .5;
+      var mound = lowRock(r + 30, 1.55 + (r % 2) * .45, .62 + (r % 3) * .22, 1.15);
+      rim.add(mound);
+      var blade = lowBlade(r + 10, .55, 1.35 + (r % 2) * .45, [2, 4, 5][r % 3]);
+      blade.position.set(.25, .45, .1); blade.rotation.z = -.18;
+      rim.add(blade);
+      var fan = lowFan(r + 20, 1.05 + (r % 2) * .25, [1, 2, 5][r % 3]);
+      fan.position.set(-.38, .42, -.12); fan.rotation.y = .45;
+      rim.add(fan);
+      root.add(rim);
+      landmarkFeet.push([x, z, 4.5]);
+    }
+    // Scattered curved conch shells & starfish on the sunlit seabed between tiles.
+    for(var si = 0; si < spaces.length; si += 2){
+      var sp = spaces[si], a = si * 1.45 + .6, d = 2.6 + (si % 3) * .7;
+      var sx = sp.x + Math.cos(a) * d, sz = sp.z + Math.sin(a) * d;
+      if(!rimClear(sx, sz, 2.4)) continue;
+      var accent = (si % 4 === 0) ? lowStar(.34, 2) : lowShell(.36, [3, 1, 2][si % 3]);
+      accent.position.set(sx, o.groundY(sx, sz), sz);
+      accent.rotation.y = a;
+      root.add(accent);
+    }
+  })();
+
   o.statics.add(root);
 }

@@ -1,0 +1,67 @@
+{
+  "file": "pharmacy-shrimp-close.glb",
+  "bytes": 648392,
+  "triangles": 15904,
+  "meshCount": 1,
+  "primitives": 1,
+  "materials": 1,
+  "bones": 8,
+  "maps": [
+    {
+      "width": 1024,
+      "height": 1024,
+      "bytes": 52039,
+      "mime": "image/jpeg"
+    },
+    {
+      "width": 256,
+      "height": 256,
+      "bytes": 1124,
+      "mime": "image/png"
+    }
+  ],
+  "clips": [
+    {
+      "name": "Idle",
+      "duration": 3.2,
+      "animatedBones": [
+        "Ant.L",
+        "Ant.R",
+        "Arm.L",
+        "Arm.R",
+        "Body",
+        "Float",
+        "Head",
+        "Tail"
+      ]
+    },
+    {
+      "name": "Listen",
+      "duration": 2.6,
+      "animatedBones": [
+        "Ant.L",
+        "Ant.R",
+        "Arm.L",
+        "Arm.R",
+        "Body",
+        "Float",
+        "Head",
+        "Tail"
+      ]
+    },
+    {
+      "name": "React",
+      "duration": 1.8,
+      "animatedBones": [
+        "Ant.L",
+        "Ant.R",
+        "Arm.L",
+        "Arm.R",
+        "Body",
+        "Float",
+        "Head",
+        "Tail"
+      ]
+    }
+  ]
+}

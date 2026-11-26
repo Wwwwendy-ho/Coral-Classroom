@@ -1,0 +1,126 @@
+{
+  "file": "jisu-board.glb",
+  "bytes": 475252,
+  "triangles": 9278,
+  "draws": 1,
+  "materials": 1,
+  "bones": 14,
+  "textureImages": [
+    {
+      "name": "jisu-color-1024",
+      "width": 1024,
+      "height": 1024,
+      "mime": "image/jpeg",
+      "bytes": 50660
+    },
+    {
+      "name": "jisu-surface-256",
+      "width": 256,
+      "height": 256,
+      "mime": "image/png",
+      "bytes": 903
+    }
+  ],
+  "clips": [
+    {
+      "name": "Idle",
+      "duration": 2.4333,
+      "animatedBones": [
+        "Antenna.L",
+        "Antenna.R",
+        "Body",
+        "Claw.L",
+        "Claw.R",
+        "Eye.L",
+        "Eye.R",
+        "Leg1.L",
+        "Leg1.R",
+        "Leg2.L",
+        "Leg2.R",
+        "Leg3.L",
+        "Leg3.R",
+        "Root"
+      ],
+      "channels": 42
+    },
+    {
+      "name": "Listen",
+      "duration": 1.5667,
+      "animatedBones": [
+        "Antenna.L",
+        "Antenna.R",
+        "Body",
+        "Claw.L",
+        "Claw.R",
+        "Eye.L",
+        "Eye.R",
+        "Leg1.L",
+        "Leg1.R",
+        "Leg2.L",
+        "Leg2.R",
+        "Leg3.L",
+        "Leg3.R",
+        "Root"
+      ],
+      "channels": 42
+    },
+    {
+      "name": "React",
+      "duration": 1.0333,
+      "animatedBones": [
+        "Antenna.L",
+        "Antenna.R",
+        "Body",
+        "Claw.L",
+        "Claw.R",
+        "Eye.L",
+        "Eye.R",
+        "Leg1.L",
+        "Leg1.R",
+        "Leg2.L",
+        "Leg2.R",
+        "Leg3.L",
+        "Leg3.R",
+        "Root"
+      ],
+      "channels": 42
+    }
+  ],
+  "exportedVertices": 5758,
+  "unweightedExportVertices": 0,
+  "maxSerializedInfluences": 1,
+  "weightSumRange": [
+    1.0,
+    1.0
+  ],
+  "weightedBoneNames": [
+    "Body",
+    "Eye.L",
+    "Antenna.L",
+    "Claw.L",
+    "Leg1.L",
+    "Leg2.L",
+    "Leg3.L",
+    "Eye.R",
+    "Antenna.R",
+    "Claw.R",
+    "Leg1.R",
+    "Leg2.R",
+    "Leg3.R"
+  ],
+  "weightedVertices": 5692,
+  "unweightedVertices": 0,
+  "maxInfluences": 1,
+  "bounds": [
+    [
+      -1.4229837656021118,
+      -1.35844087600708,
+      0.03249992057681084
+    ],
+    [
+      1.4277852773666382,
+      1.2089999914169312,
+      2.3097431659698486
+    ]
+  ]
+}

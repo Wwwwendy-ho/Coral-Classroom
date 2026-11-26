@@ -21,17 +21,36 @@
   function reef3dGlowMat(col, op){ var THREE = window.THREE; return new THREE.SpriteMaterial({ map: reef3dBlobTex(true), color: col, transparent: true, opacity: op, depthWrite: false, fog: false, blending: THREE.AdditiveBlending }); }
   function reef3dLifeBuild(view){
     var THREE = window.THREE, night = view.night, L = view.life = { orb: 0 };
-    // the beam: two open cylinders, a soft wide one and a bright core, fading out as they rise
-    var c = document.createElement('canvas'); c.width = 4; c.height = 128; var g = c.getContext('2d'), gr = g.createLinearGradient(0, 128, 0, 0);
-    gr.addColorStop(0, 'rgba(255,255,255,.95)'); gr.addColorStop(.25, 'rgba(255,255,255,.5)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 4, 128);
+    // the beam: two crossed soft-feathered ribbon pairs (outer glow and bright core), fading at edges and ends
+    var c = document.createElement('canvas'); c.width = 64; c.height = 128; var g = c.getContext('2d');
+    var img = g.createImageData(64, 128), d = img.data;
+    for(var iy = 0; iy < 128; iy++){
+      var v = 1 - iy / 127;
+      var vert = v < 0.14 ? (v / 0.14) : Math.max(0, 1 - (v - 0.14) / 0.74);
+      for(var ix = 0; ix < 64; ix++){
+        var u = ix / 63;
+        var horiz = Math.pow(Math.sin(Math.PI * u), 2.2);
+        var alpha = Math.min(1, horiz * vert);
+        var idx = (iy * 64 + ix) * 4;
+        d[idx] = 255; d[idx + 1] = 255; d[idx + 2] = 255; d[idx + 3] = Math.round(alpha * 255);
+      }
+    }
+    g.putImageData(img, 0, 0);
     var tex = new THREE.CanvasTexture(c), col = night ? '#ffd98a' : '#fff0b8';
     var bm = function(op){ return new THREE.MeshBasicMaterial({ map: tex, color: col, transparent: true, opacity: op, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, fog: false }); };
+    var outerMat = bm(night ? .24 : .16), coreMat = bm(night ? .38 : .26);
     var beam = new THREE.Group();
-    var outer = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.45, 11, 24, 1, true), bm(night ? .28 : .2)); outer.position.y = 5.5;
-    var core = new THREE.Mesh(new THREE.CylinderGeometry(.32, .5, 11, 16, 1, true), bm(night ? .55 : .4)); core.position.y = 5.5;
+    var outer = new THREE.Group(); outer.position.y = 5.25;
+    var core = new THREE.Group(); core.position.y = 5.25;
+    var outerGeo = new THREE.PlaneGeometry(2.6, 10.5), coreGeo = new THREE.PlaneGeometry(1.0, 10.5);
+    [0, Math.PI / 2].forEach(function(ry){
+      var om = new THREE.Mesh(outerGeo, outerMat); om.rotation.y = ry; om.raycast = function(){}; outer.add(om);
+      var cm = new THREE.Mesh(coreGeo, coreMat); cm.rotation.y = ry; cm.raycast = function(){}; core.add(cm);
+    });
     var pool = new THREE.Sprite(reef3dGlowMat(col, night ? .7 : .45)); pool.scale.set(4.2, 4.2, 1); pool.position.y = .3;
+    pool.raycast = function(){};
     beam.add(outer, core, pool); beam.visible = false;
-    [outer, core, pool].forEach(function(m){ m.raycast = function(){}; });
+    L.outerMat = outerMat; L.coreMat = coreMat;
     L.motes = [];
     for(var i = 0; i < 9; i++){ var s = new THREE.Sprite(reef3dGlowMat(col, 0)); s.scale.setScalar(.32); s.userData = { ph: i / 9, a: i * 2.4, r: .3 + (i % 3) * .3 }; beam.add(s); L.motes.push(s); }
     view.scene.add(beam); L.beam = beam; L.outer = outer; L.core = core;
@@ -52,7 +71,7 @@
     if(on){
       var x = st.position.x, z = st.position.z; L.beam.position.set(x, view.groundY(x, z), z);
       var pulse = (calm ? 1 : .85 + .15 * Math.sin(t * 2.2)) * Math.max(.3, Math.min(1, (Math.hypot(view.cam.position.x - x, view.cam.position.z - z) - 6) / 10));   // softer up close, so it never blinds the view
-      L.outer.material.opacity = (view.night ? .28 : .2) * pulse; L.core.material.opacity = (view.night ? .55 : .4) * pulse;
+      L.outerMat.opacity = (view.night ? .24 : .16) * pulse; L.coreMat.opacity = (view.night ? .38 : .26) * pulse;
       L.outer.rotation.y = t * .3;
       L.motes.forEach(function(m){
         var u = calm ? m.userData.ph : (m.userData.ph + t * .12) % 1, a = m.userData.a + t * .8;

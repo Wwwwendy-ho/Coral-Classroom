@@ -7,8 +7,14 @@
      dips under the celebration clip, and follows a 🎵 switch saved on this device. ---------- */
   var RM = { el: {}, cur: null, duck: 1, started: false, speechCount: 0, speechDuck: false, speechSafetyT: null };
   var RM_KEY = 'cc-music';
-  var RM_REGION_SONGS = ['town', 'lagoon', 'caves', 'patterns', 'beach', 'light', 'captain'].map(function(id){ return 'region-' + id + '-song'; });
+  var RM_REGION_IDS = ['town', 'lagoon', 'caves', 'patterns', 'beach', 'light', 'captain'];
+  var RM_REGION_SONGS = [];
+  RM_REGION_IDS.forEach(function(id){ RM_REGION_SONGS.push('region-' + id + '-song', 'region-' + id + '-night-song'); });
   var RM_SONGS = ['day-song', 'night-song', 'lobby-song', 'deck-song', 'timer-song', 'game-song'].concat(RM_REGION_SONGS);
+  var RM_ROUTE_OVERRIDES = {};
+  function reefRegionTrack(id){
+    return reefNight() ? 'region-' + id + '-night-song' : 'region-' + id + '-song';
+  }
   function reefMusicOn(){ try { return localStorage.getItem(RM_KEY) !== 'off'; } catch(e){ return true; } }
   function reefSoundOn(){ try { return typeof Sound === 'undefined' || !Sound || typeof Sound.isEnabled !== 'function' || Sound.isEnabled(); } catch(e){ return true; } }
   function reefMusicSet(on){ try { localStorage.setItem(RM_KEY, on ? 'on' : 'off'); } catch(e){} if(on && !RM.started) reefMusicStart(); else reefMusicUpdate(); reefMusicButtons(); }
@@ -127,8 +133,9 @@
     if(!S.profile) return { name: 'lobby-song', vol: 1 };       // the profile screen
     if(!reefGame()) return null;
     if(regionEncounterActive(R3.view) && R3.view.encounter.phase === 'lesson'){
-      var encSong = 'region-' + R3.view.encounter.region + '-song';
-      return { name: RM_SONGS.indexOf(encSong) >= 0 ? encSong : 'deck-song', vol: RM_DECK };
+      var encReg = R3.view.encounter.region;
+      var encSong = RM_ROUTE_OVERRIDES['lesson:' + encReg] || reefRegionTrack(encReg);
+      return { name: RM_SONGS.indexOf(encSong) >= 0 ? encSong : 'deck-song', vol: encReg === 'caves' ? RM_LISTEN : RM_DECK };
     }
     if(S.view === 'study' && S.timedChoiceTimerHandle && S.timedChoiceState && !S.timedChoiceState.reefCalm) return { name: 'timer-song', vol: RM_DECK };
     if(document.querySelector('.r3-mini')) return { name: 'game-song', vol: RM_GAME };    // under the minigame's sound effects
@@ -137,10 +144,15 @@
     var board = typeof window.__regionBoardView === 'function' ? window.__regionBoardView() : null;
     if(board && board.mode === 'board' && board.region === S.view &&
        document.querySelector('.rb-root[data-region-board="' + board.region + '"]')){
-      var brdSong = 'region-' + board.region + '-song';
+      var brdSong = reefRegionTrack(board.region);
       if(RM_SONGS.indexOf(brdSong) >= 0) return { name: brdSong, vol: 1 };
     }
-    if(reefInDeck() || S.view === 'summary') return { name: 'deck-song', vol: RM_DECK };   // kept low so speech stays clear
+    if(reefInDeck() || S.view === 'summary'){
+      var deckMode = S.studyQueue && S.studyQueue[0] && S.studyQueue[0].mode;
+      var quietDeck = deckMode === 'listen' || deckMode === 'echo';
+      var deckSong = RM_ROUTE_OVERRIDES.deck || name;
+      return { name: RM_SONGS.indexOf(deckSong) >= 0 ? deckSong : name, vol: quietDeck ? RM_LISTEN : RM_DECK };   // kept low so speech stays clear
+    }
     return { name: name, vol: 1 };
   }
   window.__reefMusicState = function(){
@@ -166,7 +178,7 @@
     var seek = function(){ try { if(Math.abs(m.a.currentTime - at(m.a.duration)) > .06) m.a.currentTime = at(m.a.duration); } catch(e){} };
     if(!m.a.paused) seek(); else m.a.addEventListener('playing', seek, { once: true });
   }
-  var RM_DECK = .5, RM_GAME = .7;   // the deck song is mastered at about -21 LUFS, the game song -18, the reef songs -15 to -17
+  var RM_LISTEN = .28, RM_DECK = .48, RM_GAME = .7;   // the deck song is mastered at about -21 LUFS, the game song -18, the reef songs -15 to -17
   var RM_BASE = .5;   // the songs' overall level under Coral Cove's own sounds and voice
   function reefMusicUpdate(){
     var muted = !reefMusicOn() || !reefSoundOn();

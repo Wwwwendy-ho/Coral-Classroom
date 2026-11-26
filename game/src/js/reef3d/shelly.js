@@ -216,7 +216,7 @@
         if(!view.moving){
           var body = view.guide.userData.body;
           body.position.set(0, 0, 0);
-          body.rotation.set(0, reef3dShellyCameraYaw(view) * .82, 0);
+          body.rotation.set(0, view.encounter && view.encounter.interior ? 0 : reef3dShellyCameraYaw(view) * .82, 0);
           body.scale.set(1, 1, 1);
         }
         state.calm = true;
@@ -224,7 +224,7 @@
       state.lastX = view.guide.position.x;
       state.lastZ = view.guide.position.z;
       state.lastYaw = view.guide.rotation.y;
-      if(!view.moving) view.guide.userData.body.rotation.y = reef3dShellyCameraYaw(view) * .82;
+      if(!view.moving) view.guide.userData.body.rotation.y = view.encounter && view.encounter.interior ? 0 : reef3dShellyCameraYaw(view) * .82;
       return;
     }
     if(state.calm){ state.action.paused = false; state.calm = false; }
@@ -235,7 +235,7 @@
     } else {
       var heroBody = view.guide.userData.body;
       var emote = view.emote && view.emote.name;
-      var face = emote === 'bonk' || emote === 'dive' ? 0 : Math.max(.82, pose && pose.face || 0);
+      var face = emote === 'bonk' || emote === 'dive' || (view.encounter && view.encounter.interior) ? 0 : Math.max(.82, pose && pose.face || 0);
       var angle = reef3dShellyCameraYaw(view) * face;
       var ease = Math.min(1, dt * 7), yawOff = Math.atan2(Math.sin(angle - heroBody.rotation.y), Math.cos(angle - heroBody.rotation.y));
       heroBody.rotation.y += yawOff * ease;

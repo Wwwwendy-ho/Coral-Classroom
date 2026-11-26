@@ -1,0 +1,70 @@
+{
+  "file": "pip-board.glb",
+  "bytes": 397412,
+  "triangles": 7040,
+  "meshCount": 1,
+  "primitives": 1,
+  "materials": 1,
+  "bones": 9,
+  "maps": [
+    {
+      "width": 1024,
+      "height": 1024,
+      "bytes": 79638,
+      "mime": "image/jpeg"
+    },
+    {
+      "width": 256,
+      "height": 256,
+      "bytes": 1257,
+      "mime": "image/png"
+    }
+  ],
+  "clips": [
+    {
+      "name": "Idle",
+      "duration": 3.3,
+      "animatedBones": [
+        "Body",
+        "Dorsal",
+        "Eye.L",
+        "Eye.R",
+        "Float",
+        "Head",
+        "Pectoral.L",
+        "Pectoral.R",
+        "Tail"
+      ]
+    },
+    {
+      "name": "Listen",
+      "duration": 2.8333333333333335,
+      "animatedBones": [
+        "Body",
+        "Dorsal",
+        "Eye.L",
+        "Eye.R",
+        "Float",
+        "Head",
+        "Pectoral.L",
+        "Pectoral.R",
+        "Tail"
+      ]
+    },
+    {
+      "name": "React",
+      "duration": 1.7666666666666666,
+      "animatedBones": [
+        "Body",
+        "Dorsal",
+        "Eye.L",
+        "Eye.R",
+        "Float",
+        "Head",
+        "Pectoral.L",
+        "Pectoral.R",
+        "Tail"
+      ]
+    }
+  ]
+}

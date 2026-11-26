@@ -1,0 +1,41 @@
+{
+  "file": "kiko-mochi-board.glb",
+  "bytes": 294976,
+  "triangles": 4864,
+  "meshCount": 1,
+  "draws": 1,
+  "materials": 1,
+  "bones": 12,
+  "textureImages": [
+    {
+      "width": 1024,
+      "height": 1024,
+      "bytes": 58680,
+      "mime": "image/jpeg"
+    },
+    {
+      "width": 256,
+      "height": 256,
+      "bytes": 1120,
+      "mime": "image/png"
+    }
+  ],
+  "clips": [
+    "Idle",
+    "Listen",
+    "React"
+  ],
+  "authorVertices": 2608,
+  "bounds": [
+    [
+      -1.396314024925232,
+      -0.762093722820282,
+      -8.344651192260244e-09
+    ],
+    [
+      1.396314024925232,
+      0.573185920715332,
+      0.7762863636016846
+    ]
+  ]
+}

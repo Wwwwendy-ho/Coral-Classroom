@@ -1,0 +1,67 @@
+{
+  "file": "subway-ray-board.glb",
+  "bytes": 257588,
+  "triangles": 4208,
+  "meshCount": 1,
+  "primitives": 1,
+  "materials": 1,
+  "bones": 8,
+  "maps": [
+    {
+      "width": 1024,
+      "height": 1024,
+      "bytes": 48204,
+      "mime": "image/jpeg"
+    },
+    {
+      "width": 256,
+      "height": 256,
+      "bytes": 1124,
+      "mime": "image/png"
+    }
+  ],
+  "clips": [
+    {
+      "name": "Idle",
+      "duration": 3.2,
+      "animatedBones": [
+        "Body",
+        "Float",
+        "Head",
+        "Tail",
+        "WingIn.L",
+        "WingIn.R",
+        "WingTip.L",
+        "WingTip.R"
+      ]
+    },
+    {
+      "name": "Listen",
+      "duration": 2.6,
+      "animatedBones": [
+        "Body",
+        "Float",
+        "Head",
+        "Tail",
+        "WingIn.L",
+        "WingIn.R",
+        "WingTip.L",
+        "WingTip.R"
+      ]
+    },
+    {
+      "name": "React",
+      "duration": 1.8,
+      "animatedBones": [
+        "Body",
+        "Float",
+        "Head",
+        "Tail",
+        "WingIn.L",
+        "WingIn.R",
+        "WingTip.L",
+        "WingTip.R"
+      ]
+    }
+  ]
+}

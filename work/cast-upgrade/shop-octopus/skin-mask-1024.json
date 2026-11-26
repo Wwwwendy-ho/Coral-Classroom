@@ -1,0 +1,85 @@
+{
+  "rule": "alpha 255 only skin/arm; 0 eyes/suckers/clothing/brass; OPAQUE material",
+  "tiles": {
+    "skin": {
+      "alphaMin": 255,
+      "alphaMax": 255,
+      "region": [
+        0,
+        0,
+        600,
+        1024
+      ]
+    },
+    "arm": {
+      "alphaMin": 255,
+      "alphaMax": 255,
+      "region": [
+        600,
+        0,
+        424,
+        512
+      ]
+    },
+    "cloth": {
+      "alphaMin": 0,
+      "alphaMax": 0,
+      "region": [
+        600,
+        512,
+        284,
+        300
+      ]
+    },
+    "pocket": {
+      "alphaMin": 0,
+      "alphaMax": 0,
+      "region": [
+        600,
+        812,
+        284,
+        212
+      ]
+    },
+    "eye": {
+      "alphaMin": 0,
+      "alphaMax": 0,
+      "region": [
+        884,
+        512,
+        140,
+        140
+      ]
+    },
+    "sucker": {
+      "alphaMin": 0,
+      "alphaMax": 0,
+      "region": [
+        884,
+        652,
+        140,
+        140
+      ]
+    },
+    "gold": {
+      "alphaMin": 0,
+      "alphaMax": 0,
+      "region": [
+        884,
+        792,
+        140,
+        116
+      ]
+    },
+    "strap": {
+      "alphaMin": 0,
+      "alphaMax": 0,
+      "region": [
+        884,
+        908,
+        140,
+        116
+      ]
+    }
+  }
+}

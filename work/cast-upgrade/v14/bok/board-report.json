@@ -1,0 +1,64 @@
+{
+  "file": "bok-board.glb",
+  "bytes": 405180,
+  "triangles": 6766,
+  "meshCount": 1,
+  "primitives": 1,
+  "materials": 1,
+  "bones": 7,
+  "maps": [
+    {
+      "width": 1024,
+      "height": 1024,
+      "bytes": 98683,
+      "mime": "image/jpeg"
+    },
+    {
+      "width": 256,
+      "height": 256,
+      "bytes": 2009,
+      "mime": "image/png"
+    }
+  ],
+  "clips": [
+    {
+      "name": "Idle",
+      "duration": 3.3,
+      "animatedBones": [
+        "Eye.L",
+        "Eye.R",
+        "Fin.L",
+        "Fin.R",
+        "Float",
+        "Head",
+        "Tail"
+      ]
+    },
+    {
+      "name": "Listen",
+      "duration": 2.8333333333333335,
+      "animatedBones": [
+        "Eye.L",
+        "Eye.R",
+        "Fin.L",
+        "Fin.R",
+        "Float",
+        "Head",
+        "Tail"
+      ]
+    },
+    {
+      "name": "React",
+      "duration": 1.7666666666666666,
+      "animatedBones": [
+        "Eye.L",
+        "Eye.R",
+        "Fin.L",
+        "Fin.R",
+        "Float",
+        "Head",
+        "Tail"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,2062 @@
+{
+  "armCount": 8,
+  "generation": "Eight independent closed swept tubes; no arm vertices or faces are shared. Two capped ends each; one hidden root and one exposed tip.",
+  "arms": [
+    {
+      "arm": 1,
+      "root": [
+        -0.48,
+        0.14,
+        1.48
+      ],
+      "tip": [
+        -1.61,
+        0.01,
+        1.79
+      ],
+      "ringTubeOnly": true,
+      "oneCenterlineNoBranches": true,
+      "rootCapCount": 1,
+      "tipCapCount": 1,
+      "connectedComponentVertices": 234,
+      "expectedVertices": 234,
+      "nonManifoldEdges": 0,
+      "eulerCharacteristic": 2,
+      "controlStations": [
+        [
+          -0.48,
+          0.14,
+          1.48
+        ],
+        [
+          -0.95,
+          0.13,
+          1.35
+        ],
+        [
+          -1.55,
+          0.15,
+          1.42
+        ],
+        [
+          -1.85,
+          0.11,
+          1.82
+        ],
+        [
+          -1.73,
+          0.07,
+          2.06
+        ],
+        [
+          -1.48,
+          0.04,
+          2.02
+        ],
+        [
+          -1.45,
+          0.02,
+          1.82
+        ],
+        [
+          -1.61,
+          0.01,
+          1.79
+        ]
+      ]
+    },
+    {
+      "arm": 2,
+      "root": [
+        0.47,
+        0.1,
+        1.48
+      ],
+      "tip": [
+        1.61,
+        -0.08,
+        1.92
+      ],
+      "ringTubeOnly": true,
+      "oneCenterlineNoBranches": true,
+      "rootCapCount": 1,
+      "tipCapCount": 1,
+      "connectedComponentVertices": 234,
+      "expectedVertices": 234,
+      "nonManifoldEdges": 0,
+      "eulerCharacteristic": 2,
+      "controlStations": [
+        [
+          0.47,
+          0.1,
+          1.48
+        ],
+        [
+          0.96,
+          0.08,
+          1.36
+        ],
+        [
+          1.55,
+          0.03,
+          1.52
+        ],
+        [
+          1.83,
+          -0.02,
+          1.94
+        ],
+        [
+          1.65,
+          -0.04,
+          2.15
+        ],
+        [
+          1.43,
+          -0.06,
+          2.04
+        ],
+        [
+          1.49,
+          -0.08,
+          1.86
+        ],
+        [
+          1.61,
+          -0.08,
+          1.92
+        ]
+      ]
+    },
+    {
+      "arm": 3,
+      "root": [
+        -0.54,
+        -0.13,
+        1.23
+      ],
+      "tip": [
+        -1.88,
+        -0.42,
+        1.31
+      ],
+      "ringTubeOnly": true,
+      "oneCenterlineNoBranches": true,
+      "rootCapCount": 1,
+      "tipCapCount": 1,
+      "connectedComponentVertices": 234,
+      "expectedVertices": 234,
+      "nonManifoldEdges": 0,
+      "eulerCharacteristic": 2,
+      "controlStations": [
+        [
+          -0.54,
+          -0.13,
+          1.23
+        ],
+        [
+          -1.02,
+          -0.23,
+          1.02
+        ],
+        [
+          -1.69,
+          -0.3,
+          1.02
+        ],
+        [
+          -2.05,
+          -0.34,
+          1.22
+        ],
+        [
+          -2.05,
+          -0.37,
+          1.49
+        ],
+        [
+          -1.83,
+          -0.39,
+          1.53
+        ],
+        [
+          -1.74,
+          -0.41,
+          1.35
+        ],
+        [
+          -1.88,
+          -0.42,
+          1.31
+        ]
+      ]
+    },
+    {
+      "arm": 4,
+      "root": [
+        0.54,
+        -0.15,
+        1.22
+      ],
+      "tip": [
+        1.87,
+        -0.33,
+        1.43
+      ],
+      "ringTubeOnly": true,
+      "oneCenterlineNoBranches": true,
+      "rootCapCount": 1,
+      "tipCapCount": 1,
+      "connectedComponentVertices": 234,
+      "expectedVertices": 234,
+      "nonManifoldEdges": 0,
+      "eulerCharacteristic": 2,
+      "controlStations": [
+        [
+          0.54,
+          -0.15,
+          1.22
+        ],
+        [
+          1.04,
+          -0.2,
+          1.05
+        ],
+        [
+          1.64,
+          -0.23,
+          1.14
+        ],
+        [
+          2.02,
+          -0.25,
+          1.37
+        ],
+        [
+          2.04,
+          -0.28,
+          1.6
+        ],
+        [
+          1.82,
+          -0.3,
+          1.66
+        ],
+        [
+          1.73,
+          -0.32,
+          1.48
+        ],
+        [
+          1.87,
+          -0.33,
+          1.43
+        ]
+      ]
+    },
+    {
+      "arm": 5,
+      "root": [
+        -0.45,
+        0.4,
+        1.12
+      ],
+      "tip": [
+        -1.83,
+        0.43,
+        0.66
+      ],
+      "ringTubeOnly": true,
+      "oneCenterlineNoBranches": true,
+      "rootCapCount": 1,
+      "tipCapCount": 1,
+      "connectedComponentVertices": 234,
+      "expectedVertices": 234,
+      "nonManifoldEdges": 0,
+      "eulerCharacteristic": 2,
+      "controlStations": [
+        [
+          -0.45,
+          0.4,
+          1.12
+        ],
+        [
+          -0.95,
+          0.68,
+          0.66
+        ],
+        [
+          -1.57,
+          0.77,
+          0.42
+        ],
+        [
+          -1.97,
+          0.7,
+          0.53
+        ],
+        [
+          -2.1,
+          0.6,
+          0.77
+        ],
+        [
+          -1.91,
+          0.51,
+          0.92
+        ],
+        [
+          -1.74,
+          0.47,
+          0.78
+        ],
+        [
+          -1.83,
+          0.43,
+          0.66
+        ]
+      ]
+    },
+    {
+      "arm": 6,
+      "root": [
+        0.45,
+        0.43,
+        1.1
+      ],
+      "tip": [
+        1.86,
+        0.41,
+        0.61
+      ],
+      "ringTubeOnly": true,
+      "oneCenterlineNoBranches": true,
+      "rootCapCount": 1,
+      "tipCapCount": 1,
+      "connectedComponentVertices": 234,
+      "expectedVertices": 234,
+      "nonManifoldEdges": 0,
+      "eulerCharacteristic": 2,
+      "controlStations": [
+        [
+          0.45,
+          0.43,
+          1.1
+        ],
+        [
+          0.92,
+          0.72,
+          0.58
+        ],
+        [
+          1.53,
+          0.78,
+          0.35
+        ],
+        [
+          1.94,
+          0.72,
+          0.43
+        ],
+        [
+          2.12,
+          0.6,
+          0.68
+        ],
+        [
+          1.94,
+          0.49,
+          0.85
+        ],
+        [
+          1.76,
+          0.44,
+          0.74
+        ],
+        [
+          1.86,
+          0.41,
+          0.61
+        ]
+      ]
+    },
+    {
+      "arm": 7,
+      "root": [
+        -0.3,
+        -0.42,
+        1.0
+      ],
+      "tip": [
+        -1.29,
+        -1.2,
+        0.39
+      ],
+      "ringTubeOnly": true,
+      "oneCenterlineNoBranches": true,
+      "rootCapCount": 1,
+      "tipCapCount": 1,
+      "connectedComponentVertices": 234,
+      "expectedVertices": 234,
+      "nonManifoldEdges": 0,
+      "eulerCharacteristic": 2,
+      "controlStations": [
+        [
+          -0.3,
+          -0.42,
+          1.0
+        ],
+        [
+          -0.55,
+          -0.66,
+          0.55
+        ],
+        [
+          -1.0,
+          -0.91,
+          0.29
+        ],
+        [
+          -1.38,
+          -1.05,
+          0.24
+        ],
+        [
+          -1.53,
+          -1.12,
+          0.43
+        ],
+        [
+          -1.4,
+          -1.17,
+          0.64
+        ],
+        [
+          -1.18,
+          -1.19,
+          0.62
+        ],
+        [
+          -1.14,
+          -1.2,
+          0.43
+        ],
+        [
+          -1.29,
+          -1.2,
+          0.39
+        ]
+      ]
+    },
+    {
+      "arm": 8,
+      "root": [
+        0.3,
+        -0.43,
+        1.0
+      ],
+      "tip": [
+        1.27,
+        -1.24,
+        0.39
+      ],
+      "ringTubeOnly": true,
+      "oneCenterlineNoBranches": true,
+      "rootCapCount": 1,
+      "tipCapCount": 1,
+      "connectedComponentVertices": 234,
+      "expectedVertices": 234,
+      "nonManifoldEdges": 0,
+      "eulerCharacteristic": 2,
+      "controlStations": [
+        [
+          0.3,
+          -0.43,
+          1.0
+        ],
+        [
+          0.55,
+          -0.7,
+          0.54
+        ],
+        [
+          1.02,
+          -0.97,
+          0.28
+        ],
+        [
+          1.36,
+          -1.12,
+          0.21
+        ],
+        [
+          1.55,
+          -1.17,
+          0.39
+        ],
+        [
+          1.45,
+          -1.21,
+          0.6
+        ],
+        [
+          1.22,
+          -1.23,
+          0.63
+        ],
+        [
+          1.12,
+          -1.24,
+          0.46
+        ],
+        [
+          1.27,
+          -1.24,
+          0.39
+        ]
+      ]
+    }
+  ],
+  "neutralPairClearances": [
+    {
+      "arms": [
+        1,
+        2
+      ],
+      "surfaceClearance": 2.7603,
+      "t": [
+        0.28,
+        0.28
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        1,
+        3
+      ],
+      "surfaceClearance": 0.30372,
+      "t": [
+        0.28,
+        0.28
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        1,
+        4
+      ],
+      "surfaceClearance": 2.87059,
+      "t": [
+        0.28,
+        0.28
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        1,
+        5
+      ],
+      "surfaceClearance": 0.48282,
+      "t": [
+        0.28,
+        0.757
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        1,
+        6
+      ],
+      "surfaceClearance": 2.96073,
+      "t": [
+        0.28,
+        0.28
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        1,
+        7
+      ],
+      "surfaceClearance": 1.29273,
+      "t": [
+        0.28,
+        0.613
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        1,
+        8
+      ],
+      "surfaceClearance": 2.80997,
+      "t": [
+        0.28,
+        0.28
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        2,
+        3
+      ],
+      "surfaceClearance": 2.95052,
+      "t": [
+        0.28,
+        0.28
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        2,
+        4
+      ],
+      "surfaceClearance": 0.12335,
+      "t": [
+        0.361,
+        0.7030000000000001
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        2,
+        5
+      ],
+      "surfaceClearance": 3.03271,
+      "t": [
+        0.28,
+        0.28
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        2,
+        6
+      ],
+      "surfaceClearance": 0.66467,
+      "t": [
+        0.28,
+        0.766
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        2,
+        7
+      ],
+      "surfaceClearance": 2.76783,
+      "t": [
+        0.28,
+        0.28
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        2,
+        8
+      ],
+      "surfaceClearance": 1.30545,
+      "t": [
+        0.28,
+        0.631
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        3,
+        4
+      ],
+      "surfaceClearance": 2.97822,
+      "t": [
+        0.28,
+        0.28
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        3,
+        5
+      ],
+      "surfaceClearance": 0.6073,
+      "t": [
+        0.28,
+        0.793
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        3,
+        6
+      ],
+      "surfaceClearance": 3.10329,
+      "t": [
+        0.28,
+        0.28
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        3,
+        7
+      ],
+      "surfaceClearance": 0.73575,
+      "t": [
+        0.28,
+        0.577
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        3,
+        8
+      ],
+      "surfaceClearance": 2.67041,
+      "t": [
+        0.28,
+        0.28
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        4,
+        5
+      ],
+      "surfaceClearance": 3.07286,
+      "t": [
+        0.28,
+        0.28
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        4,
+        6
+      ],
+      "surfaceClearance": 0.57839,
+      "t": [
+        0.28900000000000003,
+        0.784
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        4,
+        7
+      ],
+      "surfaceClearance": 2.63102,
+      "t": [
+        0.28,
+        0.28
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        4,
+        8
+      ],
+      "surfaceClearance": 0.88388,
+      "t": [
+        0.28,
+        0.604
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        5,
+        6
+      ],
+      "surfaceClearance": 2.73021,
+      "t": [
+        0.28,
+        0.28
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        5,
+        7
+      ],
+      "surfaceClearance": 1.44001,
+      "t": [
+        0.9189999999999999,
+        0.28
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        5,
+        8
+      ],
+      "surfaceClearance": 2.89445,
+      "t": [
+        0.28,
+        0.28
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        6,
+        7
+      ],
+      "surfaceClearance": 2.81292,
+      "t": [
+        0.28,
+        0.28
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        6,
+        8
+      ],
+      "surfaceClearance": 1.47467,
+      "t": [
+        0.901,
+        0.28
+      ],
+      "excludes": "shared crown attachment t<.28"
+    },
+    {
+      "arms": [
+        7,
+        8
+      ],
+      "surfaceClearance": 1.90632,
+      "t": [
+        0.28,
+        0.28
+      ],
+      "excludes": "shared crown attachment t<.28"
+    }
+  ],
+  "minimumNeutralArmClearance": 0.12335,
+  "parts": [
+    {
+      "name": "mantle and crown",
+      "vertexStart": 0,
+      "vertexCount": 534,
+      "faceStart": 0,
+      "faceCount": 560,
+      "tile": "skin"
+    },
+    {
+      "name": "arm-01-root-to-tip",
+      "vertexStart": 534,
+      "vertexCount": 234,
+      "faceStart": 560,
+      "faceCount": 240,
+      "tile": "arm"
+    },
+    {
+      "name": "arm-01-sucker--1-0",
+      "vertexStart": 768,
+      "vertexCount": 12,
+      "faceStart": 800,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-01-sucker--1-1",
+      "vertexStart": 780,
+      "vertexCount": 12,
+      "faceStart": 806,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-01-sucker--1-2",
+      "vertexStart": 792,
+      "vertexCount": 12,
+      "faceStart": 812,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-01-sucker--1-3",
+      "vertexStart": 804,
+      "vertexCount": 12,
+      "faceStart": 818,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-01-sucker--1-4",
+      "vertexStart": 816,
+      "vertexCount": 12,
+      "faceStart": 824,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-01-sucker--1-5",
+      "vertexStart": 828,
+      "vertexCount": 12,
+      "faceStart": 830,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-01-sucker--1-6",
+      "vertexStart": 840,
+      "vertexCount": 12,
+      "faceStart": 836,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-01-sucker--1-7",
+      "vertexStart": 852,
+      "vertexCount": 12,
+      "faceStart": 842,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-01-sucker-1-0",
+      "vertexStart": 864,
+      "vertexCount": 12,
+      "faceStart": 848,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-01-sucker-1-1",
+      "vertexStart": 876,
+      "vertexCount": 12,
+      "faceStart": 854,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-01-sucker-1-2",
+      "vertexStart": 888,
+      "vertexCount": 12,
+      "faceStart": 860,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-01-sucker-1-3",
+      "vertexStart": 900,
+      "vertexCount": 12,
+      "faceStart": 866,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-01-sucker-1-4",
+      "vertexStart": 912,
+      "vertexCount": 12,
+      "faceStart": 872,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-01-sucker-1-5",
+      "vertexStart": 924,
+      "vertexCount": 12,
+      "faceStart": 878,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-01-sucker-1-6",
+      "vertexStart": 936,
+      "vertexCount": 12,
+      "faceStart": 884,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-01-sucker-1-7",
+      "vertexStart": 948,
+      "vertexCount": 12,
+      "faceStart": 890,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-02-root-to-tip",
+      "vertexStart": 960,
+      "vertexCount": 234,
+      "faceStart": 896,
+      "faceCount": 240,
+      "tile": "arm"
+    },
+    {
+      "name": "arm-02-sucker--1-0",
+      "vertexStart": 1194,
+      "vertexCount": 12,
+      "faceStart": 1136,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-02-sucker--1-1",
+      "vertexStart": 1206,
+      "vertexCount": 12,
+      "faceStart": 1142,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-02-sucker--1-2",
+      "vertexStart": 1218,
+      "vertexCount": 12,
+      "faceStart": 1148,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-02-sucker--1-3",
+      "vertexStart": 1230,
+      "vertexCount": 12,
+      "faceStart": 1154,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-02-sucker--1-4",
+      "vertexStart": 1242,
+      "vertexCount": 12,
+      "faceStart": 1160,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-02-sucker--1-5",
+      "vertexStart": 1254,
+      "vertexCount": 12,
+      "faceStart": 1166,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-02-sucker--1-6",
+      "vertexStart": 1266,
+      "vertexCount": 12,
+      "faceStart": 1172,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-02-sucker--1-7",
+      "vertexStart": 1278,
+      "vertexCount": 12,
+      "faceStart": 1178,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-02-sucker-1-0",
+      "vertexStart": 1290,
+      "vertexCount": 12,
+      "faceStart": 1184,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-02-sucker-1-1",
+      "vertexStart": 1302,
+      "vertexCount": 12,
+      "faceStart": 1190,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-02-sucker-1-2",
+      "vertexStart": 1314,
+      "vertexCount": 12,
+      "faceStart": 1196,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-02-sucker-1-3",
+      "vertexStart": 1326,
+      "vertexCount": 12,
+      "faceStart": 1202,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-02-sucker-1-4",
+      "vertexStart": 1338,
+      "vertexCount": 12,
+      "faceStart": 1208,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-02-sucker-1-5",
+      "vertexStart": 1350,
+      "vertexCount": 12,
+      "faceStart": 1214,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-02-sucker-1-6",
+      "vertexStart": 1362,
+      "vertexCount": 12,
+      "faceStart": 1220,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-02-sucker-1-7",
+      "vertexStart": 1374,
+      "vertexCount": 12,
+      "faceStart": 1226,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-03-root-to-tip",
+      "vertexStart": 1386,
+      "vertexCount": 234,
+      "faceStart": 1232,
+      "faceCount": 240,
+      "tile": "arm"
+    },
+    {
+      "name": "arm-03-sucker--1-0",
+      "vertexStart": 1620,
+      "vertexCount": 12,
+      "faceStart": 1472,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-03-sucker--1-1",
+      "vertexStart": 1632,
+      "vertexCount": 12,
+      "faceStart": 1478,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-03-sucker--1-2",
+      "vertexStart": 1644,
+      "vertexCount": 12,
+      "faceStart": 1484,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-03-sucker--1-3",
+      "vertexStart": 1656,
+      "vertexCount": 12,
+      "faceStart": 1490,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-03-sucker--1-4",
+      "vertexStart": 1668,
+      "vertexCount": 12,
+      "faceStart": 1496,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-03-sucker--1-5",
+      "vertexStart": 1680,
+      "vertexCount": 12,
+      "faceStart": 1502,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-03-sucker--1-6",
+      "vertexStart": 1692,
+      "vertexCount": 12,
+      "faceStart": 1508,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-03-sucker--1-7",
+      "vertexStart": 1704,
+      "vertexCount": 12,
+      "faceStart": 1514,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-03-sucker-1-0",
+      "vertexStart": 1716,
+      "vertexCount": 12,
+      "faceStart": 1520,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-03-sucker-1-1",
+      "vertexStart": 1728,
+      "vertexCount": 12,
+      "faceStart": 1526,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-03-sucker-1-2",
+      "vertexStart": 1740,
+      "vertexCount": 12,
+      "faceStart": 1532,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-03-sucker-1-3",
+      "vertexStart": 1752,
+      "vertexCount": 12,
+      "faceStart": 1538,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-03-sucker-1-4",
+      "vertexStart": 1764,
+      "vertexCount": 12,
+      "faceStart": 1544,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-03-sucker-1-5",
+      "vertexStart": 1776,
+      "vertexCount": 12,
+      "faceStart": 1550,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-03-sucker-1-6",
+      "vertexStart": 1788,
+      "vertexCount": 12,
+      "faceStart": 1556,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-03-sucker-1-7",
+      "vertexStart": 1800,
+      "vertexCount": 12,
+      "faceStart": 1562,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-04-root-to-tip",
+      "vertexStart": 1812,
+      "vertexCount": 234,
+      "faceStart": 1568,
+      "faceCount": 240,
+      "tile": "arm"
+    },
+    {
+      "name": "arm-04-sucker--1-0",
+      "vertexStart": 2046,
+      "vertexCount": 12,
+      "faceStart": 1808,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-04-sucker--1-1",
+      "vertexStart": 2058,
+      "vertexCount": 12,
+      "faceStart": 1814,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-04-sucker--1-2",
+      "vertexStart": 2070,
+      "vertexCount": 12,
+      "faceStart": 1820,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-04-sucker--1-3",
+      "vertexStart": 2082,
+      "vertexCount": 12,
+      "faceStart": 1826,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-04-sucker--1-4",
+      "vertexStart": 2094,
+      "vertexCount": 12,
+      "faceStart": 1832,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-04-sucker--1-5",
+      "vertexStart": 2106,
+      "vertexCount": 12,
+      "faceStart": 1838,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-04-sucker--1-6",
+      "vertexStart": 2118,
+      "vertexCount": 12,
+      "faceStart": 1844,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-04-sucker--1-7",
+      "vertexStart": 2130,
+      "vertexCount": 12,
+      "faceStart": 1850,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-04-sucker-1-0",
+      "vertexStart": 2142,
+      "vertexCount": 12,
+      "faceStart": 1856,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-04-sucker-1-1",
+      "vertexStart": 2154,
+      "vertexCount": 12,
+      "faceStart": 1862,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-04-sucker-1-2",
+      "vertexStart": 2166,
+      "vertexCount": 12,
+      "faceStart": 1868,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-04-sucker-1-3",
+      "vertexStart": 2178,
+      "vertexCount": 12,
+      "faceStart": 1874,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-04-sucker-1-4",
+      "vertexStart": 2190,
+      "vertexCount": 12,
+      "faceStart": 1880,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-04-sucker-1-5",
+      "vertexStart": 2202,
+      "vertexCount": 12,
+      "faceStart": 1886,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-04-sucker-1-6",
+      "vertexStart": 2214,
+      "vertexCount": 12,
+      "faceStart": 1892,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-04-sucker-1-7",
+      "vertexStart": 2226,
+      "vertexCount": 12,
+      "faceStart": 1898,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-05-root-to-tip",
+      "vertexStart": 2238,
+      "vertexCount": 234,
+      "faceStart": 1904,
+      "faceCount": 240,
+      "tile": "arm"
+    },
+    {
+      "name": "arm-05-sucker--1-0",
+      "vertexStart": 2472,
+      "vertexCount": 12,
+      "faceStart": 2144,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-05-sucker--1-1",
+      "vertexStart": 2484,
+      "vertexCount": 12,
+      "faceStart": 2150,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-05-sucker--1-2",
+      "vertexStart": 2496,
+      "vertexCount": 12,
+      "faceStart": 2156,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-05-sucker--1-3",
+      "vertexStart": 2508,
+      "vertexCount": 12,
+      "faceStart": 2162,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-05-sucker--1-4",
+      "vertexStart": 2520,
+      "vertexCount": 12,
+      "faceStart": 2168,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-05-sucker--1-5",
+      "vertexStart": 2532,
+      "vertexCount": 12,
+      "faceStart": 2174,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-05-sucker--1-6",
+      "vertexStart": 2544,
+      "vertexCount": 12,
+      "faceStart": 2180,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-05-sucker--1-7",
+      "vertexStart": 2556,
+      "vertexCount": 12,
+      "faceStart": 2186,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-05-sucker-1-0",
+      "vertexStart": 2568,
+      "vertexCount": 12,
+      "faceStart": 2192,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-05-sucker-1-1",
+      "vertexStart": 2580,
+      "vertexCount": 12,
+      "faceStart": 2198,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-05-sucker-1-2",
+      "vertexStart": 2592,
+      "vertexCount": 12,
+      "faceStart": 2204,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-05-sucker-1-3",
+      "vertexStart": 2604,
+      "vertexCount": 12,
+      "faceStart": 2210,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-05-sucker-1-4",
+      "vertexStart": 2616,
+      "vertexCount": 12,
+      "faceStart": 2216,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-05-sucker-1-5",
+      "vertexStart": 2628,
+      "vertexCount": 12,
+      "faceStart": 2222,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-05-sucker-1-6",
+      "vertexStart": 2640,
+      "vertexCount": 12,
+      "faceStart": 2228,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-05-sucker-1-7",
+      "vertexStart": 2652,
+      "vertexCount": 12,
+      "faceStart": 2234,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-06-root-to-tip",
+      "vertexStart": 2664,
+      "vertexCount": 234,
+      "faceStart": 2240,
+      "faceCount": 240,
+      "tile": "arm"
+    },
+    {
+      "name": "arm-06-sucker--1-0",
+      "vertexStart": 2898,
+      "vertexCount": 12,
+      "faceStart": 2480,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-06-sucker--1-1",
+      "vertexStart": 2910,
+      "vertexCount": 12,
+      "faceStart": 2486,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-06-sucker--1-2",
+      "vertexStart": 2922,
+      "vertexCount": 12,
+      "faceStart": 2492,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-06-sucker--1-3",
+      "vertexStart": 2934,
+      "vertexCount": 12,
+      "faceStart": 2498,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-06-sucker--1-4",
+      "vertexStart": 2946,
+      "vertexCount": 12,
+      "faceStart": 2504,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-06-sucker--1-5",
+      "vertexStart": 2958,
+      "vertexCount": 12,
+      "faceStart": 2510,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-06-sucker--1-6",
+      "vertexStart": 2970,
+      "vertexCount": 12,
+      "faceStart": 2516,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-06-sucker--1-7",
+      "vertexStart": 2982,
+      "vertexCount": 12,
+      "faceStart": 2522,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-06-sucker-1-0",
+      "vertexStart": 2994,
+      "vertexCount": 12,
+      "faceStart": 2528,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-06-sucker-1-1",
+      "vertexStart": 3006,
+      "vertexCount": 12,
+      "faceStart": 2534,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-06-sucker-1-2",
+      "vertexStart": 3018,
+      "vertexCount": 12,
+      "faceStart": 2540,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-06-sucker-1-3",
+      "vertexStart": 3030,
+      "vertexCount": 12,
+      "faceStart": 2546,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-06-sucker-1-4",
+      "vertexStart": 3042,
+      "vertexCount": 12,
+      "faceStart": 2552,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-06-sucker-1-5",
+      "vertexStart": 3054,
+      "vertexCount": 12,
+      "faceStart": 2558,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-06-sucker-1-6",
+      "vertexStart": 3066,
+      "vertexCount": 12,
+      "faceStart": 2564,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-06-sucker-1-7",
+      "vertexStart": 3078,
+      "vertexCount": 12,
+      "faceStart": 2570,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-07-root-to-tip",
+      "vertexStart": 3090,
+      "vertexCount": 234,
+      "faceStart": 2576,
+      "faceCount": 240,
+      "tile": "arm"
+    },
+    {
+      "name": "arm-07-sucker--1-0",
+      "vertexStart": 3324,
+      "vertexCount": 12,
+      "faceStart": 2816,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-07-sucker--1-1",
+      "vertexStart": 3336,
+      "vertexCount": 12,
+      "faceStart": 2822,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-07-sucker--1-2",
+      "vertexStart": 3348,
+      "vertexCount": 12,
+      "faceStart": 2828,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-07-sucker--1-3",
+      "vertexStart": 3360,
+      "vertexCount": 12,
+      "faceStart": 2834,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-07-sucker--1-4",
+      "vertexStart": 3372,
+      "vertexCount": 12,
+      "faceStart": 2840,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-07-sucker--1-5",
+      "vertexStart": 3384,
+      "vertexCount": 12,
+      "faceStart": 2846,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-07-sucker--1-6",
+      "vertexStart": 3396,
+      "vertexCount": 12,
+      "faceStart": 2852,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-07-sucker--1-7",
+      "vertexStart": 3408,
+      "vertexCount": 12,
+      "faceStart": 2858,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-07-sucker-1-0",
+      "vertexStart": 3420,
+      "vertexCount": 12,
+      "faceStart": 2864,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-07-sucker-1-1",
+      "vertexStart": 3432,
+      "vertexCount": 12,
+      "faceStart": 2870,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-07-sucker-1-2",
+      "vertexStart": 3444,
+      "vertexCount": 12,
+      "faceStart": 2876,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-07-sucker-1-3",
+      "vertexStart": 3456,
+      "vertexCount": 12,
+      "faceStart": 2882,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-07-sucker-1-4",
+      "vertexStart": 3468,
+      "vertexCount": 12,
+      "faceStart": 2888,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-07-sucker-1-5",
+      "vertexStart": 3480,
+      "vertexCount": 12,
+      "faceStart": 2894,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-07-sucker-1-6",
+      "vertexStart": 3492,
+      "vertexCount": 12,
+      "faceStart": 2900,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-07-sucker-1-7",
+      "vertexStart": 3504,
+      "vertexCount": 12,
+      "faceStart": 2906,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-08-root-to-tip",
+      "vertexStart": 3516,
+      "vertexCount": 234,
+      "faceStart": 2912,
+      "faceCount": 240,
+      "tile": "arm"
+    },
+    {
+      "name": "arm-08-sucker--1-0",
+      "vertexStart": 3750,
+      "vertexCount": 12,
+      "faceStart": 3152,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-08-sucker--1-1",
+      "vertexStart": 3762,
+      "vertexCount": 12,
+      "faceStart": 3158,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-08-sucker--1-2",
+      "vertexStart": 3774,
+      "vertexCount": 12,
+      "faceStart": 3164,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-08-sucker--1-3",
+      "vertexStart": 3786,
+      "vertexCount": 12,
+      "faceStart": 3170,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-08-sucker--1-4",
+      "vertexStart": 3798,
+      "vertexCount": 12,
+      "faceStart": 3176,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-08-sucker--1-5",
+      "vertexStart": 3810,
+      "vertexCount": 12,
+      "faceStart": 3182,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-08-sucker--1-6",
+      "vertexStart": 3822,
+      "vertexCount": 12,
+      "faceStart": 3188,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-08-sucker--1-7",
+      "vertexStart": 3834,
+      "vertexCount": 12,
+      "faceStart": 3194,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-08-sucker-1-0",
+      "vertexStart": 3846,
+      "vertexCount": 12,
+      "faceStart": 3200,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-08-sucker-1-1",
+      "vertexStart": 3858,
+      "vertexCount": 12,
+      "faceStart": 3206,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-08-sucker-1-2",
+      "vertexStart": 3870,
+      "vertexCount": 12,
+      "faceStart": 3212,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-08-sucker-1-3",
+      "vertexStart": 3882,
+      "vertexCount": 12,
+      "faceStart": 3218,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-08-sucker-1-4",
+      "vertexStart": 3894,
+      "vertexCount": 12,
+      "faceStart": 3224,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-08-sucker-1-5",
+      "vertexStart": 3906,
+      "vertexCount": 12,
+      "faceStart": 3230,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-08-sucker-1-6",
+      "vertexStart": 3918,
+      "vertexCount": 12,
+      "faceStart": 3236,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "arm-08-sucker-1-7",
+      "vertexStart": 3930,
+      "vertexCount": 12,
+      "faceStart": 3242,
+      "faceCount": 6,
+      "tile": "sucker"
+    },
+    {
+      "name": "eye L",
+      "vertexStart": 3942,
+      "vertexCount": 160,
+      "faceStart": 3248,
+      "faceCount": 144,
+      "tile": "eye"
+    },
+    {
+      "name": "socket L",
+      "vertexStart": 4102,
+      "vertexCount": 64,
+      "faceStart": 3392,
+      "faceCount": 48,
+      "tile": "skin"
+    },
+    {
+      "name": "upper lid L",
+      "vertexStart": 4166,
+      "vertexCount": 39,
+      "faceStart": 3440,
+      "faceCount": 24,
+      "tile": "skin"
+    },
+    {
+      "name": "eye R",
+      "vertexStart": 4205,
+      "vertexCount": 160,
+      "faceStart": 3464,
+      "faceCount": 144,
+      "tile": "eye"
+    },
+    {
+      "name": "socket R",
+      "vertexStart": 4365,
+      "vertexCount": 64,
+      "faceStart": 3608,
+      "faceCount": 48,
+      "tile": "skin"
+    },
+    {
+      "name": "upper lid R",
+      "vertexStart": 4429,
+      "vertexCount": 39,
+      "faceStart": 3656,
+      "faceCount": 24,
+      "tile": "skin"
+    },
+    {
+      "name": "work apron",
+      "vertexStart": 4468,
+      "vertexCount": 130,
+      "faceStart": 3680,
+      "faceCount": 108,
+      "tile": "cloth"
+    },
+    {
+      "name": "sewn pocket",
+      "vertexStart": 4598,
+      "vertexCount": 54,
+      "faceStart": 3788,
+      "faceCount": 40,
+      "tile": "pocket"
+    },
+    {
+      "name": "shoulder strap",
+      "vertexStart": 4652,
+      "vertexCount": 45,
+      "faceStart": 3828,
+      "faceCount": 28,
+      "tile": "strap"
+    },
+    {
+      "name": "brass strap button",
+      "vertexStart": 4697,
+      "vertexCount": 40,
+      "faceStart": 3856,
+      "faceCount": 32,
+      "tile": "gold"
+    },
+    {
+      "name": "shoulder strap",
+      "vertexStart": 4737,
+      "vertexCount": 45,
+      "faceStart": 3888,
+      "faceCount": 28,
+      "tile": "strap"
+    },
+    {
+      "name": "brass strap button",
+      "vertexStart": 4782,
+      "vertexCount": 40,
+      "faceStart": 3916,
+      "faceCount": 32,
+      "tile": "gold"
+    },
+    {
+      "name": "waist band",
+      "vertexStart": 4822,
+      "vertexCount": 72,
+      "faceStart": 3948,
+      "faceCount": 48,
+      "tile": "strap"
+    }
+  ],
+  "mouth": "No human mouth or mantle smile; natural beak hidden beneath crown and apron."
+}

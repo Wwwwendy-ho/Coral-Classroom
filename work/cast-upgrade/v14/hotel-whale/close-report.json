@@ -1,0 +1,61 @@
+{
+  "file": "hotel-whale-close.glb",
+  "bytes": 646760,
+  "triangles": 15696,
+  "meshCount": 1,
+  "primitives": 1,
+  "materials": 1,
+  "bones": 6,
+  "maps": [
+    {
+      "width": 1024,
+      "height": 1024,
+      "bytes": 59440,
+      "mime": "image/jpeg"
+    },
+    {
+      "width": 256,
+      "height": 256,
+      "bytes": 833,
+      "mime": "image/png"
+    }
+  ],
+  "clips": [
+    {
+      "name": "Idle",
+      "duration": 3.2,
+      "animatedBones": [
+        "Body",
+        "Fin.L",
+        "Fin.R",
+        "Float",
+        "Head",
+        "Tail"
+      ]
+    },
+    {
+      "name": "Listen",
+      "duration": 2.6,
+      "animatedBones": [
+        "Body",
+        "Fin.L",
+        "Fin.R",
+        "Float",
+        "Head",
+        "Tail"
+      ]
+    },
+    {
+      "name": "React",
+      "duration": 1.8,
+      "animatedBones": [
+        "Body",
+        "Fin.L",
+        "Fin.R",
+        "Float",
+        "Head",
+        "Tail"
+      ]
+    }
+  ]
+}

@@ -20,8 +20,8 @@
       var e = new THREE.Group(); e.position.set(x, y, z); body.add(e);
       add(e, sph(r), white, 0, 0, 0, 1, 1.1, 1);
       add(e, sph(r * .62), ink, look * r * .15, -r * .08, r * .62, 1, 1.1, .7);
-      add(e, sph(r * .2), white, -r * .22, r * .22, r * 1.1);
-      add(e, sph(r * .1), white, r * .2, -r * .25, r * 1.08);
+      add(e, sph(r * .22), white, look * r * .15 - r * .18, r * .2, r * 1.08, 1, 1, .6);
+      add(e, sph(r * .12), white, look * r * .15 + r * .18, -r * .22, r * 1.07, 1, 1, .6);
       parts.eyes.push(e);
     }
     function stalkEye(sd, x, y, z, h, r, col){
@@ -128,7 +128,7 @@
     if(typeof window === 'undefined' || !window.THREE) return;
     if(!window.THREE.GLTFLoader && typeof reefInstallGLTF === 'function') try { reefInstallGLTF(); } catch(e){}
     if(!window.THREE.GLTFLoader) return;
-    var url = name === 'hermit' ? 'assets/models/kiko-hermit.glb?v=mp-1' : 'assets/models/kiko-mochi.glb?v=mp-1';
+    var url = name === 'hermit' ? 'assets/models/kiko-hermit.glb?v=mp-40' : 'assets/models/kiko-mochi.glb?v=mp-41';
     if(!reefCrabModels[url]){
       reefCrabModels[url] = new Promise(function(resolve){
         try {

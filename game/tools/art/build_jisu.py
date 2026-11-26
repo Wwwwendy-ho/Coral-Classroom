@@ -1,4 +1,4 @@
-"""Reproducible authored Jisu hermit-crab candidate. No active asset writes.
+﻿"""Reproducible authored Jisu hermit-crab candidate. No active asset writes.
 blender -b --factory-startup --python tools/art/build_jisu.py -- --output /workspace/work/jisu-production
 """
 import argparse, importlib.util, json, math, sys
@@ -45,13 +45,13 @@ def shell(u,v,inside=False):
 
 def eye(side,u,v):
     # Spherical portrait mapped by polar distance from the forward direction.
-    c=Vector((side*.236,-.66,1.40));a=TAU*u;p=math.pi*v
-    return c+Vector((.151*math.sin(p)*math.cos(a),-.119*math.cos(p),.171*math.sin(p)*math.sin(a)))
+    c=Vector((side*.224,-.645,1.31));a=TAU*u;p=math.pi*v
+    return c+Vector((.128*math.sin(p)*math.cos(a),-.078*math.cos(p),.148*math.sin(p)*math.sin(a)))
 
 def eye_rim(side,u,v):
-    c=Vector((side*.236,-.648,1.40));a=TAU*u;b=TAU*v
+    c=Vector((side*.224,-.636,1.31));a=TAU*u;b=TAU*v
     # Sculpted dark cuticle annulus behind the globe, without eyebrows/lashes.
-    return c+Vector(((.158+.016*math.cos(b))*math.cos(a),.018*math.sin(b)+.036,(.178+.018*math.cos(b))*math.sin(a)))
+    return c+Vector(((.134+.012*math.cos(b))*math.cos(a),.014*math.sin(b)+.024,(.154+.013*math.cos(b))*math.sin(a)))
 
 def cloth_box(c,s,u,v):
     a=TAU*u;z=mix(-1,1,v)
@@ -91,11 +91,14 @@ def make_mesh(lod,mat,rig):
             knee=(side*(.61+.09*j),-.37+j*.27,.50+.055*j)
             ankle=(side*(.78+.12*j),-.49+j*.30,.23)
             tip=(side*(.80+.11*j),-.60+j*.30,.035)
-            pipe([origin,knee,ankle,tip],[.096-.007*j,.079-.005*j,.043,.003],'limb','Leg%d.%s'%(j+1,suf),n=8,j=12)
+            pipe([origin,knee,ankle,tip],[.112-.008*j,.096-.006*j,.070,.044],'limb','Leg%d.%s'%(j+1,suf),n=12,j=12)
+            # Rounded plush foot pad closes the leg tube; knee gets a soft ball joint.
+            grid(lambda u,v,tip=tip:ell((tip[0],tip[1],tip[2]+.012),(.052,.056,.044),u,v),12*K,8*K,'limb','Leg%d.%s'%(j+1,suf))
+            grid(lambda u,v,knee=knee,j=j:ell(knee,(.100-.006*j,.100-.006*j,.100-.006*j),u,v),12*K,8*K,'limb','Leg%d.%s'%(j+1,suf))
             # Joint cuffs reinforce articulated cuticle.
             pipe([tuple(Vector(knee)+Vector((0,0,.025))),tuple(Vector(knee)+Vector((side*.03,0,-.04)))],[.080-.006*j,.075-.006*j],'limb','Leg%d.%s'%(j+1,suf),n=8,j=3)
         # Curved orange eye peduncles and socket collars.
-        pipe([(side*.18,-.63,.77),(side*.21,-.65,.99),(side*.236,-.66,1.255)],[.037,.032,.043],'orange','Eye.'+suf,n=10,j=12)
+        pipe([(side*.18,-.63,.77),(side*.205,-.645,.99),(side*.224,-.645,1.185)],[.037,.032,.043],'orange','Eye.'+suf,n=10,j=12)
         grid(lambda u,v:eye(side,u,v),20*K,12*K,'eye','Eye.'+suf)
         grid(lambda u,v:eye_rim(side,u,v),24*K,6*K,'body','Eye.'+suf,wrap_v=True)
         pipe([(side*.08,-.72,.75),(side*.12,-.78,1.02),(side*.29,-.79,1.23),(side*.42,-.76,1.27)],[.014,.011,.007,.001],'orange','Antenna.'+suf,n=6,j=14)
@@ -152,27 +155,29 @@ def paint(name,u,v):
         overlay((255,248,236),smoothstep(0.70,0.98,v)*0.42)
         rough[:]=0.64
     elif name in ('limb','claw','body'):
-        rough[:]=0.58 if name=='claw' else 0.64
-        color((36,56,98))
-        overlay((54,82,134),smoothstep(0.15,0.85,v)*0.65)
+        # v13 plush coral-peach felt (matches Kiko/Shelly): velvety matte, soft rosy knee/joint blush, no photoreal bands.
+        rough[:]=0.84
+        color((240,152,134))
+        overlay((255,206,176),smoothstep(0.10,0.95,v)*0.62)
+        overlay((252,122,118),np.exp(-((v-0.52)/0.11)**2)*0.30)
         if name=='limb':
-            bands=smoothstep(0.35,0.55,0.5+0.5*np.sin(TAU*(v*2.45+0.03*np.sin(u*9.0))))
-            overlay((28,134,242),bands*0.94)
-            overlay((84,182,255),bands*smoothstep(0.2,0.9,v)*0.32)
+            overlay((255,226,204),np.exp(-((v-0.86)/0.10)**2)*0.55)
         elif name=='body':
-            overlay((52,136,234),smoothstep(0.30,0.85,v)*0.45)
+            overlay((255,168,160),np.exp(-((u-0.5)/0.30)**2-((v-0.5)/0.28)**2)*0.38)
+            overlay((255,226,210),smoothstep(0.55,1.0,v)*0.42)
         elif name=='claw':
-            overlay((64,96,152),smoothstep(0.45,0.95,v)*0.52)
+            overlay((255,222,196),smoothstep(0.55,0.98,v)*0.62)
+            overlay((250,120,112),np.exp(-((v-0.20)/0.14)**2)*0.28)
     elif name=='eye':
         # Crisp warm pearl-white sclera + glowing golden-amber iris + twin Nintendo catchlights
         color((255,252,246));rad=v
-        iris=np.clip((0.430-rad)*140.0,0.0,1.0);a=u*TAU
-        honey_w=np.clip(0.35+0.48*np.clip((rad-0.22)/0.19,0.0,1.0)-0.24*np.sin(a),0.0,1.0)
+        iris=np.clip((0.535-rad)*140.0,0.0,1.0);a=u*TAU
+        honey_w=np.clip(0.35+0.48*np.clip((rad-0.28)/0.22,0.0,1.0)-0.24*np.sin(a),0.0,1.0)
         irisrgb=np.array((132,62,22),dtype=np.float32)*(1.0-honey_w[...,None])+np.array((248,174,54),dtype=np.float32)*honey_w[...,None]
-        limbal=np.clip((rad-0.39)*110.0,0.0,1.0)
+        limbal=np.clip((rad-0.495)*110.0,0.0,1.0)
         irisrgb=irisrgb*(1.0-0.75*limbal[...,None])+np.array((52,34,24),dtype=np.float32)*(0.75*limbal[...,None])
         rgb=rgb*(1.0-iris[...,None])+irisrgb*iris[...,None]
-        overlay((16,14,22),np.clip((0.270-rad)*160.0,0.0,1.0))
+        overlay((16,14,22),np.clip((0.355-rad)*160.0,0.0,1.0))
         rough[:]=0.14
         x=np.sin(v*math.pi)*np.cos(a);z=np.sin(v*math.pi)*np.sin(a)
         overlay((255,255,250),np.clip((0.118-np.sqrt((x+0.16)**2+(z-0.22)**2))*160.0,0.0,1.0))
@@ -265,15 +270,24 @@ def exported_weight_audit(path):
     assert result['unweightedExportVertices']==0 and float(sums.max())<1.001,result
     return result
 
+SCALE=1.30  # v13: sculpted mesh + rig enlarged inside the GLB for readability on Bottle Beach (feet stay on z=0).
+
+def scale_asset(mesh,rig,s):
+    for v in mesh.data.vertices:v.co=v.co*s
+    mesh.data.update()
+    bpy.ops.object.select_all(action='DESELECT');bpy.context.view_layer.objects.active=rig;rig.select_set(True);bpy.ops.object.mode_set(mode='EDIT')
+    for b in rig.data.edit_bones:b.head=b.head*s;b.tail=b.tail*s
+    bpy.ops.object.mode_set(mode='OBJECT')
+
 def build(lod,output):
     bpy.ops.wm.read_factory_settings(use_empty=True);size=2048 if lod=='close' else 1024
     mat=h.shared_material(*atlas(output,size));mat.name='Jisu | painted shell, cuticle, canvas, eye atlas'
-    rig=rig_create();mesh=make_mesh(lod,mat,rig);animate(rig)
+    rig=rig_create();mesh=make_mesh(lod,mat,rig);scale_asset(mesh,rig,SCALE);animate(rig)
     bpy.ops.object.select_all(action='DESELECT');rig.select_set(True);mesh.select_set(True);bpy.context.view_layer.objects.active=mesh
     dest=output/f'jisu-{lod}.glb'
     bpy.ops.export_scene.gltf(filepath=str(dest),export_format='GLB',use_selection=True,export_animations=True,export_animation_mode='ACTIONS',export_force_sampling=True,export_apply=False,export_image_format='AUTO',export_extras=False,export_yup=True,export_rest_position_armature=True)
     report=h.glb_stats(dest);report.update(exported_weight_audit(dest));report['weightedVertices']=len(mesh.data.vertices);report['unweightedVertices']=sum(not v.groups for v in mesh.data.vertices);report['maxInfluences']=max(len(v.groups) for v in mesh.data.vertices);report['bounds']=[list(v) for v in (Vector([min(p[i] for p in mesh.bound_box) for i in range(3)]),Vector([max(p[i] for p in mesh.bound_box) for i in range(3)]))]
-    assert report['triangles']<=(22000 if lod=='close' else 8000),report
+    assert report['triangles']<=(28000 if lod=='close' else 10500),report
     assert report['bytes']<(2500000 if lod=='close' else 1000000),report
     assert report['draws']==report['materials']==1 and report['bones']<=16 and report['unweightedVertices']==0,report
     assert len(report['textureImages'])==2,report

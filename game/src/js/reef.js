@@ -496,6 +496,11 @@
     ['[data-act="open-stats"]', 'progress', 'Progress'],
     ['[data-act="toggle-edit-mode"]', 'edit', 'Edit decks'],
     ['[data-r3-games]', 'games', 'Minigame corner'],
+    ['[data-jmb-shop]', 'bag', 'Bok\'s item shop'],
+    ['[data-jmb-showtime]', 'games', 'Showtime minigame'],
+    ['[data-jmb-special]', 'compass', 'Region special'],
+    ['[data-jmb-cam]', 'sparkle', 'Shell camera'],
+    ['[data-jmb-theme]', 'settings', function(b){ return b.getAttribute('data-jmb-theme-mode') === 'culture' ? 'Theme: Cultural Accents' : 'Theme: Oceanic Classic'; }],
     ['.r3 [data-music-toggle]', null, function(b){ return b.getAttribute('aria-pressed') === 'true' ? 'Music: on' : 'Music: off'; }],
     ['[data-r3-theme]', null, function(){ return R3.view && R3.view.region ? (reefNight() ? 'Day view' : 'Night view') : reefNight() ? 'Sunlit reef' : 'Midnight wreck'; }],
     ['[data-act="toggle-sound"]', null, function(b){ return /off/.test(b.getAttribute('aria-label') || '') ? 'Sounds: on' : 'Sounds: off'; }],
@@ -977,9 +982,9 @@
   }
 
   /* ---------- Never stuck (child profile) ----------
-     After ten seconds without a tap, the next thing to do glows and Shelly says it ("Tap the card to flip it!"),
-     again every twelve seconds while nothing happens. A pop-up on the board that is still waiting fifteen seconds
-     after the first nudge closes itself, so she's back on the board. */
+     After ten seconds without a tap, the next thing to do glows and Shelly says it at most once per screen state
+     (never during an encounter dialog or talk sheet). A non-encounter board pop-up that is still waiting fifteen
+     seconds after the first nudge closes itself, so she's back on the board. */
   var REEF_NUDGES = [
     // [what to find, what Shelly says]; the first one on screen wins
     ['.r3-mini-play .r3-tile:not(.up):not(.got)', 'Tap a card to turn it over!'],
@@ -995,32 +1000,58 @@
     ['.feed-stage', 'Swipe up for the next one!'],
     ['.btn-primary', 'Tap the glowing button!']
   ];
-  var reefNudge = { touch: Date.now(), last: 0, first: 0 };
+  var reefNudge = { touch: Date.now(), last: 0, first: 0, view: '', spoken: {} };
   ['pointerdown', 'keydown', 'touchstart'].forEach(function(t){
     document.addEventListener(t, function(){ reefNudge.touch = Date.now(); reefNudge.first = 0; }, true);
   });
+  function reefNudgeEncounterOpen(){
+    if(typeof S !== 'undefined' && S.view === 'townTalk') return true;
+    if(document.body && document.body.classList.contains('rpg-lesson')) return true;
+    if(document.querySelector('.r3-person-panel, .rpg-dialogue, .rpg-stage-host, .tw-page, [data-person-practice]')) return true;
+    if(typeof regionEncounterActive === 'function' && typeof R3 !== 'undefined' && R3.view && regionEncounterActive(R3.view)) return true;
+    return false;
+  }
+  function reefNudgeStateKey(){
+    var c = document.querySelector('.feed-card-current, .stage .face-front');
+    var panel = document.querySelector('.r3-panel');
+    var miniAsk = document.querySelector('.r3-mini-play .r3-mini-ask');
+    var dice = document.querySelector('.r3-dice-tip');
+    var v = (typeof S !== 'undefined' ? (S.view || '') + '|' + (S.pinPromptFor || '') : '');
+    var at = (typeof R3 !== 'undefined' && R3.view) ? ('|' + (R3.view.region ? R3.view.region.id : 'cove') + '@' + R3.view.at) : '';
+    var pKey = panel ? ('|panel:' + panel.className + ':' + (panel.querySelector('h3, h2') ? panel.querySelector('h3, h2').textContent.trim() : '')) : '';
+    var mKey = miniAsk ? ('|mini:' + miniAsk.textContent.trim()) : '';
+    var dKey = dice ? '|dice' : '';
+    var cKey = c ? ('|card:' + c.textContent.trim().slice(0, 60)) : '';
+    return v + at + pKey + mKey + dKey + cKey;
+  }
   // a new screen or card starts the ten seconds again
   afterRender('never stuck', function(){ var c = document.querySelector('.feed-card-current, .stage .face-front'), v = S.view + '|' + (S.pinPromptFor || '') + '|' + (c ? c.textContent : ''); if(v !== reefNudge.view){ reefNudge.view = v; reefNudge.touch = Date.now(); reefNudge.first = 0; } });
   function reefVisible(el){ var r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight && getComputedStyle(el).visibility !== 'hidden'; }
   setInterval(function(){
     if(!reefKid() || document.hidden || window.__reefTx || reefBusy || document.querySelector('.reef-gate')) return;
+    if(reefNudgeEncounterOpen()) return;
     var now = Date.now(), idle = now - reefNudge.touch;
     if(idle < 10000 || now - reefNudge.last < 12000) return;
-    // a board pop-up that's still waiting after a nudge: close it
+    // a board pop-up that's still waiting after a nudge: close it (never an encounter/person dialog)
     var panel = document.querySelector('.r3-panel');
-    if(panel && reefNudge.first && now - reefNudge.first > 15000 && !panel.querySelector('.r3-mini-play')){
+    if(panel && !panel.classList.contains('r3-person-panel') && reefNudge.first && now - reefNudge.first > 15000 && !panel.querySelector('.r3-mini-play')){
       var leave = panel.querySelector('[data-skip], [data-back], [data-close], [data-done], [data-no], [data-ok]');
       if(leave){ leave.click(); reefNudge.touch = now; reefNudge.first = 0; return; }
     }
     var ask = document.querySelector('.r3-mini-play .r3-mini-ask b');
     if(ask) document.querySelectorAll('.r3-bub').forEach(function(b){ b.classList.toggle('want', b.dataset.n === ask.textContent.trim()); });
+    var stateKey = reefNudgeStateKey();
     for(var i = 0; i < REEF_NUDGES.length; i++){
       var el = Array.prototype.find.call(document.querySelectorAll(REEF_NUDGES[i][0]), reefVisible);
       if(!el) continue;
       reefNudge.last = now; if(!reefNudge.first) reefNudge.first = now;
       el.classList.remove('cc-nudge'); void el.offsetWidth; el.classList.add('cc-nudge');
       setTimeout(function(){ el.classList.remove('cc-nudge'); }, 4200);
-      try { Speech.speak(REEF_NUDGES[i][1]); } catch(e){}
+      if(!reefNudgeEncounterOpen() && !reefNudge.spoken[stateKey]){
+        if(Object.keys(reefNudge.spoken).length > 80) reefNudge.spoken = {};
+        reefNudge.spoken[stateKey] = true;
+        try { Speech.speak(REEF_NUDGES[i][1]); } catch(e){}
+      }
       return;
     }
   }, 1000);

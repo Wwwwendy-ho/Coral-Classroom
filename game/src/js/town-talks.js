@@ -233,11 +233,11 @@
       end:{ t:['오천 원이에요. 빨리 나으세요.', 'It is five thousand won. Get well soon.', '오천=five thousand;원이에요=won it is=원;빨리=soon, quickly;나으세요=please get better'], end:true }
     } },
 
-    { id:'friend', en:'A new friend', ko:'새 친구 지수', place:'Meeting someone', icon:'wave', start:'a', nodes:{
-      a:{ t:['안녕하세요! 저는 지수예요. 만나서 반가워요.', 'Hi! I am Jisu. Nice to meet you.', '안녕하세요=hello;저는=I=저;지수예요=am Jisu;만나서=meeting you, so=만나요;반가워요=I am glad'],
+    { id:'friend', en:'A new friend', ko:'새 친구 수아', place:'Meeting someone', icon:'wave', start:'a', nodes:{
+      a:{ t:['안녕하세요! 저는 수아예요. 만나서 반가워요.', 'Hi! I am Sua. Nice to meet you.', '안녕하세요=hello;저는=I=저;수아예요=am Sua;만나서=meeting you, so=만나요;반가워요=I am glad'],
         c:[ { ko:'저도 반가워요.', en:'Nice to meet you too.', w:'저도=me too=저;반가워요=I am glad', g:'best', to:'from', also:['반가워요', '저도 만나서 반가워요', '만나서 반가워요', '반갑습니다'] },
-            { ko:'저는 지수예요.', en:'I am Jisu.', w:'저는=I=저;지수예요=am Jisu', g:'oops',
-              hint:'That says "I am Jisu", but she is Jisu! Answer 저도 반가워요 (nice to meet you too).' } ] },
+            { ko:'저는 수아예요.', en:'I am Sua.', w:'저는=I=저;수아예요=am Sua', g:'oops',
+              hint:'That says "I am Sua", but she is Sua! Answer 저도 반가워요 (nice to meet you too).' } ] },
       from:{ t:['어느 나라에서 왔어요?', 'What country are you from?', '어느=which;나라에서=country, from=나라;왔어요=did you come=와요'],
         c:[ { ko:'미국에서 왔어요.', en:'I am from the United States.', w:'미국에서=from the United States=미국;왔어요=I came=와요', g:'best', to:'why', also:['미국 사람이에요', '미국이요'], re:/에서\s*왔어요$|사람이에요$/ },
             { ko:'캐나다에서 왔어요.', en:'I am from Canada.', w:'캐나다에서=from Canada=캐나다;왔어요=I came=와요', g:'best', to:'why', also:['캐나다 사람이에요', '캐나다요'] },

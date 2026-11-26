@@ -1,0 +1,41 @@
+{
+  "file": "kiko-hermit-close.glb",
+  "bytes": 953520,
+  "triangles": 20756,
+  "meshCount": 1,
+  "draws": 1,
+  "materials": 1,
+  "bones": 15,
+  "textureImages": [
+    {
+      "width": 2048,
+      "height": 2048,
+      "bytes": 143831,
+      "mime": "image/jpeg"
+    },
+    {
+      "width": 512,
+      "height": 512,
+      "bytes": 4225,
+      "mime": "image/png"
+    }
+  ],
+  "clips": [
+    "Idle",
+    "Listen",
+    "React"
+  ],
+  "authorVertices": 11028,
+  "bounds": [
+    [
+      -1.0571972131729126,
+      -1.0760490894317627,
+      -3.346397647874255e-08
+    ],
+    [
+      1.0584710836410522,
+      1.2508560419082642,
+      1.6271862983703613
+    ]
+  ]
+}

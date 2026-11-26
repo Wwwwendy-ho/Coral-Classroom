@@ -1,0 +1,67 @@
+{
+  "file": "captain-bay-close.glb",
+  "bytes": 954748,
+  "triangles": 20396,
+  "meshCount": 1,
+  "primitives": 1,
+  "materials": 1,
+  "bones": 8,
+  "maps": [
+    {
+      "width": 2048,
+      "height": 2048,
+      "bytes": 153498,
+      "mime": "image/jpeg"
+    },
+    {
+      "width": 512,
+      "height": 512,
+      "bytes": 4637,
+      "mime": "image/png"
+    }
+  ],
+  "clips": [
+    {
+      "name": "Idle",
+      "duration": 3.966666666666667,
+      "animatedBones": [
+        "Eye.L",
+        "Eye.R",
+        "Fin.L",
+        "Fin.R",
+        "Head",
+        "Root",
+        "Tail",
+        "Torso"
+      ]
+    },
+    {
+      "name": "Listen",
+      "duration": 3.4,
+      "animatedBones": [
+        "Eye.L",
+        "Eye.R",
+        "Fin.L",
+        "Fin.R",
+        "Head",
+        "Root",
+        "Tail",
+        "Torso"
+      ]
+    },
+    {
+      "name": "React",
+      "duration": 2.1333333333333333,
+      "animatedBones": [
+        "Eye.L",
+        "Eye.R",
+        "Fin.L",
+        "Fin.R",
+        "Head",
+        "Root",
+        "Tail",
+        "Torso"
+      ]
+    }
+  ]
+}

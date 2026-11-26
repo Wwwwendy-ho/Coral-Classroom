@@ -93,12 +93,13 @@ def skin_point(u,v):
 
 
 def eye_center(side):
-    return Vector((side*.435-.02,-.631,2.075+(.025 if side==1 else 0)))
+    return Vector((side*.392-.015,-.578,2.045+(.018 if side==1 else 0)))
 
 
 def eye_point(side,u,v):
+    # v40: Warm slightly horizontal almond-oval eyeball seated cleanly inside the sculpted brow-ridged socket
     a=(u-.5)*TAU;phi=math.pi*(1-v)
-    return eye_center(side)+Vector((.250*math.sin(a)*math.sin(phi),-.172*math.cos(a)*math.sin(phi),.245*math.cos(phi)))
+    return eye_center(side)+Vector((.204*math.sin(a)*math.sin(phi),-.092*math.cos(a)*math.sin(phi),.194*math.cos(phi)))
 
 
 def mantle_front_y(x,z):
@@ -117,24 +118,27 @@ def mantle_front_y(x,z):
 
 def orbit_point(side,u,v):
     a=TAU*u
-    r=1+.33*v
+    r=1+.24*v
     c=eye_center(side)
-    # Full skin socket ring, with heavier natural upper fold.
-    x=c.x+.248*r*math.cos(a);z=c.z+.244*r*math.sin(a)
-    inside=c.y-.063-.012*max(0,math.sin(a))
-    outside=mantle_front_y(x,z)-.014
-    y=inside*(1-v)+outside*v-.025*math.sin(math.pi*v)
+    # v40: Sculpted warm Nintendo brow-ridge overhang above the eye + soft lower cheek bolster
+    up_w=max(0.0,math.sin(a))**1.35
+    x=c.x+.202*r*math.cos(a);z=c.z+(.192+.022*up_w)*r*math.sin(a)
+    inside=c.y-.036-.024*up_w
+    outside=mantle_front_y(x,z)-.010
+    brow_roll=.028*up_w*math.sin(math.pi*v)
+    y=inside*(1-v)+outside*v-.014*math.sin(math.pi*v)-brow_roll
     return Vector((x,y,z))
 
 
 def lid_point(side,u,v):
-    # Narrow crescent follows a real eyelid contour, no painted eyebrows/mouth.
+    # v40: Warm welcoming brow-ridged upper eyelid gently framing the top ~18% of the iris (warm & alert, never sleepy!)
     a=math.pi*u
-    x=.250*math.cos(a)
-    bottom=(.106+side*.012*math.cos(a))*math.sin(a)**.5+.020*math.sin(a)
-    top=.263*math.sin(a)
+    x=.205*math.cos(a)
+    bottom=(.086-side*.012*math.cos(a))*math.sin(a)**.46+.020*math.sin(a)
+    top=.220*math.sin(a)
     z=bottom*(1-v)+max(bottom,top)*v
-    y=-.172*math.sqrt(max(.03,1-(x/.25)**2-(z/.245)**2))-.016
+    brow_puff=.020*math.sin(math.pi*v)*math.sin(a)
+    y=-.096*math.sqrt(max(.03,1-(x/.205)**2-(z/.214)**2))-.014-brow_puff
     return eye_center(side)+Vector((x,y,z))
 
 
@@ -154,9 +158,9 @@ def pocket_point(u,v):
 
 
 def strap_point(side,u,v):
-    c=spline([(side*.44,-.63,1.59),(side*.54,-.58,1.86),(side*.58,-.30,1.98),
-              (side*.57,.15,1.91),(side*.52,.51,1.66),(side*.48,.50,1.34)],v)
-    return c+Vector(((u-.5)*.117,0,0))
+    c=spline([(side*.46,-.63,1.59),(side*.59,-.56,1.84),(side*.63,-.28,1.95),
+              (side*.60,.15,1.89),(side*.54,.51,1.66),(side*.48,.50,1.34)],v)
+    return c+Vector(((u-.5)*.114,0,0))
 
 
 def waist_point(u,v):
@@ -289,23 +293,33 @@ def seeded_noise(u,v,seed,columns,rows):
 
 def pigment(tile,u,v):
     a=u*TAU
-    # Periodic, irregular multi-scale dermal islands, not regularly spaced dots.
-    cloud=(np.sin(a*7+np.sin(v*23)*1.8)+.65*np.sin(a*13-v*37+.8*np.sin(a*3+v*19))+
-           .35*np.sin(a*29+v*71)+.23*np.cos(a*43-v*103))/2.23
-    if tile=='arm':cloud=(np.sin(a*5+v*25+np.sin(v*42))+.65*np.sin(a*11-v*57)+.4*np.sin(a*23+v*103))/2.05
-    mottle=np.clip((cloud-.49)*3.4,0,1)
-    mottle*=.65+.35*(.5+.5*np.sin(a*53+v*137)*np.cos(a*41-v*89))
-    base=mix([127,33,30],[175,51,40],.5+.5*np.sin(a*3-v*13))
-    base=base*(1-mottle[...,None])+np.array([202,173,139])*mottle[...,None]
-    # Baked chromatophore pores and raised irregular papilla contours.
+    # v40: Warm organic crimson-coral mottling matching Hero Shelly's velvety Switch/Pixar craft (ZERO robotic plastic shine!)
+    cloud=(np.sin(a*6+np.sin(v*19)*1.5)+.60*np.sin(a*11-v*31+.75*np.sin(a*3+v*17))+
+           .32*np.sin(a*23+v*59)+.20*np.cos(a*37-v*83))/2.12
+    if tile=='arm':cloud=(np.sin(a*5+v*21+np.sin(v*35))+.60*np.sin(a*10-v*47)+.35*np.sin(a*19+v*83))/1.95
+    mottle=np.clip((cloud-.38)*2.4,0,1)
+    mottle*=.58+.42*(.5+.5*np.sin(a*37+v*97)*np.cos(a*29-v*71))
+    # Lush sunlit coral-crimson base transitioning softly into warm organic crimson-peach mottling (zero harsh pale blotches!)
+    base=mix([146,42,36],[206,74,54],.46+.36*np.sin(math.pi*v)+.14*np.sin(a*3-v*11))
+    base=base*(1-mottle[...,None]*.34)+np.array([228,116,86],dtype=np.float32)*(mottle[...,None]*.34)
+    # Soft warm peach-coral subsurface warmth along lower mantle & arm undersides + subtle baked collar/socket AO
+    if tile=='skin':
+        sub_warm=np.clip((.42-v)*2.6,0,1)*.24
+        base=mix(base,[228,118,92],sub_warm)
+        collar_ao=np.exp(-((v-.16)/.065)**2)*.24
+        base*=(1.0-collar_ao[...,None])
+    else:
+        tip_warm=np.clip((v-.52)*2.2,0,1)*.30
+        base=mix(base,[232,126,96],tip_warm)
+        root_ao=np.exp(-((v/.10)**2))*.22
+        base*=(1.0-root_ao[...,None])
+    # Smooth painterly organic dermal variation (zero high-frequency pixel noise -> velvety Pixar finish & tight PNG budget!)
     seed=521 if tile=='skin' else 838
-    cells=.62*seeded_noise(u,v,seed,43,81)+.38*seeded_noise(u,v,seed+1,91,167)
-    grain=seeded_noise(u,v,seed+2,193,293)
-    relief=1+.065*cells+.019*grain
+    cells=seeded_noise(u,v,seed,22,38)
+    relief=1+.028*cells
     base*=relief[...,None]
-    pores=np.clip((grain-.61)*3.4,0,1)
-    base*=1-.20*pores[...,None]
-    rough=.67-.055*mottle+.045*cells
+    # Strictly velvety matte-satin roughness (0.88..0.92), zero metallic!
+    rough=np.clip(.90+.015*cells-.010*mottle,.88,.92)
     return base,rough,np.zeros_like(u)
 
 
@@ -313,51 +327,69 @@ def paint(tile,u,v):
     if tile in ('skin','arm'):
         return (*pigment(tile,u,v),np.ones_like(u))
     if tile in ('cloth','pocket','strap'):
-        weave=np.sin(u*TAU*144+v*TAU*151)*np.sin(v*TAU*173)
-        warp=np.sin(u*TAU*54+v*TAU*4)
-        wear=.5+.5*np.sin(u*33+v*19)*np.cos(v*29-u*11)
-        base=mix([22,37,65],[43,66,99],.32+.35*wear)
-        base*=1+.07*weave[...,None]+.035*warp[...,None]
+        weave=np.sin(u*TAU*48+v*TAU*48)*np.sin(v*TAU*52)
+        warp=np.sin(u*TAU*24+v*TAU*4)
+        wear=.5+.5*np.sin(u*21+v*15)*np.cos(v*19-u*9)
+        base=mix([24,42,72],[48,74,110],.34+.34*wear)
+        base*=1+.022*weave[...,None]+.016*warp[...,None]
         edge=np.minimum(np.minimum(u,1-u),np.minimum(v,1-v))
         base*=np.clip(.74+edge*8,.74,1)[...,None]
         line=(np.abs(u-.042)<.006)|(np.abs(u-.958)<.006)|(np.abs(v-.035)<.006)|(np.abs(v-.96)<.006)
         dash=np.where((np.abs(u-.042)<.006)|(np.abs(u-.958)<.006),np.sin(v*TAU*45)>.0,np.sin(u*TAU*49)>.0)
         stitches=line&dash
-        base[stitches]=[194,157,87]
+        base[stitches]=[198,162,92]
         if tile=='pocket':
-            # The top opening is dark and double stitched; pocket center is worn.
             opening=(v>.945)&(v<.968)
-            base[opening]=[12,24,44]
+            base[opening]=[14,26,48]
             center=np.exp(-((u-.5)**2+(v-.55)**2)*9)
             base+=center[...,None]*np.array([4,7,10])
-        return base,np.full_like(u,.83),np.zeros_like(u),np.zeros_like(u)
+        return base,np.full_like(u,.90),np.zeros_like(u),np.zeros_like(u)
     if tile=='eye':
+        # v40: Hero-Shelly living amber-gold eye with warm pearl-cream sclera, rich upper-eyelid shadow,
+        # radial iris fibers, caustic lower-iris crescent, feathered limbus & glossy 0.06 wet cornea!
         a=(u-.5)*TAU;phi=math.pi*(1-v)
         x=np.sin(a)*np.sin(phi);z=np.cos(phi)
-        r=np.sqrt((x+.025)**2+(z+.015)**2)
+        r=np.sqrt((x+.020)**2+(z+.030)**2)
         front=np.cos(a)>0
-        iris=(r<.80)&front;pupil=(r<.49)&front
-        base=np.zeros((*u.shape,3))+np.array([237,231,209])
-        angle=np.arctan2(z,x)
-        radial=.5+.5*np.sin(angle*73+np.sin(r*43)*2)
-        gold=mix([95,43,13],[198,130,37],np.clip(.25+.55*radial+.3*(1-r),0,1))
-        gold*=np.clip((.81-r)*17,.32,1)[...,None]
-        base[iris]=gold[iris];base[pupil]=[8,13,16]
-        highlight=(((x+.14)**2/.009+(z-.19)**2/.018)<1)&front
-        base[highlight]=[255,254,245]
-        small=(((x-.12)**2+(z+.13)**2)<.002)&front;base[small]=[232,234,218]
-        return base,np.full_like(u,.21),np.zeros_like(u),np.zeros_like(u)
+        # Warm living pearl-cream sclera with orbital edge shading
+        sclera=mix([234,225,212],[184,174,178],np.clip((r-.50)*1.4,0,.70))
+        angle=np.arctan2(z+.030,x+.020)
+        radial=(np.sin(53*angle+.8*np.sin(11*angle))*np.sin(8*angle-12*r)+.6*np.cos(83*angle+r*35))/1.6
+        grad=np.clip(.48-.92*(z+.030)+.14*radial,0,1)
+        iris_col=mix([72,30,12],[214,132,36],grad)
+        # Luminous caustic lower-iris bounce
+        caustic=np.clip((-.04-z)*2.4,0,1)*np.clip((r-.34)*5.0,0,1)*np.clip((.76-r)*6.0,0,1)
+        iris_col=mix(iris_col,[252,208,92],caustic*.62)
+        # Soft feathered limbus border
+        limbus=np.clip((r-.68)*14.0,0,1)*np.clip((.80-r)*14.0,0,1)
+        iris_col=mix(iris_col,[36,18,16],limbus*.75)
+        # Velvety deep pupil with soft feathered edge
+        pup_t=np.clip((.44-r)*18.0,0,1)
+        iris_col=mix(iris_col,[18,16,26],pup_t)
+        iris_mask=np.clip((.79-r)*16.0,0,1)*front.astype(np.float32)
+        base=mix(sclera,iris_col,iris_mask)
+        # Rich sculpted upper-eyelid overhang shadow across upper ~32% of sclera & iris!
+        lid_sh=np.clip((z-.08)/.48,0,1)
+        lid_sh=lid_sh*lid_sh*(3-2*lid_sh)
+        base*=1.0-lid_sh[...,None]*np.array([.44,.46,.36],dtype=np.float32)
+        # Restrained luminous warm-cream primary catchlight + delicate lower bounce
+        hl1=np.clip((1.0-np.sqrt(((x-.15)/.12)**2+((z-.16)/.10)**2))*2.6,0,1)*front.astype(np.float32)
+        hl2=np.clip((1.0-np.sqrt(((x+.17)/.062)**2+((z+.18)/.056)**2))*2.6,0,1)*front.astype(np.float32)
+        base=mix(base,[255,248,234],hl1*.95)
+        base=mix(base,[248,242,226],hl2*.64)
+        # ONLY eye cornea is glossy (0.06 <= 0.08)!
+        return base,np.full_like(u,.06),np.zeros_like(u),np.zeros_like(u)
     if tile=='sucker':
-        # v is cup radius; concentric inner hollow, raised cream lip and pink base.
-        base=mix([147,91,71],[236,213,173],np.clip(v*1.7,0,1))
-        edge=np.exp(-((v-.77)/.15)**2)
-        base+=edge[...,None]*np.array([13,15,13])
-        base*=1+.025*np.sin(u*TAU*18+v*43)[...,None]
-        return base,np.full_like(u,.43),np.zeros_like(u),np.zeros_like(u)
+        # v40: Subtle pale velvety cream-peach suckers (roughness 0.88 — ZERO plastic bead glare!)
+        base=mix([174,116,96],[244,224,198],np.clip(v*1.55,0,1))
+        rim_hi=np.exp(-((v-.76)/.14)**2)
+        base+=rim_hi[...,None]*np.array([10,11,9],dtype=np.float32)
+        base*=1+.020*np.sin(u*TAU*16+v*37)[...,None]
+        return base,np.full_like(u,.88),np.zeros_like(u),np.zeros_like(u)
     if tile=='gold':
         rim=np.exp(-((v-.18)/.035)**2)+np.exp(-((v-.82)/.035)**2)
-        base=mix([113,76,24],[207,162,70],.60+.18*np.sin(u*TAU)+.15*rim)
-        return base,np.full_like(u,.32),np.full_like(u,.65),np.zeros_like(u)
+        base=mix([118,80,26],[212,168,74],.60+.18*np.sin(u*TAU)+.15*rim)
+        return base,np.full_like(u,.36),np.full_like(u,.48),np.zeros_like(u)
     raise ValueError(tile)
 
 
@@ -381,7 +413,7 @@ def atlas(output,size):
     png(color_path,color)
     # Quantize RGB first, then duplicate its palette for the two exact mask
     # values. Quantizing RGBA directly would discard RGB under mask alpha 0.
-    subprocess.run([shutil.which('python'),'-c',
+    subprocess.run([sys.executable,'-c',
         "from PIL import Image,ImageChops; import sys; "
         "p=sys.argv[1]; n=int(sys.argv[2]); im=Image.open(p).convert('RGBA'); "
         "q=im.convert('RGB').quantize(colors=n,method=Image.Quantize.MEDIANCUT,dither=Image.Dither.NONE); "
@@ -390,7 +422,7 @@ def atlas(output,size):
         "mask=im.getchannel('A').point(lambda a:n if a>127 else 0); "
         "result=Image.frombytes('P',q.size,ImageChops.add(idx,mask).tobytes()); "
         "result.putpalette(pal+pal); result.info['transparency']=bytes([0]*n+[255]*n); "
-        "result.save(p,optimize=True)",str(color_path),'128'],check=True)
+        "result.save(p,optimize=True)",str(color_path),'72'],check=True)
     down=np.uint8(np.rint(surface.reshape(size//4,4,size//4,4,3).mean(axis=(1,3))))
     down[...,1]=np.uint8(np.clip(np.rint(down[...,1].astype(np.float32)/8)*8,0,255))
     png(surface_path,down)
@@ -402,7 +434,9 @@ def material(color_path,surface_path):
     mat=bpy.data.materials.new('OctopusSkinMask');mat.use_nodes=True
     mat['residentSkinMask']='baseColorAlpha'
     nodes=mat.node_tree.nodes;links=mat.node_tree.links;shader=nodes.get('Principled BSDF')
-    shader.inputs['Specular IOR Level'].default_value=.34
+    shader.inputs['Specular IOR Level'].default_value=.14
+    if 'Coat Weight' in shader.inputs:
+        shader.inputs['Coat Weight'].default_value=0.0
     tex=nodes.new('ShaderNodeTexImage');tex.image=bpy.data.images.load(str(color_path));tex.image.pack()
     tex.label='Opaque pigment; alpha selects skin for intentional camouflage'
     surface=nodes.new('ShaderNodeTexImage');surface.image=bpy.data.images.load(str(surface_path));surface.image.colorspace_settings.name='Non-Color';surface.image.pack()

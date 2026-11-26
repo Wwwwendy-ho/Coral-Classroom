@@ -1,0 +1,85 @@
+{
+  "file": "taxi-squid-close.glb",
+  "bytes": 866460,
+  "triangles": 17052,
+  "meshCount": 1,
+  "primitives": 1,
+  "materials": 1,
+  "bones": 14,
+  "maps": [
+    {
+      "width": 2048,
+      "height": 2048,
+      "bytes": 143804,
+      "mime": "image/jpeg"
+    },
+    {
+      "width": 512,
+      "height": 512,
+      "bytes": 40068,
+      "mime": "image/png"
+    }
+  ],
+  "clips": [
+    {
+      "name": "Idle",
+      "duration": 3.3,
+      "animatedBones": [
+        "Arm.0",
+        "Arm.1",
+        "Arm.2",
+        "Arm.3",
+        "Arm.4",
+        "Arm.5",
+        "Arm.6",
+        "Arm.7",
+        "Eye.L",
+        "Eye.R",
+        "Fin.L",
+        "Fin.R",
+        "Float",
+        "Head"
+      ]
+    },
+    {
+      "name": "Listen",
+      "duration": 2.8333333333333335,
+      "animatedBones": [
+        "Arm.0",
+        "Arm.1",
+        "Arm.2",
+        "Arm.3",
+        "Arm.4",
+        "Arm.5",
+        "Arm.6",
+        "Arm.7",
+        "Eye.L",
+        "Eye.R",
+        "Fin.L",
+        "Fin.R",
+        "Float",
+        "Head"
+      ]
+    },
+    {
+      "name": "React",
+      "duration": 1.7666666666666666,
+      "animatedBones": [
+        "Arm.0",
+        "Arm.1",
+        "Arm.2",
+        "Arm.3",
+        "Arm.4",
+        "Arm.5",
+        "Arm.6",
+        "Arm.7",
+        "Eye.L",
+        "Eye.R",
+        "Fin.L",
+        "Fin.R",
+        "Float",
+        "Head"
+      ]
+    }
+  ]
+}

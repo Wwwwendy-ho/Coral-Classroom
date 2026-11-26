@@ -1,7 +1,7 @@
-"""Build Echo beluga and Pip royal gramma. Blender 4.3 CPU only.
+﻿"""Build Echo beluga and Pip royal gramma. Blender 4.3 CPU only.
 blender -b --factory-startup --python tools/art/build_echo_pip.py -- --character echo --output /workspace/work/vertebrate-production/echo
 """
-import argparse, json, math, struct, sys, zlib
+import argparse, importlib.util, json, math, struct, sys, zlib
 from pathlib import Path
 import bpy
 import numpy as np
@@ -135,28 +135,28 @@ def body(u,v,extra=0):
 
 def eye_axes(side):
     if CHAR=='echo':
-        c=Vector((side*.365,-.936,1.79)); n=Vector((side*.80,-.59,.05)).normalized();r=.199
+        c=Vector((side*.448,-.915,1.785)); n=Vector((side*.86,-.50,.05)).normalized();r=.180
     else:
-        c=Vector((side*.25,-.742,1.57)); n=Vector((side*.91,-.41,.06)).normalized();r=.176
+        c=Vector((side*.312,-.735,1.565)); n=Vector((side*.94,-.33,.06)).normalized();r=.160
     h=Z.cross(n).normalized(); w=n.cross(h).normalized()
     return c,h,w,n,r
 
 def eye_point(side,u,v):
-    c,h,w,n,r=eye_axes(side);a=-TAU*u;t=1.48*v
-    return c+r*(math.sin(t)*(math.cos(a)*h+math.sin(a)*w)+.62*math.cos(t)*n)
+    c,h,w,n,r=eye_axes(side);a=-TAU*u;t=1.48*v;flat=.42 if CHAR=='echo' else .38
+    return c+r*(math.sin(t)*(math.cos(a)*h+math.sin(a)*w)+flat*math.cos(t)*n)
 
 def orbit(side,u,v):
     # A tapered continuous annulus covers the globe margins and sinks into the cheek.
-    c,h,w,n,r=eye_axes(side);a=TAU*u
+    c,h,w,n,r=eye_axes(side);a=TAU*u;flat=.42 if CHAR=='echo' else .38
     upper=max(0,math.sin(a));lower=max(0,-math.sin(a))
     inner_w=.94 if CHAR=='echo' else .87
     inner_h=(.87-.045*upper+.025*lower) if CHAR=='echo' else (.80-.09*upper+.04*lower)
     width=r*(inner_w+.59*v)
     height=r*(inner_h+.76*v)
     inner_radius=r*math.sqrt((inner_w*math.cos(a))**2+(inner_h*math.sin(a))**2)
-    innerdepth=.62*math.sqrt(max(0,r*r-inner_radius*inner_radius))+.003
+    innerdepth=flat*math.sqrt(max(0,r*r-inner_radius*inner_radius))+.003
     radius=math.sqrt((width*math.cos(a))**2+(height*math.sin(a))**2)
-    depth=.62*math.sqrt(max(0,r*r-radius*radius))+.006 if radius<r else lerp(.006,-.135,ease(r,r*1.52,radius))
+    depth=flat*math.sqrt(max(0,r*r-radius*radius))+.006 if radius<r else lerp(.006,-.135,ease(r,r*1.52,radius))
     return c+width*math.cos(a)*h+height*math.sin(a)*w+n*depth
 
 def ellipsoid(center,radius,u,v):
@@ -249,7 +249,7 @@ def box_face(center,half,axis,sign,u,v):
 
 def make_mesh(lod,mat,rig):
     near=lod=='close';s=lambda a,b:b if near else a;b=Builder()
-    b.grid(body,s(24,40),s(35,66),'body',weights,True)
+    b.grid(body,s(30,44),s(44,70),'body',weights,True)
     if CHAR=='echo':
         b.grid(lambda u,v:ellipsoid((0,-1.18,1.555),(.29,.23,.17),u,.002+.996*v),s(20,30),s(10,16),'jaw','Head',True)
         b.grid(lambda u,v:ellipsoid((0,-1.14,1.43),(.265,.215,.105),u,.002+.996*v),s(20,30),s(8,12),'jaw','Head',True)
@@ -298,27 +298,46 @@ def clouds(u,v):
         result += weight*map_coordinates(NOISE,[(v*scale+31.3)%256,(u*scale+17.7)%256],order=1,mode='wrap')
     return result
 
+def body_xyz(u,v):
+    # Per-texel 3D position of the body surface (same parameterization as body()).
+    a=TAU*u;xyz=np.zeros(u.shape+(3,),np.float32)
+    for j,vv in enumerate(v[:,0]):
+        y,z,w,h=frame(float(vv))
+        org=(1+.012*np.sin(a[j]*3+vv*15)*math.sin(math.pi*vv)**2) if CHAR=='echo' else (1+.006*np.cos(a[j]*31+vv*97)*math.sin(math.pi*vv))
+        xyz[j,:,0]=np.sin(a[j])*w*org;xyz[j,:,1]=y;xyz[j,:,2]=z+np.cos(a[j])*h*org
+    return xyz
+
+def cheek_blush(u,v):
+    # Soft warm rosy cheek spots beneath and slightly forward of each eye.
+    p=body_xyz(u,v);out=np.zeros(u.shape,np.float32)
+    for side in (-1,1):
+        c,h,w,n,r=eye_axes(side)
+        tgt=np.array(c)+np.array((-side*.045,-.075,-.215) if CHAR=='echo' else (-side*.035,-.05,-.17))
+        out=np.maximum(out,np.exp(-(np.linalg.norm(p-tgt,axis=-1)/(.095 if CHAR=='echo' else .068))**2))
+    return out
+
 def pigment(tile,u,v):
     cloud=clouds(u,v);zero=np.zeros_like(u)
     if tile=='eye':
-        a=-TAU*u;r=1.48*v;iris=np.clip(((.78 if CHAR=='echo' else .88)-r)/.03,0,1)
+        a=-TAU*u;r=1.48*v;iris=np.clip(((.94 if CHAR=='echo' else .80)-r)/.03,0,1)
         rgb=tint((250,247,239),(167,171,181),np.clip((r-.6)*.3,0,.4))
         fiber=.12*np.sin(a*87+r*13)+.08*np.sin(a*121-r*23)
-        col=tint((8,66,83),(50,166,188),np.clip(.45+.35*np.sin(r*5)+fiber,0,1)) if CHAR=='echo' else tint((86,37,9),(244,175,39),np.clip(.4+.4*np.sin(r*5)+fiber,0,1))
-        rgb=rgb+(col-rgb)*iris[...,None];rgb=paint(rgb,(9,19,28),np.exp(-((r-(.74 if CHAR=='echo' else .84))/.027)**2)*.9)
-        rgb=paint(rgb,(6,11,19),np.clip(((.53 if CHAR=='echo' else .63)-r)/.018,0,1))
+        col=tint((5,30,46),(24,104,126),np.clip(.40+.35*np.sin(r*5)+fiber,0,1)) if CHAR=='echo' else tint((40,16,6),(176,104,24),np.clip(.38+.40*np.sin(r*5)+fiber,0,1))
+        rgb=rgb+(col-rgb)*iris[...,None];rgb=paint(rgb,(5,12,20),np.exp(-((r-(.90 if CHAR=='echo' else .76))/.030)**2)*.92)
+        rgb=paint(rgb,(4,8,14),np.clip(((.62 if CHAR=='echo' else .50)-r)/.018,0,1))
         x,y=np.sin(r)*np.cos(a),np.sin(r)*np.sin(a)
-        light=np.exp(-(((x+.16)/.080)**2+((y-.24)/.070)**2))
-        rgb=paint(rgb,(255,254,248),np.clip((light-.17)*1.5,0,.94))
-        return rgb,.23+zero,zero
+        light=np.exp(-(((x+.16)/.10)**2+((y-.24)/.088)**2))
+        low=np.exp(-(((x-.14)/.042)**2+((y+.16)/.042)**2))
+        rgb=paint(rgb,(255,255,252),np.clip((light-.30)*16,0,1)*.99);rgb=paint(rgb,(255,255,252),np.clip((low-.30)*16,0,1)*.97)
+        return rgb,.10+zero,zero
     if tile=='brass':return tint((148,106,52),(235,201,123),.6+.1*cloud),.43+zero,.24+zero
-    if tile=='jaw':return tint((194,207,210),(244,240,226),.72+.045*cloud),.48+.025*cloud,zero
+    if tile=='jaw':return tint((194,207,210),(244,240,226),.72+.045*cloud),.84+zero,zero
     if tile=='orbit':
         rgb=tint((170,186,202),(237,240,235),.60+.06*cloud) if CHAR=='echo' else tint((79,23,128),(151,60,194),.62+.04*cloud)
         upper=np.maximum(0,np.sin(TAU*u))**.45
         crease=np.exp(-(v/.065)**2)*(.16+.62*upper)
         rgb=paint(rgb,(75,94,116) if CHAR=='echo' else (54,15,87),crease)
-        return rgb,.51+.04*cloud,zero
+        return rgb,.84+zero,zero
     if tile=='dark':return tint((23,26,37),(57,52,65),.35+.08*cloud),.65+zero,zero
     if tile=='body':
         if CHAR=='echo':
@@ -329,7 +348,8 @@ def pigment(tile,u,v):
             rgb=paint(rgb,(202,215,224),np.clip(.035+.035*fine,0,.09))
             blow=np.exp(-(((u-.0)/.035)**2+((v-.44)/.010)**2))+np.exp(-(((u-1)/.035)**2+((v-.44)/.010)**2))
             rgb=paint(rgb,(84,101,118),blow*.72)
-            return rgb,.47+.055*cloud,zero
+            rgb=paint(rgb,(250,138,150),.58*cheek_blush(u,v))
+            return rgb,np.clip(.84+.02*cloud,.80,.88),zero
         transition=np.clip((v-.48)/.19,0,1);transition=transition*transition*(3-2*transition)
         rgb=tint((105,29,174),(252,191,29),transition)
         belly=(.5-.5*np.cos(TAU*u))**3;rgb=paint(rgb,(173,84,208),.18*belly*(1-transition))
@@ -337,24 +357,25 @@ def pigment(tile,u,v):
         row=np.floor(v*69);sx=(u*42+.5*(row%2))%1;sy=(v*69)%1
         crescent=np.exp(-((np.sqrt(((sx-.5)/.54)**2+((sy-.05)/1.05)**2)-.88)/.055)**2)
         glint=np.exp(-(((sx-.37)/.23)**2+((sy-.42)/.20)**2))
-        rgb=paint(rgb,(55,15,98),.31*crescent*(1-.65*transition))
-        rgb=paint(rgb,(255,224,109),glint*(.10+.15*transition))
+        rgb=paint(rgb,(55,15,98),.09*crescent*(1-.65*transition))
+        rgb=paint(rgb,(255,224,109),glint*(.05+.08*transition))
         gill=np.exp(-((v-(.365+.025*np.cos(TAU*u)))/.0045)**2)*np.abs(np.sin(TAU*u))**6
         rgb=paint(rgb,(62,18,101),.66*gill)
         lateral=np.exp(-((np.abs(np.sin(TAU*u))-.985)/.018)**2)*np.clip((v-.43)*9,0,1)*np.clip((.9-v)*10,0,1)
         rgb=paint(rgb,(255,207,71),.14*lateral)
-        return rgb,.56-.10*glint+.07*crescent,zero
+        rgb=paint(rgb,(255,128,152),.52*cheek_blush(u,v))
+        return rgb,np.clip(.84-.04*glint+.03*crescent,.80,.88),zero
     if tile=='tailfin':
         rays=(.5+.5*np.cos(TAU*u*10))**18
         rgb=tint((221,132,10),(255,219,65),.4+.45*v+.04*cloud);rgb=paint(rgb,(255,238,154),.54*rays)
-        return rgb,.60-.12*rays,zero
+        return rgb,np.clip(.84-.03*rays,.80,.88),zero
     if tile=='fin':
-        if CHAR=='echo':return tint((184,197,213),(245,245,235),.69+.06*cloud+.12*v),.59+.02*cloud,zero
+        if CHAR=='echo':return tint((184,197,213),(245,245,235),.69+.06*cloud+.12*v),np.clip(.84+.02*cloud,.80,.88),zero
         ray=(.5+.5*np.cos(TAU*u*14+.12*v))**16
         rgb=tint((111,33,177),(255,198,44),np.clip(.12+.68*v+.14*cloud,0,1))
         rgb=paint(rgb,(248,220,151),.55*ray)
         rgb=paint(rgb,(87,27,144),.50*np.exp(-((v-.97)/.025)**2))
-        return rgb,.62-.13*ray,zero
+        return rgb,np.clip(.84-.03*ray,.80,.88),zero
     if tile in ('cloth','strap'):
         weave=.018*np.sin(u*TAU*160)+.018*np.sin(v*TAU*190)
         if CHAR=='echo':rgb=tint((22,49,121),(54,99,197),.47+.04*cloud+weave)
@@ -457,7 +478,7 @@ def build(lod,output,source):
     bpy.ops.export_scene.gltf(filepath=str(dest),export_format='GLB',use_selection=True,export_animations=True,export_animation_mode='ACTIONS',export_force_sampling=True,export_apply=False,export_image_format='AUTO',export_extras=False,export_yup=True,export_rest_position_armature=True)
     report=glb_stats(dest);report.update(exported_audit(dest));report['skinWeights']={'vertices':len(mesh.data.vertices),'unweighted':sum(not v.groups for v in mesh.data.vertices),'maxInfluences':max(len(v.groups) for v in mesh.data.vertices),'maxSumError':max(abs(sum(g.weight for g in v.groups)-1) for v in mesh.data.vertices)}
     report['character']=CHAR;report['species']='beluga' if CHAR=='echo' else 'royal gramma';report['validation']='Offline CPU, exported GLB reimported before review rendering; no browser/device FPS claim.'
-    assert report['triangles']<=(18000 if lod=='close' else 6500),report
+    assert report['triangles']<=(20000 if lod=='close' else 7500),report
     assert report['bytes']<(2000000 if lod=='close' else 850000),report
     assert report['draws']==report['materials']==1 and report['bones']<=14,report
     assert len(report['textureImages'])==2 and {c['name'] for c in report['clips']}=={'Idle','Listen','React'},report
@@ -468,15 +489,28 @@ def build(lod,output,source):
     print('VERTEBRATE_REPORT',json.dumps(report),flush=True)
 
 def main():
-    global CHAR
-    p=argparse.ArgumentParser();p.add_argument('--character',choices=['echo','pip'],required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--source',type=Path);p.add_argument('--skip-render',action='store_true');p.add_argument('--render-only',action='store_true');p.add_argument('--views',default='front,quarter,side,back,eyes');p.add_argument('--lod',choices=['both','board','close'],default='both');a=p.parse_args(sys.argv[sys.argv.index('--')+1:]);CHAR=a.character
+    global CHAR, REVIEW_VIEWS
+    p=argparse.ArgumentParser();p.add_argument('--character',choices=['echo','pip'],required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--source',type=Path);p.add_argument('--skip-render',action='store_true');p.add_argument('--render-only',action='store_true');p.add_argument('--views',default='front,quarter,side,back,eyes');p.add_argument('--lod',choices=['both','board','close'],default='both');a=p.parse_args(sys.argv[sys.argv.index('--')+1:]);CHAR=a.character;a.output=a.output.resolve();a.source=a.source.resolve() if a.source else None
+    if CHAR in ('pip','echo'):
+        # v25/v26: Route both Pip and Echo directly to the cast-standard conforming_eye.py builder in build_supporting_hosts.py
+        # (Pip: 76.5% iris fill, S-wave dorsal fin, enlarged twin catchlights & bold smile;
+        #  Echo: silky pearl-cream/coral-marigold finish, 3D NACA hydrofoil beluga paddle flippers, 76% teal-aqua eyes).
+        spec=importlib.util.spec_from_file_location('build_supporting_hosts',str(Path(__file__).with_name('build_supporting_hosts.py')))
+        sh=importlib.util.module_from_spec(spec);spec.loader.exec_module(sh)
+        a.output.mkdir(parents=True,exist_ok=True)
+        lods=('board','close') if a.lod=='both' else (a.lod,)
+        if not a.render_only:
+            for lod in lods:sh.build(CHAR,lod,a.output)
+        if not a.skip_render:
+            REVIEW_VIEWS=a.views.split(',')
+            for lod in lods:render_imported(a.output/f'{CHAR}-{lod}.glb',a.output,lod)
+        return
     if CHAR=='echo':ATLAS['fin']=(640,384,384,300);ATLAS.pop('tailfin',None)
     a.output.mkdir(parents=True,exist_ok=True);source=a.source or Path(__file__).resolve().parents[2]/'art-source/npcs'/CHAR;source.mkdir(parents=True,exist_ok=True)
     lods=('board','close') if a.lod=='both' else (a.lod,)
     if not a.render_only:
         for lod in lods:build(lod,a.output,source)
     if not a.skip_render:
-        global REVIEW_VIEWS
         REVIEW_VIEWS=a.views.split(',')
         for lod in lods:render_imported(a.output/f'{CHAR}-{lod}.glb',a.output,lod)
 if __name__=='__main__':main()

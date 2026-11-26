@@ -1,0 +1,61 @@
+{
+  "file": "restaurant-otter-close.glb",
+  "bytes": 797916,
+  "triangles": 19790,
+  "meshCount": 1,
+  "primitives": 1,
+  "materials": 1,
+  "bones": 6,
+  "maps": [
+    {
+      "width": 1024,
+      "height": 1024,
+      "bytes": 58125,
+      "mime": "image/jpeg"
+    },
+    {
+      "width": 256,
+      "height": 256,
+      "bytes": 1141,
+      "mime": "image/png"
+    }
+  ],
+  "clips": [
+    {
+      "name": "Idle",
+      "duration": 3.2,
+      "animatedBones": [
+        "Head",
+        "Paw.L",
+        "Paw.R",
+        "Root",
+        "Tail",
+        "Torso"
+      ]
+    },
+    {
+      "name": "Listen",
+      "duration": 2.6,
+      "animatedBones": [
+        "Head",
+        "Paw.L",
+        "Paw.R",
+        "Root",
+        "Tail",
+        "Torso"
+      ]
+    },
+    {
+      "name": "React",
+      "duration": 1.8,
+      "animatedBones": [
+        "Head",
+        "Paw.L",
+        "Paw.R",
+        "Root",
+        "Tail",
+        "Torso"
+      ]
+    }
+  ]
+}

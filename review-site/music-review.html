@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Coral Classroom — Soundtrack Audition Studio</title>
+<style>
+  :root { --bg:#eef7f8; --card:#fffdf8; --ink:#193a42; --muted:#56767d; --teal:#1c8c93; --gold:#e4c872; --night:#17313a; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:var(--ink); padding:18px; }
+  header { max-width:1280px; margin:0 auto 14px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; }
+  h1 { margin:0; font-size:1.35rem; }
+  .sub { color:var(--muted); font-size:.9rem; margin:2px 0 0; }
+  .bar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .pill { border:2px solid var(--gold); background:var(--card); color:var(--ink); border-radius:999px; padding:6px 14px; font-weight:700; cursor:pointer; }
+  .pill.on { background:var(--teal); color:#fff; border-color:var(--teal); }
+  .grid { max-width:1280px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(285px,1fr)); gap:12px; }
+  .card { background:var(--card); border:2px solid #d9e9eb; border-radius:18px; padding:12px 12px; display:flex; flex-direction:column; gap:7px; box-shadow:0 4px 14px rgba(25,58,66,.07); }
+  .card.is-night { background:var(--night); color:#eef8f8; border-color:#2c5965; }
+  .top { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+  .title { font-weight:800; font-size:.9rem; white-space:nowrap; min-width:0; overflow:hidden; text-overflow:ellipsis; }
+  .meta-row { display:flex; align-items:center; justify-content:space-between; gap:6px; font-size:.75rem; color:var(--muted); }
+  .card.is-night .meta-row { color:#9dc1c8; }
+  .tags { font-size:.75rem; color:var(--muted); white-space:nowrap; }
+  .card.is-night .tags { color:#9dc1c8; }
+  .seg { display:inline-flex; flex-shrink:0; border-radius:999px; background:rgba(28,140,147,.12); padding:2px; }
+  .seg button { border:none; background:transparent; color:inherit; font:700 .72rem/1 inherit; padding:4px 7px; border-radius:999px; cursor:pointer; white-space:nowrap; }
+  .seg button.active { background:var(--teal); color:#fff; }
+  .desc { font-size:.82rem; opacity:.88; min-height:2.7em; }
+  .ctrl { display:flex; align-items:center; gap:8px; }
+  .play { border:none; background:var(--teal); color:#fff; border-radius:10px; padding:6px 12px; font-weight:700; cursor:pointer; min-width:68px; }
+  .scrub { flex:1; accent-color:var(--teal); }
+  .time { font-variant-numeric:tabular-nums; font-size:.76rem; min-width:38px; text-align:right; opacity:.8; }
+  .foot { display:flex; align-items:center; justify-content:space-between; gap:6px; font-size:.74rem; opacity:.85; }
+  .track-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+  .dur { white-space:nowrap; font-variant-numeric:tabular-nums; opacity:.9; flex-shrink:0; }
+  .foot a { color:inherit; font-weight:700; text-decoration:none; border-bottom:1px dotted currentColor; white-space:nowrap; flex-shrink:0; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Coral Classroom — 16-Track Day &amp; Night Soundtrack Studio</h1>
+    <p class="sub">Cohesive Cozy-Oceanic Nintendo OST (8 regions × Day &amp; Night, 48–64 bar loops, MuseScore General SF2 + MIDI).</p>
+  </div>
+  <div class="bar">
+    <button type="button" id="focusToggle" class="pill" aria-pressed="false">🎧 Lesson Focus Filter (2400 Hz): OFF</button>
+    <button type="button" id="stopAll" class="pill">⏹ Stop</button>
+  </div>
+</header>
+<main class="grid" id="grid"></main>
+
+<script>
+(function(){
+  'use strict';
+  var REGIONS = [
+    { id:'cove', name:'1. Coral Cove', meta:'C maj · 4/4 · 104/80 BPM',
+      bars:'48', dayDur:'1:51', nightDur:'2:24',
+      day:'day-song', night:'night-song',
+      dayDesc:'Sunlit marimba, nylon guitar, flute & island percussion.',
+      nightDesc:'Starry celesta, detuned EP, harp, cello & slow strings.' },
+    { id:'town', name:'2. Harbor Town', meta:'G maj · 4/4 swing · 118/88 BPM',
+      bars:'48', dayDur:'1:38', nightDur:'2:11',
+      day:'region-town-song', night:'region-town-night-song',
+      dayDesc:'Upbeat boardwalk accordion, nylon guitar, flute & brass.',
+      nightDesc:'Lantern-lit EP jazz lounge, muted trumpet & brush groove.' },
+    { id:'lagoon', name:'3. Story Lagoon', meta:'D maj · 6/8 · 90/72 BPM',
+      bars:'48', dayDur:'1:36', nightDur:'2:00',
+      day:'region-lagoon-song', night:'region-lagoon-night-song',
+      dayDesc:'Dreamy 6/8 barcarolle with flute, oboe, harp & strings.',
+      nightDesc:'Bedtime 6/8 music box, rolling harp, cello & hushed flute.' },
+    { id:'caves', name:'4. Echo Caves', meta:'A Dorian · 4/4 · 86/74 BPM',
+      bars:'48', dayDur:'2:14', nightDur:'2:36',
+      day:'region-caves-song', night:'region-caves-night-song',
+      dayDesc:'Luminous A Dorian vibes & marimba with crystal echoes.',
+      nightDesc:'Bioluminescent glass-bell celesta, harp & fretless bass.' },
+    { id:'patterns', name:'5. Pattern Reef', meta:'F maj · 4/4 · 120/90 BPM',
+      bars:'48', dayDur:'1:36', nightDur:'2:08',
+      day:'region-patterns-song', night:'region-patterns-night-song',
+      dayDesc:'Upbeat puzzle-pop marimba, xylophone, clarinet & woodblock.',
+      nightDesc:'Cozy late-night kalimba, harp, soft marimba & brush tick.' },
+    { id:'beach', name:'6. Bottle Beach', meta:'C maj · 4/4 · 98/78 BPM',
+      bars:'48', dayDur:'1:58', nightDur:'2:28',
+      day:'region-beach-song', night:'region-beach-night-song',
+      dayDesc:'Breezy steel drum, nylon guitar bossa, harp & flute.',
+      nightDesc:'Moonlit fingerpicked guitar, Rhodes, cello & brush whisper.' },
+    { id:'light', name:'7. The Lighthouse', meta:'Eb maj · 3/4 · 86/74 BPM',
+      bars:'48', dayDur:'1:40', nightDur:'1:57',
+      day:'region-light-song', night:'region-light-night-song',
+      dayDesc:'Deadpan 3/4 clockwork waltz + crisp stay-alert pings.',
+      nightDesc:'Sleepy night-watch piano, bassoon & sweeping beam chime.' },
+    { id:'captain', name:"8. Captain's Deck", meta:'D min · 6/8 · 124/92 BPM',
+      bars:'64', dayDur:'1:33', nightDur:'2:05',
+      day:'region-captain-song', night:'region-captain-night-song',
+      dayDesc:'Heroic 6/8 horn & brass, spiccato strings, accordion & fiddle.',
+      nightDesc:'Starlit naval watch: solo horn, guitar, harp & cello.' }
+  ];
+
+  var ctx = null, lp = null, focusOn = false, active = null;
+  function ensureBus(){
+    if(!ctx){
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return null;
+      ctx = new AC();
+      lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass'; lp.Q.value = 0.5;
+      lp.frequency.value = focusOn ? 2400 : 18000;
+      lp.connect(ctx.destination);
+    }
+    if(ctx.state === 'suspended') ctx.resume();
+    return lp;
+  }
+
+  var focusBtn = document.getElementById('focusToggle');
+  focusBtn.addEventListener('click', function(){
+    focusOn = !focusOn;
+    focusBtn.classList.toggle('on', focusOn);
+    focusBtn.setAttribute('aria-pressed', String(focusOn));
+    focusBtn.textContent = '🎧 Lesson Focus Filter (2400 Hz): ' + (focusOn ? 'ON' : 'OFF');
+    if(lp && ctx){
+      var t = ctx.currentTime;
+      lp.frequency.cancelScheduledValues(t);
+      lp.frequency.setValueAtTime(lp.frequency.value, t);
+      lp.frequency.linearRampToValueAtTime(focusOn ? 2400 : 18000, t + 0.35);
+    }
+  });
+
+  function fmt(s){ if(!isFinite(s)) return '0:00'; var m = Math.floor(s/60), r = Math.floor(s%60); return m + ':' + (r<10?'0':'') + r; }
+
+  function stopActive(){
+    if(!active) return;
+    active.audio.pause();
+    active.playBtn.textContent = '▶ Play';
+    active = null;
+  }
+  document.getElementById('stopAll').addEventListener('click', stopActive);
+
+  var grid = document.getElementById('grid');
+  REGIONS.forEach(function(r){
+    var card = document.createElement('section');
+    card.className = 'card';
+    var mode = 'day';
+    var audio = new Audio();
+    audio.loop = true; audio.preload = 'none';
+    var wired = false;
+
+    card.innerHTML =
+      '<div class="top"><div class="title">' + r.name + '</div>' +
+      '<div class="seg"><button type="button" data-m="day" class="active">☀️ Day</button><button type="button" data-m="night">🌙 Night</button></div></div>' +
+      '<div class="meta-row"><span class="tags">' + r.meta + '</span><span class="dur">' + r.bars + ' bars · ' + r.dayDur + '</span></div>' +
+      '<div class="desc">' + r.dayDesc + '</div>' +
+      '<div class="ctrl"><button type="button" class="play">▶ Play</button><input type="range" class="scrub" min="0" max="100" value="0"><span class="time">0:00</span></div>' +
+      '<div class="foot"><span class="track-name">' + r.day + '.mp3</span><a class="mid-link" href="../game/assets/midi/' + r.day + '.mid" download>MIDI ↓</a></div>';
+
+    var playBtn = card.querySelector('.play'), scrub = card.querySelector('.scrub'), timeEl = card.querySelector('.time');
+    var descEl = card.querySelector('.desc'), trName = card.querySelector('.track-name'), durEl = card.querySelector('.dur'), midLink = card.querySelector('.mid-link');
+
+    function track(){ return mode === 'day' ? r.day : r.night; }
+    function loadSrc(){
+      var tr = track();
+      var url = '../game/' + tr + '.mp3';
+      if(audio.getAttribute('data-src') !== url){
+        audio.setAttribute('data-src', url);
+        audio.src = url;
+        scrub.value = 0;
+        timeEl.textContent = '0:00';
+      }
+      trName.textContent = tr + '.mp3';
+      durEl.textContent = r.bars + ' bars · ' + (mode === 'day' ? r.dayDur : r.nightDur);
+      midLink.href = '../game/assets/midi/' + tr + '.mid';
+      descEl.textContent = mode === 'day' ? r.dayDesc : r.nightDesc;
+      card.classList.toggle('is-night', mode === 'night');
+    }
+    loadSrc();
+
+    card.querySelectorAll('.seg button').forEach(function(b){
+      b.addEventListener('click', function(){
+        if(mode === b.dataset.m) return;
+        mode = b.dataset.m;
+        card.querySelectorAll('.seg button').forEach(function(x){ x.classList.toggle('active', x === b); });
+        var wasPlaying = active && active.audio === audio;
+        loadSrc();
+        if(wasPlaying){
+          var p = audio.play();
+          if(p && p.catch) p.catch(function(){
+            playBtn.textContent = '▶ Play';
+            if(active && active.audio === audio) active = null;
+          });
+        }
+      });
+    });
+
+    playBtn.addEventListener('click', function(){
+      if(active && active.audio === audio){ stopActive(); return; }
+      stopActive();
+      var bus = ensureBus();
+      if(bus && !wired){
+        try { ctx.createMediaElementSource(audio).connect(bus); wired = true; } catch(e){}
+      }
+      loadSrc();
+      audio.play().then(function(){
+        playBtn.textContent = '⏸ Pause';
+        active = { audio: audio, playBtn: playBtn };
+      }).catch(function(){});
+    });
+
+    audio.addEventListener('timeupdate', function(){
+      if(audio.duration){
+        scrub.value = (audio.currentTime / audio.duration) * 100;
+        timeEl.textContent = fmt(audio.currentTime);
+      }
+    });
+    scrub.addEventListener('input', function(){
+      if(audio.duration) audio.currentTime = (scrub.value / 100) * audio.duration;
+    });
+
+    grid.appendChild(card);
+  });
+})();
+</script>
+</body>
+</html>

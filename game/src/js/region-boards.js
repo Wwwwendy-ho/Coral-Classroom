@@ -75,22 +75,92 @@
       beach:openBeach, light:openLight, captain:openCaptain }[region];
     if(go){ if(immediate) go(); else regionTravel(region, go); }
   }
+  function regionBoardTownVenue(entry){
+    if(!entry) return null;
+    if(entry.practice && entry.practice.talk) return entry.practice.talk;
+    if(typeof TOWN_FOLK !== 'undefined' && TOWN_FOLK.some(function(f){ return f.id === entry.id; })) return entry.id;
+    return null;
+  }
+  function regionBoardCanEnterTown3d(){
+    return typeof R3 !== 'undefined' && !R3.failed &&
+      typeof regionPeopleOpen === 'function' && typeof reef3dMount === 'function';
+  }
+  function regionBoardEnterTownPlace(entry, venueId){
+    var st = regionBoardState('town');
+    var openActivity = entry.practice
+      ? { region:'town', id:entry.id, venueId:venueId, practice:entry.practice }
+      : { region:'town', id:venueId };
+    st.mode = 'board';
+    st.practice = null;
+    st.played = false;
+    st.activity = null;
+    st.completed = false;
+    st.pendingTownOpen = null;
+    try { Speech.stop(); } catch(e){}
+    if(S.view !== 'town' && S.view !== 'townTalk') regionBoardNavigate('town', true);
+    else S.view = 'town';
+    var root = app && typeof app.querySelector === 'function' ? app.querySelector('.rb-root[data-region-board="town"]') : null;
+    var guide = root && root.querySelector('.rb-guide');
+    if(guide && guide.open) guide.open = false;
+    if(R3.view && R3.view.encounter && typeof regionEncounterEnd === 'function') regionEncounterEnd(R3.view);
+    if(!root || !R3.view || R3.view.parked || !R3.view.region || R3.view.region.id !== 'town' || !R3.view.wrap || !R3.view.wrap.isConnected){
+      if(typeof render === 'function') render();
+      else regionBoardRender('town');
+      root = app && typeof app.querySelector === 'function' ? app.querySelector('.rb-root[data-region-board="town"]') : null;
+      guide = root && root.querySelector('.rb-guide');
+      if(guide && guide.open) guide.open = false;
+    }
+    var view = R3.view;
+    if(view && !view.parked && view.region && view.region.id === 'town' && view.regionPeople && view.wrap && view.wrap.isConnected){
+      if(view.dice && view.dice.rolling && typeof reef3dDiceDone === 'function') reef3dDiceDone(view, view.dice);
+      view.greetEpoch = (view.greetEpoch || 0) + 1;
+      if(regionPeopleOpen(view, 'town:' + venueId, openActivity)){
+        window.scrollTo(0, 0);
+        return true;
+      }
+      if(!view.leaving && !R3.failed){
+        st.pendingTownOpen = { venueId:venueId, activity:openActivity, pid:st.pid };
+        window.scrollTo(0, 0);
+        return true;
+      }
+    } else if(!R3.failed){
+      st.pendingTownOpen = { venueId:venueId, activity:openActivity, pid:st.pid };
+      window.scrollTo(0, 0);
+      return true;
+    }
+    return false;
+  }
   function regionBoardLaunch(activity){
     if(!activity || !REGION_BOARD_META[activity.region]) return false;
     var region = activity.region, id = String(activity.id || '');
     var entry = regionBoardActivities(region).find(function(a){ return a.id === id; });
     if(!entry) return false;
-    var retainedEncounter = regionEncounterKeep(R3.view, activity);
+    var rehearsal = entry.practice && !entry.practice.rule;
+    var townVenue = region === 'town' ? regionBoardTownVenue(entry) : null;
+    var keepTarget = townVenue ? { region:'town', id:townVenue } : activity;
+    var retainedEncounter = typeof regionEncounterKeep === 'function' && regionEncounterKeep(R3.view, keepTarget);
+    if(region === 'town' && townVenue && !retainedEncounter && regionBoardCanEnterTown3d()){
+      if(regionBoardEnterTownPlace(entry, townVenue)) return true;
+    }
     if(!retainedEncounter) reef3dUnmount();
     if(S.view !== region && !(region === 'lagoon' && S.view === 'lagoonRead') && !(region === 'town' && S.view === 'townTalk')) regionBoardNavigate(region, true);
     var st = regionBoardState(region);
-    var rehearsal = entry.practice && !entry.practice.rule;
-    st.played = !rehearsal; st.activity = rehearsal ? null : id; st.completed = false;
+    st.pendingTownOpen = null;
+    var townRepairEncounter = !!(retainedEncounter && rehearsal && region === 'town' && townVenue);
+    st.played = townRepairEncounter ? true : !rehearsal;
+    st.activity = townRepairEncounter ? townVenue : (rehearsal ? null : id);
+    st.completed = false;
     try { Speech.stop(); } catch(e){}
     if(rehearsal){
-      S.view = region;
+      if(townRepairEncounter){
+        S.town = Object.assign(S.town || {}, { id:townVenue, log:[], speaking:false, waiting:false, phase:'talk' });
+        S.view = 'townTalk';
+      } else {
+        S.view = region;
+      }
       st.practice = { activity:entry.practice, drafts:{}, revealed:{} };
       regionPracticeRender(region, st.practice);
+      if(townRepairEncounter && typeof regionEncounterAttach === 'function') regionEncounterAttach(app);
     } else if(region === 'lagoon') lagoonOpenStory(id);
     else if(region === 'town') townOpenTalk(id);
     else if(region === 'caves'){
@@ -128,22 +198,44 @@
   function regionBoardShowList(region){
     var st = regionBoardState(region);
     st.mode = 'list';
+    st.pendingTownOpen = null;
     render();
     window.scrollTo(0, 0);
   }
   function regionBoardListNav(region){
-    var st = S.regionBoard, page = app.querySelector('.nav-row');
-    if(!st || st.region !== region || st.mode !== 'list' || S.view !== region || !page || page.querySelector('[data-rb-board]')) return;
-    var button = document.createElement('button');
-    button.type = 'button'; button.className = 'back-btn rb-return'; button.dataset.rbBoard = region;
-    button.innerHTML = ccIcon('map') + ' Board';
-    button.addEventListener('click', function(){ regionBoardReturn(region); });
-    page.appendChild(button);
+    var st = S.regionBoard, page = app && typeof app.querySelector === 'function' ? app.querySelector('.nav-row') : null;
+    if(!st || st.region !== region || st.mode !== 'list' || S.view !== region || !page) return;
+    if(!page.querySelector('[data-rb-board]')){
+      var button = document.createElement('button');
+      button.type = 'button'; button.className = 'back-btn rb-return'; button.dataset.rbBoard = region;
+      button.innerHTML = ccIcon('map') + ' Board';
+      button.addEventListener('click', function(){ regionBoardReturn(region); });
+      page.appendChild(button);
+    }
+    if(region === 'town' && typeof REGION_PRACTICE !== 'undefined' && Array.isArray(REGION_PRACTICE.town) && REGION_PRACTICE.town.length){
+      var listPage = app.querySelector('.lg-page');
+      if(listPage && !listPage.querySelector('[data-rb-town-repairs]')){
+        var sec = document.createElement('section');
+        sec.className = 'tw-sec rb-town-repairs';
+        sec.setAttribute('data-rb-town-repairs', '1');
+        sec.innerHTML = '<h3>' + ccIcon('sparkle') + ' Quick repairs</h3><div class="rb-repair-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">' +
+          REGION_PRACTICE.town.map(function(pr){
+            return '<button type="button" class="rb-card" data-rb-town-repair="practice:' + esc(pr.id) + '" style="border:1px solid rgba(25,58,66,.16);background:rgba(255,250,235,.85)">' +
+              '<span class="rb-card-icon" aria-hidden="true">' + ccIcon(pr.icon || 'talk') + '</span>' +
+              '<span><b>' + esc(pr.name) + '</b><small>' + esc(pr.detail) + '</small></span></button>';
+          }).join('') + '</div>';
+        sec.querySelectorAll('[data-rb-town-repair]').forEach(function(b){
+          b.addEventListener('click', function(){ regionBoardLaunch({ region:'town', id:b.dataset.rbTownRepair }); });
+        });
+        listPage.appendChild(sec);
+      }
+    }
   }
   function regionBoardReturn(region){
     if(!REGION_BOARD_META[region]) return;
     var st = regionBoardState(region); st.mode = 'board';
     st.practice = null;
+    st.pendingTownOpen = null;
     if(region === 'lagoon'){ lagoonStop(); S.view = 'lagoon'; }
     else if(region === 'town'){ townStop(); S.view = 'town'; }
     else if(region === 'caves'){ cavesStopAll(); S.caves.sec = null; S.caves.line = null; S.caves.rule = null; S.caves.round = null; S.view = 'caves'; }
@@ -175,14 +267,16 @@
     app.innerHTML = '<section class="rb-root rw ' + (reefNight() ? 'night' : 'day') + '" data-region-board="' + region + '" aria-label="' + esc(meta.name) + ' board">' +
       '<div class="rb-overlay"><div class="rb-title">' + ccIcon(meta.icon) + '<span><b>' + esc(meta.name) + '</b><small>' + esc(meta.lead) + '</small></span></div>' +
       '<div class="rb-actions"><button type="button" data-rb-home aria-label="' + esc(homeLabel) + '">' + ccIcon(S.deckBack ? 'anchor' : 'map') + '<span>' + esc(homeLabel) + '</span></button>' +
-      '<button type="button" data-rb-roll aria-label="Choose or roll a die">' + ccIcon('dice') + '<span>Dice</span></button>' +
-      '<button type="button" class="rb-activities" data-rb-list aria-label="Activities">' + ccIcon('cards') + '<span>Activities</span></button></div></div>' +
+      '<button type="button" class="rb-activities" data-rb-list aria-label="Activities">' + ccIcon('cards') + '<span>Activities</span></button>' +
+      '<button type="button" class="rb-roll" data-rb-roll aria-label="Choose or roll a die">' + ccIcon('dice') + '<span>Dice</span></button>' +
+      '<button type="button" class="rb-map" data-rb-map data-r3-map aria-label="Treasure map">' + ccIcon('map') + '<span>Map</span></button></div></div>' +
       '<div class="rw-scene rb-scene"><div class="rb-fallback"><h2>' + esc(meta.name) + '</h2><p>' + esc(meta.lead) + '</p>' + cards + '</div></div>' +
       '<details class="rb-guide"><summary>' + ccIcon('compass') + ' Travel</summary><div class="rb-guide-list">' +
       '<nav class="rb-near" aria-label="Nearby places"><span>Nearby</span>' + links + '</nav>' + cards + '</div></details>' +
       '</section>';
-    var root = app.querySelector('.rb-root');
+    var root = app.querySelector('.rb-root'), guide = root.querySelector('.rb-guide');
     root.addEventListener('click', function(e){
+      if(guide && guide.open && !guide.contains(e.target) && !e.target.closest('.r3-menu, .r3-menubtn')) guide.open = false;
       var b = e.target.closest('button'); if(!b || !root.contains(b)) return;
       if(b.hasAttribute('data-rb-home')){ regionTravel(S.deckBack ? 'captain' : 'cove', goHome); return; }
       if(b.hasAttribute('data-rb-roll')){
@@ -192,10 +286,18 @@
         }
         return;
       }
+      if(b.hasAttribute('data-rb-map')){
+        var vm = R3.view;
+        if(vm && vm.region && vm.region.id === region && !vm.moving && !vm.wrap.querySelector('.r3-panel')) reef3dMap(vm);
+        return;
+      }
       if(b.hasAttribute('data-rb-list')){ regionBoardShowList(region); return; }
       if(b.dataset.rbRegion){ regionBoardNavigate(b.dataset.rbRegion); return; }
       if(b.dataset.rbActivity){ regionBoardLaunch({ region:region, id:b.dataset.rbActivity }); }
     });
+    if(guide){
+      guide.addEventListener('keydown', function(e){ if(e.key === 'Escape' && guide.open){ e.preventDefault(); guide.open = false; } });
+    }
     reef3dMount(root, zones);
     reefBoardMenuSync();
     return true;
@@ -210,12 +312,30 @@
       position:v && v.region && v.region.id === region ? v.at : null };
   };
   afterRender('region board lifecycle', function(){
-    var root = app.querySelector('.rb-root[data-region-board]');
+    var st = S.regionBoard;
+    if(st && st.region === 'town' && st.practice && S.view === 'townTalk' &&
+       app && typeof app.querySelector === 'function' && !app.querySelector('[data-rp-back]')){
+      regionPracticeRender('town', st.practice);
+    }
+    var root = app && typeof app.querySelector === 'function' ? app.querySelector('.rb-root[data-region-board]') : null;
     var encounter = regionEncounterAttach(app);
     if(!root && !encounter && R3.view && R3.view.region) reef3dUnmount(R3.view.region.id);
-    if(!root && S.regionBoard) regionBoardListNav(S.regionBoard.region);
+    if(!root && st) regionBoardListNav(st.region);
     regionPeopleLessonSync();
   });
+  if(typeof app !== 'undefined' && app && typeof app.addEventListener === 'function'){
+    app.addEventListener('click', function(e){
+      var btn = e.target && typeof e.target.closest === 'function' ? e.target.closest('[data-tw-open]') : null;
+      if(!btn || !btn.dataset || !btn.dataset.twOpen) return;
+      var st = S.regionBoard;
+      if(!st || st.region !== 'town' || (S.view !== 'town' && S.view !== 'townTalk')) return;
+      if(!regionBoardCanEnterTown3d()) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+      regionBoardLaunch({ region:'town', id:btn.dataset.twOpen });
+    }, true);
+  }
   // Learning screens can render directly after a reply or a listening step.
   var regionPeopleScreenWatch = new MutationObserver(function(){
     if(!regionEncounterAttach(app) && R3.view && R3.view.encounter && !regionEncounterActive(R3.view)) regionEncounterEnd(R3.view);

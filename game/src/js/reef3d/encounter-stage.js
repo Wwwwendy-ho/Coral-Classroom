@@ -60,7 +60,9 @@
     // The merged world model faces positive Z; turn it a touch toward the learner.
     actor.rotation.y = saved.rotation.y + .1;
     if(typeof regionResidentEncounter==='function') regionResidentEncounter(view,actor);
-    regionEncounterSightline(view);
+    if(!(typeof regionEncounterInteriorBegin==='function' && regionEncounterInteriorBegin(view))){
+      regionEncounterSightline(view);
+    }
     reef3dQEncounter(view,true);
     if(view.post) view.post.on = false;
     view.wrap.classList.add('rpg-stage-scene', 'rpg-stage-intro');
@@ -70,7 +72,7 @@
   }
   function regionEncounterSightline(view){
     var e = view && view.encounter;
-    if(!e || !view.cam || !view.scene || !window.THREE) return;
+    if(!e || e.interior || !view.cam || !view.scene || !window.THREE) return;
     if(e.sightlineHidden){
       e.sightlineHidden.forEach(function(savedObject){ savedObject.object.visible = savedObject.visible; });
     }
@@ -224,6 +226,7 @@
   }
   function regionEncounterCamera(view, out, look){
     if(!regionEncounterActive(view)) return false;
+    if(typeof regionEncounterInteriorCamera==='function' && regionEncounterInteriorCamera(view, out, look)) return true;
     var actor = view.encounter.actor;
     if(!actor || !actor.position) return false;
     var p=actor.position, e=view.encounter, b=e.actorBounds;
@@ -246,9 +249,10 @@
     var e = view.encounter, actor = e.actor, base = e.savedActorTransform;
     if(view.post) view.post.on=false;
     if(!actor || !base) return;
-    if(e.sightlineBounds !== e.actorBounds || e.sightlineX !== actor.position.x || e.sightlineZ !== actor.position.z){
+    if(!e.interior && (e.sightlineBounds !== e.actorBounds || e.sightlineX !== actor.position.x || e.sightlineZ !== actor.position.z)){
       regionEncounterSightline(view);
     }
+    if(e.interior && typeof regionEncounterInteriorTick==='function') regionEncounterInteriorTick(view, now);
     var speaking = false;
     if(e.region === 'town' && e.phase === 'lesson' && S.town){
       var i = S.town.speaking;
@@ -301,6 +305,7 @@
     if(!e) return false;
     if(typeof regionPeopleIntroCancel==='function') regionPeopleIntroCancel(view);
     if(typeof regionResidentCloseEnd==='function') regionResidentCloseEnd(view,e);
+    if(typeof regionEncounterInteriorEnd==='function') regionEncounterInteriorEnd(view,e);
     var actor = e.actor, saved = e.savedActorTransform;
     if(actor && saved){ actor.position.copy(saved.position); actor.rotation.copy(saved.rotation); actor.scale.copy(saved.scale); }
     (e.hiddenObjects || []).forEach(function(savedObject){ savedObject.object.visible=savedObject.visible; });
@@ -321,6 +326,13 @@
     document.body.classList.remove('rpg-lesson');
     if(!document.querySelector('.r3')) document.body.classList.remove('r3-full');
     view.encounter = null;
+    if(e._wasInterior && view.camPos && view.camLook && view.cam && typeof reef3dCamTarget === 'function'){
+      reef3dCamTarget(view, view.camPos, view.camLook);
+      view.cam.position.copy(view.camPos);
+      view.cam.lookAt(view.camLook);
+      view.camModeWas = view.camMode;
+      view.camGlide = 0;
+    }
     reef3dQEncounter(view,false);
     view.w = 0;
     return true;

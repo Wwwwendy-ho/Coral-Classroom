@@ -1,0 +1,570 @@
+/* ==========================================================================
+   CORAL CLASSROOM — JAMBOREE FEATURES UI
+   Switch-era frosted-glass overlays, pearl/gold accents, 3D speech bubbles,
+   compact zero-scroll grids (1–6 items fit cleanly on 1280x800 & 390x844).
+   ========================================================================== */
+
+:root {
+  --jmb-glass: rgba(252, 249, 240, 0.88);
+  --jmb-glass-strong: rgba(255, 252, 244, 0.94);
+  --jmb-glass-border: rgba(255, 255, 255, 0.78);
+  --jmb-pearl: #fffdf7;
+  --jmb-pearl-tint: rgba(233, 245, 244, 0.72);
+  --jmb-gold: #f0c44d;
+  --jmb-gold-deep: #b8821d;
+  --jmb-gold-glow: rgba(240, 196, 77, 0.32);
+  --jmb-ink: #173a44;
+  --jmb-ink-soft: #4c6c75;
+  --jmb-teal: #1b8c8e;
+  --jmb-coral: #e46f54;
+  --jmb-radius: 22px;
+  --jmb-radius-sm: 14px;
+  --jmb-shadow: 0 14px 34px rgba(12, 42, 52, 0.22), 0 3px 0 rgba(184, 130, 29, 0.22);
+  --jmb-pop: cubic-bezier(0.22, 1.28, 0.36, 1);
+}
+
+:root[data-theme="dark"],
+.r3.night {
+  --jmb-glass: rgba(16, 44, 54, 0.9);
+  --jmb-glass-strong: rgba(20, 52, 64, 0.95);
+  --jmb-glass-border: rgba(233, 217, 168, 0.28);
+  --jmb-pearl: #1b4350;
+  --jmb-pearl-tint: rgba(26, 66, 78, 0.78);
+  --jmb-gold: #f4cc63;
+  --jmb-gold-deep: #d9a438;
+  --jmb-gold-glow: rgba(244, 204, 99, 0.24);
+  --jmb-ink: #f3f7f2;
+  --jmb-ink-soft: #b8d2d6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --jmb-glass: rgba(16, 44, 54, 0.9);
+    --jmb-glass-strong: rgba(20, 52, 64, 0.95);
+    --jmb-glass-border: rgba(233, 217, 168, 0.28);
+    --jmb-pearl: #1b4350;
+    --jmb-pearl-tint: rgba(26, 66, 78, 0.78);
+    --jmb-ink: #f3f7f2;
+    --jmb-ink-soft: #b8d2d6;
+  }
+}
+
+/* ---------- Shared Overlay & Frosted-Glass Panel Shell ---------- */
+.jmb-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 48;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(12px, env(safe-area-inset-top, 0px))
+           max(12px, env(safe-area-inset-right, 0px))
+           max(12px, env(safe-area-inset-bottom, 0px))
+           max(12px, env(safe-area-inset-left, 0px));
+  background: rgba(9, 34, 43, 0.42);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.jmb-panel {
+  position: relative;
+  width: min(740px, 100%);
+  max-height: calc(100dvh - 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--jmb-radius);
+  background: var(--jmb-glass);
+  color: var(--jmb-ink);
+  border: 2px solid var(--jmb-glass-border);
+  box-shadow: var(--jmb-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(14px) saturate(1.25);
+  -webkit-backdrop-filter: blur(14px) saturate(1.25);
+  overflow: hidden;
+  animation: jmbPanelIn 0.26s var(--jmb-pop) both;
+}
+
+.jmb-panel--wide {
+  width: min(860px, 100%);
+}
+
+.jmb-panel--compact {
+  width: min(540px, 100%);
+}
+
+@keyframes jmbPanelIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.jmb-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1.5px solid rgba(240, 196, 77, 0.35);
+  flex-shrink: 0;
+}
+
+.jmb-panel-title {
+  margin: 0;
+  font: 800 1.2rem/1.15 'Baloo 2', system-ui, sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--jmb-ink);
+}
+
+.jmb-panel-sub {
+  margin: 2px 0 0;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--jmb-ink-soft);
+}
+
+.jmb-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.jmb-panel-body--scroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.jmb-panel-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 6px;
+  flex-shrink: 0;
+}
+
+/* ---------- Buttons, Badges & Pearl/Gold Pills ---------- */
+.jmb-close,
+.jmb-btn {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  font: 800 0.92rem/1.1 'Baloo 2', system-ui, sans-serif;
+  border-radius: 999px;
+  padding: 8px 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.jmb-close {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  background: var(--jmb-pearl-tint);
+  color: var(--jmb-ink);
+  box-shadow: inset 0 0 0 1.5px var(--jmb-glass-border);
+}
+
+.jmb-btn {
+  background: linear-gradient(180deg, #fffdf8, #f2ead4);
+  color: #3f2c1b;
+  box-shadow: 0 3px 0 rgba(184, 130, 29, 0.35), 0 4px 10px rgba(12, 42, 52, 0.12);
+}
+
+.jmb-btn--gold {
+  background: linear-gradient(180deg, #ffe285, #f0c44d);
+  color: #462c06;
+  box-shadow: 0 3px 0 #b8821d, 0 6px 14px var(--jmb-gold-glow);
+}
+
+.jmb-btn--teal {
+  background: linear-gradient(180deg, #35b4b1, #1b8c8e);
+  color: #ffffff;
+  box-shadow: 0 3px 0 #105d60, 0 6px 14px rgba(27, 140, 142, 0.28);
+}
+
+.jmb-btn--coral {
+  background: linear-gradient(180deg, #f38b72, #e46f54);
+  color: #ffffff;
+  box-shadow: 0 3px 0 #a9442d;
+}
+
+.jmb-btn:active,
+.jmb-close:active {
+  transform: translateY(2px);
+}
+
+.jmb-btn:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.jmb-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font: 800 0.82rem/1.1 'Baloo 2', system-ui, sans-serif;
+  background: var(--jmb-pearl-tint);
+  color: var(--jmb-ink);
+  border: 1.5px solid rgba(240, 196, 77, 0.45);
+}
+
+/* ---------- Responsive Multi-Column Grids (1–6 items zero-scroll) ---------- */
+.jmb-grid,
+.jmb-shop-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  align-items: stretch;
+}
+
+.jmb-grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.jmb-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 10px;
+  border-radius: var(--jmb-radius-sm);
+  background: var(--jmb-glass-strong);
+  border: 1.5px solid var(--jmb-glass-border);
+  box-shadow: 0 4px 12px rgba(12, 42, 52, 0.08), inset 0 0 0 1px rgba(240, 196, 77, 0.18);
+  text-align: center;
+  transition: transform 0.14s ease, border-color 0.14s ease;
+}
+
+.jmb-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--jmb-gold);
+}
+
+.jmb-card.is-selected,
+.jmb-card[aria-pressed="true"] {
+  border-color: var(--jmb-gold);
+  box-shadow: 0 0 0 2px var(--jmb-gold-glow), 0 6px 14px rgba(12, 42, 52, 0.14);
+}
+
+.jmb-card-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.jmb-card-title {
+  margin: 0;
+  font: 800 0.94rem/1.15 'Baloo 2', system-ui, sans-serif;
+  color: var(--jmb-ink);
+}
+
+.jmb-card-meta {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--jmb-ink-soft);
+}
+
+/* ---------- 3D-Anchored Speech Bubble & Kiko Silent Hint ---------- */
+.jmb-speech-bubble {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 6;
+  max-width: min(260px, 72vw);
+  padding: 8px 13px;
+  border-radius: 18px 18px 18px 6px;
+  background: var(--jmb-glass-strong);
+  color: var(--jmb-ink);
+  border: 2px solid var(--jmb-gold);
+  box-shadow: 0 8px 20px rgba(12, 42, 52, 0.22);
+  font: 800 0.9rem/1.25 'Baloo 2', system-ui, sans-serif;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  will-change: transform, opacity;
+  animation: jmbBubblePop 0.24s var(--jmb-pop) both;
+}
+
+.jmb-speech-bubble::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  bottom: -8px;
+  width: 12px;
+  height: 12px;
+  background: var(--jmb-glass-strong);
+  border-right: 2px solid var(--jmb-gold);
+  border-bottom: 2px solid var(--jmb-gold);
+  transform: rotate(45deg);
+}
+
+@keyframes jmbBubblePop {
+  from { opacity: 0; transform: translate(-50%, -90%) scale(0.86); }
+  to   { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+}
+
+.jmb-kiko-hint {
+  position: absolute;
+  left: 50%;
+  top: 16px;
+  z-index: 7;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(320px, calc(100% - 28px));
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--jmb-glass-strong);
+  color: var(--jmb-ink);
+  border: 2px solid rgba(114, 212, 206, 0.72);
+  box-shadow: 0 8px 20px rgba(12, 42, 52, 0.18);
+  font: 800 0.88rem/1.15 'Baloo 2', system-ui, sans-serif;
+  pointer-events: none;
+  animation: jmbHintFloat 2.4s ease-in-out infinite;
+}
+
+@keyframes jmbHintFloat {
+  0%, 100% { transform: translate(-50%, 0); }
+  50%      { transform: translate(-50%, -4px); }
+}
+
+/* ---------- Showtime Minigame HUD ---------- */
+.jmb-showtime {
+  position: absolute;
+  inset: 12px;
+  z-index: 18;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.jmb-showtime-bar {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: min(560px, 100%);
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--jmb-glass-strong);
+  color: var(--jmb-ink);
+  border: 2px solid var(--jmb-gold);
+  box-shadow: var(--jmb-shadow);
+  font: 800 0.95rem/1.1 'Baloo 2', system-ui, sans-serif;
+}
+
+.jmb-showtime-prompt {
+  pointer-events: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--jmb-radius);
+  background: var(--jmb-glass);
+  border: 2px solid var(--jmb-glass-border);
+  box-shadow: var(--jmb-shadow);
+  max-width: min(520px, 100%);
+}
+
+/* ---------- Room & Region Feature Panels ---------- */
+.jmb-order-tray,
+.jmb-tray {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+  padding: 10px;
+  border-radius: var(--jmb-radius-sm);
+  background: var(--jmb-pearl-tint);
+  border: 1.5px dashed var(--jmb-gold);
+}
+
+.jmb-block-forge,
+.jmb-forge {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.jmb-sign-repair,
+.jmb-sign {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  align-items: center;
+}
+
+.jmb-sign-plank {
+  padding: 12px;
+  border-radius: var(--jmb-radius-sm);
+  background: linear-gradient(180deg, #e7c99f, #cca472);
+  color: #3f2c1b;
+  border: 2px solid #9c7548;
+  font: 800 1rem/1.2 'Baloo 2', system-ui, sans-serif;
+  text-align: center;
+  box-shadow: 0 4px 0 #8a6439;
+}
+
+.jmb-telescope {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.jmb-telescope-lens {
+  aspect-ratio: 16 / 10;
+  max-height: 220px;
+  width: 100%;
+  border-radius: 18px;
+  background: radial-gradient(circle at 50% 45%, #1d4e66, #081e2c 78%);
+  border: 3px solid var(--jmb-gold);
+  box-shadow: inset 0 0 28px rgba(120, 220, 235, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f6e9c8;
+  overflow: hidden;
+}
+
+.jmb-gramophone {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.jmb-camera,
+.jmb-shell-camera {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.jmb-camera-frame {
+  position: relative;
+  border-radius: 16px;
+  border: 3px solid var(--jmb-gold);
+  background: var(--jmb-pearl-tint);
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.jmb-home-island,
+.jmb-island {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+/* ---------- Lantern Festival Banner ---------- */
+.jmb-lantern-banner,
+.jmb-festival-banner {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(560px, calc(100% - 24px));
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 224, 130, 0.94), rgba(244, 180, 74, 0.94));
+  color: #3f2704;
+  border: 2px solid #fff7dc;
+  box-shadow: 0 8px 24px rgba(184, 130, 29, 0.34);
+  font: 800 0.96rem/1.15 'Baloo 2', system-ui, sans-serif;
+  pointer-events: none;
+}
+
+/* ---------- Mobile Viewport (390x844): Compact Zero-Scroll ---------- */
+@media (max-width: 600px) {
+  .jmb-overlay {
+    padding: max(8px, env(safe-area-inset-top, 0px))
+             max(8px, env(safe-area-inset-right, 0px))
+             max(8px, env(safe-area-inset-bottom, 0px))
+             max(8px, env(safe-area-inset-left, 0px));
+  }
+  .jmb-panel {
+    max-height: calc(100dvh - 32px);
+    padding: 10px 12px;
+    gap: 8px;
+    border-radius: 18px;
+  }
+  .jmb-panel-title {
+    font-size: 1.05rem;
+  }
+  .jmb-grid,
+  .jmb-shop-grid,
+  .jmb-block-forge,
+  .jmb-forge,
+  .jmb-gramophone,
+  .jmb-home-island,
+  .jmb-island {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .jmb-telescope {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .jmb-telescope-lens {
+    max-height: 150px;
+  }
+  .jmb-card {
+    padding: 7px 6px;
+    gap: 4px;
+  }
+  .jmb-card-icon {
+    font-size: 1.45rem;
+  }
+  .jmb-card-title {
+    font-size: 0.84rem;
+  }
+  .jmb-card-meta {
+    font-size: 0.72rem;
+  }
+  .jmb-btn {
+    padding: 7px 12px;
+    font-size: 0.85rem;
+  }
+}
+
+/* ---------- Calm Motion & Reduced Motion ---------- */
+body.reef-calm .jmb-panel,
+body.reef-calm .jmb-speech-bubble,
+body.reef-calm .jmb-kiko-hint {
+  animation: none !important;
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jmb-panel,
+  .jmb-speech-bubble,
+  .jmb-kiko-hint {
+    animation: none !important;
+    transition: none !important;
+  }
+}

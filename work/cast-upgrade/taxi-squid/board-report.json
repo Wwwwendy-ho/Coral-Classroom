@@ -1,0 +1,79 @@
+{
+  "file": "taxi-squid-board.glb",
+  "bytes": 399548,
+  "triangles": 6944,
+  "meshCount": 1,
+  "primitives": 1,
+  "materials": 1,
+  "bones": 12,
+  "maps": [
+    {
+      "width": 1024,
+      "height": 1024,
+      "bytes": 71186,
+      "mime": "image/jpeg"
+    },
+    {
+      "width": 256,
+      "height": 256,
+      "bytes": 1188,
+      "mime": "image/png"
+    }
+  ],
+  "clips": [
+    {
+      "name": "Idle",
+      "duration": 3.2,
+      "animatedBones": [
+        "Arm.0",
+        "Arm.1",
+        "Arm.2",
+        "Arm.3",
+        "Arm.4",
+        "Arm.5",
+        "Fin.L",
+        "Fin.R",
+        "Float",
+        "Head",
+        "Tent.L",
+        "Tent.R"
+      ]
+    },
+    {
+      "name": "Listen",
+      "duration": 2.6,
+      "animatedBones": [
+        "Arm.0",
+        "Arm.1",
+        "Arm.2",
+        "Arm.3",
+        "Arm.4",
+        "Arm.5",
+        "Fin.L",
+        "Fin.R",
+        "Float",
+        "Head",
+        "Tent.L",
+        "Tent.R"
+      ]
+    },
+    {
+      "name": "React",
+      "duration": 1.8,
+      "animatedBones": [
+        "Arm.0",
+        "Arm.1",
+        "Arm.2",
+        "Arm.3",
+        "Arm.4",
+        "Arm.5",
+        "Fin.L",
+        "Fin.R",
+        "Float",
+        "Head",
+        "Tent.L",
+        "Tent.R"
+      ]
+    }
+  ]
+}

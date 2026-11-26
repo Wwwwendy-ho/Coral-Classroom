@@ -1,0 +1,69 @@
+{
+  "character": "Mira",
+  "candidate_only": true,
+  "source": "art-source/shelly/natural-mouth/shelly.blend (accepted organic A-eye closed-beak family source)",
+  "close": {
+    "path": "..\\work\\cast-upgrade\\v13\\mira\\mira-close.glb",
+    "bytes": 1422480,
+    "triangles": 15499,
+    "mesh_count": 1,
+    "primitive_count": 1,
+    "materials": 1,
+    "skins": 1,
+    "bones": 11,
+    "clips": [
+      "Idle",
+      "Listen",
+      "React"
+    ],
+    "maps": 2
+  },
+  "board": {
+    "path": "..\\work\\cast-upgrade\\v13\\mira\\mira-board.glb",
+    "bytes": 685756,
+    "triangles": 6988,
+    "mesh_count": 1,
+    "primitive_count": 1,
+    "materials": 1,
+    "skins": 1,
+    "bones": 11,
+    "clips": [
+      "Idle",
+      "Listen",
+      "React"
+    ],
+    "maps": 2
+  },
+  "texture_sizes": {
+    "close": [
+      [
+        1536,
+        1536
+      ],
+      [
+        512,
+        512
+      ]
+    ],
+    "board": [
+      [
+        768,
+        768
+      ],
+      [
+        256,
+        256
+      ]
+    ]
+  },
+  "proportion_changes": "Head 88%, body width114%, body height117%, longer flippers and neck; fitted field kit",
+  "bones": 11,
+  "clips": [
+    "Idle",
+    "Listen",
+    "React"
+  ],
+  "limitations": [
+    "Offline CPU validation only; world scale and runtime integration owned by root."
+  ]
+}

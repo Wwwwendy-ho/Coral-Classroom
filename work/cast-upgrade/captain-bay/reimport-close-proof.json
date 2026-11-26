@@ -1,0 +1,99 @@
+{
+  "source": "C:\\Users\\20750\\.gemini\\antigravity\\scratch\\Coral-Classroom\\work\\cast-upgrade\\captain-bay\\captain-bay-close.glb",
+  "sourceBytes": 1011936,
+  "reimportedSkinnedMeshes": 1,
+  "meshName": "Captain Bay",
+  "vertices": 11267,
+  "polygons": 19468,
+  "bones": [
+    "Float",
+    "Head",
+    "Tail",
+    "Eye.L",
+    "Fin.L",
+    "Eye.R",
+    "Fin.R"
+  ],
+  "proofs": [
+    {
+      "view": "front",
+      "clip": "Idle_captain-bay rig",
+      "frame": 1,
+      "boundsMin": [
+        -1.2200230360031128,
+        -0.7964091897010803,
+        0.19003556668758392
+      ],
+      "boundsMax": [
+        1.2199428081512451,
+        1.9400508403778076,
+        2.391679286956787
+      ],
+      "image": "C:\\Users\\20750\\.gemini\\antigravity\\scratch\\Coral-Classroom\\work\\cast-upgrade\\captain-bay\\proof-close-front.png"
+    },
+    {
+      "view": "quarter",
+      "clip": "Idle_captain-bay rig",
+      "frame": 1,
+      "boundsMin": [
+        -1.2200230360031128,
+        -0.7964091897010803,
+        0.19003556668758392
+      ],
+      "boundsMax": [
+        1.2199428081512451,
+        1.9400508403778076,
+        2.391679286956787
+      ],
+      "image": "C:\\Users\\20750\\.gemini\\antigravity\\scratch\\Coral-Classroom\\work\\cast-upgrade\\captain-bay\\proof-close-quarter.png"
+    },
+    {
+      "view": "side",
+      "clip": "Idle_captain-bay rig",
+      "frame": 1,
+      "boundsMin": [
+        -1.2200230360031128,
+        -0.7964091897010803,
+        0.19003556668758392
+      ],
+      "boundsMax": [
+        1.2199428081512451,
+        1.9400508403778076,
+        2.391679286956787
+      ],
+      "image": "C:\\Users\\20750\\.gemini\\antigravity\\scratch\\Coral-Classroom\\work\\cast-upgrade\\captain-bay\\proof-close-side.png"
+    },
+    {
+      "view": "back",
+      "clip": "Idle_captain-bay rig",
+      "frame": 1,
+      "boundsMin": [
+        -1.2200230360031128,
+        -0.7964091897010803,
+        0.19003556668758392
+      ],
+      "boundsMax": [
+        1.2199428081512451,
+        1.9400508403778076,
+        2.391679286956787
+      ],
+      "image": "C:\\Users\\20750\\.gemini\\antigravity\\scratch\\Coral-Classroom\\work\\cast-upgrade\\captain-bay\\proof-close-back.png"
+    },
+    {
+      "view": "reaction",
+      "clip": "React_captain-bay rig",
+      "frame": 20,
+      "boundsMin": [
+        -1.1105949878692627,
+        -0.8457639217376709,
+        0.2894340753555298
+      ],
+      "boundsMax": [
+        1.2173514366149902,
+        2.061051845550537,
+        2.47694730758667
+      ],
+      "image": "C:\\Users\\20750\\.gemini\\antigravity\\scratch\\Coral-Classroom\\work\\cast-upgrade\\captain-bay\\proof-close-reaction.png"
+    }
+  ]
+}

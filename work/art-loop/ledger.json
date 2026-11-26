@@ -1,0 +1,640 @@
+{
+  "rubricVersion": "1.0",
+  "passBar": 8.5,
+  "iterations": [
+    {
+      "iteration": 0,
+      "label": "Baseline (mario_party_v3)",
+      "date": "2026-11-24",
+      "scores": {
+        "silhouette": 7.4,
+        "eyesAndFinish": 7.2,
+        "grounding": 5.5,
+        "cameraDensity": 6.8,
+        "sculptedCraft": 7.0,
+        "runtimeBudget": 9.5
+      },
+      "weightedAverage": 7.1,
+      "passed": false,
+      "criticalDefects": [
+        "restaurant-otter misclassified as deep swimmer (size.z > 1.25 from tail) and floating above bistro counter",
+        "hotel-whale still had a UV pole pinch point at center of smile when viewed head-on",
+        "pharmacy-shrimp front pincers were thin tubes ending in disconnected teal balls",
+        "captain-deck default camera showed ~90% blank water outside rails; lighthouse had flat olive slab & boxy tree puffs; harbor town had bare grey paving between shops and quay"
+      ]
+    },
+    {
+      "iteration": 1,
+      "label": "Grounded Cast + North-Star Dioramas",
+      "date": "2026-11-24",
+      "scores": {
+        "silhouette": 8.6,
+        "eyesAndFinish": 8.5,
+        "grounding": 9.2,
+        "cameraDensity": 7.7,
+        "sculptedCraft": 7.8,
+        "runtimeBudget": 9.6
+      },
+      "weightedAverage": 8.46,
+      "passed": false,
+      "criticalDefects": []
+    },
+    {
+      "iteration": 2,
+      "label": "Iteration 2 (Zero-Context Adversarial Re-Grade by Gemini 4 Neon XHigh)",
+      "date": "2026-11-24",
+      "critic": "adversarial-critic (gemini-4-neon-xhigh)",
+      "scores": {
+        "silhouette": 5.2,
+        "eyesAndFinish": 4.8,
+        "grounding": 4.6,
+        "cameraDensity": 4.5,
+        "sculptedCraft": 4.4,
+        "runtimeBudget": 6.5
+      },
+      "weightedAverage": 4.95,
+      "passed": false
+    },
+    {
+      "iteration": 3,
+      "label": "Iteration 3 (Zero-Context Adversarial Re-Grade by Gemini 4 Neon XHigh)",
+      "date": "2026-11-24",
+      "critic": "adversarial-critic-v3 (gemini-4-neon-xhigh)",
+      "scores": {
+        "silhouette": 5.8,
+        "eyesAndFinish": 6.1,
+        "grounding": 5.1,
+        "cameraDensity": 5.9,
+        "sculptedCraft": 6.6,
+        "runtimeBudget": 8.4
+      },
+      "weightedAverage": 6.08,
+      "passed": false
+    },
+    {
+      "iteration": 4,
+      "label": "Iteration 4 (Zero-Context Adversarial Re-Grade by Gemini 4 Neon XHigh)",
+      "date": "2026-11-24",
+      "critic": "adversarial-critic-v4 (gemini-4-neon-xhigh)",
+      "scores": {
+        "silhouette": 5.9,
+        "eyesAndFinish": 6.7,
+        "grounding": 4.8,
+        "cameraDensity": 5.7,
+        "sculptedCraft": 6.3,
+        "runtimeBudget": 7.1
+      },
+      "weightedAverage": 5.97,
+      "passed": false,
+      "criticalDefects": [
+        "Lighthouse: cottage roof slices into Keeper Hana; left meadow blank; top sailboat clips cliff foam",
+        "Coral Cove: palm fronds 100% backface-culled invisible (bald sticks); heroBoatSpot impales conch pavilion; jagged islet foam & hard-edged star beam",
+        "Harbor Town: giant crate/crateBottles swallow streetlamp & clip seawall/pier; waterClear(4.5) emptied all visible basin sailboats",
+        "Hotel Whale top-pole dorsal shark-fin spike; Captain Bay pitch-black inverted hind flipper & visor-clipping eyebrow; kiko-*-close.glb > 1.4 MB"
+      ],
+      "distilledRules": [
+        "Always build two-sided closed thickness (upper + offset lower) for upward-facing palm fronds on single-sided MeshBasicMaterial.",
+        "Never move landmarks (like Lighthouse cottage) inward without checking host marker coordinates (>= 6.2u from main[0], >= 5.2u from main[1]).",
+        "Check every board GLB < 650 KB and close GLB < 1.4 MB (1433.6 KB) after EVERY Blender export."
+      ]
+    },
+    {
+      "iteration": 5,
+      "label": "Iteration 5 (Zero-Context Adversarial Re-Grade by Gemini 4 Neon XHigh)",
+      "date": "2026-11-24",
+      "critic": "adversarial-critic-v5 (gemini-4-neon-xhigh)",
+      "scores": {
+        "silhouette": 6.6,
+        "eyesAndFinish": 7.3,
+        "grounding": 5.9,
+        "cameraDensity": 6.7,
+        "sculptedCraft": 6.9,
+        "runtimeBudget": 8.8
+      },
+      "weightedAverage": 6.87,
+      "passed": false,
+      "criticalDefects": [
+        "Character/tile clipping: board.js light:['rock'] spawns a giant grey boulder through Keeper Hana & Shelly's tile (07-lighthouse); cottage overlaps lighthouse & cliff; Shrimp cap overlaps bottom shelf (05-pharmacy); gemBlue/gemPink poke out of playable tiles",
+        "Broken backface-culled scenery & character mesh/UV bugs: Coral Cove hero sailboat hull & mainsail culled invisible (01-coral-cove); Otter open black wrist-hole + half-red saucer; Shrimp south-pole belly knife crease + pink claw wrists; Captain Bay inverted-normal hind-flipper blade; Whale fluke-tip holes & vest zipper z-fighting",
+        "Captain's Deck ~45-50% barren plank desert (empty lower-right quadrant & left-center corridor) + starboard palm islet still cropped behind Travel (+3.4 sign error)"
+      ],
+      "distilledRules": [
+        "Always check board.js regionProps & gem placement against host markers and tile clearances before declaring a region un-clipped.",
+        "Emit both-winding / double-sided thickness for single-sided panelGrid boat hulls and sails on painted MeshBasicMaterial.",
+        "Always verify 3D axis sign (+X vs -X) on Captain's Deck before shifting coastal islets."
+      ]
+    },
+    {
+      "iteration": 6,
+      "label": "Iteration 6 (Zero-Context Adversarial Re-Grade by Gemini 4 Neon XHigh)",
+      "date": "2026-11-24",
+      "critic": "adversarial-critic-v6 (gemini-4-neon-xhigh)",
+      "scores": {
+        "silhouette": 7.4,
+        "eyesAndFinish": 7.5,
+        "grounding": 8.5,
+        "cameraDensity": 7.1,
+        "sculptedCraft": 7.9,
+        "runtimeBudget": 9.7
+      },
+      "weightedAverage": 7.88,
+      "passed": false,
+      "criticalDefects": [
+        "Captain's Deck midships lower-right quadrant & left-center corridor remain barren planks and starboard palm islet 70% cropped at x=100% because vignettes/islet were anchored to bow main[0]/main[1] instead of midships cx",
+        "Pharmacy Shrimp axial spine v=0 pole landed between its eyes, creating a bulbous forehead snout lump + UV pole pinch dot + vertical forehead creases, plus open hollow collar side gaps"
+      ],
+      "distilledRules": [
+        "Anchor Captain's Deck midships camera vignettes to ship center cx (not bow main[0]), since the default camera views midships.",
+        "Never place a UV/geometry pole (v=0) on a character's front face; keep poles on top (+Z under cap/crown) and bottom (-Z under collar/belly).",
+        "Avoid high-frequency vertex wave/caustic math on coarse 48x48 water planes; use smooth depth gradients + tiled CanvasTexture caustics."
+      ]
+    },
+    {
+      "iteration": 7,
+      "label": "Iteration 7 (Zero-Context Adversarial Re-Grade by Gemini 4 Neon XHigh)",
+      "date": "2026-11-24",
+      "critic": "adversarial-critic-v7 (gemini-4-neon-xhigh)",
+      "scores": {
+        "silhouette": 8.3,
+        "eyesAndFinish": 8.1,
+        "grounding": 8.3,
+        "cameraDensity": 7.2,
+        "sculptedCraft": 8.4,
+        "runtimeBudget": 9.8
+      },
+      "weightedAverage": 8.26,
+      "passed": false,
+      "criticalDefects": [
+        "Captain's Deck (06-captains-deck near treasure branch) still has 3 barren plank quadrants (~65-70% empty) because only 9 midships spots around cx were furnished; starboard palm islet shifted behind Coral Cove pill & y=0%"
+      ],
+      "distilledRules": [
+        "Furnish Captain's Deck across the full 360-degree inboard/outboard circuit, branch corridors, and centerline spine so no camera angle near any branch fork exposes barren planks.",
+        "Always check brow ellipsoid Z-bounds against eye sphere Z_top (c.z + r) and visor bottom before adjusting character brow height.",
+        "CanvasTexture multiplied by vertexColors must paint sunlit ripples onto a darker-than-white base (e.g., #d2e7eb) so white strokes remain visible."
+      ]
+    },
+    {
+      "iteration": 8,
+      "label": "Iteration 8 (Zero-Context Adversarial Re-Grade by Gemini 4 Neon XHigh \u2014 PASS)",
+      "date": "2026-11-24",
+      "critic": "adversarial-critic-v8 (gemini-4-neon-xhigh)",
+      "scores": {
+        "silhouette": 8.7,
+        "eyesAndFinish": 8.7,
+        "grounding": 8.8,
+        "cameraDensity": 8.2,
+        "sculptedCraft": 8.7,
+        "runtimeBudget": 9.8
+      },
+      "weightedAverage": 8.76,
+      "passed": true,
+      "criticalDefects": [],
+      "distilledRules": [
+        "Pass bar (>= 8.5/10 weighted average and 0 Critical Defects) achieved at 8.76/10 across all 7 live scenes and 6 audited cast characters with 39/39 GLBs at 1 draw call."
+      ]
+    },
+    {
+      "iteration": 9,
+      "label": "Iteration 9 (Opus 5.5 High Audit \u2014 Core 7 + Outer 4 Baseline vs 9.6 Target)",
+      "date": "2026-11-24",
+      "critic": "adversarial-critic-v9 (claude-opus-5-5-high)",
+      "scores": {
+        "core7Weighted": 8.84,
+        "outer4Weighted": 6.02,
+        "silhouette": 7.78,
+        "eyesAndFinish": 7.71,
+        "grounding": 7.55,
+        "cameraDensity": 7.22,
+        "sculptedCraft": 7.64,
+        "runtimeBudget": 9.68
+      },
+      "weightedAverage": 7.81,
+      "passed": false,
+      "criticalDefects": [
+        "I10-1 CRIT-A: Procedural 12x8 Bok proxy visible in settled 08-lagoon & 09-caves (host-first queue loads shopkeeper last)",
+        "I10-2 CRIT-B: ? surprise block buried in Shelly's head in 10-patterns & 11-beach",
+        "I10-3/4 CRIT-C: Pattern Reef left half blank & Echo Caves lower-right blank with giant boulders & 5-sided cone crystals"
+      ],
+      "distilledRules": [
+        "Use camera-space NDC projection guards for Harbor Town boats/ferry and anchor Captain's Deck ocean trio to Space 0's Z rather than sb.minZ.",
+        "Order single-slot resident fetch queue by on-screen visibility first, then distance to guide, and wait for seen residents to swap before capturing.",
+        "Lift ? surprise block above Shelly's head when she stands on that space."
+      ]
+    },
+    {
+      "iteration": 10,
+      "label": "Iteration 10 (Shelly-Conforming Eye Overhaul + 11-Scene Push)",
+      "date": "2026-11-25",
+      "critic": "adversarial-critic-v10 (claude-opus-5-5-high)",
+      "scores": {
+        "silhouette": 8.97,
+        "eyesAndFinish": 8.97,
+        "grounding": 8.88,
+        "cameraDensity": 9.21,
+        "sculptedCraft": 8.78,
+        "runtimeBudget": 9.56
+      },
+      "weightedAverage": 9.02,
+      "passed": false,
+      "eyeIntegration": "PASS (0 Critical, 0 Major across all 9 cast members)",
+      "criticalDefects": [],
+      "majorDefects": [
+        "M1: ? surprise block contacts/occludes Shelly on her own tile in 10-patterns & 11-beach",
+        "M2: Harbor Town pharmacy shrimp face-planted into planter bush / perched on fence post",
+        "M3: Jisu is a ~22px speck under 'Open a letter' pill on Bottle Beach",
+        "M4: Blockout-grade slab hut (08-lagoon) & gold box / ice kiosk (09-caves)"
+      ],
+      "distilledRules": [
+        "Project radial-disc eyes onto each character's actual head surface with local skin calibration and cornea-only gloss (conforming_eye.py) so eyes sit naturally inside every face.",
+        "Always check foreground obstacle clearance (planters, fence posts, sea fans, stone pools) via shared _sceneryObstacles before placing residents."
+      ]
+    },
+    {
+      "iteration": 11,
+      "label": "Iteration 11 (5-Worker Cast + Interior + Outer Board Polish)",
+      "date": "2026-11-25",
+      "critic": "adversarial-critic-v11 (gemini-4-neon-xhigh)",
+      "scores": {
+        "silhouette": 8.9,
+        "eyesAndFinish": 8.95,
+        "grounding": 7.75,
+        "cameraDensity": 8.63,
+        "sculptedCraft": 8.44,
+        "runtimeBudget": 8.96
+      },
+      "weightedAverage": 8.6,
+      "passed": false,
+      "castProofsMean": 9.5,
+      "topScene": "03-restaurant (9.60 / 10, 0C/0M)",
+      "criticalDefects": [
+        "02-harbor-town: procedural subway-ray blob slicing hotel-whale & ferry; procedural friend-seal blob on pier",
+        "04-hotel: upper-right wall shelf bracket clipping hotel-whale's tail fluke",
+        "10-patterns: procedural fallback Bok blob",
+        "11-beach: blank upper-right ocean quadrant"
+      ],
+      "distilledRules": [
+        "Raise resident-models.js request/LOD radii (52 / 48) so visible mid-board residents never stay on procedural fallback blobs, and enforce multi-resident spacing via _placedPeople.",
+        "Wait until every visible resident GLB settles before capturing live screenshots."
+      ]
+    },
+    {
+      "iteration": 12,
+      "weightedAverage": 8.67,
+      "critical": 0,
+      "major": 9,
+      "minor": 15,
+      "status": "PASS_RUBRIC_BELOW_9.6",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter12.md",
+      "distilledRules": [
+        "Dress large bare deck/harbor surfaces (06-captains-deck) and replace smooth drum sea-rocks (07-lighthouse, 11-beach) with layered faceted cliff rocks and curved surf-foam rings.",
+        "Ensure Bok clearance (BOK_GAP >= 0.95) and hotel-whale dock grounding without left-edge viewport clipping.",
+        "Boost board-scale iris vibrancy and catchlights on conforming_eye.py so eyes read clearly at board distance, and fix otter ears/muzzle/tail and ray cephalic/eye placement."
+      ]
+    },
+    {
+      "iteration": 13,
+      "weightedAverage": 7.85,
+      "critical": 1,
+      "major": 5,
+      "minor": 5,
+      "status": "FAIL_CRITICAL",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter13.md",
+      "distilledRules": [
+        "Verify Harbor Town street residents against building awnings/planters/poles in both 3D OBB and 2D screen space so no awning slices an actor.",
+        "Enforce >= 0.8u Kiko crab clearance from Shelly and nearby board residents, and keep lobby intro coral/kelp clear of profile tokens and Kiko.",
+        "Sculpt continuous head-to-collar transitions and high-contrast board-scale silhouettes (Echo, hotel-whale, pharmacy-shrimp held bottle) so every character reads clearly from afar."
+      ]
+    },
+    {
+      "iteration": 14,
+      "weightedAverage": 8.01,
+      "critical": 0,
+      "major": 9,
+      "minor": 9,
+      "status": "BELOW_8.5_BAR",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter14.md",
+      "distilledRules": [
+        "Give every region host a distinct silhouette and color palette (no duplicate pale-blue/navy/gold cetaceans), and upgrade supporting harbor townsfolk (friend-seal) to conforming_eye + clean high-poly cast bar.",
+        "Avoid thin high-frequency stitch lines that mip-bleed at board distance, avoid radial UV pole pinches on rounded bellies, and keep held props angled outward away from faces/shells.",
+        "Add procedural mottled textures to flat ground slabs (07 grass, 10 seabed), clear sightlines behind/around region keepers (08 Mira), and capture all 12 desktop scenes at uniform 1280x800 16:10 viewport."
+      ]
+    },
+    {
+      "iteration": 15,
+      "weightedAverage": 7.97,
+      "critical": 2,
+      "major": 6,
+      "minor": 8,
+      "status": "FAIL_CRITICAL",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter15.md",
+      "distilledRules": [
+        "Always re-capture 00-intro-mobile.png fresh whenever lobby.js changes (never reuse stale mobile captures).",
+        "Eliminate all flat hex-cap cylinder foliage stand-ins (08-lagoon) and single-blade paddle palms (01-coral-cove), replacing with pinnate palm fronds and organic lagoon blooms/rocks.",
+        "Seat floating swimmers in visible water volume/tidepools (Bok waterline foam & beach splash-pool; Hana coastal stone tidepool) and enforce 72-80% iris fill in conforming_eye.py."
+      ]
+    },
+    {
+      "iteration": 16,
+      "weightedAverage": 8.59,
+      "critical": 0,
+      "major": 3,
+      "minor": 10,
+      "status": "PASS_RUBRIC_BELOW_9.6",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter16.md",
+      "distilledRules": [
+        "Build every anatomical crustacean silhouette cleanly (pharmacy-shrimp segmented carapace, walking legs, fanned uropod tail fan) and keep Kiko Mochi/Hermit on conforming_eye.py with 76% iris fill and smooth satin finish.",
+        "Replace low-poly intro lobby props (treasure chest, flat-shaded grey rocks) with crafted planked/brass MP8 geometry and frame mobile portrait so Kiko and foreground shells fill the lower sand."
+      ]
+    },
+    {
+      "iteration": 17,
+      "weightedAverage": 8.59,
+      "critical": 0,
+      "major": 3,
+      "minor": 9,
+      "status": "PASS_RUBRIC_BELOW_9.6",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter17.md",
+      "distilledRules": [
+        "Upgrade every remaining shopkeeper/resident (Bok pufferfish) to conforming_eye.py (76% iris fill, catchlights, sculpted fins/spines) and keep all characters in proof sets.",
+        "Orient board-scale swimmers and segmented crustaceans (Echo upward 3/4 pitch, pharmacy-shrimp 3/4 side profile) so their faces and silhouettes read clearly from the board camera."
+      ]
+    },
+    {
+      "iteration": 18,
+      "weightedAverage": 8.32,
+      "critical": 1,
+      "major": 5,
+      "minor": 6,
+      "status": "FAIL_CRITICAL",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter18.md",
+      "distilledRules": [
+        "Eliminate UV-pole specular hotspots on dome tops (Hana bell) with matte-satin roughness=0.94, low specular, and smooth apex normals.",
+        "Seat every coastal actor at true ground/waterline elevation (friend-seal belly resting on cobblestones with contact shadow; subway-ray at waterY with ripple ring clear of boat mast; Jisu scaled 1.4x and turned toward 11-beach camera; Mira 76% iris fill with goggles cleanly on forehead)."
+      ]
+    },
+    {
+      "iteration": 19,
+      "weightedAverage": 9.34,
+      "critical": 0,
+      "major": 0,
+      "minor": 9,
+      "status": "PASS_RUBRIC_BELOW_9.6",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter19.md",
+      "distilledRules": [
+        "All 9 remaining deductions from 9.34/10 to 9.8+/10 are Minor: Mira smile line & smooth muzzle, Pip expressive MP8 eyes/mouth/blush, hotel-whale sculpted body/fins/forked flukes/collar blend, 74-78% iris fill on whale & bok, 09-caves/10-patterns right-edge reef clusters, 06 deck remaining plank zones & Captain Bay contact shadow, and 08-lagoon dock post water ripples."
+      ]
+    },
+    {
+      "iteration": 20,
+      "weightedAverage": 9.45,
+      "critical": 0,
+      "major": 0,
+      "minor": 8,
+      "status": "PASS_RUBRIC_BELOW_9.6",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter20.md",
+      "distilledRules": [
+        "Final 8 Minor items to clear >= 9.6 showcase and >= 9.8/10: clear hotel-whale fluke V-notch + 04-hotel fin desk clearance, 06 deck remaining plank zones, Menu-closed 01-coral-cove capture, Pip board-scale catchlights/smile + thicker front dorsal fin, Echo 3D hydrofoil pectorals, and Captain Bay organic walrus silhouette."
+      ]
+    },
+    {
+      "iteration": 21,
+      "weightedAverage": 9.43,
+      "critical": 0,
+      "major": 0,
+      "minor": 10,
+      "status": "PASS_RUBRIC_BELOW_9.6",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter21.md",
+      "distilledRules": [
+        "Flatten whale fluke dihedral to ~0-5\u00b0 so lobes never rise like ears in front view or tilt into a vertical tail in 3/4 view, and keep fluke tip below 04-hotel shelf.",
+        "Keep every interior foreground balanced (05-pharmacy apothecary floor rug/baskets/plant, shrimp tail clear of counter scale pan) and ensure seal pup cobblestone contact shadow and cheerful Jisu brows."
+      ]
+    },
+    {
+      "iteration": 22,
+      "weightedAverage": 9.45,
+      "critical": 0,
+      "major": 0,
+      "minor": 10,
+      "status": "PASS_RUBRIC_BELOW_9.6",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter22.md",
+      "distilledRules": [
+        "Final 10 anatomical/craft refinements to clear >= 9.6 and >= 9.8: clean crab path placement, 06-deck lifebuoy/Bay shadow + varied cargo + top-left/bottom-left deck pockets, rounded paddle whale flukes, larger Mira eyes + coral-sunset shell contrast, smooth Pip fin margins, jointed Jisu crab legs, soft gradient cave light pools, Echo mouth trim, and distinct headgear colors across cast."
+      ]
+    },
+    {
+      "iteration": 23,
+      "weightedAverage": 9.37,
+      "critical": 0,
+      "major": 1,
+      "minor": 7,
+      "status": "PASS_RUBRIC_BELOW_9.6",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter23.md",
+      "distilledRules": [
+        "Enforce zero prop-to-prop 3D bounding/mesh intersection inside and between 06-captains-deck vignettes (tidy non-touching clusters), and nudge 09-caves background crystal clear of Echo's head.",
+        "Polish final 7 Minors (Echo matte rostrum nub, shrimp bolder smile, sculpted sailboats with curved billowing sails, Jisu quill angled clear of cheek, Hana translucent lower bell rim, otter contoured belly + pleated bistro apron) for >= 9.8/10."
+      ]
+    },
+    {
+      "iteration": 24,
+      "weightedAverage": 9.65,
+      "critical": 0,
+      "major": 0,
+      "minor": 11,
+      "status": "PASS_9.6_SHOWCASE_MILESTONE",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter24.md",
+      "distilledRules": [
+        "Milestone 9.65/10 achieved with 0 Critical and 0 Major (D6 10.0, 11-beach 9.8). Remaining 11 Minors for >= 9.8/10 tonight: enlarge Captain Bay eyes, thicken Echo caudal flukes + solid 09-caves kiosk plinth, deeper Hotel Whale fluke V-notch, open shrimp collar below cheeks, calm/clear foreground ambient motes over faces, 01-cove ? block margin, 06-deck organic cluster composition, 07-lighthouse left lawn bushes, and 03/04/05 foreground floor corner accents."
+      ]
+    },
+    {
+      "iteration": 25,
+      "weightedAverage": 9.49,
+      "critical": 0,
+      "major": 1,
+      "minor": 5,
+      "status": "PASS_RUBRIC_BELOW_9.6",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter25.md",
+      "distilledRules": [
+        "Shorten hotel-whale peduncle (~0.8x body length, thick base, subtle dorsal ridge, broad plump horizontal flukes angled/banked for 04-hotel readability) so it never reads as a thin tube edge-on or dragonfly in front view.",
+        "Keep 02-harbor-town hotel-whale cleanly inside viewport clear of Ask Shelly with upright hat, add 09-caves floor contrast under Echo, refine 11-beach umbrella/lounger, fill 06-deck (290-460,470-610), and use floor-appropriate potted plant in 03-restaurant bottom-left."
+      ]
+    },
+    {
+      "iteration": 27,
+      "label": "MP8 Overhaul (Follow Cam, Clean 2-Corner HUD, Giant Spiral Lighthouse, Living Eyes)",
+      "weightedAverage": 7.92,
+      "critical": 0,
+      "major": 7,
+      "minor": 14,
+      "status": "FAIL_NEEDS_POLISH",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter27.md",
+      "distilledRules": [
+        "Eliminate 07-lighthouse rotunda floor shadow acne (disable floor receiveShadow or tune shadow bias/frustum), remove stray floor debug lines, fade/cull foreground occluding column, and angle Lighthouse camera inward/upward to showcase central Fresnel beacon, tidal pool, and visible helical climb + elevated Hana/Bok.",
+        "Move Kiko companion slightly beside Shelly rather than directly between camera and Shelly so he is never clipped by the bottom viewport edge.",
+        "Align 09-caves dark luminous grotto pool directly beneath Echo with soft contact shadow, and give hotel-whale a readable side/quarter bilobed fluke + dorsal hump."
+      ]
+    },
+    {
+      "iteration": 28,
+      "label": "Lighthouse Polish, Kiko Framing, Sky & Cast Silhouettes",
+      "weightedAverage": 8.56,
+      "critical": 0,
+      "major": 4,
+      "minor": 9,
+      "status": "PASS_RUBRIC_BELOW_9.8",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter28.md",
+      "distilledRules": [
+        "Fix 06-captains-deck floating ? blocks over ocean (seat/glow over visible tiles or keep bright emissive gold), clear Kiko from ship's wheel (06) and Shelly's head (07), and give Jisu's hermit shell full 3D coiled spiral volume in side.png.",
+        "Polish Minors: Jisu quill clear of eye/hat in side.png, larger irises on Pip/Bok/Jisu, 09-caves stalactite cavern ceiling arch, 02-harbor whale framing inside left edge, 07 rotunda floor foreground detail & cleaner beacon."
+      ]
+    },
+    {
+      "iteration": 29,
+      "label": "Zero-Major Polish Pass",
+      "weightedAverage": 8.63,
+      "critical": 0,
+      "major": 3,
+      "minor": 6,
+      "status": "PASS_RUBRIC_BELOW_9.8",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter29.md",
+      "distilledRules": [
+        "Enforce strict 3D (>= 2.8u) and 2D screen-space separation in reef3dCrabSpot between Kiko and ALL NPCs (Jisu on 11-beach, Shrimp on 02-harbor) as well as ALL ? blocks (01-coral-cove) and tile platforms (07-lighthouse)."
+      ]
+    },
+    {
+      "iteration": 30,
+      "label": "Zero-Flaw Polish & Creative Leap Beyond MP8",
+      "weightedAverage": 9.01,
+      "critical": 0,
+      "major": 2,
+      "minor": 12,
+      "status": "PASS_9.0_BELOW_9.8",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter30.md",
+      "distilledRules": [
+        "Capture 05-pharmacy on initial encounter bottom-card (not centered lesson modal), keep Coral Cove Kiko clear of foreground-right coral reef slab, and polish top Minors (rounded reef whale, softer Cove light beam, horizontal hotel-whale flukes, Cave wisp subtlety, Pattern fan variety)."
+      ]
+    },
+    {
+      "iteration": 31,
+      "label": "Zero-Major Polish",
+      "weightedAverage": 8.86,
+      "critical": 0,
+      "major": 0,
+      "minor": 7,
+      "status": "PASS_ZERO_MAJOR_BELOW_9.8",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter31.md",
+      "distilledRules": [
+        "All 0 Critical / 0 Major achieved! Remaining 7 Minors for >= 9.8/10: tighten Lighthouse camera slightly (larger Shelly/Kiko/Hana, less upper arch repetition), move 11-beach Bok from sand puddle into open turquoise bay, add cobblestone contact shadow under 02-harbor shrimp, tuck 01-cove Kiko feet onto sand path, add crystal-vein islet in 09-caves upper-right lake, soften 04-hotel whale eye rim, soften shrimp ventral leg taper."
+      ]
+    },
+    {
+      "iteration": 32,
+      "label": "Final 7-Minor Polish & Beyond-MP8 Showpiece",
+      "weightedAverage": 8.72,
+      "critical": 0,
+      "major": 0,
+      "minor": 7,
+      "status": "PASS_ZERO_CRITICAL_ZERO_MAJOR",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter32.md",
+      "distilledRules": [
+        "Zero Critical and Zero Major sustained across Iter 31 and Iter 32 after complete MP8 follow-cam, 2-corner HUD, Giant Spiral Lighthouse, living-eyes, and Beyond-MP8 oceanic craft overhaul."
+      ]
+    },
+    {
+      "iteration": 33,
+      "label": "User Playtest Overhaul + Rubric v2.0",
+      "weightedAverage": 8.37,
+      "critical": 2,
+      "major": 11,
+      "minor": 16,
+      "status": "FAIL_RUBRIC_V2",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter33.md",
+      "distilledRules": [
+        "Fix Harbor Town ? cube/resident collision and Echo Caves Kiko/Echo intersection + Lighthouse Kiko visibility.",
+        "Enclose Captain's Deck into a ceilinged Great Cabin with prominent curio cases/ship-in-bottle/globe, and put Lagoon storybooks/origami boats and Pattern Reef spirals/checkered plazas/ABAB colonnades into hero camera frustums.",
+        "Differentiate Harbor Town 3D room layouts per venue, remove board ? cube from friend gazebo, rename Harbor Town seal friend, refine Jisu encounter framing, and capture true 390x844 mobile viewport."
+      ]
+    },
+    {
+      "iteration": 34,
+      "label": "Zero CRIT + Indoor Great Cabin + 8 Bespoke Rooms + Rubric v3.0 (Jamboree)",
+      "weightedAverage": 8.76,
+      "critical": 0,
+      "major": 7,
+      "minor": 16,
+      "status": "PASS_RUBRIC_V3_JAMBOREE",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter34.md",
+      "distilledRules": [
+        "Achieved 0 CRIT on Rubric v3.0 (Jamboree Benchmark) with indoor vaulted Great Cabin, 8 bespoke Harbor Town rooms, hero Lagoon storybooks & Pattern Reef mosaics, and D6=9.6.",
+        "Next (Iter 35 Jamboree Leap): add diagonal indoor window sunbeams + glossy floor sheen, gloss/rim/AO on board spaces, warm horizon haze, sculpted lagoon reeds/lotus clusters replacing hollow cylinders, fix restaurant Otter table clearance, Harbor Town umbrella ? cube & Kiko curb proximity, and refine Giant Bottle readability & Captain chest/lantern glow."
+      ]
+    },
+    {
+      "iteration": 35,
+      "label": "Jamboree Leap: Diverse Eyes, Squid/Ray/Octopus Revamp, Mutual Gaze, Subway Track Fix & Sunsets",
+      "weightedAverage": 8.61,
+      "critical": 0,
+      "major": 8,
+      "minor": 17,
+      "status": "PASS_RUBRIC_V3_JAMBOREE",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter35.md",
+      "distilledRules": [
+        "Resolved all 7 Iter 34 MAJs (03-restaurant Otter grounded, Harbor Town umbrella & Kiko clear, Lagoon cylinders replaced with lotus-lantern nests, Captain tight bulb gleams + 3D chest hoard, Subway mat clear of tracks, Sua sunset water, matte non-robotic Shop Octopus, true squid silhouette).",
+        "Next (Iter 36 Zero-MAJ Push): bolder non-circular eye silhouettes/iris hues across squid/jisu/whale/seal/otter, rotate Cafe Seahorse toward Shelly, fix Hotel Whale 2-lobed crescent fluke & Otter tail seam, clear Lighthouse Kiko from stair rim/rail, clear Pattern Reef colonnade from Pip's face, add colossal curved sea-glass bottle ribs enclosing Bottle Beach, and boost indoor diagonal window sunbeams + floor sheen to match Jamboree ref 04."
+      ]
+    },
+    {
+      "iteration": 36,
+      "label": "Zero-MAJ Push + FPS Fix (6 of 8 MAJs Fixed, Signpost & Burst Leak Caught)",
+      "weightedAverage": 8.62,
+      "critical": 2,
+      "major": 4,
+      "minor": 13,
+      "status": "FAIL_CRIT_LEAK",
+      "critiqueFile": "work/art-loop/adversarial-critique-iter36.md",
+      "distilledRules": [
+        "Hide all board-level signposts, confetti bursts, and outdoor props whenever an encounter or 3D interior is open.",
+        "Never skip behind-Shelly ? cubes in Kiko's 2D overlap guard; enforce strict 2D/3D clearance from every visible ? cube."
+      ]
+    },
+    {
+      "iteration": 37,
+      "rubric": "v3.0-jamboree",
+      "score": 8.77,
+      "dimensions": {
+        "D1": 8.8,
+        "D2": 8.7,
+        "D3": 9.0,
+        "D4": 8.4,
+        "D5": 8.6,
+        "D6": 9.3
+      },
+      "crit": 0,
+      "maj": 5,
+      "min": 11,
+      "verdict": "PASS (below 9.8 target -> Iter 38)",
+      "resolved": [
+        "CRIT-1",
+        "CRIT-2",
+        "MAJ-A",
+        "MAJ-B",
+        "MIN-1",
+        "MIN-2",
+        "MIN-3",
+        "MIN-4",
+        "MIN-5",
+        "MIN-7",
+        "MIN-8",
+        "MIN-9",
+        "MIN-12"
+      ],
+      "remaining_maj": [
+        "MAJ-1 (Bottle Beach horizon neck/sliver/tag)",
+        "MAJ-2 (Pharmacy/Shop/Hotel floor sunbeams)",
+        "MAJ-3 (Coral Cove whale in sky)",
+        "MAJ-4 (Echo Caves Echo facing away)",
+        "MAJ-5 (Subway Ray cap pedestal & dent)"
+      ]
+    }
+  ]
+}
