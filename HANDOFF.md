@@ -1,9 +1,9 @@
 # Coral Classroom — Developer Handoff
 
-**Updated:** 2026-11-26 (08:35 PST)  
+**Updated:** 2026-11-26 (10:20 PST)  
 **Branch:** `upgrade/integrated-2026-11-24`  
 **Remote:** `https://github.com/Wwwwendy-ho/Coral-Classroom.git`  
-**Current Formal Rubric v3.0 Score:** **`8.86 / 10` (`PASS`)** (Iteration 58, `0 CRIT`, `6 MAJ`, `14 MIN`; `D2 = 9.1`, `D3 = 9.2`, `D6 = 9.5`; 60 FPS Overhaul + Tile Brightness committed in `25187d3`; overnight loop continuing toward `>= 9.8 / 10` until ~09:45 PST).
+**Current Formal Rubric v3.0 Score:** **`8.86 / 10` (`PASS`)** (Iteration 58, `0 CRIT`, `6 MAJ`, `14 MIN`; `D1 = 8.6`, `D2 = 9.1`, `D3 = 9.2`, `D4 = 8.7`, `D5 = 8.2`, `D6 = 9.5`; 60 FPS Overhaul + Tile Brightness committed in `25187d3`; overnight loop Iter 39–58 committed locally and ready for handoff).
 
 ---
 
@@ -79,10 +79,11 @@ python tools/check/soundtrack_verify.py
 4. Smooth `1.8s` Golden Pearl relocation camera pan (`reef3dPanToSpace`).
 5. Bobbing color-coded 3D directional fork arrows (`d.forkArrows`) + throttled resident proximity greetings within `7.5u`.
 
-### E. Iterations 33–38 & Soundtrack
-- **Captain's Cabin**: 100% indoor vaulted coffered-oak Great Cabin with panoramic ocean gallery windows, chandeliers, curio vitrine, and chests.
-- **Harbor Town**: 8 genuinely distinct bespoke 3D indoor room layouts (`cafe`, `restaurant`, `shop`, `taxi`, `subway`, `hotel`, `pharmacy`, `friend`), with Activities entering live 3D rooms.
-- **Cast & Companion**: Mario Party eye-shape diversity, velvety finish (`0.86–0.92` roughness), mutual head/neck gaze, Kiko scuttling 1 tile behind Shelly, Subway Ray convex dome, Kiko Mochi rounded toes, Captain's Cabin painting variety.
+### E. Iterations 33–58 & Soundtrack
+- **Captain's Cabin**: 100% indoor vaulted coffered-oak Great Cabin with panoramic ocean gallery windows, chandeliers, curio vitrine, chests, sunbeams, and crew facing.
+- **Harbor Town**: 8 genuinely distinct bespoke 3D indoor room layouts (`cafe`, `restaurant`, `shop`, `taxi`, `subway`, `hotel`, `pharmacy`, `friend`), with Activities entering live 3D rooms, Taxi Squid counter grounding, Mobile Shop 2x2 dialogue card, and Mobile Town planter fix.
+- **Regions & Landmarks**: Bottle Beach cyan tide-plane removal, horizon ribbed sea-glass bottle, cork surf foam, and slab framing; Echo Caves cavern tidepools; Lighthouse brass window sashes; smooth Lagoon Banyan canopy; double-`boardYaw` orientation fix.
+- **Cast & Companion**: Mario Party eye-shape diversity, velvety finish (`0.86–0.92` roughness), mutual head/neck gaze, `kiko-mochi` companion scuttling 1 tile behind Shelly, Subway Ray convex dome, Captain's Cabin painting variety.
 - **Soundtrack**: 16-track dynamic Day & Night MP3 OST verified by `soundtrack_verify.py` (`285/285`).
 
 ---
@@ -101,12 +102,33 @@ python tools/check/soundtrack_verify.py
 
 ---
 
-## 4. Next Steps Toward >= 9.8 / 10 (`0 CRIT`, `0 MAJ`)
+## 4. Handoff Status, Verification & Next Steps
 
-1. **Coral Cove Horizon Fix (spotted in live check)**: Keep `view.bigOne` whale and `sc.h` fish schools cleanly below the distant ocean horizon so neither silhouettes against the yellow sky.
-2. **Iteration 39 Full 21-Shot Capture & Adversarial Critic Grade**: Run full desktop (`1280x800`) + mobile (`390x844`) captures on `http://localhost:8820/game/` and grade against `work/art-loop/rubric.md`.
-3. **Clear Remaining Iter 37–39 `MAJ` Items**:
-   - Diagonal indoor window sunbeams + floor sheen on `pharmacy`, `shop`, `hotel`.
-   - Echo Caves resident orientation & lighting polish.
-   - Bottle Beach colossal curved glass bottle & neck/cork framing on the expanded loop.
-   - Interactive 3D clicking on fork arrows and final `MIN` polish across all 7 regions + Coral Cove.
+### Recent Local Commits (`upgrade/integrated-2026-11-24`)
+- `c5b9b5f` — `art-loop: Iter 58 PASS 8.86/10 (0 CRIT, 6 MAJ) - Tidepools, Brass Sashes, Taxi, Cork Foam & Haze`
+- `16436ae` — `art-loop: Iter 57 PASS 8.64/10 (0 CRIT) - Bottle Beach slab & horizon bottle, Cabin sunbeams, Banyan, Kiko`
+- `25187d3` — `feat: 60fps frame-pacing overhaul, Mario Party world scale, tile brightness, 5 gameplay upgrades, and HANDOFF.md`
+
+### Verification Gate Results (Latest Run)
+- `build.py --check`: **PASS** (`build: index.html matches src/`)
+- `soundtrack_verify.py`: **PASS** (`total=285 pass=285 fail=0 baseline_gap=0`)
+- `game/tools/check/` Node checks: **`27/37` passed** (all 27 standalone Node/Three CPU tests passed). The remaining 10 checks failed/could not run in this environment due to missing external dependencies or required CLI args:
+  - Missing `playwright` (6): `npc_worlds_smoke.js`, `region_boards_smoke.js`, `region_resident_mask_render_test.js`, `shelly_smoke.js`, `smoke.js`, `snapshots.js`
+  - Missing `eslint` (1): `lint.js`
+  - Missing `acorn` (1): `qblock_visual_test.js`
+  - Missing `PIL` in system `python` (1): `world_surfaces_test.js`
+  - Requires `<id>` CLI arg (1): `resident_asset_test.js`
+
+### Push to GitHub
+WSL has no stored GitHub credentials (`terminal prompts disabled`), so push from your terminal:
+```bash
+wsl bash -c 'cd /mnt/c/Users/20750/.gemini/antigravity/scratch/Coral-Classroom && git push -u origin upgrade/integrated-2026-11-24'
+```
+
+### Remaining 6 `MAJ` Items (Iter 58 -> `>= 9.8 / 10`, `0 MAJ`)
+1. `02` / `19`: Harbor Town board shrimp basin + mutual gaze.
+2. `12`: Echo Caves almond-oval eyes, mottling, gaze, and crystal clearance.
+3. `13` / `16`: Pattern Reef `pip` & Lighthouse legacy merchant almond-oval eyes.
+4. `01` / `02` / `11` / `18` / `19`: Beveled 3D medallions + starfish pebble clip.
+5. `14` / `12` / `01`: Terrain ripples & strata detail.
+6. `11` / `02` / rooms: Multi-cluster foliage polish.
