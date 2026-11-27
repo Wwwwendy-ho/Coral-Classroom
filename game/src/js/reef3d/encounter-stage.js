@@ -132,7 +132,7 @@
     };
     var inRegion = false;
     var scan = function(node){
-      if(!node || !node.visible || isActorOrChild(node) || (node.userData && node.userData.reefGround)) return;
+      if(!node || !node.visible || isActorOrChild(node) || (e._jisuStage && node === e._jisuStage) || (node.userData && node.userData.reefGround)) return;
       if(node.isLight || node.isPoints || node.isSprite) return;
       var isRegionGroup = !!(node.name && node.name.indexOf('region-') === 0);
       var isPeopleRoot = !!(people && node === people.root);
@@ -273,9 +273,10 @@
         py = Math.sin(rp * Math.PI) * .04;
       }
     }
+    var baseY = (typeof e._jisuGroundedY === 'number') ? e._jisuGroundedY : base.position.y;
     actor.rotation.x = base.rotation.x + (!calm && speaking ? Math.sin(t * 6.5) * .025 : 0) + rx;
     actor.rotation.z = base.rotation.z + (!calm ? Math.sin(t * 1.4) * .012 : 0) + rz;
-    actor.position.y = base.position.y + (!calm && speaking ? Math.sin(t * 6.5) * .025 : 0) + py;
+    actor.position.y = baseY + (!calm && speaking ? Math.sin(t * 6.5) * .025 : 0) + py;
     actor.scale.copy(base.scale).multiplyScalar(sc);
   }
   function regionEncounterReact(view, mood){

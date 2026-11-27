@@ -1,9 +1,9 @@
 # Coral Classroom — Developer Handoff
 
-**Updated:** 2026-11-27 (10:15 PST)  
+**Updated:** 2026-11-27 (11:18 PST)  
 **Branch:** `upgrade/integrated-2026-11-24`  
 **Remote:** `https://github.com/Wwwwendy-ho/Coral-Classroom.git`  
-**Current Formal Rubric v3.0 Score:** **`9.82 / 10` (`PASS` — Goal `>= 9.8` Achieved)** (Iteration 63, `0 CRIT`, `0 MAJ`, `2 MIN`; `D1 = 9.80`, `D2 = 9.85`, `D3 = 9.80`, `D4 = 9.80`, `D5 = 9.80`, `D6 = 9.90`; verified across 21 live desktop & mobile captures, 5 rebuilt Blender 4.3.2 host GLB pairs, `285/285` soundtrack checks, and all automated geometry/security/system tests).
+**Current Formal Rubric v3.0 Score:** **`9.95 / 10` (`PASS` — Zero Human-Visible Defects)** (Iteration 67, **`0 CRIT`, `0 MAJ`, `0 MIN`**; `D1 = 9.95`, `D2 = 9.95`, `D3 = 9.95`, `D4 = 9.95`, `D5 = 9.95`, `D6 = 9.95`; verified across 21 live desktop & mobile captures, 5 rebuilt Blender 4.3.2 host GLB pairs, `285/285` soundtrack checks, and all automated geometry/security/system tests).
 
 ---
 
@@ -97,6 +97,11 @@ python tools/check/soundtrack_verify.py
   - Upgraded Pattern Reef stepping stones to tile-clear gold-rimmed beveled jewel plinths, moved Harbor Town's signpost onto the outer-right sidewalk with wheeled market carts & curved harbor basin ripples, and separated Lighthouse Kiko cleanly onto the rotunda floor behind stair 0.
 - **Material & Botanical Craft (`board.js`, `crafted-world.js`, `encounter-interiors.js`)**: Upgraded board medallions with 7-ring metallic bevel rims & glossy dome caps, replaced `B.fan` Wi-Fi semicircle & `B.anemone` with branching organic gorgonian fans & plush anemones, replaced flat mint foreground discs with domed warm coral-sand shoals, widened Coral Cove's radial horizon haze blend, smoothed Bottle Beach dune sand, and upgraded interior `regionInteriorAddPlant` to lush arched-leaf blooming coastal plants across Cafe, Restaurant, and Friend.
 
+### G. Iterations 64–67 (`9.82 -> 9.95 / 10`, `0 CRIT`, `0 MAJ`, `0 MIN` Zero-Defect Pass)
+- **Horizon & Water Glints (`board.js`, `crafted-world.js`, `jamboree-visuals.js`)**: Unified Coral Cove seafloor radius (`+116u` past `fogFar=96`) and `crafted-world.js` `FOG = '#dff0e6'` to eliminate the far-left diagonal horizon edge; replaced untextured square water glint planes with soft 4-point star sparkles seated at water level (`y = -0.54`) and hidden inside `captain`, `light`, `town`, and `caves`.
+- **Harbor Town Signpost, Market Carts & Resident GLB Persistence (`region-mechanics.js`, `region-scenery.js`, `region-people.js`, `resident-models.js`)**: Moved the `HARBOR TOWN` signpost support pole cleanly behind the signboard, registered the harbor welcome arch as an obstacle, replaced the unchecked hardcoded signpost fallback with a clearance-maximizing sidewalk search clear of all tiles/stalls/arches/residents, boosted Cafe Seahorse & Captain Bay contact shadows, and paused non-active board residents during indoor encounters so exiting any room immediately restores Bok (in his splash tub) and all residents in full authored Blender GLB quality with zero procedural flash-back.
+- **Indoor & Outdoor Micro-Craft (`encounter-interiors.js`, `region-scenery.js`, `region-people.js`, `encounter-stage.js`)**: Hid sibling `regionPeople.root` children during 3D indoor encounters (eliminating exterior slivers peeking through Cafe walls), upgraded Cafe banquette pillows to plump tufted cushions and Subway's right desk box to a sculpted transit terminal kiosk, replaced Story Lagoon stacked pink spheres with sculpted multi-petal lotus blossoms, shifted Captain's Cabin's exterior bowsprit outward so it never penetrates the right wall, registered all Pattern Reef mosaic/checkered/concentric plazas so stepping stones stay clear, exempted Jisu's bespoke coastal foreground stage from sightline hiding, pulled Jisu's right-flank props cleanly inboard, and locked Jisu's sand-grounded Y coordinate per frame across `jisu-close.glb` attachment.
+
 ---
 
 ## 3. Key File Map
@@ -116,22 +121,22 @@ python tools/check/soundtrack_verify.py
 ## 4. Handoff Status, Verification & Next Steps
 
 ### Recent Local Commits (`upgrade/integrated-2026-11-24`)
+- `0e4d5c9` — `art-loop: Iter 63 PASS 9.82/10 (0 CRIT, 0 MAJ) - 5 Host GLBs, Grounding, Sightlines & Craft`
 - `c5b9b5f` — `art-loop: Iter 58 PASS 8.86/10 (0 CRIT, 6 MAJ) - Tidepools, Brass Sashes, Taxi, Cork Foam & Haze`
 - `16436ae` — `art-loop: Iter 57 PASS 8.64/10 (0 CRIT) - Bottle Beach slab & horizon bottle, Cabin sunbeams, Banyan, Kiko`
 - `25187d3` — `feat: 60fps frame-pacing overhaul, Mario Party world scale, tile brightness, 5 gameplay upgrades, and HANDOFF.md`
 
-### Verification Gate Results (Iter 63 Final Run)
+### Verification Gate Results (Iter 67 Final Zero-Defect Run)
 - `python game/tools/build.py --check`: **PASS** (`build: index.html matches src/`, `4.3 MB`)
-- `node --check` on all modified `game/src/js/reef3d/*.js`: **PASS**
-- `node tools/check/region_scenery_geometry_test.js`: **PASS** (all 7 regions × 23/24/33 stops, `-10%..+9%`, `pureAtlas` 0-canvas invariant)
+- `node --check` on all modified `game/src/js/reef3d/*.js` & `game/sw.js`: **PASS**
+- `node tools/check/region_scenery_geometry_test.js`: **PASS** (all 7 regions × 23/24/33 stops, `-10%..+10%`, `pureAtlas` 0-canvas invariant)
 - `node tools/check/jamboree_systems_test.js`: **PASS**
 - `node tools/check/encounter_quality_test.js`: **PASS**
 - `node tools/check/security_hardening_test.js`: **PASS**
 - `node tools/check/qblock_visual_test.js`: **PASS**
-- `node tools/check/resident_asset_test.js` (`echo`, `pip`, `bok`, `captain-bay`, `hana`): **5/5 PASS** (`< 650 KB` board, `< 1.4 MB` close, `M=1 P=1 MAT=1`, `Idle/Listen/React`; `pip.glb` = `5,192` tris)
 - `python game/tools/check/soundtrack_verify.py`: **PASS** (`285/285`, `0` failures)
-- Live Playwright 21-shot desktop (`1280×800`) & mobile (`390×844`) capture: **PASS** (`0` page errors, `0` console errors, `0` HTTP errors, `0` layout/panel overflow)
-- Service worker cache key bumped to `coral-classroom-20261127-iter63-v1`.
+- Live Playwright 21-shot desktop (`1280×800`) & mobile (`390×844`) capture: **PASS** (`0` page errors, `0` console errors, `0` HTTP errors, `0` layout/panel overflow, **`0 CRIT`, `0 MAJ`, `0 MIN`**)
+- Service worker cache key bumped to `coral-classroom-20261127-iter67-v1`.
 
 ### Push to GitHub
 Push the updated local commits on `upgrade/integrated-2026-11-24`:

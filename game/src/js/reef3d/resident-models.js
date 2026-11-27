@@ -781,14 +781,18 @@
     if(view.encounter && view.encounter.actor===actor && regionEncounterActive(view)) regionResidentCloseRequest(view,state);
     var close=state.close && state.close.root ? state.close : null;
     if(!state.root && !close) return;
-    var seen=!!(view.encounter && view.encounter.actor===actor);
+    var inEncounter=!!(view.encounter && view.encounter.actor===actor);
+    if(view.encounter && !inEncounter){
+      state.lastTime=0;
+      return;
+    }
+    var seen=inEncounter;
     if(!seen && actor.visible && view.cam){
       var point=state.point.copy(actor.position); point.y+=actor.userData.regionBounds.centerY; point.project(view.cam);
       seen=point.z>-1 && point.z<1 && Math.abs(point.x)<1.2 && Math.abs(point.y)<1.2;
     }
     // Keep the authored mesh for a nearby visible resident or its encounter;
     // the lightweight procedural version carries far-away board views.
-    var inEncounter=!!(view.encounter && view.encounter.actor===actor);
     var encRegion=inEncounter && view.encounter ? view.encounter.region : null;
     regionResidentApplyBoardYaw(state,inEncounter,(inEncounter && !close) ? view.encounter.interior : null,encRegion);
     var limit=state.detailed ? 54 : 48;
@@ -944,11 +948,12 @@
       if(react){
         close.react=close.mixer.clipAction(react);close.react.setLoop(T.LoopOnce,1);
         close.mixer.addEventListener('finished',function(ev){if(ev.action===close.react){close.action.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).play();close.react.crossFadeTo(close.action,.18,false);}});
-        if(e.phase==='intro' && !reefCalm()){
+        if(e.phase==='intro' && !reefCalm() && e.region!=='beach'){
           close.react.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).play();close.action.crossFadeTo(close.react,.18,false);
         }
       }
     }
+    if(e.region==='beach') e._jisuGroundedY=null;
   }
   function regionResidentCloseEnd(view,encounter){
     regionResidentStates(view).forEach(function(state){regionResidentCloseEndOne(view,state,encounter);});

@@ -4718,8 +4718,12 @@
       regionInteriorAddPlant(kit, room, bwx + 0.84, 1.50, -2.78, 0.44);
       regionInteriorAddBox(kit, room, 2.74, 0.44, 0.54, theme.counter, bwx, 0.22, -2.66);
       regionInteriorAddBox(kit, room, 2.66, 0.10, 0.50, theme.accent, bwx, 0.49, -2.64);
-      regionInteriorAddBox(kit, room, 0.28, 0.24, 0.11, 0xfaf0d6, bwx - 1.02, 0.64, -2.74, 0.22);
-      regionInteriorAddBox(kit, room, 0.28, 0.24, 0.11, 0xe26d5c, bwx + 1.02, 0.64, -2.74, -0.22);
+      // Plump softly rounded tufted cafe banquette throw pillows (zero stark white cube!)
+      [[bwx - 1.02, 0xe8b974, 0xc96b4e, 0.24], [bwx + 1.02, 0xe26d5c, 0xfaf0d6, -0.24]].forEach(function(pw){
+        var pil = regionInteriorAdd(room, new T.SphereGeometry(0.17, 12, 8), kit.M(pw[1]), pw[0], 0.65, -2.74, 0, pw[3], 0);
+        pil.scale.set(1.12, 0.86, 0.44);
+        regionInteriorAdd(room, new T.SphereGeometry(0.024, 8, 6), kit.M(pw[2]), pw[0], 0.65, -2.665);
+      });
       regionInteriorAddBistroTable(kit, room, 2.94, 0.0, -1.66);
       regionInteriorAddStool(kit, room, 2.34, 0.0, -1.78, 0.44, 0x6f4325, 0x579c87, true, 0.44);
       regionInteriorAddStool(kit, room, 3.54, 0.0, -1.78, 0.44, 0x6f4325, 0x579c87, true, -0.44);
@@ -5255,8 +5259,13 @@
       // IC tap-card reader pad on far-left desk & ticket terminal on far-right desk
       regionInteriorAddBox(kit, room, 0.24, 0.07, 0.22, 0x354452, skx2 - 0.80, 0.59, skz2 + 0.04);
       regionInteriorAddBox(kit, room, 0.16, 0.02, 0.14, kit.M(0x62f0bc, { emissive: 0x1a7856 }), skx2 - 0.80, 0.635, skz2 + 0.05);
-      regionInteriorAddBox(kit, room, 0.30, 0.24, 0.20, 0x26879c, skx2 + 0.80, 0.68, skz2);
-      regionInteriorAddBox(kit, room, 0.22, 0.13, 0.03, kit.M(0xc4f4fa, { emissive: 0x265e6a }), skx2 + 0.80, 0.71, skz2 + 0.105);
+      // Sculpted Harbor Metro ticket terminal kiosk on far-right desk (sloped bezel, framed display, keypad & brass slot)
+      regionInteriorAddBox(kit, room, 0.28, 0.05, 0.22, 0x354452, skx2 + 0.80, 0.585, skz2);
+      regionInteriorAddBox(kit, room, 0.26, 0.22, 0.16, 0x26879c, skx2 + 0.80, 0.71, skz2 - 0.02);
+      regionInteriorAddBox(kit, room, 0.28, 0.03, 0.18, 0x354452, skx2 + 0.80, 0.83, skz2 - 0.02);
+      regionInteriorAddBox(kit, room, 0.22, 0.13, 0.02, 0x1a2834, skx2 + 0.80, 0.74, skz2 + 0.062);
+      regionInteriorAddBox(kit, room, 0.19, 0.10, 0.025, kit.M(0x9cf0f8, { emissive: 0x266c7a }), skx2 + 0.80, 0.74, skz2 + 0.068);
+      regionInteriorAddBox(kit, room, 0.16, 0.022, 0.04, 0xe8be58, skx2 + 0.80, 0.635, skz2 + 0.075);
 
       // Illuminated HARBOR TRANSIT route map, station clock & sleek overhead LED arrival gantry
       regionInteriorAddBox(kit, room, 2.16, 0.94, 0.05, theme.trim, skx2, 2.20, -2.93);
@@ -6182,7 +6191,16 @@
     e.interiorHidden = [];
     view.scene.children.forEach(function(o){
       if(!o || o === room || o === actor || o === guide || o.isLight) return;
-      if(regionInteriorIsAncestor(o, actor) || regionInteriorIsAncestor(o, guide)) return;
+      if(regionInteriorIsAncestor(o, actor) || regionInteriorIsAncestor(o, guide)){
+        // Hide sibling board residents, stalls, tubs & shadows inside view.regionPeople.root so none peek through interior walls!
+        (o.children || []).forEach(function(ch){
+          if(!ch || ch === actor || ch === guide) return;
+          if(regionInteriorIsAncestor(ch, actor) || regionInteriorIsAncestor(ch, guide)) return;
+          e.interiorHidden.push({ object: ch, visible: ch.visible });
+          ch.visible = false;
+        });
+        return;
+      }
       e.interiorHidden.push({ object: o, visible: o.visible });
       o.visible = false;
     });

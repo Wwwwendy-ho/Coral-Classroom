@@ -631,6 +631,41 @@
   }
   // The painted top of a space: the deck's emoji, a "?" for surprises, a shell for plain spaces.
   var R3tex = {};
+  var R3glyphScratch = null;
+  function reef3dDrawCenteredGlyph(g, text, cx, cy, font, fillStyle, maxBox){
+    var drawDirect = function(ctx, ox, oy){
+      if(fillStyle) ctx.fillStyle = fillStyle;
+      ctx.font = font; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(text, ox, oy);
+    };
+    try {
+      if(typeof document === 'undefined' || !document.createElement){ drawDirect(g, cx, cy); return; }
+      if(!R3glyphScratch){ R3glyphScratch = document.createElement('canvas'); R3glyphScratch.width = R3glyphScratch.height = 256; }
+      var sg = R3glyphScratch.getContext && R3glyphScratch.getContext('2d');
+      if(!sg || typeof sg.getImageData !== 'function'){ drawDirect(g, cx, cy); return; }
+      sg.clearRect(0, 0, 256, 256);
+      sg.save(); drawDirect(sg, 128, 128); sg.restore();
+      var img = sg.getImageData(0, 0, 256, 256), data = img && img.data;
+      if(!data || data.length < 256 * 256 * 4){ drawDirect(g, cx, cy); return; }
+      var minX = 256, minY = 256, maxX = -1, maxY = -1;
+      for(var y = 0; y < 256; y++){
+        var row = y * 256 * 4;
+        for(var x = 0; x < 256; x++){
+          if(data[row + x * 4 + 3] > 16){
+            if(x < minX) minX = x; if(x > maxX) maxX = x;
+            if(y < minY) minY = y; if(y > maxY) maxY = y;
+          }
+        }
+      }
+      if(maxX < minX || maxY < minY){ drawDirect(g, cx, cy); return; }
+      var sw = maxX - minX + 1, sh = maxY - minY + 1;
+      var sc = maxBox ? Math.min(1, maxBox / sw, maxBox / sh) : 1;
+      var dw = sw * sc, dh = sh * sc;
+      g.drawImage(R3glyphScratch, minX, minY, sw, sh, cx - dw * .5, cy - dh * .5, dw, dh);
+    } catch(e){
+      drawDirect(g, cx, cy);
+    }
+  }
   function reef3dTileTex(col, icon, night, kind){
     var key = col + icon + night + kind; if(R3tex[key]) return R3tex[key];
     var c = document.createElement('canvas'); c.width = c.height = 256; var g = c.getContext('2d');
@@ -640,15 +675,15 @@
     g.beginPath(); g.arc(128, 128, 104, 0, Math.PI * 2); g.stroke(); g.setLineDash([]);
     if(/^deck/.test(kind)){   // decks: a white badge behind a big emoji, and a gold star once it's all done
       g.fillStyle = night ? 'rgba(255,246,222,.92)' : 'rgba(255,255,255,.92)'; g.beginPath(); g.arc(128, 128, 82, 0, Math.PI * 2); g.fill();
-      g.font = '128px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-      // a letter instead of an emoji (My words is 말) takes the fill colour, so it needs ink, not the badge's white
-      if(/[가-힣]/.test(icon)){ g.fillStyle = night ? '#6b4514' : '#0d5262'; g.font = '700 116px system-ui, sans-serif'; }
-      g.fillText(icon, 128, 136);
-      if(kind === 'deck-done'){ g.font = '900 64px "Baloo 2", system-ui, sans-serif'; g.fillStyle = '#ffcf3f'; g.strokeStyle = '#8a5a12'; g.lineWidth = 6; g.strokeText('★', 200, 58); g.fillText('★', 200, 58); }
+      var isHangul = /[가-힣]/.test(icon);
+      var dFont = isHangul ? '700 116px system-ui, sans-serif' : '128px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+      var dFill = isHangul ? (night ? '#6b4514' : '#0d5262') : (night ? '#6b4514' : '#0d5262');
+      reef3dDrawCenteredGlyph(g, icon, 128, 128, dFont, dFill, 126);
+      if(kind === 'deck-done'){ g.font = '900 64px "Baloo 2", system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#ffcf3f'; g.strokeStyle = '#8a5a12'; g.lineWidth = 6; g.strokeText('★', 200, 58); g.fillText('★', 200, 58); }
       var dt = new window.THREE.CanvasTexture(c); dt.anisotropy = 4; return (R3tex[key] = dt);
     }
-    if(icon === '?'){ g.fillStyle = night ? '#ffe29a' : '#ffffff'; g.font = '900 150px "Baloo 2", system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('?', 128, 140); }
-    else if(icon){ g.font = (kind === 'plain' ? 90 : 120) + 'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(icon, 128, 138); }
+    if(icon === '?'){ reef3dDrawCenteredGlyph(g, '?', 128, 128, '900 150px "Baloo 2", system-ui, sans-serif', night ? '#ffe29a' : '#ffffff', 148); }
+    else if(icon){ reef3dDrawCenteredGlyph(g, icon, 128, 128, (kind === 'plain' ? 90 : 120) + 'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif', '#155664', kind === 'plain' ? 104 : 132); }
     else { g.fillStyle = 'rgba(255,255,255,.55)'; g.beginPath(); g.arc(128, 128, 26, 0, Math.PI * 2); g.fill(); }
     var t = new window.THREE.CanvasTexture(c); t.anisotropy = 4; return (R3tex[key] = t);
   }
@@ -932,8 +967,8 @@
       for(k = 0; k < 14; k++){ var a = k / 14 * Math.PI * 2; g.beginPath(); g.moveTo(128 + Math.cos(a) * 70, 128 + Math.sin(a) * 70); g.lineTo(128 + Math.cos(a) * 126, 128 + Math.sin(a) * 126); g.stroke(); }
       g.fillStyle = night ? '#3c4a47' : '#fff6e2'; g.beginPath(); g.arc(128, 128, 66, 0, Math.PI * 2); g.fill();
     }
-    if(icon === '?'){ g.fillStyle = night ? '#ffe29a' : '#ffffff'; g.font = '900 140px "Baloo 2", system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('?', 128, 140); }
-    else if(icon){ g.font = (kind === 'plain' ? 86 : 112) + 'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(icon, 128, 138); }
+    if(icon === '?'){ reef3dDrawCenteredGlyph(g, '?', 128, 128, '900 140px "Baloo 2", system-ui, sans-serif', night ? '#ffe29a' : '#ffffff', 132); }
+    else if(icon){ reef3dDrawCenteredGlyph(g, icon, 128, 128, (kind === 'plain' ? 86 : 112) + 'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif', '#155664', style === 'shell' ? 104 : 124); }
     else { g.fillStyle = 'rgba(255,255,255,.55)'; g.beginPath(); g.arc(128, 128, 24, 0, Math.PI * 2); g.fill(); }
     var t = new window.THREE.CanvasTexture(c); t.anisotropy = 4; return (R3tex[key] = t);
   }
@@ -1726,11 +1761,15 @@
     var rig = reef3dRig(scene), bake = {};   // lighting is baked into the scenery (see reef3dBakeGeo), so no shadow maps
     renderer.shadowMap.enabled = false; sun.castShadow = false;
 
-    // Sea floor with soft dunes.
-    var bounds = spaces.bounds, len = spaces.loop ? Math.max(50, bounds.maxZ - bounds.minZ + 32) : mainN * 2.6 + 40;
-    var floorWidth = spaces.loop ? Math.max(50, bounds.maxX - bounds.minX + 32) : 70;
+    // Sea floor with soft dunes — extend wide past fogFar on Coral Cove so the left/right ocean horizon is 100% seamless.
+    var bounds = spaces.bounds;
+    var covePad = (!region && crafted) ? 116 : 32;
+    var len = spaces.loop ? Math.max((!region && crafted) ? 168 : 50, bounds.maxZ - bounds.minZ + covePad) : mainN * 2.6 + 40;
+    var floorWidth = spaces.loop ? Math.max((!region && crafted) ? 168 : 50, bounds.maxX - bounds.minX + covePad) : 70;
     var floorX = spaces.loop ? (bounds.minX + bounds.maxX) / 2 : 0;
-    var floorGeo = new THREE.PlaneGeometry(floorWidth, len, region ? 1 : Math.ceil(floorWidth / 2), region ? 1 : Math.ceil(len / 2));
+    var floorSegX = region ? 1 : Math.min(64, Math.ceil(floorWidth / 2));
+    var floorSegZ = region ? 1 : Math.min(64, Math.ceil(len / 2));
+    var floorGeo = new THREE.PlaneGeometry(floorWidth, len, floorSegX, floorSegZ);
     var pos = floorGeo.attributes.position;
     // The dunes settle down under the path and just around it, so no tile or bit of path sinks into the sand.
     var pathLines = reef3dPathLines(spaces), pathPts = [];
@@ -3108,18 +3147,21 @@
           out.y = gy + 2.8 + (settingLoop[0] - 2.8) * capLo;
         }
       }
-      if(view.craftedPavilion && view.at < 5){
-        // Keep the Nautilus pavilion, Shelly, and "?" block together in the opening frame, then
-        // ease smoothly to normal MP8 follow framing over the next few tiles.
-        var emphasis = 1 - view.at / 5, aspect = view.w && view.h ? view.w / view.h : 1.02;
+      if(view.craftedPavilion){
+        var aspect = view.w && view.h ? view.w / view.h : 1.02;
         var portraitC = Math.max(0, Math.min(1, (1.02 - aspect) / .56));
-        var p = view.craftedPavilion, toward = Math.sign(-dz * (p.x - current.x) + dx * (p.z - current.z));
-        var shift = (.42 + portraitC * .55) * toward * emphasis;
-        look.x -= dz * shift + dx * portraitC * 1.4 * emphasis;
-        look.z += dx * shift - dz * portraitC * 1.4 * emphasis;
-        look.y += .22 * emphasis;
-        out.x -= dx * portraitC * 2.4 * emphasis; out.z -= dz * portraitC * 2.4 * emphasis;
-        out.y += (portraitC * 1.0 - .35) * emphasis;
+        if(view.at === 0){
+          // Keep the Nautilus pavilion, Shelly, and "?" block together in the opening frame.
+          var p0 = view.craftedPavilion, toward = Math.sign(-dz * (p0.x - current.x) + dx * (p0.z - current.z));
+          var shift = (.42 + portraitC * .55) * toward;
+          look.x -= dz * shift + dx * portraitC * 1.4;
+          look.z += dx * shift - dz * portraitC * 1.4;
+          look.y += .22;
+          out.x -= dx * portraitC * 2.4; out.z -= dz * portraitC * 2.4;
+          out.y += portraitC * 1.0 - .35;
+        } else {
+          reef3dCamClearCrafted(view, out, look, g, portraitC);
+        }
       }
       view.camMode = 'loop'; return;
     }
@@ -3154,6 +3196,73 @@
     }
     out.set(g.x * f, 6.4 + gy, g.z + 10.6);
     look.set(g.x * (f + .05), g.y + 1.15, g.z - 4.0);
+  }
+  // Keep tall Coral Cove structures (especially the Nautilus Pavilion) out of the camera-to-Shelly sightline.
+  function reef3dCamClearCrafted(view, out, look, g, portraitC){
+    var p = view.craftedPavilion;
+    if(!p) return;
+    var blockers = [{ x: p.x, z: p.z, r: 5.5 + portraitC * .65, topY: (p.y || 0) + 7.8 }];
+    var obs = view._coveObstacles || [];
+    for(var i = 0; i < obs.length; i++){
+      var ob = obs[i];
+      if(!ob || ob.maxY < 2.2) continue;
+      if(Math.hypot(ob.x - p.x, ob.z - p.z) < 2.6) continue;
+      blockers.push({ x: ob.x, z: ob.z, r: Math.max(2.3, Math.min(4.8, (ob.r || 2.0) + 1.0 + portraitC * .35)), topY: ob.maxY + 1.0 });
+    }
+    var tx = g.x, ty = g.y + .9, tz = g.z;
+    function occlusion(cx, cy, cz){
+      var sx = tx - cx, sy = ty - cy, sz = tz - cz, L2 = sx * sx + sz * sz;
+      if(L2 < .1) return 0;
+      var pen = 0;
+      for(var k = 0; k < blockers.length; k++){
+        var b = blockers[k];
+        var u = ((b.x - cx) * sx + (b.z - cz) * sz) / L2;
+        if(u < -.22 || u > .94) continue;
+        var uc = Math.max(0, Math.min(1, u));
+        var rx = cx + sx * uc, rz = cz + sz * uc, ry = cy + sy * uc;
+        if(ry > b.topY) continue;
+        var dist = Math.hypot(rx - b.x, rz - b.z);
+        if(dist < b.r){
+          var weight = uc < .55 ? 1.35 : 1.0;
+          pen = Math.max(pen, (b.r - dist) * weight);
+        }
+      }
+      return pen;
+    }
+    if(occlusion(out.x, out.y, out.z) <= 0) return;
+    // Compute loop center so ties prefer swinging inward over open lagoon water.
+    var lcx = 0, lcz = 0, sp = view.spaces || [], mN = sp.mainN || sp.length || 1;
+    for(var s = 0; s < mN; s++){ lcx += sp[s].x; lcz += sp[s].z; }
+    lcx /= mN; lcz /= mN;
+    var ox = out.x - g.x, oz = out.z - g.z, rad = Math.hypot(ox, oz) || 12.6, baseA = Math.atan2(oz, ox);
+    var bestX = out.x, bestY = out.y, bestZ = out.z, bestCost = 1e9;
+    var yOffsets = [0, 1.4, 2.8];
+    for(var yi = 0; yi < yOffsets.length; yi++){
+      var cy = out.y + yOffsets[yi];
+      for(var step = 1; step <= 18; step++){
+        var deg = step * 7 * Math.PI / 180;
+        for(var dir = -1; dir <= 1; dir += 2){
+          var ang = baseA + dir * deg;
+          var cx = g.x + Math.cos(ang) * rad, cz = g.z + Math.sin(ang) * rad;
+          var occ = occlusion(cx, cy, cz);
+          var toCenter = Math.hypot(cx - lcx, cz - lcz) * .018;
+          var cost = occ * 100 + deg * 1.6 + yOffsets[yi] * .55 + toCenter;
+          if(cost < bestCost){
+            bestCost = cost; bestX = cx; bestY = cy; bestZ = cz;
+          }
+          if(occ <= 0 && yi === 0 && step <= 12){
+            // Found a clean horizontal orbit with zero occlusion; still test the opposite sign on this step.
+            break;
+          }
+        }
+        if(bestCost < 10 && yi === 0) break;
+      }
+      if(bestCost < 10) break;
+    }
+    out.set(bestX, bestY, bestZ);
+    // Keep Shelly cleanly framed slightly below center while still looking gently down the path ahead.
+    look.x = g.x + (look.x - g.x) * .68;
+    look.z = g.z + (look.z - g.z) * .68;
   }
   // A mast standing between the camera and her: slide the camera sideways until it clears (by room, in units).
   function reef3dCamMasts(view, out, room){

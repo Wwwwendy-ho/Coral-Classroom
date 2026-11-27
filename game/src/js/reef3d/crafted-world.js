@@ -1,7 +1,7 @@
 /* The crafted Cove shares the board's route, hit targets, and static light bake. */
 var ReefCraftedWorld = (function(){
   'use strict';
-  var TAU = Math.PI * 2, CELL = 128, SIZE = 1024, FOG = '#79cce2';
+  var TAU = Math.PI * 2, CELL = 128, SIZE = 1024, FOG = '#dff0e6';
   var glass = {
     jade: ['#53e2e5', '#3ca9df', '#af8de9', '#62eed2'],
     lilac: ['#80d2fb', '#9d87e6', '#d698e9', '#56dce3'],
@@ -43,31 +43,80 @@ var ReefCraftedWorld = (function(){
     textureGrain(g, '#94809e', 420, .14);
     if(mark) paintMark(g, mark, '#9e82b2', 2.5);
   }
+  var markScratch = null;
+  function drawCenteredMark(g, cx, cy, boxW, boxH, drawFn){
+    try {
+      if(typeof document === 'undefined' || !document.createElement) return false;
+      if(!markScratch){
+        markScratch = document.createElement('canvas');
+        markScratch.width = markScratch.height = 192;
+      }
+      var sg = markScratch.getContext && markScratch.getContext('2d');
+      if(!sg || typeof sg.getImageData !== 'function') return false;
+      sg.clearRect(0, 0, 192, 192);
+      sg.save();
+      drawFn(sg, 96, 96);
+      sg.restore();
+      var img = sg.getImageData(0, 0, 192, 192), data = img && img.data;
+      if(!data || data.length < 192 * 192 * 4) return false;
+      var minX = 192, minY = 192, maxX = -1, maxY = -1;
+      for(var y = 0; y < 192; y++){
+        var row = y * 192 * 4;
+        for(var x = 0; x < 192; x++){
+          if(data[row + x * 4 + 3] > 16){
+            if(x < minX) minX = x;
+            if(x > maxX) maxX = x;
+            if(y < minY) minY = y;
+            if(y > maxY) maxY = y;
+          }
+        }
+      }
+      if(maxX < minX || maxY < minY) return false;
+      var sw = maxX - minX + 1, sh = maxY - minY + 1;
+      var scale = Math.min(1, boxW / sw, boxH / sh);
+      var dw = sw * scale, dh = sh * scale;
+      g.drawImage(markScratch, minX, minY, sw, sh, cx - dw * .5, cy - dh * .5, dw, dh);
+      return true;
+    } catch(e){
+      return false;
+    }
+  }
   function paintMark(g, mark, ink, line){
     g.lineCap = 'round'; g.lineJoin = 'round';
     if(mark === 'wave'){
-      for(var wave = 0; wave < 2; wave++){
-        var y = 59 + wave * 14;
-        g.beginPath(); g.moveTo(38, y + 2); g.bezierCurveTo(58, y - 16, 66, y + 12, 89, y - 3);
-        g.lineWidth = line + 1.2; g.strokeStyle = '#fff9ee'; g.stroke();
-        g.lineWidth = line; g.strokeStyle = ink; g.stroke();
-      }
+      var drawWave = function(ctx, ox, oy){
+        ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        for(var wave = 0; wave < 2; wave++){
+          var y = oy - 7 + wave * 14;
+          ctx.beginPath(); ctx.moveTo(ox - 26, y + 2); ctx.bezierCurveTo(ox - 6, y - 16, ox + 2, y + 12, ox + 25, y - 3);
+          ctx.lineWidth = line + 1.2; ctx.strokeStyle = '#fff9ee'; ctx.stroke();
+          ctx.lineWidth = line; ctx.strokeStyle = ink; ctx.stroke();
+        }
+      };
+      if(!drawCenteredMark(g, 64, 64, 58, 52, drawWave)) drawWave(g, 64, 64);
       return;
     }
     if(mark === 'shell'){
-      g.lineWidth = line; g.strokeStyle = ink;
-      g.beginPath(); g.moveTo(64, 86); g.bezierCurveTo(30, 77, 35, 45, 49, 47);
-      g.quadraticCurveTo(51, 36, 60, 41); g.quadraticCurveTo(64, 32, 71, 41);
-      g.quadraticCurveTo(80, 38, 83, 47); g.bezierCurveTo(97, 48, 101, 76, 64, 86); g.stroke();
-      for(var fan = -2; fan <= 2; fan++){
-        g.beginPath(); g.moveTo(64, 81); g.quadraticCurveTo(64 + fan * 6, 66, 64 + fan * 8, 47 + Math.abs(fan) * 6); g.stroke();
-      }
+      var drawShell = function(ctx, ox, oy){
+        ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        ctx.lineWidth = line; ctx.strokeStyle = ink;
+        ctx.beginPath(); ctx.moveTo(ox, oy + 22); ctx.bezierCurveTo(ox - 34, oy + 13, ox - 29, oy - 19, ox - 15, oy - 17);
+        ctx.quadraticCurveTo(ox - 13, oy - 28, ox - 4, oy - 23); ctx.quadraticCurveTo(ox, oy - 32, ox + 7, oy - 23);
+        ctx.quadraticCurveTo(ox + 16, oy - 26, ox + 19, oy - 17); ctx.bezierCurveTo(ox + 33, oy - 16, ox + 37, oy + 12, ox, oy + 22); ctx.stroke();
+        for(var fan = -2; fan <= 2; fan++){
+          ctx.beginPath(); ctx.moveTo(ox, oy + 17); ctx.quadraticCurveTo(ox + fan * 6, oy + 2, ox + fan * 8, oy - 17 + Math.abs(fan) * 6); ctx.stroke();
+        }
+      };
+      if(!drawCenteredMark(g, 64, 64, 62, 56, drawShell)) drawShell(g, 64, 64);
       return;
     }
-    g.fillStyle = ink; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.font = mark === '?' || mark === '!' || /[가-힣]/.test(mark) ? '800 53px system-ui, sans-serif'
+    var font = mark === '?' || mark === '!' || /[가-힣]/.test(mark) ? '800 53px system-ui, sans-serif'
       : '49px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
-    g.fillText(mark, 64, 66);
+    var drawGlyph = function(ctx, ox, oy){
+      ctx.fillStyle = ink; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = font;
+      ctx.fillText(mark, ox, oy);
+    };
+    if(!drawCenteredMark(g, 64, 64, 54, 54, drawGlyph)) drawGlyph(g, 64, 64);
   }
   function paintGlass(g, palette, mark, done){
     var cols = glass[palette], origin = [64, 108];

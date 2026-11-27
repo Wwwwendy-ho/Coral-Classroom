@@ -5220,9 +5220,8 @@ body.reef-calm .jmb-kiko-hint {
     if(p) p.addEventListener('click', exitToPicker);
     var e = app.querySelector('[data-act="end-session"]');
     if(e) e.addEventListener('click', function(){
-      // In Adult Mode there's no child "session" to lock/end -- a grown-up playing a deck to try it
-      // out just heads back to Manage Decks, no PIN needed (they were never asked for one to get here).
       if(S.managingDecks){ goHome(); return; }
+      if(reefNoPin()){ endSessionNow(); return; }
       S.pinPromptFor='end'; render();
     });
   }
@@ -5354,10 +5353,15 @@ body.reef-calm .jmb-kiko-hint {
   // Adult Mode and a not-yet-started Child Mode profile have nothing to protect, so those go straight
   // through goToPicker().
   function exitToPicker(){
-    if(S.sessionActive){
+    if(S.sessionActive && !reefNoPin()){
       S.pinPromptFor = 'switch';
       render();
       return;
+    }
+    if(S.sessionActive){
+      var endSettings = Object.assign({}, S.settings, { sessionActive:false });
+      S.settings = endSettings;
+      S.store.setSettings(endSettings).catch(function(){});
     }
     goToPicker();
   }
@@ -5390,8 +5394,7 @@ body.reef-calm .jmb-kiko-hint {
         var p = S.profiles.find(function(x){ return x.id === b.dataset.profile; });
         if(!p) return;
         Sound.unlock();
-        /* iPad copy: grown-up profiles need the PIN to open; child profiles open freely. */
-        if(p.mode === 'adult'){
+        if(p.mode === 'adult' && !reefNoPin()){
           S.pendingEnterProfile = p;
           S.pinPromptFor = 'enterAdult';
           render();
@@ -5402,6 +5405,11 @@ body.reef-calm .jmb-kiko-hint {
     });
     app.querySelector('[data-act="manage-profiles"]').addEventListener('click', function(){
       Sound.unlock();
+      if(reefNoPin()){
+        S.managingProfiles = true;
+        render();
+        return;
+      }
       S.pinPromptFor = 'manageProfiles';
       render();
     });
@@ -5558,7 +5566,7 @@ body.reef-calm .jmb-kiko-hint {
       var name = d.name.trim();
       if(!name || (d.mode==='child' && !d.consent)) return;
       var goal = (d.learnGoal || '').trim();   // a learning goal switches Coral Classroom on for this profile
-      S.store.addProfile({ name: name, mode: d.mode, initialMode: d.mode, photoId: d.photoId||'', photoUrl: safePhotoUrl(d.photoUrl||''), order: S.profiles.length, learnGoal: goal, courseOn: !!goal }).then(function(){
+      S.store.addProfile({ name: name, mode: d.mode, initialMode: d.mode, photoId: d.photoId||'', photoUrl: safePhotoUrl(d.photoUrl||''), order: S.profiles.length, learnGoal: goal, courseOn: true }).then(function(){
         S.newProfileDraft = null;
         S.creatingProfile = false;
         render();
@@ -5620,7 +5628,7 @@ body.reef-calm .jmb-kiko-hint {
   }
 
   function requestEditMode(){
-    if(S.managingDecks){ S.editMode = true; render(); return; }
+    if(S.managingDecks || reefNoPin()){ S.editMode = true; render(); return; }
     S.pendingEdit = null;
     S.pinPromptFor = 'edit';
     render();
@@ -11217,7 +11225,7 @@ body.reef-calm .jmb-kiko-hint {
       b.addEventListener('click', function(){
         var id = b.dataset.modeSwitch;
         if(!S.profile || id === S.profile.mode) return;
-        if(S.profile.initialMode === 'child'){
+        if(S.profile.initialMode === 'child' && !reefNoPin()){
           S.pendingModeSwitch = id;
           S.pinPromptFor = 'modeSwitch';
           render();
@@ -11239,9 +11247,7 @@ body.reef-calm .jmb-kiko-hint {
 
   /* ---------- EDITOR ---------- */
   function openEditor(deckId, focusName){
-    // Adult Mode never asks for the PIN. Child Mode already cleared the PIN once to reach Edit Mode
-    // in the first place, so opening one specific deck from inside it needs no second PIN prompt.
-    if(S.managingDecks || S.editMode){ openEditorUnlocked(deckId, focusName); return; }
+    if(S.managingDecks || S.editMode || reefNoPin()){ openEditorUnlocked(deckId, focusName); return; }
     // Defensive fallback in case this is ever reached outside Edit Mode.
     S.pendingEdit = { deckId: deckId, focusName: focusName };
     S.pinPromptFor = 'edit';
@@ -12826,10 +12832,8 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
   }
   afterRender('board menu', reefBoardMenuSync);
 
-  /* ---------- No grown-up check in the Claude version (Wendy's choice). The GitHub/iPad copy loads its seed data
-     file, which defines CORAL_COVE_SEED, and asks for the grown-up password (reefGrownUpGate) wherever a PIN
-     used to be asked. ---------- */
-  function reefNoPin(){ return !window.CORAL_COVE_SEED; }
+  /* ---------- No parent/grown-up password gate: profiles, settings, and edit mode open directly. ---------- */
+  function reefNoPin(){ return true; }
   /* Inside a grown-up profile nothing asks again: the password was entered on the way in.
      Opening the profile and Manage Profiles (on the profile screen, outside any profile) still ask. */
   function reefInsideAdult(kind){
@@ -13919,8 +13923,8 @@ function coveSwimCalm(){if(SW.el&&SW.T&&SW.ex){try{swExSet(null);}catch(e){}}}
     else reefParallax();
   }
 
-  // Coral Classroom, for the app: is it on for this profile, and which unit is she on (the earliest not finished)?
-  function reefCourseOn(){ var p = S.profile; if(!p) return false; return p.courseOn != null ? !!p.courseOn : /^wendy$/i.test(p.id || '') || /^wendy$/i.test(p.name || ''); }
+  // Coral Classroom, for the app: Sea Map & all regions are enabled by default unless explicitly turned off.
+  function reefCourseOn(){ var p = S.profile; if(!p) return false; return p.courseOn !== false; }
   function reefCourseNow(){
     var co = reefCourseOn() && S.profile.course; if(!co || !co.units) return null;
     for(var i = 0; i < co.units.length; i++) if(!co.units[i].done) return { co: co, unit: co.units[i], i: i };
@@ -27441,18 +27445,66 @@ function reef3dOverviewDress(view, root){
       g.beginPath(); g.arc(64, 64, insetR - 2, Math.PI * 1.08, Math.PI * 1.9);
       g.strokeStyle = 'rgba(255,255,241,.55)'; g.stroke();
     }
+    var drawCenteredFace = function(boxW, boxH, drawFn){
+      try {
+        if(typeof document === 'undefined' || !document.createElement) return false;
+        if(!paintFace._scratch){
+          paintFace._scratch = document.createElement('canvas');
+          paintFace._scratch.width = paintFace._scratch.height = 192;
+        }
+        var sg = paintFace._scratch.getContext && paintFace._scratch.getContext('2d');
+        if(!sg || typeof sg.getImageData !== 'function') return false;
+        sg.clearRect(0, 0, 192, 192);
+        sg.save();
+        drawFn(sg, 96, 96);
+        sg.restore();
+        var img = sg.getImageData(0, 0, 192, 192), data = img && img.data;
+        if(!data || data.length < 192 * 192 * 4) return false;
+        var minX = 192, minY = 192, maxX = -1, maxY = -1;
+        for(var py = 0; py < 192; py++){
+          var row = py * 192 * 4;
+          for(var px = 0; px < 192; px++){
+            if(data[row + px * 4 + 3] > 16){
+              if(px < minX) minX = px;
+              if(px > maxX) maxX = px;
+              if(py < minY) minY = py;
+              if(py > maxY) maxY = py;
+            }
+          }
+        }
+        if(maxX < minX || maxY < minY) return false;
+        var sw = maxX - minX + 1, sh = maxY - minY + 1;
+        var sc = Math.min(1, boxW / sw, boxH / sh);
+        var dw = sw * sc, dh = sh * sc;
+        g.drawImage(paintFace._scratch, minX, minY, sw, sh, 64 - dw * .5, 64 - dh * .5, dw, dh);
+        return true;
+      } catch(e){
+        return false;
+      }
+    };
     g.textAlign = 'center'; g.textBaseline = 'middle';
     if(icon === '?' || icon === '!'){
-      g.fillStyle = night ? '#ffe29a' : '#fffdf3'; g.font = '900 71px system-ui, sans-serif'; g.fillText(icon, 64, 68);
+      var drawBang = function(ctx, ox, oy){
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = night ? '#ffe29a' : '#fffdf3'; ctx.font = '900 71px system-ui, sans-serif'; ctx.fillText(icon, ox, oy);
+      };
+      if(!drawCenteredFace(70, 70, drawBang)) drawBang(g, 64, 64);
     } else if(icon){
-      g.fillStyle = night ? '#694a20' : '#155664';
-      g.font = /[가-힣]/.test(icon) ? '700 54px system-ui, sans-serif' : (style === 'shell' ? '52px' : '62px') + ' "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
-      g.fillText(icon, 64, 67);
+      var iconFont = /[가-힣]/.test(icon) ? '700 54px system-ui, sans-serif' : (style === 'shell' ? '52px' : '62px') + ' "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+      var iconMax = style === 'shell' ? 50 : (kind.indexOf('deck') === 0 ? 58 : 66);
+      var drawIcon = function(ctx, ox, oy){
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = night ? '#694a20' : '#155664'; ctx.font = iconFont; ctx.fillText(icon, ox, oy);
+      };
+      if(!drawCenteredFace(iconMax, iconMax, drawIcon)) drawIcon(g, 64, 64);
     } else {
       // A little etched shell instead of a blank dot.
-      g.strokeStyle = night ? '#7a887c' : '#c7ac83'; g.lineWidth = 2; g.lineCap = 'round';
-      for(var k = -2; k <= 2; k++){ g.beginPath(); g.moveTo(64, 77); g.quadraticCurveTo(64 + k * 6, 66, 64 + k * 8, 53); g.stroke(); }
-      g.beginPath(); g.arc(64, 62, 17, Math.PI * 1.05, Math.PI * 1.95); g.stroke();
+      var drawEtched = function(ctx, ox, oy){
+        ctx.strokeStyle = night ? '#7a887c' : '#c7ac83'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+        for(var k = -2; k <= 2; k++){ ctx.beginPath(); ctx.moveTo(ox, oy + 13); ctx.quadraticCurveTo(ox + k * 6, oy + 2, ox + k * 8, oy - 11); ctx.stroke(); }
+        ctx.beginPath(); ctx.arc(ox, oy - 2, 17, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
+      };
+      if(!drawCenteredFace(42, 42, drawEtched)) drawEtched(g, 64, 64);
     }
     if(kind === 'deck-done'){
       g.font = '900 30px system-ui, sans-serif'; g.lineWidth = 3; g.strokeStyle = '#8a5a12'; g.fillStyle = '#ffcf3f'; g.strokeText('★', 100, 30); g.fillText('★', 100, 30);
@@ -27549,7 +27601,7 @@ function reef3dOverviewDress(view, root){
 /* The crafted Cove shares the board's route, hit targets, and static light bake. */
 var ReefCraftedWorld = (function(){
   'use strict';
-  var TAU = Math.PI * 2, CELL = 128, SIZE = 1024, FOG = '#79cce2';
+  var TAU = Math.PI * 2, CELL = 128, SIZE = 1024, FOG = '#dff0e6';
   var glass = {
     jade: ['#53e2e5', '#3ca9df', '#af8de9', '#62eed2'],
     lilac: ['#80d2fb', '#9d87e6', '#d698e9', '#56dce3'],
@@ -27591,31 +27643,80 @@ var ReefCraftedWorld = (function(){
     textureGrain(g, '#94809e', 420, .14);
     if(mark) paintMark(g, mark, '#9e82b2', 2.5);
   }
+  var markScratch = null;
+  function drawCenteredMark(g, cx, cy, boxW, boxH, drawFn){
+    try {
+      if(typeof document === 'undefined' || !document.createElement) return false;
+      if(!markScratch){
+        markScratch = document.createElement('canvas');
+        markScratch.width = markScratch.height = 192;
+      }
+      var sg = markScratch.getContext && markScratch.getContext('2d');
+      if(!sg || typeof sg.getImageData !== 'function') return false;
+      sg.clearRect(0, 0, 192, 192);
+      sg.save();
+      drawFn(sg, 96, 96);
+      sg.restore();
+      var img = sg.getImageData(0, 0, 192, 192), data = img && img.data;
+      if(!data || data.length < 192 * 192 * 4) return false;
+      var minX = 192, minY = 192, maxX = -1, maxY = -1;
+      for(var y = 0; y < 192; y++){
+        var row = y * 192 * 4;
+        for(var x = 0; x < 192; x++){
+          if(data[row + x * 4 + 3] > 16){
+            if(x < minX) minX = x;
+            if(x > maxX) maxX = x;
+            if(y < minY) minY = y;
+            if(y > maxY) maxY = y;
+          }
+        }
+      }
+      if(maxX < minX || maxY < minY) return false;
+      var sw = maxX - minX + 1, sh = maxY - minY + 1;
+      var scale = Math.min(1, boxW / sw, boxH / sh);
+      var dw = sw * scale, dh = sh * scale;
+      g.drawImage(markScratch, minX, minY, sw, sh, cx - dw * .5, cy - dh * .5, dw, dh);
+      return true;
+    } catch(e){
+      return false;
+    }
+  }
   function paintMark(g, mark, ink, line){
     g.lineCap = 'round'; g.lineJoin = 'round';
     if(mark === 'wave'){
-      for(var wave = 0; wave < 2; wave++){
-        var y = 59 + wave * 14;
-        g.beginPath(); g.moveTo(38, y + 2); g.bezierCurveTo(58, y - 16, 66, y + 12, 89, y - 3);
-        g.lineWidth = line + 1.2; g.strokeStyle = '#fff9ee'; g.stroke();
-        g.lineWidth = line; g.strokeStyle = ink; g.stroke();
-      }
+      var drawWave = function(ctx, ox, oy){
+        ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        for(var wave = 0; wave < 2; wave++){
+          var y = oy - 7 + wave * 14;
+          ctx.beginPath(); ctx.moveTo(ox - 26, y + 2); ctx.bezierCurveTo(ox - 6, y - 16, ox + 2, y + 12, ox + 25, y - 3);
+          ctx.lineWidth = line + 1.2; ctx.strokeStyle = '#fff9ee'; ctx.stroke();
+          ctx.lineWidth = line; ctx.strokeStyle = ink; ctx.stroke();
+        }
+      };
+      if(!drawCenteredMark(g, 64, 64, 58, 52, drawWave)) drawWave(g, 64, 64);
       return;
     }
     if(mark === 'shell'){
-      g.lineWidth = line; g.strokeStyle = ink;
-      g.beginPath(); g.moveTo(64, 86); g.bezierCurveTo(30, 77, 35, 45, 49, 47);
-      g.quadraticCurveTo(51, 36, 60, 41); g.quadraticCurveTo(64, 32, 71, 41);
-      g.quadraticCurveTo(80, 38, 83, 47); g.bezierCurveTo(97, 48, 101, 76, 64, 86); g.stroke();
-      for(var fan = -2; fan <= 2; fan++){
-        g.beginPath(); g.moveTo(64, 81); g.quadraticCurveTo(64 + fan * 6, 66, 64 + fan * 8, 47 + Math.abs(fan) * 6); g.stroke();
-      }
+      var drawShell = function(ctx, ox, oy){
+        ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        ctx.lineWidth = line; ctx.strokeStyle = ink;
+        ctx.beginPath(); ctx.moveTo(ox, oy + 22); ctx.bezierCurveTo(ox - 34, oy + 13, ox - 29, oy - 19, ox - 15, oy - 17);
+        ctx.quadraticCurveTo(ox - 13, oy - 28, ox - 4, oy - 23); ctx.quadraticCurveTo(ox, oy - 32, ox + 7, oy - 23);
+        ctx.quadraticCurveTo(ox + 16, oy - 26, ox + 19, oy - 17); ctx.bezierCurveTo(ox + 33, oy - 16, ox + 37, oy + 12, ox, oy + 22); ctx.stroke();
+        for(var fan = -2; fan <= 2; fan++){
+          ctx.beginPath(); ctx.moveTo(ox, oy + 17); ctx.quadraticCurveTo(ox + fan * 6, oy + 2, ox + fan * 8, oy - 17 + Math.abs(fan) * 6); ctx.stroke();
+        }
+      };
+      if(!drawCenteredMark(g, 64, 64, 62, 56, drawShell)) drawShell(g, 64, 64);
       return;
     }
-    g.fillStyle = ink; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.font = mark === '?' || mark === '!' || /[가-힣]/.test(mark) ? '800 53px system-ui, sans-serif'
+    var font = mark === '?' || mark === '!' || /[가-힣]/.test(mark) ? '800 53px system-ui, sans-serif'
       : '49px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
-    g.fillText(mark, 64, 66);
+    var drawGlyph = function(ctx, ox, oy){
+      ctx.fillStyle = ink; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = font;
+      ctx.fillText(mark, ox, oy);
+    };
+    if(!drawCenteredMark(g, 64, 64, 54, 54, drawGlyph)) drawGlyph(g, 64, 64);
   }
   function paintGlass(g, palette, mark, done){
     var cols = glass[palette], origin = [64, 108];
@@ -30128,6 +30229,41 @@ var ReefCraftedWorld = (function(){
   }
   // The painted top of a space: the deck's emoji, a "?" for surprises, a shell for plain spaces.
   var R3tex = {};
+  var R3glyphScratch = null;
+  function reef3dDrawCenteredGlyph(g, text, cx, cy, font, fillStyle, maxBox){
+    var drawDirect = function(ctx, ox, oy){
+      if(fillStyle) ctx.fillStyle = fillStyle;
+      ctx.font = font; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(text, ox, oy);
+    };
+    try {
+      if(typeof document === 'undefined' || !document.createElement){ drawDirect(g, cx, cy); return; }
+      if(!R3glyphScratch){ R3glyphScratch = document.createElement('canvas'); R3glyphScratch.width = R3glyphScratch.height = 256; }
+      var sg = R3glyphScratch.getContext && R3glyphScratch.getContext('2d');
+      if(!sg || typeof sg.getImageData !== 'function'){ drawDirect(g, cx, cy); return; }
+      sg.clearRect(0, 0, 256, 256);
+      sg.save(); drawDirect(sg, 128, 128); sg.restore();
+      var img = sg.getImageData(0, 0, 256, 256), data = img && img.data;
+      if(!data || data.length < 256 * 256 * 4){ drawDirect(g, cx, cy); return; }
+      var minX = 256, minY = 256, maxX = -1, maxY = -1;
+      for(var y = 0; y < 256; y++){
+        var row = y * 256 * 4;
+        for(var x = 0; x < 256; x++){
+          if(data[row + x * 4 + 3] > 16){
+            if(x < minX) minX = x; if(x > maxX) maxX = x;
+            if(y < minY) minY = y; if(y > maxY) maxY = y;
+          }
+        }
+      }
+      if(maxX < minX || maxY < minY){ drawDirect(g, cx, cy); return; }
+      var sw = maxX - minX + 1, sh = maxY - minY + 1;
+      var sc = maxBox ? Math.min(1, maxBox / sw, maxBox / sh) : 1;
+      var dw = sw * sc, dh = sh * sc;
+      g.drawImage(R3glyphScratch, minX, minY, sw, sh, cx - dw * .5, cy - dh * .5, dw, dh);
+    } catch(e){
+      drawDirect(g, cx, cy);
+    }
+  }
   function reef3dTileTex(col, icon, night, kind){
     var key = col + icon + night + kind; if(R3tex[key]) return R3tex[key];
     var c = document.createElement('canvas'); c.width = c.height = 256; var g = c.getContext('2d');
@@ -30137,15 +30273,15 @@ var ReefCraftedWorld = (function(){
     g.beginPath(); g.arc(128, 128, 104, 0, Math.PI * 2); g.stroke(); g.setLineDash([]);
     if(/^deck/.test(kind)){   // decks: a white badge behind a big emoji, and a gold star once it's all done
       g.fillStyle = night ? 'rgba(255,246,222,.92)' : 'rgba(255,255,255,.92)'; g.beginPath(); g.arc(128, 128, 82, 0, Math.PI * 2); g.fill();
-      g.font = '128px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-      // a letter instead of an emoji (My words is 말) takes the fill colour, so it needs ink, not the badge's white
-      if(/[가-힣]/.test(icon)){ g.fillStyle = night ? '#6b4514' : '#0d5262'; g.font = '700 116px system-ui, sans-serif'; }
-      g.fillText(icon, 128, 136);
-      if(kind === 'deck-done'){ g.font = '900 64px "Baloo 2", system-ui, sans-serif'; g.fillStyle = '#ffcf3f'; g.strokeStyle = '#8a5a12'; g.lineWidth = 6; g.strokeText('★', 200, 58); g.fillText('★', 200, 58); }
+      var isHangul = /[가-힣]/.test(icon);
+      var dFont = isHangul ? '700 116px system-ui, sans-serif' : '128px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+      var dFill = isHangul ? (night ? '#6b4514' : '#0d5262') : (night ? '#6b4514' : '#0d5262');
+      reef3dDrawCenteredGlyph(g, icon, 128, 128, dFont, dFill, 126);
+      if(kind === 'deck-done'){ g.font = '900 64px "Baloo 2", system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#ffcf3f'; g.strokeStyle = '#8a5a12'; g.lineWidth = 6; g.strokeText('★', 200, 58); g.fillText('★', 200, 58); }
       var dt = new window.THREE.CanvasTexture(c); dt.anisotropy = 4; return (R3tex[key] = dt);
     }
-    if(icon === '?'){ g.fillStyle = night ? '#ffe29a' : '#ffffff'; g.font = '900 150px "Baloo 2", system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('?', 128, 140); }
-    else if(icon){ g.font = (kind === 'plain' ? 90 : 120) + 'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(icon, 128, 138); }
+    if(icon === '?'){ reef3dDrawCenteredGlyph(g, '?', 128, 128, '900 150px "Baloo 2", system-ui, sans-serif', night ? '#ffe29a' : '#ffffff', 148); }
+    else if(icon){ reef3dDrawCenteredGlyph(g, icon, 128, 128, (kind === 'plain' ? 90 : 120) + 'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif', '#155664', kind === 'plain' ? 104 : 132); }
     else { g.fillStyle = 'rgba(255,255,255,.55)'; g.beginPath(); g.arc(128, 128, 26, 0, Math.PI * 2); g.fill(); }
     var t = new window.THREE.CanvasTexture(c); t.anisotropy = 4; return (R3tex[key] = t);
   }
@@ -30429,8 +30565,8 @@ var ReefCraftedWorld = (function(){
       for(k = 0; k < 14; k++){ var a = k / 14 * Math.PI * 2; g.beginPath(); g.moveTo(128 + Math.cos(a) * 70, 128 + Math.sin(a) * 70); g.lineTo(128 + Math.cos(a) * 126, 128 + Math.sin(a) * 126); g.stroke(); }
       g.fillStyle = night ? '#3c4a47' : '#fff6e2'; g.beginPath(); g.arc(128, 128, 66, 0, Math.PI * 2); g.fill();
     }
-    if(icon === '?'){ g.fillStyle = night ? '#ffe29a' : '#ffffff'; g.font = '900 140px "Baloo 2", system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('?', 128, 140); }
-    else if(icon){ g.font = (kind === 'plain' ? 86 : 112) + 'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(icon, 128, 138); }
+    if(icon === '?'){ reef3dDrawCenteredGlyph(g, '?', 128, 128, '900 140px "Baloo 2", system-ui, sans-serif', night ? '#ffe29a' : '#ffffff', 132); }
+    else if(icon){ reef3dDrawCenteredGlyph(g, icon, 128, 128, (kind === 'plain' ? 86 : 112) + 'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif', '#155664', style === 'shell' ? 104 : 124); }
     else { g.fillStyle = 'rgba(255,255,255,.55)'; g.beginPath(); g.arc(128, 128, 24, 0, Math.PI * 2); g.fill(); }
     var t = new window.THREE.CanvasTexture(c); t.anisotropy = 4; return (R3tex[key] = t);
   }
@@ -31223,11 +31359,15 @@ var ReefCraftedWorld = (function(){
     var rig = reef3dRig(scene), bake = {};   // lighting is baked into the scenery (see reef3dBakeGeo), so no shadow maps
     renderer.shadowMap.enabled = false; sun.castShadow = false;
 
-    // Sea floor with soft dunes.
-    var bounds = spaces.bounds, len = spaces.loop ? Math.max(50, bounds.maxZ - bounds.minZ + 32) : mainN * 2.6 + 40;
-    var floorWidth = spaces.loop ? Math.max(50, bounds.maxX - bounds.minX + 32) : 70;
+    // Sea floor with soft dunes — extend wide past fogFar on Coral Cove so the left/right ocean horizon is 100% seamless.
+    var bounds = spaces.bounds;
+    var covePad = (!region && crafted) ? 116 : 32;
+    var len = spaces.loop ? Math.max((!region && crafted) ? 168 : 50, bounds.maxZ - bounds.minZ + covePad) : mainN * 2.6 + 40;
+    var floorWidth = spaces.loop ? Math.max((!region && crafted) ? 168 : 50, bounds.maxX - bounds.minX + covePad) : 70;
     var floorX = spaces.loop ? (bounds.minX + bounds.maxX) / 2 : 0;
-    var floorGeo = new THREE.PlaneGeometry(floorWidth, len, region ? 1 : Math.ceil(floorWidth / 2), region ? 1 : Math.ceil(len / 2));
+    var floorSegX = region ? 1 : Math.min(64, Math.ceil(floorWidth / 2));
+    var floorSegZ = region ? 1 : Math.min(64, Math.ceil(len / 2));
+    var floorGeo = new THREE.PlaneGeometry(floorWidth, len, floorSegX, floorSegZ);
     var pos = floorGeo.attributes.position;
     // The dunes settle down under the path and just around it, so no tile or bit of path sinks into the sand.
     var pathLines = reef3dPathLines(spaces), pathPts = [];
@@ -32605,18 +32745,21 @@ var ReefCraftedWorld = (function(){
           out.y = gy + 2.8 + (settingLoop[0] - 2.8) * capLo;
         }
       }
-      if(view.craftedPavilion && view.at < 5){
-        // Keep the Nautilus pavilion, Shelly, and "?" block together in the opening frame, then
-        // ease smoothly to normal MP8 follow framing over the next few tiles.
-        var emphasis = 1 - view.at / 5, aspect = view.w && view.h ? view.w / view.h : 1.02;
+      if(view.craftedPavilion){
+        var aspect = view.w && view.h ? view.w / view.h : 1.02;
         var portraitC = Math.max(0, Math.min(1, (1.02 - aspect) / .56));
-        var p = view.craftedPavilion, toward = Math.sign(-dz * (p.x - current.x) + dx * (p.z - current.z));
-        var shift = (.42 + portraitC * .55) * toward * emphasis;
-        look.x -= dz * shift + dx * portraitC * 1.4 * emphasis;
-        look.z += dx * shift - dz * portraitC * 1.4 * emphasis;
-        look.y += .22 * emphasis;
-        out.x -= dx * portraitC * 2.4 * emphasis; out.z -= dz * portraitC * 2.4 * emphasis;
-        out.y += (portraitC * 1.0 - .35) * emphasis;
+        if(view.at === 0){
+          // Keep the Nautilus pavilion, Shelly, and "?" block together in the opening frame.
+          var p0 = view.craftedPavilion, toward = Math.sign(-dz * (p0.x - current.x) + dx * (p0.z - current.z));
+          var shift = (.42 + portraitC * .55) * toward;
+          look.x -= dz * shift + dx * portraitC * 1.4;
+          look.z += dx * shift - dz * portraitC * 1.4;
+          look.y += .22;
+          out.x -= dx * portraitC * 2.4; out.z -= dz * portraitC * 2.4;
+          out.y += portraitC * 1.0 - .35;
+        } else {
+          reef3dCamClearCrafted(view, out, look, g, portraitC);
+        }
       }
       view.camMode = 'loop'; return;
     }
@@ -32651,6 +32794,73 @@ var ReefCraftedWorld = (function(){
     }
     out.set(g.x * f, 6.4 + gy, g.z + 10.6);
     look.set(g.x * (f + .05), g.y + 1.15, g.z - 4.0);
+  }
+  // Keep tall Coral Cove structures (especially the Nautilus Pavilion) out of the camera-to-Shelly sightline.
+  function reef3dCamClearCrafted(view, out, look, g, portraitC){
+    var p = view.craftedPavilion;
+    if(!p) return;
+    var blockers = [{ x: p.x, z: p.z, r: 5.5 + portraitC * .65, topY: (p.y || 0) + 7.8 }];
+    var obs = view._coveObstacles || [];
+    for(var i = 0; i < obs.length; i++){
+      var ob = obs[i];
+      if(!ob || ob.maxY < 2.2) continue;
+      if(Math.hypot(ob.x - p.x, ob.z - p.z) < 2.6) continue;
+      blockers.push({ x: ob.x, z: ob.z, r: Math.max(2.3, Math.min(4.8, (ob.r || 2.0) + 1.0 + portraitC * .35)), topY: ob.maxY + 1.0 });
+    }
+    var tx = g.x, ty = g.y + .9, tz = g.z;
+    function occlusion(cx, cy, cz){
+      var sx = tx - cx, sy = ty - cy, sz = tz - cz, L2 = sx * sx + sz * sz;
+      if(L2 < .1) return 0;
+      var pen = 0;
+      for(var k = 0; k < blockers.length; k++){
+        var b = blockers[k];
+        var u = ((b.x - cx) * sx + (b.z - cz) * sz) / L2;
+        if(u < -.22 || u > .94) continue;
+        var uc = Math.max(0, Math.min(1, u));
+        var rx = cx + sx * uc, rz = cz + sz * uc, ry = cy + sy * uc;
+        if(ry > b.topY) continue;
+        var dist = Math.hypot(rx - b.x, rz - b.z);
+        if(dist < b.r){
+          var weight = uc < .55 ? 1.35 : 1.0;
+          pen = Math.max(pen, (b.r - dist) * weight);
+        }
+      }
+      return pen;
+    }
+    if(occlusion(out.x, out.y, out.z) <= 0) return;
+    // Compute loop center so ties prefer swinging inward over open lagoon water.
+    var lcx = 0, lcz = 0, sp = view.spaces || [], mN = sp.mainN || sp.length || 1;
+    for(var s = 0; s < mN; s++){ lcx += sp[s].x; lcz += sp[s].z; }
+    lcx /= mN; lcz /= mN;
+    var ox = out.x - g.x, oz = out.z - g.z, rad = Math.hypot(ox, oz) || 12.6, baseA = Math.atan2(oz, ox);
+    var bestX = out.x, bestY = out.y, bestZ = out.z, bestCost = 1e9;
+    var yOffsets = [0, 1.4, 2.8];
+    for(var yi = 0; yi < yOffsets.length; yi++){
+      var cy = out.y + yOffsets[yi];
+      for(var step = 1; step <= 18; step++){
+        var deg = step * 7 * Math.PI / 180;
+        for(var dir = -1; dir <= 1; dir += 2){
+          var ang = baseA + dir * deg;
+          var cx = g.x + Math.cos(ang) * rad, cz = g.z + Math.sin(ang) * rad;
+          var occ = occlusion(cx, cy, cz);
+          var toCenter = Math.hypot(cx - lcx, cz - lcz) * .018;
+          var cost = occ * 100 + deg * 1.6 + yOffsets[yi] * .55 + toCenter;
+          if(cost < bestCost){
+            bestCost = cost; bestX = cx; bestY = cy; bestZ = cz;
+          }
+          if(occ <= 0 && yi === 0 && step <= 12){
+            // Found a clean horizontal orbit with zero occlusion; still test the opposite sign on this step.
+            break;
+          }
+        }
+        if(bestCost < 10 && yi === 0) break;
+      }
+      if(bestCost < 10) break;
+    }
+    out.set(bestX, bestY, bestZ);
+    // Keep Shelly cleanly framed slightly below center while still looking gently down the path ahead.
+    look.x = g.x + (look.x - g.x) * .68;
+    look.z = g.z + (look.z - g.z) * .68;
   }
   // A mast standing between the camera and her: slide the camera sideways until it clears (by room, in units).
   function reef3dCamMasts(view, out, room){
@@ -37200,6 +37410,7 @@ var ReefCraftedWorld = (function(){
           var archGrp=new T.Group(), archOrg=new T.Vector3(ax,ay,az);
           root.children.slice(g0).forEach(function(p){ p.position.sub(archOrg); archGrp.add(p); });
           archGrp.position.copy(archOrg); archGrp.rotation.y=wRot; root.add(archGrp);
+          addObstacle(ax, az, 2.3);
           break;
         }
       }
@@ -37977,7 +38188,7 @@ var ReefCraftedWorld = (function(){
           reeds(x-1.3,y,z-.5);
           seaGrass(x+.8,y+.12,z-.6,.75,'#52957f');
           pebble(x-.6,y+.1,z+.8,.3,'#f0d8a8');
-          if(i%2===0){ orb(.34,'#f9a8c4',x+.45,y+.48,z-.3); orb(.18,'#ffe4b3',x+.55,y+.78,z-.28); }
+          if(i%2===0){ sculptedLotusBlossom(x+.45,y+.28,z-.3,.84,'#f7a0c0','#fff2d8',i); }
         });
         placed(s,-sd,5.4,1,function(x,y,z){ reeds(x,y,z); reeds(x+1,y,z+.6); });
       });
@@ -41650,8 +41861,10 @@ var ReefCraftedWorld = (function(){
       // 3) Rhythmic ABAB Alternating Striped Coral Colonnade Pillars lining the main path (placed BEFORE generic scatter!)
       // 4) Nested Concentric Stepping-Stone Rings
       var decalY=-.296;
+      view._patternPlazas=[];
       function mosaic(x,z,r){
         var k=r||1.95;
+        view._patternPlazas.push({x:x,z:z,r:k+0.55});
         emitCached('patFibSpiralPlaza:' + Math.round(k*10), x, -.296, z, ((x+z)*0.3)%6.28, 1, function(){
           // Sculpted beveled ivory-limestone circular plaza base + crisp turquoise/coral alternating outer border
           var baseD=add(cyl(k,k*1.04,.048,24),'#f6ecd2',0,.024,0,0,0,0,'stone'); baseD.userData.reefGround=true;
@@ -41683,6 +41896,7 @@ var ReefCraftedWorld = (function(){
       // Crisp 3D Checkered Turquoise-and-Ivory Stepped Tile Plaza (clean alternating raised square tiles with sandstone trim!)
       function checkeredReefPlaza(x,z,halfW,rot){
         var hw=halfW||1.85;
+        view._patternPlazas.push({x:x,z:z,r:hw*1.42+0.55});
         emitCached('patCheckeredPlaza:' + Math.round(hw*10), x, -.296, z, rot||0, 1, function(){
           // Two-tier stepped ivory-sandstone outer apron + dark teal mortar bed
           var outer=block(hw*2+.52,.042,hw*2+.52,'#e9d9b4',0,.021,0,0,'stone'); outer.userData.reefGround=true;
@@ -41710,6 +41924,7 @@ var ReefCraftedWorld = (function(){
       // Nested Concentric Stepping-Stone Rings (sculpted multi-ring bullseye reef stepping stones!)
       function concentricStepStone(x,z,r){
         var k=r||0.95;
+        view._patternPlazas.push({x:x,z:z,r:k+0.55});
         emitCached('patConcentricRing:' + Math.round(k*10), x, -.296, z, 0, 1, function(){
           var r1=add(cyl(k,k*1.06,.042,20),'#f6ebd0',0,.021,0,0,0,0,'stone'); r1.userData.reefGround=true;
           var r2=add(cyl(k*.76,k*.80,.052,18),'#28b0bc',0,.028,0,0,0,0,'stone'); r2.userData.reefGround=true;
@@ -48098,11 +48313,11 @@ var ReefCraftedWorld = (function(){
         add(cyl(.64,.36,.42,10),'#563722',mainMastX,7.95,cz,0,0,0,'timber');
         add(smoothTorus(.58,.055,6,14),'#ecc25c',mainMastX,7.74,cz,Math.PI/2,0,0,false);
       }
-      // Vessel exterior bowsprit & gilded figurehead outside the bow panoramic ocean window
+      // Vessel exterior bowsprit & gilded figurehead cleanly outside the bow panoramic ocean window (zero wall poke-through!)
       var bowX=sb.maxX;
-      var bowsprit=add(cyl(.09,.19,6.4,8),'#7a583f',bowX+1.4,1.25,cz,0,0,-1.28,'timber');
+      var bowsprit=add(cyl(.09,.19,6.4,8),'#7a583f',bowX+3.45,1.88,cz,0,0,-1.28,'timber');
       bowsprit.userData.reefStructure='ship-bowsprit';
-      block(.07,.22,.78,'#49a6b5',bowX+3.9,2.15,cz+.35,0,'fabric');
+      block(.07,.22,.78,'#49a6b5',bowX+5.9,2.72,cz+.35,0,'fabric');
       add(cyl(.2,.32,.95,8),'#e6ba58',bowX+.25,.28,cz,0,0,-.65,false);
       orb(.24,'#f7d97e',bowX+.68,.62,cz,false);
       block(.12,.45,.65,'#e6ba58',bowX+.3,.42,cz,0,false);
@@ -49446,14 +49661,18 @@ var ReefCraftedWorld = (function(){
     if(view.encounter && view.encounter.actor===actor && regionEncounterActive(view)) regionResidentCloseRequest(view,state);
     var close=state.close && state.close.root ? state.close : null;
     if(!state.root && !close) return;
-    var seen=!!(view.encounter && view.encounter.actor===actor);
+    var inEncounter=!!(view.encounter && view.encounter.actor===actor);
+    if(view.encounter && !inEncounter){
+      state.lastTime=0;
+      return;
+    }
+    var seen=inEncounter;
     if(!seen && actor.visible && view.cam){
       var point=state.point.copy(actor.position); point.y+=actor.userData.regionBounds.centerY; point.project(view.cam);
       seen=point.z>-1 && point.z<1 && Math.abs(point.x)<1.2 && Math.abs(point.y)<1.2;
     }
     // Keep the authored mesh for a nearby visible resident or its encounter;
     // the lightweight procedural version carries far-away board views.
-    var inEncounter=!!(view.encounter && view.encounter.actor===actor);
     var encRegion=inEncounter && view.encounter ? view.encounter.region : null;
     regionResidentApplyBoardYaw(state,inEncounter,(inEncounter && !close) ? view.encounter.interior : null,encRegion);
     var limit=state.detailed ? 54 : 48;
@@ -49609,11 +49828,12 @@ var ReefCraftedWorld = (function(){
       if(react){
         close.react=close.mixer.clipAction(react);close.react.setLoop(T.LoopOnce,1);
         close.mixer.addEventListener('finished',function(ev){if(ev.action===close.react){close.action.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).play();close.react.crossFadeTo(close.action,.18,false);}});
-        if(e.phase==='intro' && !reefCalm()){
+        if(e.phase==='intro' && !reefCalm() && e.region!=='beach'){
           close.react.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).play();close.action.crossFadeTo(close.react,.18,false);
         }
       }
     }
+    if(e.region==='beach') e._jisuGroundedY=null;
   }
   function regionResidentCloseEnd(view,encounter){
     regionResidentStates(view).forEach(function(state){regionResidentCloseEndOne(view,state,encounter);});
@@ -51381,6 +51601,7 @@ var ReefCraftedWorld = (function(){
 
     var stage = new T.Group();
     stage.name = 'jisu-encounter-beach-stage';
+    stage.userData.reefGround = true;
     stage.position.set(cx, sandY, cz);
     stage.rotation.y = aimY;
     var disposables = [];
@@ -51542,8 +51763,8 @@ var ReefCraftedWorld = (function(){
       addProp(new T.SphereGeometry(0.5, 14, 8, 0, Math.PI * 2, 0, Math.PI * 0.5), sr[6], sr[0], 0.0, sr[1], 0, sr[5], 0, sr[2], sr[3] * 2.0, sr[4]);
     });
 
-    // 4. Sculpted 5-arm Jamboree coral-orange starfish on lower-right foreground sand (x = +0.58, z = +0.44)
-    var stx = 0.58, stz = 0.44;
+    // 4. Sculpted 5-arm Jamboree coral-orange starfish on lower-right foreground sand (x = +0.52, z = +0.36)
+    var stx = 0.52, stz = 0.36;
     var starMat = propMat(0xf0724f), studMat = propMat(0xffe5be);
     addShadow(stx, stz, 0.30, 0.28, true, 0.005);
     addProp(new T.SphereGeometry(0.046, 10, 8), starMat, stx, 0.014, stz, 0, 0, 0, 1.0, 0.48, 1.0);
@@ -51555,9 +51776,9 @@ var ReefCraftedWorld = (function(){
       addProp(new T.SphereGeometry(0.007, 6, 6), studMat, stx + Math.cos(ang) * 0.082, 0.022, stz + Math.sin(ang) * 0.082);
     }
 
-    // 5. Corked aqua sea-glass message bottle w/ rolled parchment scroll tucked cleanly to lower-left side (x = -0.84, z = +0.50, well clear of Jisu's claw)
+    // 5. Corked aqua sea-glass message bottle w/ rolled parchment scroll tucked cleanly to lower-left flank (x = -0.62, z = +0.34, inside frame & clear of Jisu!)
     var bGrp = new T.Group();
-    bGrp.position.set(-0.84, 0.046, 0.50);
+    bGrp.position.set(-0.62, 0.046, 0.34);
     bGrp.rotation.set(0.06, 0.36, 0.04);
     var glassMat = track(new T.MeshLambertMaterial({ color: 0x7de4da, transparent: true, opacity: 0.66 }));
     var scrollMat = propMat(0xfaf0d2), ribbonMat = propMat(0xd94e46), corkMat = propMat(0xb67b48);
@@ -51580,9 +51801,9 @@ var ReefCraftedWorld = (function(){
     addB(new T.CylinderGeometry(0.026, 0.026, 0.145, 10), scrollMat, -0.015, -0.008, 0.004, 0, 0, Math.PI / 2);
     addB(new T.CylinderGeometry(0.028, 0.028, 0.022, 10), ribbonMat, -0.015, -0.008, 0.004, 0, 0, Math.PI / 2);
     stage.add(bGrp);
-    addShadow(-0.80, 0.50, 0.42, 0.19, true, 0.005);
+    addShadow(-0.58, 0.34, 0.42, 0.19, true, 0.005);
 
-    // 6. Sculpted pastel scallop shells, spiral conch shell & smooth coastal pebbles across foreground sand
+    // 6. Sculpted pastel scallop shells, spiral conch shell & smooth coastal pebbles cleanly inside viewport flanks (zero edge-crop!)
     function addScallop(sx, sz, sc, col, ry){
       addShadow(sx, sz, 0.18 * sc, 0.15 * sc, true, 0.005);
       var sMat = propMat(col), ribMat = propMat(0xfff5e4);
@@ -51593,9 +51814,9 @@ var ReefCraftedWorld = (function(){
         addProp(new T.CylinderGeometry(0.004 * sc, 0.006 * sc, 0.072 * sc, 6), ribMat, sx + Math.sin(ra) * 0.022 * sc, 0.022 * sc, sz + Math.cos(ra) * 0.022 * sc, Math.PI * 0.44, ra, 0);
       }
     }
-    addScallop( 0.24, 0.60, 1.05, 0xf6b8b0, -0.45);
-    addScallop(-0.46, 0.68, 0.85, 0xf8e2b8,  0.65);
-    addScallop( 0.78, 0.22, 0.88, 0xecd4e8, -1.15);
+    addScallop( 0.36, 0.46, 0.96, 0xf6b8b0, -0.45);
+    addScallop(-0.42, 0.48, 0.84, 0xf8e2b8,  0.65);
+    addScallop( 0.58, 0.24, 0.82, 0xecd4e8, -1.15);
 
     // Spiral ivory-apricot sea snail / conch shell (x = -0.26, z = +0.58)
     var spx = -0.26, spz = 0.58;
@@ -51672,6 +51893,7 @@ var ReefCraftedWorld = (function(){
           e.actor.updateMatrixWorld(true);
           jb.min.y = targetFootY;
         }
+        e._jisuGroundedY = e.actor.position.y;
         var sandY = beachSandY;
         var b = e.actorBounds || e.actor.userData.regionBounds;
         var h = (b && b.height) || 0.52;
@@ -52684,8 +52906,8 @@ var ReefCraftedWorld = (function(){
             root.add(phBasin);
           }
         } else if(isLoopBoard){
-          // Soft grounded contact shadow disc beneath every Harbor Town street resident on the cobblestones (m7 / iter19 M1).
-          addStreetShadow(npc,-.310,person.id==='cafe'?.38:.48);
+          // Crisp grounded contact shadow disc beneath every Harbor Town street resident on the cobblestones.
+          addStreetShadow(npc,-.310,person.id==='cafe'?.62:.54,person.id==='cafe'?{shadowScale:[1.18,1.08]}:undefined);
         }
         npc.traverse(function(o){ if(o.isMesh) o.userData.regionPerson='town:'+person.id; });
         view.hitables.push(npc); towns.push({ object:npc, space:s, meta:person, skin:skinState });
@@ -52766,7 +52988,7 @@ var ReefCraftedWorld = (function(){
           shCtx.fillStyle=shGr; shCtx.fillRect(0,0,128,128);
           var shTex=new T.CanvasTexture(shCv);
           var shGeo=new T.PlaneGeometry(2,2); shGeo.rotateX(-Math.PI/2);
-          var shMat=new T.MeshBasicMaterial({map:shTex,transparent:true,opacity:id==='captain'?.58:.62,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
+          var shMat=new T.MeshBasicMaterial({map:shTex,transparent:true,opacity:id==='captain'?.70:.64,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
           hostShadow=new T.Mesh(shGeo,shMat);
           hostShadow.position.y=id==='captain'?-.112:-.310;
           hostShadow.renderOrder=2;
@@ -57934,8 +58156,12 @@ var ReefCraftedWorld = (function(){
       regionInteriorAddPlant(kit, room, bwx + 0.84, 1.50, -2.78, 0.44);
       regionInteriorAddBox(kit, room, 2.74, 0.44, 0.54, theme.counter, bwx, 0.22, -2.66);
       regionInteriorAddBox(kit, room, 2.66, 0.10, 0.50, theme.accent, bwx, 0.49, -2.64);
-      regionInteriorAddBox(kit, room, 0.28, 0.24, 0.11, 0xfaf0d6, bwx - 1.02, 0.64, -2.74, 0.22);
-      regionInteriorAddBox(kit, room, 0.28, 0.24, 0.11, 0xe26d5c, bwx + 1.02, 0.64, -2.74, -0.22);
+      // Plump softly rounded tufted cafe banquette throw pillows (zero stark white cube!)
+      [[bwx - 1.02, 0xe8b974, 0xc96b4e, 0.24], [bwx + 1.02, 0xe26d5c, 0xfaf0d6, -0.24]].forEach(function(pw){
+        var pil = regionInteriorAdd(room, new T.SphereGeometry(0.17, 12, 8), kit.M(pw[1]), pw[0], 0.65, -2.74, 0, pw[3], 0);
+        pil.scale.set(1.12, 0.86, 0.44);
+        regionInteriorAdd(room, new T.SphereGeometry(0.024, 8, 6), kit.M(pw[2]), pw[0], 0.65, -2.665);
+      });
       regionInteriorAddBistroTable(kit, room, 2.94, 0.0, -1.66);
       regionInteriorAddStool(kit, room, 2.34, 0.0, -1.78, 0.44, 0x6f4325, 0x579c87, true, 0.44);
       regionInteriorAddStool(kit, room, 3.54, 0.0, -1.78, 0.44, 0x6f4325, 0x579c87, true, -0.44);
@@ -58471,8 +58697,13 @@ var ReefCraftedWorld = (function(){
       // IC tap-card reader pad on far-left desk & ticket terminal on far-right desk
       regionInteriorAddBox(kit, room, 0.24, 0.07, 0.22, 0x354452, skx2 - 0.80, 0.59, skz2 + 0.04);
       regionInteriorAddBox(kit, room, 0.16, 0.02, 0.14, kit.M(0x62f0bc, { emissive: 0x1a7856 }), skx2 - 0.80, 0.635, skz2 + 0.05);
-      regionInteriorAddBox(kit, room, 0.30, 0.24, 0.20, 0x26879c, skx2 + 0.80, 0.68, skz2);
-      regionInteriorAddBox(kit, room, 0.22, 0.13, 0.03, kit.M(0xc4f4fa, { emissive: 0x265e6a }), skx2 + 0.80, 0.71, skz2 + 0.105);
+      // Sculpted Harbor Metro ticket terminal kiosk on far-right desk (sloped bezel, framed display, keypad & brass slot)
+      regionInteriorAddBox(kit, room, 0.28, 0.05, 0.22, 0x354452, skx2 + 0.80, 0.585, skz2);
+      regionInteriorAddBox(kit, room, 0.26, 0.22, 0.16, 0x26879c, skx2 + 0.80, 0.71, skz2 - 0.02);
+      regionInteriorAddBox(kit, room, 0.28, 0.03, 0.18, 0x354452, skx2 + 0.80, 0.83, skz2 - 0.02);
+      regionInteriorAddBox(kit, room, 0.22, 0.13, 0.02, 0x1a2834, skx2 + 0.80, 0.74, skz2 + 0.062);
+      regionInteriorAddBox(kit, room, 0.19, 0.10, 0.025, kit.M(0x9cf0f8, { emissive: 0x266c7a }), skx2 + 0.80, 0.74, skz2 + 0.068);
+      regionInteriorAddBox(kit, room, 0.16, 0.022, 0.04, 0xe8be58, skx2 + 0.80, 0.635, skz2 + 0.075);
 
       // Illuminated HARBOR TRANSIT route map, station clock & sleek overhead LED arrival gantry
       regionInteriorAddBox(kit, room, 2.16, 0.94, 0.05, theme.trim, skx2, 2.20, -2.93);
@@ -59398,7 +59629,16 @@ var ReefCraftedWorld = (function(){
     e.interiorHidden = [];
     view.scene.children.forEach(function(o){
       if(!o || o === room || o === actor || o === guide || o.isLight) return;
-      if(regionInteriorIsAncestor(o, actor) || regionInteriorIsAncestor(o, guide)) return;
+      if(regionInteriorIsAncestor(o, actor) || regionInteriorIsAncestor(o, guide)){
+        // Hide sibling board residents, stalls, tubs & shadows inside view.regionPeople.root so none peek through interior walls!
+        (o.children || []).forEach(function(ch){
+          if(!ch || ch === actor || ch === guide) return;
+          if(regionInteriorIsAncestor(ch, actor) || regionInteriorIsAncestor(ch, guide)) return;
+          e.interiorHidden.push({ object: ch, visible: ch.visible });
+          ch.visible = false;
+        });
+        return;
+      }
       e.interiorHidden.push({ object: o, visible: o.visible });
       o.visible = false;
     });
@@ -59697,7 +59937,7 @@ var ReefCraftedWorld = (function(){
     };
     var inRegion = false;
     var scan = function(node){
-      if(!node || !node.visible || isActorOrChild(node) || (node.userData && node.userData.reefGround)) return;
+      if(!node || !node.visible || isActorOrChild(node) || (e._jisuStage && node === e._jisuStage) || (node.userData && node.userData.reefGround)) return;
       if(node.isLight || node.isPoints || node.isSprite) return;
       var isRegionGroup = !!(node.name && node.name.indexOf('region-') === 0);
       var isPeopleRoot = !!(people && node === people.root);
@@ -59838,9 +60078,10 @@ var ReefCraftedWorld = (function(){
         py = Math.sin(rp * Math.PI) * .04;
       }
     }
+    var baseY = (typeof e._jisuGroundedY === 'number') ? e._jisuGroundedY : base.position.y;
     actor.rotation.x = base.rotation.x + (!calm && speaking ? Math.sin(t * 6.5) * .025 : 0) + rx;
     actor.rotation.z = base.rotation.z + (!calm ? Math.sin(t * 1.4) * .012 : 0) + rz;
-    actor.position.y = base.position.y + (!calm && speaking ? Math.sin(t * 6.5) * .025 : 0) + py;
+    actor.position.y = baseY + (!calm && speaking ? Math.sin(t * 6.5) * .025 : 0) + py;
     actor.scale.copy(base.scale).multiplyScalar(sc);
   }
   function regionEncounterReact(view, mood){
@@ -60111,12 +60352,33 @@ var JamboreeVisuals = (function(){
     var group = new THREE.Group();
     group.name = 'jv-ocean';
 
-    // Layer A: Crisp diamond sun-glitter sparkles (InstancedMesh, 48 instances)
-    var glintGeo = trackRes(st, new THREE.PlaneGeometry(0.28, 0.28));
+    // Layer A: Soft 4-point star sunlit ocean water glints (zero raw white squares; strictly hidden on indoor/dry floors!)
+    var sparkCv = document.createElement('canvas');
+    sparkCv.width = 64; sparkCv.height = 64;
+    var sg = sparkCv.getContext('2d');
+    if(sg){
+      sg.clearRect(0, 0, 64, 64);
+      var radG = sg.createRadialGradient(32, 32, 0, 32, 32, 30);
+      radG.addColorStop(0.0, 'rgba(255,255,248,0.95)');
+      radG.addColorStop(0.28, 'rgba(235,252,255,0.55)');
+      radG.addColorStop(0.65, 'rgba(210,248,255,0.12)');
+      radG.addColorStop(1.0, 'rgba(210,248,255,0.0)');
+      sg.fillStyle = radG;
+      sg.fillRect(0, 0, 64, 64);
+      sg.fillStyle = 'rgba(255,255,255,0.85)';
+      sg.beginPath();
+      sg.moveTo(32, 4); sg.quadraticCurveTo(34, 30, 60, 32);
+      sg.quadraticCurveTo(34, 34, 32, 60); sg.quadraticCurveTo(30, 34, 4, 32);
+      sg.quadraticCurveTo(30, 30, 32, 4); sg.closePath();
+      sg.fill();
+    }
+    var sparkTex = trackRes(st, new THREE.CanvasTexture(sparkCv));
+    var glintGeo = trackRes(st, new THREE.PlaneGeometry(0.32, 0.32));
     var glintMat = trackRes(st, new THREE.MeshBasicMaterial({
+      map: sparkTex,
       color: 0xffffff,
       transparent: true,
-      opacity: 0.78,
+      opacity: 0.48,
       depthWrite: false,
       side: THREE.DoubleSide,
       blending: THREE.AdditiveBlending,
@@ -60194,7 +60456,7 @@ var JamboreeVisuals = (function(){
       caus1.visible = false;
       caus2.visible = false;
       foam.visible = false;
-      if(initRid === 'captain') glints.visible = false;
+      if(initRid === 'captain' || initRid === 'light' || initRid === 'town' || initRid === 'caves') glints.visible = false;
     }
     group.add(caus1, caus2);
 
@@ -60809,9 +61071,9 @@ var JamboreeVisuals = (function(){
       for(var i = 0; i < oc.glintData.length; i++){
         var gd = oc.glintData[i];
         var pulse = calm ? 0.55 : Math.max(0, Math.sin(t * gd.sp + gd.ph));
-        var s = gd.sc * pulse;
-        st.pos.set(gd.x, 0.09, gd.z);
-        st.euler.set(-Math.PI / 2, 0, Math.PI / 4 + (calm ? 0 : t * 0.4));
+        var s = gd.sc * pulse * 0.85;
+        st.pos.set(gd.x, (view && view.region) ? -0.54 : 0.04, gd.z);
+        st.euler.set(-Math.PI / 2, 0, Math.PI / 4 + (calm ? 0 : t * 0.35));
         st.quat.setFromEuler(st.euler);
         st.sc.setScalar(s);
         st.m4.compose(st.pos, st.quat, st.sc);
@@ -62859,6 +63121,18 @@ var JamboreeRegions = (function(){
             var ts = view.spaces[ti];
             if(ts && Math.hypot(x - ts.x, z - ts.z) < 2.95){ hit = true; break; }
           }
+          if(!hit && Array.isArray(view._patternPlazas)){
+            for(var pi2 = 0; pi2 < view._patternPlazas.length; pi2++){
+              var pp = view._patternPlazas[pi2];
+              if(pp && Math.hypot(x - pp.x, z - pp.z) < (pp.r || 2.4) + 0.65){ hit = true; break; }
+            }
+          }
+          if(!hit && Array.isArray(view._sceneryObstacles)){
+            for(var oi2 = 0; oi2 < view._sceneryObstacles.length; oi2++){
+              var oo = view._sceneryObstacles[oi2];
+              if(oo && Math.hypot(x - oo.x, z - oo.z) < (oo.r || 1.0) + 1.05){ hit = true; break; }
+            }
+          }
           if(!hit){ ok = true; break; }
           rad = tries % 2 === 0 ? (rad - 0.85) : (rad + 1.05);
           x = Math.cos(ang) * rad;
@@ -63276,41 +63550,87 @@ var JamboreeRegions = (function(){
     var THREE = T();
     if(!THREE || !st.group) return;
 
-    function townSpotClear(px, pz, minD){
+    function townClearMargin(px, pz, minD, obsPad){
+      var m = Infinity;
       if(Array.isArray(view.spaces)){
         for(var ti = 0; ti < view.spaces.length; ti++){
           var ts = view.spaces[ti];
-          if(ts && Math.hypot(px - ts.x, pz - ts.z) < (minD || 2.55)) return false;
+          if(ts) m = Math.min(m, Math.hypot(px - ts.x, pz - ts.z) - (minD || 2.15));
         }
       }
-      if(view._shopPos && Math.hypot(px - view._shopPos.x, pz - view._shopPos.z) < 3.0) return false;
-      return true;
+      if(view._shopPos) m = Math.min(m, Math.hypot(px - view._shopPos.x, pz - view._shopPos.z) - 3.6);
+      if(view.regionPeople && view.regionPeople.stall){
+        var stp = view.regionPeople.stall.position;
+        if(stp) m = Math.min(m, Math.hypot(px - stp.x, pz - stp.z) - 3.6);
+      }
+      if(Array.isArray(view._placedPeople)){
+        for(var ppi = 0; ppi < view._placedPeople.length; ppi++){
+          var pp = view._placedPeople[ppi];
+          if(pp) m = Math.min(m, Math.hypot(px - pp.x, pz - pp.z) - ((pp.r || 1.2) + 1.85));
+        }
+      }
+      if(Array.isArray(view._sceneryObstacles)){
+        for(var oi = 0; oi < view._sceneryObstacles.length; oi++){
+          var o = view._sceneryObstacles[oi];
+          if(o) m = Math.min(m, Math.hypot(px - o.x, pz - o.z) - ((o.r || 1.0) + (obsPad || 1.05)));
+        }
+      }
+      return m;
+    }
+    function townSpotClear(px, pz, minD, obsPad){
+      return townClearMargin(px, pz, minD, obsPad) > 0;
     }
 
-    // Evolving 3D World Signage — placed cleanly on the sunny outer-right sidewalk clear of Bok, Cafe Seahorse & all tiles!
-    var signCands = [[5.2, -4.4], [6.0, -3.6], [4.4, -5.8], [6.4, -5.0], [3.6, -6.2]];
-    var sx = 5.2, sz = -4.4;
-    for(var sci = 0; sci < signCands.length; sci++){
-      if(townSpotClear(signCands[sci][0], signCands[sci][1], 2.85)){
-        sx = signCands[sci][0]; sz = signCands[sci][1]; break;
+    // Evolving 3D World Signage — placed in a verified wide-open cobblestone clearing strictly clear of welcome arch, stalls, planters, Bok & all tiles!
+    var sp0 = Array.isArray(view.spaces) && view.spaces[0];
+    var sp1 = Array.isArray(view.spaces) && view.spaces[1];
+    var sx = null, sz = null, signYaw = -0.52;
+    if(sp0 && sp1){
+      var fdx = sp1.x - sp0.x, fdz = sp1.z - sp0.z, fL = Math.hypot(fdx, fdz) || 1;
+      var fx = fdx / fL, fz = fdz / fL, rx = -fz, rz = fx;
+      var bestSignM = -Infinity;
+      // Prefer a sunny, prominently visible unobstructed spot along sp[0]..sp[2] first, then widen along the promenade
+      var lats = [2.45, 2.85, 3.30, 3.85, -2.45];
+      var fwds = [0.6, 1.5, -0.4, 2.4];
+      for(var si2 = 0; si2 < Math.min(10, view.spaces.length); si2++){
+        var sRef = view.spaces[si2];
+        var sNxt = view.spaces[(si2 + 1) % view.spaces.length];
+        if(!sRef || !sNxt) continue;
+        var sdx = sNxt.x - sRef.x, sdz = sNxt.z - sRef.z, sL = Math.hypot(sdx, sdz) || 1;
+        var sfx = sdx / sL, sfz = sdz / sL, srx = -sfz, srz = sfx;
+        for(var li = 0; li < lats.length; li++){
+          for(var fi = 0; fi < fwds.length; fi++){
+            var cx2 = sRef.x + srx * lats[li] + sfx * fwds[fi];
+            var cz2 = sRef.z + srz * lats[li] + sfz * fwds[fi];
+            var cm = townClearMargin(cx2, cz2, 2.20, 1.15);
+            if(cm > bestSignM){
+              bestSignM = cm;
+              sx = cx2; sz = cz2;
+              signYaw = Math.atan2(sp0.x - fx * 6.5 - sx, sp0.z - fz * 6.5 - sz);
+            }
+          }
+        }
+        if(si2 <= 2 && bestSignM >= 0.35) break;
       }
+      if(bestSignM <= 0){ sx = null; sz = null; }
     }
+    if(sx !== null && sz !== null){
     var sgy = groundYAt(view, sx, sz);
     var signGrp = new THREE.Group();
     signGrp.position.set(sx, sgy, sz);
-    signGrp.rotation.y = -0.35;
+    signGrp.rotation.y = signYaw;
 
     var stoneMat = ownMat(st, new THREE.MeshStandardMaterial({ color: 0xc8bba4, roughness: 0.82 }));
     var postMat = ownMat(st, new THREE.MeshStandardMaterial({ color: 0x6b4226, roughness: 0.8 }));
     var capMat = ownMat(st, new THREE.MeshStandardMaterial({ color: 0xc45746, roughness: 0.72 }));
     var plinth = new THREE.Mesh(ownGeo(st, new THREE.CylinderGeometry(0.28, 0.34, 0.22, 10)), stoneMat);
-    plinth.position.y = 0.11;
+    plinth.position.set(0, 0.11, -0.095);
     signGrp.add(plinth);
-    var post = new THREE.Mesh(ownGeo(st, new THREE.CylinderGeometry(0.08, 0.09, 1.5, 10)), postMat);
-    post.position.y = 0.84;
+    var post = new THREE.Mesh(ownGeo(st, new THREE.CylinderGeometry(0.072, 0.085, 1.56, 10)), postMat);
+    post.position.set(0, 0.96, -0.095);
     signGrp.add(post);
-    var roofCap = new THREE.Mesh(ownGeo(st, new THREE.BoxGeometry(1.48, 0.10, 0.26)), capMat);
-    roofCap.position.y = 1.78;
+    var roofCap = new THREE.Mesh(ownGeo(st, new THREE.BoxGeometry(1.48, 0.10, 0.30)), capMat);
+    roofCap.position.set(0, 1.76, -0.02);
     signGrp.add(roofCap);
 
     var cv = document.createElement('canvas');
@@ -63324,9 +63644,10 @@ var JamboreeRegions = (function(){
       ownGeo(st, new THREE.BoxGeometry(1.3, 0.65, 0.08)),
       ownMat(st, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.7 }))
     );
-    board.position.y = 1.38;
+    board.position.set(0, 1.38, 0.025);
     signGrp.add(board);
     st.group.add(signGrp);
+    }
 
     // Night Market Carts — tile-clear with wooden wheels & canopies
     var items = [];
@@ -63347,11 +63668,29 @@ var JamboreeRegions = (function(){
     var wheelGeo = ownGeo(st, new THREE.CylinderGeometry(0.16, 0.16, 0.06, 12));
     var wheelMat = ownMat(st, new THREE.MeshStandardMaterial({ color: 0x4f3018, roughness: 0.78 }));
     var poleGeo = ownGeo(st, new THREE.CylinderGeometry(0.028, 0.028, 0.64, 6));
-    var cartSpots = [[2.2, -5.2], [4.0, -5.2], [5.8, -5.0]];
+    var placedCarts = [[sx, sz]];
     for(var i = 0; i < items.length; i++){
-      var cx = cartSpots[i] ? cartSpots[i][0] : (1.6 + i * 1.65);
-      var cz = cartSpots[i] ? cartSpots[i][1] : -5.2;
-      if(!townSpotClear(cx, cz, 2.35)){ cz -= 1.2; }
+      var cx = null, cz = null;
+      if(Array.isArray(view.spaces) && view.spaces.length > 6){
+        // Place each night-market cart along the open promenade near mid/far loop spaces (strictly clear of pergola & obstacles!)
+        for(var ci = 4 + i * 3; ci < view.spaces.length && cx === null; ci++){
+          var sA = view.spaces[ci], sB = view.spaces[(ci + 1) % view.spaces.length];
+          if(!sA || !sB) continue;
+          var tdx = sB.x - sA.x, tdz = sB.z - sA.z, tL = Math.hypot(tdx, tdz) || 1;
+          var rnx = -tdz / tL, rnz = tdx / tL;
+          for(var sd = 1; sd >= -1; sd -= 2){
+            var tx = sA.x + rnx * sd * 3.4, tz = sA.z + rnz * sd * 3.4;
+            if(townSpotClear(tx, tz, 2.55, 1.35) && placedCarts.every(function(p){ return Math.hypot(p[0] - tx, p[1] - tz) >= 2.2; })){
+              cx = tx; cz = tz; break;
+            }
+          }
+        }
+      }
+      if(cx === null){
+        cx = 1.6 + i * 1.8; cz = -8.5;
+        if(!townSpotClear(cx, cz, 2.45, 1.1)) continue;
+      }
+      placedCarts.push([cx, cz]);
       var cgy = groundYAt(view, cx, cz);
       var cart = new THREE.Group();
       cart.position.set(cx, cgy, cz);

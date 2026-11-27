@@ -3046,6 +3046,7 @@
           var archGrp=new T.Group(), archOrg=new T.Vector3(ax,ay,az);
           root.children.slice(g0).forEach(function(p){ p.position.sub(archOrg); archGrp.add(p); });
           archGrp.position.copy(archOrg); archGrp.rotation.y=wRot; root.add(archGrp);
+          addObstacle(ax, az, 2.3);
           break;
         }
       }
@@ -3823,7 +3824,7 @@
           reeds(x-1.3,y,z-.5);
           seaGrass(x+.8,y+.12,z-.6,.75,'#52957f');
           pebble(x-.6,y+.1,z+.8,.3,'#f0d8a8');
-          if(i%2===0){ orb(.34,'#f9a8c4',x+.45,y+.48,z-.3); orb(.18,'#ffe4b3',x+.55,y+.78,z-.28); }
+          if(i%2===0){ sculptedLotusBlossom(x+.45,y+.28,z-.3,.84,'#f7a0c0','#fff2d8',i); }
         });
         placed(s,-sd,5.4,1,function(x,y,z){ reeds(x,y,z); reeds(x+1,y,z+.6); });
       });
@@ -7496,8 +7497,10 @@
       // 3) Rhythmic ABAB Alternating Striped Coral Colonnade Pillars lining the main path (placed BEFORE generic scatter!)
       // 4) Nested Concentric Stepping-Stone Rings
       var decalY=-.296;
+      view._patternPlazas=[];
       function mosaic(x,z,r){
         var k=r||1.95;
+        view._patternPlazas.push({x:x,z:z,r:k+0.55});
         emitCached('patFibSpiralPlaza:' + Math.round(k*10), x, -.296, z, ((x+z)*0.3)%6.28, 1, function(){
           // Sculpted beveled ivory-limestone circular plaza base + crisp turquoise/coral alternating outer border
           var baseD=add(cyl(k,k*1.04,.048,24),'#f6ecd2',0,.024,0,0,0,0,'stone'); baseD.userData.reefGround=true;
@@ -7529,6 +7532,7 @@
       // Crisp 3D Checkered Turquoise-and-Ivory Stepped Tile Plaza (clean alternating raised square tiles with sandstone trim!)
       function checkeredReefPlaza(x,z,halfW,rot){
         var hw=halfW||1.85;
+        view._patternPlazas.push({x:x,z:z,r:hw*1.42+0.55});
         emitCached('patCheckeredPlaza:' + Math.round(hw*10), x, -.296, z, rot||0, 1, function(){
           // Two-tier stepped ivory-sandstone outer apron + dark teal mortar bed
           var outer=block(hw*2+.52,.042,hw*2+.52,'#e9d9b4',0,.021,0,0,'stone'); outer.userData.reefGround=true;
@@ -7556,6 +7560,7 @@
       // Nested Concentric Stepping-Stone Rings (sculpted multi-ring bullseye reef stepping stones!)
       function concentricStepStone(x,z,r){
         var k=r||0.95;
+        view._patternPlazas.push({x:x,z:z,r:k+0.55});
         emitCached('patConcentricRing:' + Math.round(k*10), x, -.296, z, 0, 1, function(){
           var r1=add(cyl(k,k*1.06,.042,20),'#f6ebd0',0,.021,0,0,0,0,'stone'); r1.userData.reefGround=true;
           var r2=add(cyl(k*.76,k*.80,.052,18),'#28b0bc',0,.028,0,0,0,0,'stone'); r2.userData.reefGround=true;
@@ -13944,11 +13949,11 @@
         add(cyl(.64,.36,.42,10),'#563722',mainMastX,7.95,cz,0,0,0,'timber');
         add(smoothTorus(.58,.055,6,14),'#ecc25c',mainMastX,7.74,cz,Math.PI/2,0,0,false);
       }
-      // Vessel exterior bowsprit & gilded figurehead outside the bow panoramic ocean window
+      // Vessel exterior bowsprit & gilded figurehead cleanly outside the bow panoramic ocean window (zero wall poke-through!)
       var bowX=sb.maxX;
-      var bowsprit=add(cyl(.09,.19,6.4,8),'#7a583f',bowX+1.4,1.25,cz,0,0,-1.28,'timber');
+      var bowsprit=add(cyl(.09,.19,6.4,8),'#7a583f',bowX+3.45,1.88,cz,0,0,-1.28,'timber');
       bowsprit.userData.reefStructure='ship-bowsprit';
-      block(.07,.22,.78,'#49a6b5',bowX+3.9,2.15,cz+.35,0,'fabric');
+      block(.07,.22,.78,'#49a6b5',bowX+5.9,2.72,cz+.35,0,'fabric');
       add(cyl(.2,.32,.95,8),'#e6ba58',bowX+.25,.28,cz,0,0,-.65,false);
       orb(.24,'#f7d97e',bowX+.68,.62,cz,false);
       block(.12,.45,.65,'#e6ba58',bowX+.3,.42,cz,0,false);

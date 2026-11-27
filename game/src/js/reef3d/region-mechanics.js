@@ -791,6 +791,18 @@ var JamboreeRegions = (function(){
             var ts = view.spaces[ti];
             if(ts && Math.hypot(x - ts.x, z - ts.z) < 2.95){ hit = true; break; }
           }
+          if(!hit && Array.isArray(view._patternPlazas)){
+            for(var pi2 = 0; pi2 < view._patternPlazas.length; pi2++){
+              var pp = view._patternPlazas[pi2];
+              if(pp && Math.hypot(x - pp.x, z - pp.z) < (pp.r || 2.4) + 0.65){ hit = true; break; }
+            }
+          }
+          if(!hit && Array.isArray(view._sceneryObstacles)){
+            for(var oi2 = 0; oi2 < view._sceneryObstacles.length; oi2++){
+              var oo = view._sceneryObstacles[oi2];
+              if(oo && Math.hypot(x - oo.x, z - oo.z) < (oo.r || 1.0) + 1.05){ hit = true; break; }
+            }
+          }
           if(!hit){ ok = true; break; }
           rad = tries % 2 === 0 ? (rad - 0.85) : (rad + 1.05);
           x = Math.cos(ang) * rad;
@@ -1208,41 +1220,87 @@ var JamboreeRegions = (function(){
     var THREE = T();
     if(!THREE || !st.group) return;
 
-    function townSpotClear(px, pz, minD){
+    function townClearMargin(px, pz, minD, obsPad){
+      var m = Infinity;
       if(Array.isArray(view.spaces)){
         for(var ti = 0; ti < view.spaces.length; ti++){
           var ts = view.spaces[ti];
-          if(ts && Math.hypot(px - ts.x, pz - ts.z) < (minD || 2.55)) return false;
+          if(ts) m = Math.min(m, Math.hypot(px - ts.x, pz - ts.z) - (minD || 2.15));
         }
       }
-      if(view._shopPos && Math.hypot(px - view._shopPos.x, pz - view._shopPos.z) < 3.0) return false;
-      return true;
+      if(view._shopPos) m = Math.min(m, Math.hypot(px - view._shopPos.x, pz - view._shopPos.z) - 3.6);
+      if(view.regionPeople && view.regionPeople.stall){
+        var stp = view.regionPeople.stall.position;
+        if(stp) m = Math.min(m, Math.hypot(px - stp.x, pz - stp.z) - 3.6);
+      }
+      if(Array.isArray(view._placedPeople)){
+        for(var ppi = 0; ppi < view._placedPeople.length; ppi++){
+          var pp = view._placedPeople[ppi];
+          if(pp) m = Math.min(m, Math.hypot(px - pp.x, pz - pp.z) - ((pp.r || 1.2) + 1.85));
+        }
+      }
+      if(Array.isArray(view._sceneryObstacles)){
+        for(var oi = 0; oi < view._sceneryObstacles.length; oi++){
+          var o = view._sceneryObstacles[oi];
+          if(o) m = Math.min(m, Math.hypot(px - o.x, pz - o.z) - ((o.r || 1.0) + (obsPad || 1.05)));
+        }
+      }
+      return m;
+    }
+    function townSpotClear(px, pz, minD, obsPad){
+      return townClearMargin(px, pz, minD, obsPad) > 0;
     }
 
-    // Evolving 3D World Signage — placed cleanly on the sunny outer-right sidewalk clear of Bok, Cafe Seahorse & all tiles!
-    var signCands = [[5.2, -4.4], [6.0, -3.6], [4.4, -5.8], [6.4, -5.0], [3.6, -6.2]];
-    var sx = 5.2, sz = -4.4;
-    for(var sci = 0; sci < signCands.length; sci++){
-      if(townSpotClear(signCands[sci][0], signCands[sci][1], 2.85)){
-        sx = signCands[sci][0]; sz = signCands[sci][1]; break;
+    // Evolving 3D World Signage — placed in a verified wide-open cobblestone clearing strictly clear of welcome arch, stalls, planters, Bok & all tiles!
+    var sp0 = Array.isArray(view.spaces) && view.spaces[0];
+    var sp1 = Array.isArray(view.spaces) && view.spaces[1];
+    var sx = null, sz = null, signYaw = -0.52;
+    if(sp0 && sp1){
+      var fdx = sp1.x - sp0.x, fdz = sp1.z - sp0.z, fL = Math.hypot(fdx, fdz) || 1;
+      var fx = fdx / fL, fz = fdz / fL, rx = -fz, rz = fx;
+      var bestSignM = -Infinity;
+      // Prefer a sunny, prominently visible unobstructed spot along sp[0]..sp[2] first, then widen along the promenade
+      var lats = [2.45, 2.85, 3.30, 3.85, -2.45];
+      var fwds = [0.6, 1.5, -0.4, 2.4];
+      for(var si2 = 0; si2 < Math.min(10, view.spaces.length); si2++){
+        var sRef = view.spaces[si2];
+        var sNxt = view.spaces[(si2 + 1) % view.spaces.length];
+        if(!sRef || !sNxt) continue;
+        var sdx = sNxt.x - sRef.x, sdz = sNxt.z - sRef.z, sL = Math.hypot(sdx, sdz) || 1;
+        var sfx = sdx / sL, sfz = sdz / sL, srx = -sfz, srz = sfx;
+        for(var li = 0; li < lats.length; li++){
+          for(var fi = 0; fi < fwds.length; fi++){
+            var cx2 = sRef.x + srx * lats[li] + sfx * fwds[fi];
+            var cz2 = sRef.z + srz * lats[li] + sfz * fwds[fi];
+            var cm = townClearMargin(cx2, cz2, 2.20, 1.15);
+            if(cm > bestSignM){
+              bestSignM = cm;
+              sx = cx2; sz = cz2;
+              signYaw = Math.atan2(sp0.x - fx * 6.5 - sx, sp0.z - fz * 6.5 - sz);
+            }
+          }
+        }
+        if(si2 <= 2 && bestSignM >= 0.35) break;
       }
+      if(bestSignM <= 0){ sx = null; sz = null; }
     }
+    if(sx !== null && sz !== null){
     var sgy = groundYAt(view, sx, sz);
     var signGrp = new THREE.Group();
     signGrp.position.set(sx, sgy, sz);
-    signGrp.rotation.y = -0.35;
+    signGrp.rotation.y = signYaw;
 
     var stoneMat = ownMat(st, new THREE.MeshStandardMaterial({ color: 0xc8bba4, roughness: 0.82 }));
     var postMat = ownMat(st, new THREE.MeshStandardMaterial({ color: 0x6b4226, roughness: 0.8 }));
     var capMat = ownMat(st, new THREE.MeshStandardMaterial({ color: 0xc45746, roughness: 0.72 }));
     var plinth = new THREE.Mesh(ownGeo(st, new THREE.CylinderGeometry(0.28, 0.34, 0.22, 10)), stoneMat);
-    plinth.position.y = 0.11;
+    plinth.position.set(0, 0.11, -0.095);
     signGrp.add(plinth);
-    var post = new THREE.Mesh(ownGeo(st, new THREE.CylinderGeometry(0.08, 0.09, 1.5, 10)), postMat);
-    post.position.y = 0.84;
+    var post = new THREE.Mesh(ownGeo(st, new THREE.CylinderGeometry(0.072, 0.085, 1.56, 10)), postMat);
+    post.position.set(0, 0.96, -0.095);
     signGrp.add(post);
-    var roofCap = new THREE.Mesh(ownGeo(st, new THREE.BoxGeometry(1.48, 0.10, 0.26)), capMat);
-    roofCap.position.y = 1.78;
+    var roofCap = new THREE.Mesh(ownGeo(st, new THREE.BoxGeometry(1.48, 0.10, 0.30)), capMat);
+    roofCap.position.set(0, 1.76, -0.02);
     signGrp.add(roofCap);
 
     var cv = document.createElement('canvas');
@@ -1256,9 +1314,10 @@ var JamboreeRegions = (function(){
       ownGeo(st, new THREE.BoxGeometry(1.3, 0.65, 0.08)),
       ownMat(st, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.7 }))
     );
-    board.position.y = 1.38;
+    board.position.set(0, 1.38, 0.025);
     signGrp.add(board);
     st.group.add(signGrp);
+    }
 
     // Night Market Carts — tile-clear with wooden wheels & canopies
     var items = [];
@@ -1279,11 +1338,29 @@ var JamboreeRegions = (function(){
     var wheelGeo = ownGeo(st, new THREE.CylinderGeometry(0.16, 0.16, 0.06, 12));
     var wheelMat = ownMat(st, new THREE.MeshStandardMaterial({ color: 0x4f3018, roughness: 0.78 }));
     var poleGeo = ownGeo(st, new THREE.CylinderGeometry(0.028, 0.028, 0.64, 6));
-    var cartSpots = [[2.2, -5.2], [4.0, -5.2], [5.8, -5.0]];
+    var placedCarts = [[sx, sz]];
     for(var i = 0; i < items.length; i++){
-      var cx = cartSpots[i] ? cartSpots[i][0] : (1.6 + i * 1.65);
-      var cz = cartSpots[i] ? cartSpots[i][1] : -5.2;
-      if(!townSpotClear(cx, cz, 2.35)){ cz -= 1.2; }
+      var cx = null, cz = null;
+      if(Array.isArray(view.spaces) && view.spaces.length > 6){
+        // Place each night-market cart along the open promenade near mid/far loop spaces (strictly clear of pergola & obstacles!)
+        for(var ci = 4 + i * 3; ci < view.spaces.length && cx === null; ci++){
+          var sA = view.spaces[ci], sB = view.spaces[(ci + 1) % view.spaces.length];
+          if(!sA || !sB) continue;
+          var tdx = sB.x - sA.x, tdz = sB.z - sA.z, tL = Math.hypot(tdx, tdz) || 1;
+          var rnx = -tdz / tL, rnz = tdx / tL;
+          for(var sd = 1; sd >= -1; sd -= 2){
+            var tx = sA.x + rnx * sd * 3.4, tz = sA.z + rnz * sd * 3.4;
+            if(townSpotClear(tx, tz, 2.55, 1.35) && placedCarts.every(function(p){ return Math.hypot(p[0] - tx, p[1] - tz) >= 2.2; })){
+              cx = tx; cz = tz; break;
+            }
+          }
+        }
+      }
+      if(cx === null){
+        cx = 1.6 + i * 1.8; cz = -8.5;
+        if(!townSpotClear(cx, cz, 2.45, 1.1)) continue;
+      }
+      placedCarts.push([cx, cz]);
       var cgy = groundYAt(view, cx, cz);
       var cart = new THREE.Group();
       cart.position.set(cx, cgy, cz);

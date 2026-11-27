@@ -1723,6 +1723,7 @@
 
     var stage = new T.Group();
     stage.name = 'jisu-encounter-beach-stage';
+    stage.userData.reefGround = true;
     stage.position.set(cx, sandY, cz);
     stage.rotation.y = aimY;
     var disposables = [];
@@ -1884,8 +1885,8 @@
       addProp(new T.SphereGeometry(0.5, 14, 8, 0, Math.PI * 2, 0, Math.PI * 0.5), sr[6], sr[0], 0.0, sr[1], 0, sr[5], 0, sr[2], sr[3] * 2.0, sr[4]);
     });
 
-    // 4. Sculpted 5-arm Jamboree coral-orange starfish on lower-right foreground sand (x = +0.58, z = +0.44)
-    var stx = 0.58, stz = 0.44;
+    // 4. Sculpted 5-arm Jamboree coral-orange starfish on lower-right foreground sand (x = +0.52, z = +0.36)
+    var stx = 0.52, stz = 0.36;
     var starMat = propMat(0xf0724f), studMat = propMat(0xffe5be);
     addShadow(stx, stz, 0.30, 0.28, true, 0.005);
     addProp(new T.SphereGeometry(0.046, 10, 8), starMat, stx, 0.014, stz, 0, 0, 0, 1.0, 0.48, 1.0);
@@ -1897,9 +1898,9 @@
       addProp(new T.SphereGeometry(0.007, 6, 6), studMat, stx + Math.cos(ang) * 0.082, 0.022, stz + Math.sin(ang) * 0.082);
     }
 
-    // 5. Corked aqua sea-glass message bottle w/ rolled parchment scroll tucked cleanly to lower-left side (x = -0.84, z = +0.50, well clear of Jisu's claw)
+    // 5. Corked aqua sea-glass message bottle w/ rolled parchment scroll tucked cleanly to lower-left flank (x = -0.62, z = +0.34, inside frame & clear of Jisu!)
     var bGrp = new T.Group();
-    bGrp.position.set(-0.84, 0.046, 0.50);
+    bGrp.position.set(-0.62, 0.046, 0.34);
     bGrp.rotation.set(0.06, 0.36, 0.04);
     var glassMat = track(new T.MeshLambertMaterial({ color: 0x7de4da, transparent: true, opacity: 0.66 }));
     var scrollMat = propMat(0xfaf0d2), ribbonMat = propMat(0xd94e46), corkMat = propMat(0xb67b48);
@@ -1922,9 +1923,9 @@
     addB(new T.CylinderGeometry(0.026, 0.026, 0.145, 10), scrollMat, -0.015, -0.008, 0.004, 0, 0, Math.PI / 2);
     addB(new T.CylinderGeometry(0.028, 0.028, 0.022, 10), ribbonMat, -0.015, -0.008, 0.004, 0, 0, Math.PI / 2);
     stage.add(bGrp);
-    addShadow(-0.80, 0.50, 0.42, 0.19, true, 0.005);
+    addShadow(-0.58, 0.34, 0.42, 0.19, true, 0.005);
 
-    // 6. Sculpted pastel scallop shells, spiral conch shell & smooth coastal pebbles across foreground sand
+    // 6. Sculpted pastel scallop shells, spiral conch shell & smooth coastal pebbles cleanly inside viewport flanks (zero edge-crop!)
     function addScallop(sx, sz, sc, col, ry){
       addShadow(sx, sz, 0.18 * sc, 0.15 * sc, true, 0.005);
       var sMat = propMat(col), ribMat = propMat(0xfff5e4);
@@ -1935,9 +1936,9 @@
         addProp(new T.CylinderGeometry(0.004 * sc, 0.006 * sc, 0.072 * sc, 6), ribMat, sx + Math.sin(ra) * 0.022 * sc, 0.022 * sc, sz + Math.cos(ra) * 0.022 * sc, Math.PI * 0.44, ra, 0);
       }
     }
-    addScallop( 0.24, 0.60, 1.05, 0xf6b8b0, -0.45);
-    addScallop(-0.46, 0.68, 0.85, 0xf8e2b8,  0.65);
-    addScallop( 0.78, 0.22, 0.88, 0xecd4e8, -1.15);
+    addScallop( 0.36, 0.46, 0.96, 0xf6b8b0, -0.45);
+    addScallop(-0.42, 0.48, 0.84, 0xf8e2b8,  0.65);
+    addScallop( 0.58, 0.24, 0.82, 0xecd4e8, -1.15);
 
     // Spiral ivory-apricot sea snail / conch shell (x = -0.26, z = +0.58)
     var spx = -0.26, spz = 0.58;
@@ -2014,6 +2015,7 @@
           e.actor.updateMatrixWorld(true);
           jb.min.y = targetFootY;
         }
+        e._jisuGroundedY = e.actor.position.y;
         var sandY = beachSandY;
         var b = e.actorBounds || e.actor.userData.regionBounds;
         var h = (b && b.height) || 0.52;
@@ -3026,8 +3028,8 @@
             root.add(phBasin);
           }
         } else if(isLoopBoard){
-          // Soft grounded contact shadow disc beneath every Harbor Town street resident on the cobblestones (m7 / iter19 M1).
-          addStreetShadow(npc,-.310,person.id==='cafe'?.38:.48);
+          // Crisp grounded contact shadow disc beneath every Harbor Town street resident on the cobblestones.
+          addStreetShadow(npc,-.310,person.id==='cafe'?.62:.54,person.id==='cafe'?{shadowScale:[1.18,1.08]}:undefined);
         }
         npc.traverse(function(o){ if(o.isMesh) o.userData.regionPerson='town:'+person.id; });
         view.hitables.push(npc); towns.push({ object:npc, space:s, meta:person, skin:skinState });
@@ -3108,7 +3110,7 @@
           shCtx.fillStyle=shGr; shCtx.fillRect(0,0,128,128);
           var shTex=new T.CanvasTexture(shCv);
           var shGeo=new T.PlaneGeometry(2,2); shGeo.rotateX(-Math.PI/2);
-          var shMat=new T.MeshBasicMaterial({map:shTex,transparent:true,opacity:id==='captain'?.58:.62,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
+          var shMat=new T.MeshBasicMaterial({map:shTex,transparent:true,opacity:id==='captain'?.70:.64,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
           hostShadow=new T.Mesh(shGeo,shMat);
           hostShadow.position.y=id==='captain'?-.112:-.310;
           hostShadow.renderOrder=2;

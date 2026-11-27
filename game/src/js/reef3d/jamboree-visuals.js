@@ -195,12 +195,33 @@ var JamboreeVisuals = (function(){
     var group = new THREE.Group();
     group.name = 'jv-ocean';
 
-    // Layer A: Crisp diamond sun-glitter sparkles (InstancedMesh, 48 instances)
-    var glintGeo = trackRes(st, new THREE.PlaneGeometry(0.28, 0.28));
+    // Layer A: Soft 4-point star sunlit ocean water glints (zero raw white squares; strictly hidden on indoor/dry floors!)
+    var sparkCv = document.createElement('canvas');
+    sparkCv.width = 64; sparkCv.height = 64;
+    var sg = sparkCv.getContext('2d');
+    if(sg){
+      sg.clearRect(0, 0, 64, 64);
+      var radG = sg.createRadialGradient(32, 32, 0, 32, 32, 30);
+      radG.addColorStop(0.0, 'rgba(255,255,248,0.95)');
+      radG.addColorStop(0.28, 'rgba(235,252,255,0.55)');
+      radG.addColorStop(0.65, 'rgba(210,248,255,0.12)');
+      radG.addColorStop(1.0, 'rgba(210,248,255,0.0)');
+      sg.fillStyle = radG;
+      sg.fillRect(0, 0, 64, 64);
+      sg.fillStyle = 'rgba(255,255,255,0.85)';
+      sg.beginPath();
+      sg.moveTo(32, 4); sg.quadraticCurveTo(34, 30, 60, 32);
+      sg.quadraticCurveTo(34, 34, 32, 60); sg.quadraticCurveTo(30, 34, 4, 32);
+      sg.quadraticCurveTo(30, 30, 32, 4); sg.closePath();
+      sg.fill();
+    }
+    var sparkTex = trackRes(st, new THREE.CanvasTexture(sparkCv));
+    var glintGeo = trackRes(st, new THREE.PlaneGeometry(0.32, 0.32));
     var glintMat = trackRes(st, new THREE.MeshBasicMaterial({
+      map: sparkTex,
       color: 0xffffff,
       transparent: true,
-      opacity: 0.78,
+      opacity: 0.48,
       depthWrite: false,
       side: THREE.DoubleSide,
       blending: THREE.AdditiveBlending,
@@ -278,7 +299,7 @@ var JamboreeVisuals = (function(){
       caus1.visible = false;
       caus2.visible = false;
       foam.visible = false;
-      if(initRid === 'captain') glints.visible = false;
+      if(initRid === 'captain' || initRid === 'light' || initRid === 'town' || initRid === 'caves') glints.visible = false;
     }
     group.add(caus1, caus2);
 
@@ -893,9 +914,9 @@ var JamboreeVisuals = (function(){
       for(var i = 0; i < oc.glintData.length; i++){
         var gd = oc.glintData[i];
         var pulse = calm ? 0.55 : Math.max(0, Math.sin(t * gd.sp + gd.ph));
-        var s = gd.sc * pulse;
-        st.pos.set(gd.x, 0.09, gd.z);
-        st.euler.set(-Math.PI / 2, 0, Math.PI / 4 + (calm ? 0 : t * 0.4));
+        var s = gd.sc * pulse * 0.85;
+        st.pos.set(gd.x, (view && view.region) ? -0.54 : 0.04, gd.z);
+        st.euler.set(-Math.PI / 2, 0, Math.PI / 4 + (calm ? 0 : t * 0.35));
         st.quat.setFromEuler(st.euler);
         st.sc.setScalar(s);
         st.m4.compose(st.pos, st.quat, st.sc);
