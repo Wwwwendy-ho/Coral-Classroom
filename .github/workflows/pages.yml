@@ -1,0 +1,60 @@
+name: Deploy Coral Classroom to GitHub Pages
+
+on:
+  push:
+    branches:
+      - upgrade/integrated-2026-11-24
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify built index.html matches game/src/
+        run: python3 game/tools/build.py --check
+
+      - name: Stage clean runtime site from game/
+        run: |
+          mkdir -p _site
+          rsync -a \
+            --exclude='art-source/' \
+            --exclude='docs/' \
+            --exclude='src/' \
+            --exclude='tools/' \
+            --exclude='.gitignore' \
+            --exclude='*.md' \
+            --exclude='LICENSE' \
+            game/ _site/
+          touch _site/.nojekyll
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
