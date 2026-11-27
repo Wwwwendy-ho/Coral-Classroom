@@ -8,16 +8,16 @@
     jisu:{ region:'beach', id:'jisu', target:'host', boardScale:1.75, url:'assets/models/jisu.glb?v=mp-39', closeUrl:'assets/models/jisu-close.glb?v=mp-39' },
     'shop-octopus':{ region:'town', id:'shop-octopus', target:'shop', skinMask:'baseColorAlpha', url:'assets/models/shop-octopus.glb?v=mp-39', closeUrl:'assets/models/shop-octopus-close.glb?v=mp-39' },
     mira:{ region:'lagoon', id:'mira', target:'host', boardScale:1.26, url:'assets/models/mira.glb?v=mp-39', closeUrl:'assets/models/mira-close.glb?v=mp-39' },
-    echo:{ region:'caves', id:'echo', target:'host', boardScale:1.24, url:'assets/models/echo.glb?v=mp-39', closeUrl:'assets/models/echo-close.glb?v=mp-39' },
-    pip:{ region:'patterns', id:'pip', target:'host', boardScale:2.15, url:'assets/models/pip.glb?v=mp-39', closeUrl:'assets/models/pip-close.glb?v=mp-39' },
-    hana:{ region:'light', id:'hana', target:'host', url:'assets/models/hana.glb?v=mp-39', closeUrl:'assets/models/hana-close.glb?v=mp-39' },
-    'captain-bay':{ region:'captain', id:'captain-bay', target:'host', boardScale:0.72, url:'assets/models/captain-bay.glb?v=mp-39', closeUrl:'assets/models/captain-bay-close.glb?v=mp-39' },
+    echo:{ region:'caves', id:'echo', target:'host', boardScale:1.24, url:'assets/models/echo.glb?v=mp-44', closeUrl:'assets/models/echo-close.glb?v=mp-44' },
+    pip:{ region:'patterns', id:'pip', target:'host', boardScale:2.15, url:'assets/models/pip.glb?v=mp-44', closeUrl:'assets/models/pip-close.glb?v=mp-44' },
+    hana:{ region:'light', id:'hana', target:'host', url:'assets/models/hana.glb?v=mp-44', closeUrl:'assets/models/hana-close.glb?v=mp-44' },
+    'captain-bay':{ region:'captain', id:'captain-bay', target:'host', boardScale:0.72, url:'assets/models/captain-bay.glb?v=mp-44', closeUrl:'assets/models/captain-bay-close.glb?v=mp-44' },
     'restaurant-otter':{ region:'town', id:'restaurant-otter', target:'restaurant', url:'assets/models/restaurant-otter.glb?v=mp-40', closeUrl:'assets/models/restaurant-otter-close.glb?v=mp-40' },
     'hotel-whale':{ region:'town', id:'hotel-whale', target:'hotel', boardScale:0.85, url:'assets/models/hotel-whale.glb?v=mp-40', closeUrl:'assets/models/hotel-whale-close.glb?v=mp-40' },
     'pharmacy-shrimp':{ region:'town', id:'pharmacy-shrimp', target:'pharmacy', boardScale:1.45, url:'assets/models/pharmacy-shrimp.glb?v=mp-39', closeUrl:'assets/models/pharmacy-shrimp-close.glb?v=mp-39' },
     'subway-ray':{ region:'town', id:'subway-ray', target:'subway', boardScale:0.38, url:'assets/models/subway-ray.glb?v=mp-41', closeUrl:'assets/models/subway-ray-close.glb?v=mp-41' },
     'friend-seal':{ region:'town', id:'friend-seal', target:'friend', boardScale:0.68, url:'assets/models/friend-seal.glb?v=mp-41', closeUrl:'assets/models/friend-seal-close.glb?v=mp-41' },
-    bok:{ regions:['town','lagoon','caves','patterns','beach','light','captain'], id:'bok', target:'shopkeeper', url:'assets/models/bok.glb?v=mp-39', closeUrl:'assets/models/bok-close.glb?v=mp-39' }
+    bok:{ regions:['town','lagoon','caves','patterns','beach','light','captain'], id:'bok', target:'shopkeeper', url:'assets/models/bok.glb?v=mp-44', closeUrl:'assets/models/bok-close.glb?v=mp-44' }
   };
   // Call only after validating both the asset and its cast/reaction contract.
   // A board-only candidate can be activated with includeClose=false.
@@ -566,7 +566,7 @@
         sc.tgtPos.copy(view.cam.position);
       }
       var dxG=sc.tgtPos.x-actor.position.x, dzG=sc.tgtPos.z-actor.position.z;
-      if(inEncounter || (dxG*dxG+dzG*dzG)<9.5*9.5){
+      if(inEncounter || (dxG*dxG+dzG*dzG)<13.5*13.5){
         syncActorWorld();
         sc.headPos.setFromMatrixPosition(bone.matrixWorld);
         player.root.getWorldQuaternion(sc.rootQ);
@@ -581,8 +581,8 @@
             var curAz=Math.atan2(sc.fwd.x,sc.fwd.z);
             var tgtAz=Math.atan2(sc.toTgt.x,sc.toTgt.z);
             var rawYaw=Math.atan2(Math.sin(tgtAz-curAz),Math.cos(tgtAz-curAz));
-            if(inEncounter || Math.abs(rawYaw)<2.05){
-              targetYaw=Math.max(-0.55,Math.min(0.55,rawYaw));
+            if(inEncounter || Math.abs(rawYaw)<2.15){
+              targetYaw=Math.max(-0.68,Math.min(0.68,rawYaw));
               var rawPitch=Math.atan2(sc.toTgt.y,Math.max(0.25,hDist));
               targetPitch=Math.max(-0.28,Math.min(0.22,rawPitch));
               wantGaze=true;
@@ -592,11 +592,13 @@
       }
     }
     var stepDt=(!inEncounter && view && typeof view.frameN==='number') ? (dt*2) : dt;
-    var instant=!!(inEncounter && (dt<=0 || (typeof reefCalm==='function' && reefCalm())));
+    var firstSnap=!!(wantGaze && !player._gazeSettled);
+    var instant=firstSnap || !!((inEncounter || wantGaze) && (dt<=0 || (typeof reefCalm==='function' && reefCalm())));
     var ease=instant ? 1 : (stepDt>0 ? (1-Math.exp(-stepDt*7.5)) : 0);
     if(ease>0){
       player._gazeYaw+=(targetYaw-player._gazeYaw)*ease;
       player._gazePitch+=(targetPitch-player._gazePitch)*ease;
+      if(wantGaze) player._gazeSettled=true;
     }
     if(Math.abs(player._gazeYaw)<0.001 && Math.abs(player._gazePitch)<0.001){
       if(!wantGaze){ player._gazeYaw=0; player._gazePitch=0; }

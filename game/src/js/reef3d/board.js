@@ -349,9 +349,29 @@
         }
         arm(0, 0, 0, .05, 1.5, 0, .16); arm(0, .6, 0, -.6, .8, .2, .12); arm(0, .8, 0, .55, .75, -.2, .12); arm(0, 1.1, 0, .2, .7, .45, .1); arm(-.35, 1.1, .1, -.3, .5, -.25, .08); arm(.35, 1.2, -.1, .35, .45, .2, .08);
         return g; },
-      fan: function(){ var g = group(); var f = mesh(new THREE.CircleGeometry(1.1, 24, 0, Math.PI), M('#b49be0', { side: THREE.DoubleSide }), 0, .45, 0); g.add(f);
-        for(var i = 0; i < 5; i++){ var r = mesh(new THREE.TorusGeometry(.3 + i * .18, .03, 4, 20, Math.PI), M('#8a6cc4'), 0, .45, .01); g.add(r); }
-        g.add(mesh(new THREE.CylinderGeometry(.08, .12, .5, 8), M('#7b5ab5'), 0, .25, 0)); return g; },
+      fan: function(){ // Organic branching gorgonian coral sea-fan (zero geometric Wi-Fi semicircle)
+        var g = group(), stemM = M('#7c5eb8'), frondM = M('#b28ce6'), tipM = M('#f4c8f0');
+        g.add(mesh(new THREE.CylinderGeometry(.07, .12, .38, 8), stemM, 0, .18, 0));
+        var fronds = [
+          [-.72, .96, .08, .052], [-.44, 1.32, -.05, .050], [-.18, 1.50, .06, .048],
+          [ .08, 1.56, -.04, .050], [ .34, 1.42, .05, .048], [ .58, 1.18, -.06, .046], [ .78, .88, .06, .042]
+        ];
+        fronds.forEach(function(fr, fi){
+          var c = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(0, .30, 0),
+            new THREE.Vector3(fr[0] * .46, .30 + fr[1] * .52, fr[2] * .5),
+            new THREE.Vector3(fr[0], .30 + fr[1], fr[2])
+          ]);
+          g.add(mesh(new THREE.TubeGeometry(c, 7, fr[3], 6), fi % 2 ? frondM : stemM));
+          g.add(mesh(new THREE.SphereGeometry(fr[3] * 1.45, 7, 5), tipM, fr[0], .30 + fr[1], fr[2]));
+          // Secondary delicate twig fork
+          var c2 = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(fr[0] * .52, .30 + fr[1] * .55, fr[2] * .4),
+            new THREE.Vector3(fr[0] * .84 + (fi % 2 ? .14 : -.14), .30 + fr[1] * .88, fr[2] + .06)
+          ]);
+          g.add(mesh(new THREE.TubeGeometry(c2, 4, fr[3] * .68, 5), frondM));
+        });
+        return g; },
       clam: function(){ var g = group(), shell = M('#f1ead8');
         var lo = mesh(new THREE.SphereGeometry(1, 20, 10, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), shell, 0, .5, 0); lo.scale.set(1, .45, .8);
         var hi = mesh(new THREE.SphereGeometry(1, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), shell, 0, .5, 0); hi.scale.set(1, .5, .8);
@@ -365,9 +385,31 @@
         g.scale.setScalar(.46); g.userData.lid = hinge; return g; },
       sponge: function(){ var g = group(); [['#f2b46a', 0, 0, 1.5], ['#d983b4', .45, .2, 1.1], ['#f2b46a', -.4, .25, .9]].forEach(function(t){
           g.add(mesh(new THREE.CylinderGeometry(.26, .3, t[3], 14, 1, true), M(t[0], { side: THREE.DoubleSide }), t[1], t[3] / 2, t[2])); }); return g; },
-      anemone: function(){ var g = group(); g.add(mesh(new THREE.CylinderGeometry(.45, .55, .6, 16), M('#8c5bb8'), 0, .3, 0));
-        for(var i = 0; i < 14; i++){ var a = i / 14 * Math.PI * 2, t = mesh(new THREE.CylinderGeometry(.05, .08, .8, 6), M('#f5a8e8'), Math.cos(a) * .3, .95, Math.sin(a) * .3);
-          t.rotation.z = Math.cos(a) * .5; t.rotation.x = -Math.sin(a) * .5; g.add(t); } return g; },
+      anemone: function(){ // Plush multi-petal sea anemone with glowing cream bulb tips on a reef cushion
+        var g = group(), baseM = M('#9a72be'), tentM = M('#f4a8e0'), innerM = M('#ffbdd0'), tipM = M('#fff4d4');
+        var cushion = mesh(new THREE.SphereGeometry(.52, 14, 9, 0, Math.PI * 2, 0, Math.PI * .55), baseM, 0, .05, 0);
+        cushion.scale.set(1.04, .66, 1.04); g.add(cushion);
+        for(var i = 0; i < 12; i++){
+          var a = i / 12 * Math.PI * 2;
+          var c = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(Math.cos(a) * .28, .34, Math.sin(a) * .28),
+            new THREE.Vector3(Math.cos(a) * .54, .68, Math.sin(a) * .54),
+            new THREE.Vector3(Math.cos(a) * .68, .92, Math.sin(a) * .68)
+          ]);
+          g.add(mesh(new THREE.TubeGeometry(c, 5, .056, 6), tentM));
+          g.add(mesh(new THREE.SphereGeometry(.072, 7, 5), tipM, Math.cos(a) * .68, .92, Math.sin(a) * .68));
+        }
+        for(var j = 0; j < 7; j++){
+          var a2 = (j + .5) / 7 * Math.PI * 2;
+          var c2 = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(Math.cos(a2) * .14, .38, Math.sin(a2) * .14),
+            new THREE.Vector3(Math.cos(a2) * .28, .76, Math.sin(a2) * .28),
+            new THREE.Vector3(Math.cos(a2) * .34, 1.06, Math.sin(a2) * .34)
+          ]);
+          g.add(mesh(new THREE.TubeGeometry(c2, 5, .048, 6), innerM));
+          g.add(mesh(new THREE.SphereGeometry(.064, 7, 5), tipM, Math.cos(a2) * .34, 1.06, Math.sin(a2) * .34));
+        }
+        return g; },
       crate: function(){ var g = group(); g.add(mesh(new THREE.BoxGeometry(1.4, 1.1, 1.2), M('#9a6b3f'), 0, .55, 0));
         [-.36, .36].forEach(function(y){ g.add(mesh(new THREE.BoxGeometry(1.46, .12, 1.26), M('#6b4626'), 0, .55 + y, 0)); }); g.rotation.y = .3; return g; },
       barrel: function(){ var g = group();
@@ -455,16 +497,23 @@
       plank: function(r){ var p = mesh(new THREE.BoxGeometry(2.4, .14, .45), M('#6b4f3a'), 0, .1, 0); p.rotation.y = r() * 3; p.rotation.z = .08; return group(p); },
       plant: function(){ var g = group();
         g.add(mesh(new THREE.CylinderGeometry(.34, .24, .34, 14), M('#c96b4b'), 0, .17, 0));
-        g.add(mesh(new THREE.CylinderGeometry(.38, .35, .08, 14), M('#b8593c'), 0, .35, 0));
+        g.add(mesh(new THREE.CylinderGeometry(.39, .35, .085, 14), M('#b8593c'), 0, .35, 0));
         g.add(mesh(new THREE.CylinderGeometry(.30, .30, .05, 12), M('#5f4635'), 0, .37, 0));
-        var leafM = M('#4c945c'), hiM = M('#6ab372');
-        for(var i = 0; i < 6; i++){ var a = i / 6 * Math.PI * 2;
-          var lf = mesh(new THREE.SphereGeometry(.17, 10, 8), i % 2 ? hiM : leafM, Math.cos(a) * .16, .50 + (i % 2) * .06, Math.sin(a) * .16);
-          lf.scale.set(1.0, .82, 1.0); g.add(lf);
+        var deepM = M('#2d7648'), leafM = M('#479e5b'), hiM = M('#6fc26e'), sunM = M('#96de76');
+        // Shaded emerald lower overhang puffs + lush mid billows + warm sunlit upper clusters
+        for(var i = 0; i < 7; i++){ var a = i / 7 * Math.PI * 2;
+          var baseP = mesh(new THREE.SphereGeometry(.155, 10, 8), i % 2 ? leafM : deepM, Math.cos(a) * .20, .46 + (i % 2) * .035, Math.sin(a) * .20);
+          baseP.scale.set(1.12, .76, 1.06); g.add(baseP);
         }
-        g.add(mesh(new THREE.SphereGeometry(.18, 10, 8), hiM, 0, .60, 0));
-        [[-.13, .63, .12, '#ffd86b'], [.14, .61, -.10, '#ff8e84'], [.02, .72, .05, '#fff0a6']].forEach(function(fl){
-          g.add(mesh(new THREE.SphereGeometry(.075, 8, 6), M(fl[3]), fl[0], fl[1], fl[2]));
+        for(var j = 0; j < 5; j++){ var a2 = j / 5 * Math.PI * 2 + .35;
+          var midP = mesh(new THREE.SphereGeometry(.145, 10, 8), j % 2 ? hiM : leafM, Math.cos(a2) * .12, .59 + (j % 2) * .045, Math.sin(a2) * .12);
+          midP.scale.set(1.08, .82, 1.06); g.add(midP);
+        }
+        var crown1 = mesh(new THREE.SphereGeometry(.135, 10, 8), sunM, -.04, .69, .03); crown1.scale.set(1.10, .78, 1.06); g.add(crown1);
+        var crown2 = mesh(new THREE.SphereGeometry(.105, 10, 8), hiM, .08, .67, -.05); crown2.scale.set(1.06, .76, 1.06); g.add(crown2);
+        [[-.17, .58, .14, '#ffd86b'], [.18, .57, -.11, '#ff7d8e'], [.03, .74, .06, '#fff3b0'], [-.08, .66, -.15, '#ff9f78'], [.14, .65, .15, '#fff8e2']].forEach(function(fl){
+          g.add(mesh(new THREE.SphereGeometry(.056, 8, 6), M(fl[3]), fl[0], fl[1], fl[2]));
+          g.add(mesh(new THREE.SphereGeometry(.032, 6, 5), M('#ffe87a'), fl[0] * 1.06, fl[1] + .028, fl[2] * 1.06));
         });
         return g; }
     };
@@ -692,19 +741,19 @@
     var gold = s.kind === 'deck' || s.kind === 'shop' || s.kind === 'start' || s.kind === 'treasure' || s.kind === 'story';
     var profile = crafted
       ? (plain
-        ? [[1.032, .210, .86], [1.008, .292, .96], [.972, .336, 1.0], [.936, .349, 1.0], [.910, .341, .95], [.895, .322, .84]]
-        : [[1.035, .218, .86], [1.006, .296, .96], [.952, .338, 1.0], [.880, .352, 1.0], [.820, .343, .95], [.786, .318, .84]])
+        ? [[1.055, .175, .80], [1.038, .265, .91], [1.008, .332, .98], [.972, .368, 1.0], [.932, .374, 1.0], [.906, .358, .94], [.892, .336, .84]]
+        : [[1.058, .180, .80], [1.036, .270, .91], [.992, .336, .98], [.942, .372, 1.0], [.874, .378, 1.0], [.816, .360, .94], [.784, .334, .84]])
       : style === 'shell'
-        ? [[1.036, .205, .86], [1.016, .282, .96], [.982, .335, 1.0], [.942, .350, 1.0], [.908, .341, .95], [.890, .324, .85]]
-        : [[1.042, .212, .86], [1.020, .292, .96], [.984, .345, 1.0], [.944, .359, 1.0], [.910, .348, .95], [.892, .328, .85]];
-    var cCrown = new THREE.Color(night ? (gold ? '#f4de9a' : '#e6f9f8') : (gold ? '#ffefba' : (crafted ? '#fff9f4' : '#fffbf2')));
-    var cMid   = new THREE.Color(night ? (gold ? '#d4b468' : '#a8d4de') : (gold ? '#f2cc72' : (crafted ? '#f0e2ec' : '#efe3ce')));
-    var cLow   = new THREE.Color(night ? (gold ? '#a48644' : '#76a4b4') : (gold ? '#d4a64a' : (crafted ? '#d4c4de' : '#d6c4a6')));
+        ? [[1.058, .170, .80], [1.038, .262, .91], [1.006, .330, .98], [.972, .366, 1.0], [.934, .372, 1.0], [.904, .356, .94], [.888, .336, .84]]
+        : [[1.064, .176, .80], [1.044, .270, .91], [1.010, .340, .98], [.974, .375, 1.0], [.936, .381, 1.0], [.906, .363, .94], [.890, .340, .84]];
+    var cCrown = new THREE.Color(night ? (gold ? '#fce7a4' : '#eefcfc') : (gold ? '#fff4c6' : (crafted ? '#fffcf8' : '#fffdf6')));
+    var cMid   = new THREE.Color(night ? (gold ? '#d8b664' : '#a8d8e4') : (gold ? '#f0c45e' : (crafted ? '#ede0ea' : '#ecdcc2')));
+    var cLow   = new THREE.Color(night ? (gold ? '#967638' : '#6e9eb0') : (gold ? '#c89438' : (crafted ? '#cbb8d8' : '#cbb490')));
     var pos = [], cols = [], idx = [], tmp = new THREE.Color();
     var sy = s.y || 0;
     for(var j = 0; j < profile.length; j++){
       var pr = profile[j][0], py = profile[j][1] + sy, lum = profile[j][2];
-      var isTop = j === 2 || j === 3;
+      var isTop = j === 3 || j === 4;
       for(var i = 0; i <= seg; i++){
         var a = i / seg * TAU, pt = reef3dTileContour(a, pr, R, style, crafted, seed);
         pos.push(s.x + pt[0], py, s.z + pt[1]);
@@ -732,11 +781,11 @@
     var seg = crafted ? 32 : 36, TAU = Math.PI * 2;
     var profile = crafted
       ? (plain
-        ? [[.894, .341], [.874, .348], [.852, .342]]
-        : [[.774, .336], [.748, .345], [.722, .340]])
+        ? [[.894, .346], [.872, .358], [.848, .349]]
+        : [[.780, .342], [.752, .355], [.724, .346]])
       : style === 'shell'
-        ? [[.890, .336], [.866, .344], [.840, .339]]
-        : [[.892, .340], [.868, .348], [.842, .343]];
+        ? [[.890, .344], [.864, .356], [.836, .347]]
+        : [[.892, .348], [.866, .361], [.838, .351]];
     var baseCol = new THREE.Color(night ? '#e8fffc' : '#fffef8');
     if(top){
       var tint = new THREE.Color(top);
@@ -796,15 +845,15 @@
     }
     var uRad = Math.max(1e-5, (uMax - uMin) * .5), vRad = Math.max(1e-5, (vMax - vMin) * .5);
     var seg = style === 'shell' ? 32 : 40, TAU = Math.PI * 2;
-    var discR = R * .901, baseY = faceMesh.position.y, domeH = .034;
+    var discR = R * .901, baseY = faceMesh.position.y, domeH = .042;
     // Outer -> inner rings give outward/upward FrontSide normals with smooth spherical cabochon curvature.
     var ringFracs = [1.0, .86, .66, .40, .14, 0.0];
     var pos = [], nrms = [], uvs = [], cols = [], idx = [];
     for(var j = 0; j < ringFracs.length; j++){
       var f = ringFracs[j];
       var domeY = baseY + domeH * (1 - f * f);
-      // Smooth analytical cabochon normal (zero pole degeneracy at f=0; ~12 deg gentle rim tilt catches sweeping glossy highlights).
-      var tilt = .22 * f, nLen = Math.hypot(tilt, 1);
+      // Smooth analytical cabochon normal (zero pole degeneracy at f=0; ~15 deg gentle rim tilt catches sweeping glossy highlights).
+      var tilt = .26 * f, nLen = Math.hypot(tilt, 1);
       var nRad = tilt / nLen, nUp = 1 / nLen;
       // Subtle radial jewel brightness (luminous center -> rich jewel rim depth).
       var lum = 0.92 - .10 * f * f;
@@ -1909,8 +1958,8 @@
       }
       var rimMat = THREE.MeshPhongMaterial
         ? new THREE.MeshPhongMaterial({
-            color: night ? '#dceaf2' : '#f2ece0', vertexColors: true, shininess: 94,
-            specular: new THREE.Color('#8a7e64'),
+            color: night ? '#dceaf2' : '#f4eee2', vertexColors: true, shininess: 112,
+            specular: new THREE.Color(night ? '#98c4d4' : '#b8a57a'),
             emissive: new THREE.Color(night ? '#2c4c58' : '#5a4a2c'), emissiveIntensity: night ? 0.12 : 0.06
           })
         : new THREE.MeshBasicMaterial({ vertexColors: true });
@@ -1918,8 +1967,8 @@
 
       var innerMat = THREE.MeshPhongMaterial
         ? new THREE.MeshPhongMaterial({
-            color: night ? '#dceaf2' : '#f2ece0', vertexColors: true, shininess: 88,
-            specular: new THREE.Color('#8a7e64'),
+            color: night ? '#dceaf2' : '#f4eee2', vertexColors: true, shininess: 102,
+            specular: new THREE.Color(night ? '#98c4d4' : '#b2a078'),
             emissive: new THREE.Color(night ? '#dceaf2' : '#4a3e28'), emissiveIntensity: night ? 0.12 : 0.06
           })
         : new THREE.MeshBasicMaterial({ vertexColors: true });
@@ -1931,8 +1980,8 @@
           map: b.map,
           color: night ? '#dceef6' : '#ffffff',
           vertexColors: true,
-          specular: new THREE.Color(night ? '#5a7888' : '#4a463c'),
-          shininess: 80,
+          specular: new THREE.Color(night ? '#688c9e' : '#5e584a'),
+          shininess: 92,
           emissiveMap: b.map,
           emissive: new THREE.Color('#ffffff'),
           emissiveIntensity: night ? 0.18 : 0.14
@@ -2215,14 +2264,19 @@
           if(spaces.some(function(ts){ return Math.hypot(ts.x - ax, ts.z - az) < 2.35; })) return;
           if(coveObstacles.some(function(co){ return Math.hypot(co.x - ax, co.z - az) < (co.r || 1.8) + .45; })) return;
           var cg = new THREE.Group();
-          cg.add(mesh(new THREE.CylinderGeometry(cl.rad, cl.rad * 1.18, .14, 16), M('#88e0d2'), 0, -.06, 0));
-          var st = B.star(r); st.scale.setScalar(cl.sc); st.rotation.y = cl.rot; st.position.set(-.14, .03, .12); cg.add(st);
+          // Softly domed warm coral-sand shoal mound over a submerged turquoise sandbar skirt (zero flat mint discs!)
+          var skirt = mesh(new THREE.SphereGeometry(cl.rad + .18, 16, 8, 0, Math.PI * 2, 0, Math.PI * .5), M('#79d9d2'), 0, -.12, 0);
+          skirt.scale.set(1.06, .16, .98); cg.add(skirt);
+          var shoal = mesh(new THREE.SphereGeometry(cl.rad + .04, 16, 9, 0, Math.PI * 2, 0, Math.PI * .5), M('#eddcb6'), 0, -.04, 0);
+          shoal.scale.set(1.04, .22, .94); cg.add(shoal);
+          // Keep starfish strictly clear of coral fan & shell/pebble (>= 0.56u center gap vs 0.45u combined radii).
+          var st = B.star(r); st.scale.setScalar(cl.sc * .66); st.rotation.y = cl.rot; st.position.set(-.30, .09, .14); cg.add(st);
           if(cl.hasFan){
-            var fn = B.fan(r); fn.scale.setScalar(cl.sc * .72); fn.rotation.y = cl.rot - .7; fn.position.set(.20, .02, -.16); cg.add(fn);
+            var fn = B.fan(r); fn.scale.setScalar(cl.sc * .56); fn.rotation.y = cl.rot - .7; fn.position.set(.26, .06, -.22); cg.add(fn);
           }
           if(cl.hasShell){
-            var sh = mesh(new THREE.SphereGeometry(.16, 10, 7), M('#ffd8be'), .16, .06, .18);
-            sh.scale.set(1.25, .58, .95); sh.rotation.y = cl.rot + .6; cg.add(sh);
+            var sh = mesh(new THREE.SphereGeometry(.15, 10, 7), M('#ffd8be'), .28, .10, .24);
+            sh.scale.set(1.20, .56, .92); sh.rotation.y = cl.rot + .6; cg.add(sh);
           }
           cg.position.set(ax, Math.min(.01, groundY(ax, az) + .15) + .02, az);
           cg.userData.noFootprint = true;
@@ -2906,7 +2960,7 @@
     var dz = (nxt && nxt !== cur) ? (nxt.z - cur.z) : Math.cos(view.guide.rotation.y || 0);
     var len = Math.hypot(dx, dz) || 1;
     dx /= len; dz /= len;
-    var startBack = (lh && cur.i === 0) ? 1.32 : 1.75;
+    var startBack = (lh && cur.i === 0) ? 2.28 : 1.75;
     var bx = cur.x - dx * startBack, bz = cur.z - dz * startBack;
     var startGroundY = lh
       ? (typeof spaces.lighthouse.floorY === 'number' ? spaces.lighthouse.floorY : reef3dCrabY(view, cur.y))

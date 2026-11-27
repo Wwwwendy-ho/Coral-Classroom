@@ -501,7 +501,7 @@
     place(rlLobbyPebbleGroup(THREE, .92, night, 367), 2.66, 3.10, 1.7, true);
     place(rlLobbyScallop(THREE, .34, '#fcf2e4', '#e8a2b2', night), 2.38, 3.45, -.6, true);
     place(rlLobbyStarfish(THREE, .40, '#ee8466', night), 4.55, 2.85, .25, true);
-    place(rlLobbyPebbleGroup(THREE, 1.05, night, 383), 4.95, 2.40, 2.5, true);
+    place(rlLobbyPebbleGroup(THREE, 1.05, night, 383), 5.32, 2.18, 2.5, true);
     place(rlLobbySandDollar(THREE, .34, night), -3.28, 4.35, .4, true);
     place(rlLobbyConch(THREE, .56, '#f0b696', night), -2.92, 4.72, 1.85, true);
 

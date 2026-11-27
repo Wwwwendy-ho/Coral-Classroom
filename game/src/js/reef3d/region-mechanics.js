@@ -295,12 +295,31 @@ var JamboreeRegions = (function(){
       color: 0xcbeeff, transparent: true, opacity: 0.28, roughness: 0.1, depthWrite: false, side: THREE.DoubleSide
     }));
 
+    var sb = view.regionShipBounds || null;
+    var museumZ = sb ? (sb.maxZ - 2.2) : -3.8;
+    var museumStartX = sb ? Math.max(sb.minX + 5.2, -3.6) : -3.0;
+    function capClearOfTiles(px, pz, minD){
+      if(!Array.isArray(view.spaces)) return true;
+      for(var ti = 0; ti < view.spaces.length; ti++){
+        var ts = view.spaces[ti];
+        if(ts && Math.hypot(px - ts.x, pz - ts.z) < (minD || 2.4)) return false;
+      }
+      return true;
+    }
+    var pedShadowGeo = ownGeo(st, new THREE.CircleGeometry(0.38, 16));
+    var pedShadowMat = ownMat(st, new THREE.MeshBasicMaterial({ color: 0x160d06, transparent: true, opacity: 0.42, depthWrite: false }));
     for(var i = 0; i < trophyDefs.length; i++){
-      var x = -3.0 + i * 1.2;
-      var z = -3.8;
+      var x = museumStartX + i * 1.35;
+      var z = museumZ;
+      if(!capClearOfTiles(x, z, 2.3)) z = sb ? (sb.minZ + 2.2) : (z - 1.8);
       var gy = groundYAt(view, x, z);
       var slot = new THREE.Group();
       slot.position.set(x, gy, z);
+
+      var shd = new THREE.Mesh(pedShadowGeo, pedShadowMat);
+      shd.rotation.x = -Math.PI / 2;
+      shd.position.y = 0.008;
+      slot.add(shd);
 
       var ped = new THREE.Mesh(pedGeo, pedMat);
       ped.position.y = 0.28;
@@ -323,12 +342,12 @@ var JamboreeRegions = (function(){
     st.group.add(museumGrp);
     st.trophiesGroup = museumGrp;
 
-    // 2) 3D Photo Corkboard
-    var cx = -4.2, cz = -2.2;
+    // 2) 3D Photo Corkboard tucked neatly by the port-aft gallery wall (zero center-deck clutter!)
+    var cx = sb ? (sb.minX + 4.4) : -4.2, cz = sb ? (sb.maxZ - 2.6) : -2.2;
     var cgy = groundYAt(view, cx, cz);
     var boardGrp = new THREE.Group();
     boardGrp.position.set(cx, cgy, cz);
-    boardGrp.rotation.y = 0.55;
+    boardGrp.rotation.y = Math.PI - 0.35;
 
     var frameMat = ownMat(st, new THREE.MeshStandardMaterial({ color: 0x6b4226, roughness: 0.75 }));
     var frame = new THREE.Mesh(ownGeo(st, new THREE.BoxGeometry(1.75, 1.18, 0.08)), frameMat);
@@ -354,8 +373,8 @@ var JamboreeRegions = (function(){
     boardGrp.add(corkMesh);
     st.group.add(boardGrp);
 
-    // 3) 3D Brass Gramophone Prop on Cabin Side Table
-    var gx = 3.8, gz = -2.3;
+    // 3) 3D Brass Gramophone Prop tucked on the starboard-aft cabin gallery
+    var gx = sb ? (museumStartX + trophyDefs.length * 1.35 + 0.6) : 3.8, gz = sb ? (sb.maxZ - 2.5) : -2.3;
     var ggy = groundYAt(view, gx, gz);
     var gramGrp = new THREE.Group();
     gramGrp.position.set(gx, ggy, gz);
@@ -753,22 +772,55 @@ var JamboreeRegions = (function(){
     if(!THREE || !st.group) return;
 
     var fMajorColors = [0xff7b89, 0xffa65c, 0xf7d060, 0x8be07b, 0x56cfe1, 0x64dfdf, 0x8093f1, 0xc77dff];
-    var tileGeo = ownGeo(st, new THREE.CylinderGeometry(0.42, 0.48, 0.1, 6));
+    var baseGeo = ownGeo(st, new THREE.CylinderGeometry(0.44, 0.50, 0.08, 18));
+    var rimGeo = ownGeo(st, new THREE.TorusGeometry(0.41, 0.042, 8, 20));
+    var domeGeo = ownGeo(st, new THREE.SphereGeometry(0.37, 16, 8, 0, Math.PI * 2, 0, Math.PI * 0.5));
+    var baseMat = ownMat(st, new THREE.MeshStandardMaterial({ color: 0xe6d8be, roughness: 0.62 }));
+    var goldMat = ownMat(st, new THREE.MeshStandardMaterial({ color: 0xe8be58, metalness: 0.65, roughness: 0.28 }));
     for(var i = 0; i < 8; i++){
       var ang = (i / 8) * Math.PI * 2;
-      var x = Math.cos(ang) * 3.8;
-      var z = Math.sin(ang) * 3.8;
+      var rad = 4.25;
+      var x = Math.cos(ang) * rad;
+      var z = Math.sin(ang) * rad;
+      var ok = true;
+      if(Array.isArray(view.spaces)){
+        ok = false;
+        for(var tries = 0; tries < 5; tries++){
+          var hit = false;
+          for(var ti = 0; ti < view.spaces.length; ti++){
+            var ts = view.spaces[ti];
+            if(ts && Math.hypot(x - ts.x, z - ts.z) < 2.95){ hit = true; break; }
+          }
+          if(!hit){ ok = true; break; }
+          rad = tries % 2 === 0 ? (rad - 0.85) : (rad + 1.05);
+          x = Math.cos(ang) * rad;
+          z = Math.sin(ang) * rad;
+        }
+      }
+      if(!ok) continue;
       var gy = groundYAt(view, x, z);
       var mat = ownMat(st, new THREE.MeshStandardMaterial({
         color: fMajorColors[i],
         emissive: fMajorColors[i],
-        emissiveIntensity: 0.12,
-        roughness: 0.35
+        emissiveIntensity: 0.14,
+        roughness: 0.22,
+        metalness: 0.10
       }));
-      var m = new THREE.Mesh(tileGeo, mat);
-      m.position.set(x, gy + 0.05, z);
-      st.group.add(m);
-      st.mosaicTiles.push({ mesh: m, mat: mat, baseY: gy + 0.05 });
+      var grp = new THREE.Group();
+      grp.position.set(x, gy + 0.03, z);
+      var plinth = new THREE.Mesh(baseGeo, baseMat);
+      plinth.position.y = 0.02;
+      grp.add(plinth);
+      var rim = new THREE.Mesh(rimGeo, goldMat);
+      rim.rotation.x = Math.PI / 2;
+      rim.position.y = 0.068;
+      grp.add(rim);
+      var cap = new THREE.Mesh(domeGeo, mat);
+      cap.scale.set(1, 0.24, 1);
+      cap.position.y = 0.056;
+      grp.add(cap);
+      st.group.add(grp);
+      st.mosaicTiles.push({ mesh: grp, mat: mat, baseY: gy + 0.03 });
     }
   }
 
@@ -888,41 +940,94 @@ var JamboreeRegions = (function(){
     var THREE = T();
     if(!THREE || !st.group) return;
 
-    var pageGeo = ownGeo(st, new THREE.BoxGeometry(0.75, 0.06, 0.55));
-    var pageMat = ownMat(st, new THREE.MeshStandardMaterial({ color: 0xfaf0dc, roughness: 0.7 }));
-    var propMat = ownMat(st, new THREE.MeshStandardMaterial({
-      color: 0xffb703, emissive: 0xfb8500, emissiveIntensity: 0.25, roughness: 0.4
-    }));
-
-    for(var i = 0; i < 3; i++){
-      var x = -2.6 + i * 2.6;
-      var z = -3.6 + (i % 2) * 0.9;
-      // Enforce >= 4.6u clearance from Bok's Reed Stall (-17.65, -10.25), Bok (-14.50, -8.10), and view._shopPos
-      var guards = [[-17.65, -10.25], [-14.50, -8.10]];
-      if(view._shopPos) guards.push([view._shopPos.x, view._shopPos.z]);
-      for(var gi = 0; gi < guards.length; gi++){
-        var dxG = x - guards[gi][0], dzG = z - guards[gi][1];
-        var dG = Math.hypot(dxG, dzG);
-        if(dG < 4.6){
-          var angG = dG > 0.01 ? Math.atan2(dzG, dxG) : (i * 1.1);
-          x = guards[gi][0] + Math.cos(angG) * 4.75;
-          z = guards[gi][1] + Math.sin(angG) * 4.75;
+    // Sculpted open floating storybooks with angled hardcover spreads, cream pages, painted vignette & golden bookmark
+    // placed strictly on OPEN turquoise lagoon water (clear of all tiles, sandbars, wooden dock, Bok & Mira!).
+    var coverGeo = ownGeo(st, new THREE.BoxGeometry(0.56, 0.04, 0.72));
+    var pageGeo = ownGeo(st, new THREE.BoxGeometry(0.50, 0.045, 0.66));
+    var spineGeo = ownGeo(st, new THREE.CylinderGeometry(0.045, 0.045, 0.72, 8));
+    var ribbonGeo = ownGeo(st, new THREE.BoxGeometry(0.055, 0.015, 0.78));
+    var illusGeo = ownGeo(st, new THREE.BoxGeometry(0.32, 0.012, 0.40));
+    var rippleGeo = ownGeo(st, new THREE.RingGeometry(0.56, 0.70, 22));
+    var pageMat = ownMat(st, new THREE.MeshStandardMaterial({ color: 0xfbf3e0, roughness: 0.72 }));
+    var goldMat = ownMat(st, new THREE.MeshStandardMaterial({ color: 0xf2c14e, metalness: 0.45, roughness: 0.32 }));
+    var rippleMat = ownMat(st, new THREE.MeshBasicMaterial({ color: 0xd8faff, transparent: true, opacity: 0.62, side: THREE.DoubleSide, depthWrite: false }));
+    var coverCols = [0x2e6f95, 0xb8465c, 0x3b8a6b];
+    var illusCols = [0x5cc5cf, 0xf29e68, 0x7bc983];
+    var guards = [[-17.65, -10.25], [-14.50, -8.10], [-8.60, -14.70]];
+    if(view._shopPos) guards.push([view._shopPos.x, view._shopPos.z]);
+    var waterY = -0.58;
+    var candidates = [
+      [-1.8, -4.6], [2.4, -3.2], [-4.8, 1.4], [3.6, 2.8], [-2.2, 4.2], [5.2, -1.8], [-6.2, -3.6], [0.8, 3.6]
+    ];
+    function lagoonSpotClear(px, pz){
+      if(Array.isArray(view.spaces)){
+        for(var ti = 0; ti < view.spaces.length; ti++){
+          var ts = view.spaces[ti];
+          if(ts && Math.hypot(px - ts.x, pz - ts.z) < 3.4) return false;
         }
       }
-      var gy = groundYAt(view, x, z);
+      for(var gi = 0; gi < guards.length; gi++){
+        if(Math.hypot(px - guards[gi][0], pz - guards[gi][1]) < 4.6) return false;
+      }
+      if(Array.isArray(view._sceneryObstacles)){
+        for(var oi = 0; oi < view._sceneryObstacles.length; oi++){
+          var o = view._sceneryObstacles[oi];
+          if(o && Math.hypot(px - o.x, pz - o.z) < (o.r || 1.2) + 1.8) return false;
+        }
+      }
+      return true;
+    }
+
+    var placed = [];
+    for(var i = 0; i < 3; i++){
+      var pick = null;
+      for(var ci = 0; ci < candidates.length; ci++){
+        var cx = candidates[(ci + i * 2) % candidates.length][0];
+        var cz = candidates[(ci + i * 2) % candidates.length][1];
+        if(placed.some(function(p){ return Math.hypot(p[0] - cx, p[1] - cz) < 3.0; })) continue;
+        if(lagoonSpotClear(cx, cz)){ pick = [cx, cz]; break; }
+      }
+      if(!pick) continue;
+      placed.push(pick);
+      var covMat = ownMat(st, new THREE.MeshStandardMaterial({ color: coverCols[i % coverCols.length], roughness: 0.55 }));
+      var illMat = ownMat(st, new THREE.MeshStandardMaterial({ color: illusCols[i % illusCols.length], roughness: 0.65 }));
       var grp = new THREE.Group();
-      grp.position.set(x, gy + 0.32, z);
+      grp.position.set(pick[0], waterY + 0.14, pick[1]);
+      grp.rotation.y = 0.45 + i * 1.15;
 
-      var book = new THREE.Mesh(pageGeo, pageMat);
-      grp.add(book);
+      var rip = new THREE.Mesh(rippleGeo, rippleMat);
+      rip.rotation.x = -Math.PI / 2;
+      rip.position.y = -0.10;
+      grp.add(rip);
 
-      // Miniature pop-up diorama prop resting on the book
-      var pop = new THREE.Mesh(ownGeo(st, new THREE.ConeGeometry(0.18, 0.36, 5)), propMat);
-      pop.position.y = 0.21;
-      grp.add(pop);
+      var spine = new THREE.Mesh(spineGeo, covMat);
+      spine.rotation.x = Math.PI / 2;
+      spine.position.y = 0.01;
+      grp.add(spine);
+
+      [-1, 1].forEach(function(sd){
+        var board = new THREE.Mesh(coverGeo, covMat);
+        board.position.set(sd * 0.27, 0.045, 0);
+        board.rotation.z = sd * 0.16;
+        grp.add(board);
+
+        var pg = new THREE.Mesh(pageGeo, pageMat);
+        pg.position.set(sd * 0.26, 0.082, 0);
+        pg.rotation.z = sd * 0.14;
+        grp.add(pg);
+
+        var ill = new THREE.Mesh(illusGeo, illMat);
+        ill.position.set(sd * 0.26, 0.108, 0);
+        ill.rotation.z = sd * 0.14;
+        grp.add(ill);
+      });
+
+      var rib = new THREE.Mesh(ribbonGeo, goldMat);
+      rib.position.set(0.02, 0.088, 0.06);
+      grp.add(rib);
 
       st.group.add(grp);
-      st.storyBooks.push({ grp: grp, baseY: gy + 0.32, phase: i * 2.1 });
+      st.storyBooks.push({ grp: grp, baseY: waterY + 0.14, phase: i * 2.1 });
     }
   }
 
@@ -1005,23 +1110,61 @@ var JamboreeRegions = (function(){
     var THREE = T();
     if(!THREE || !st.group) return;
 
-    var crystalGeo = ownGeo(st, new THREE.OctahedronGeometry(0.32, 0));
+    var crystalGeo = ownGeo(st, new THREE.CylinderGeometry(0.02, 0.24, 1.35, 6));
+    var subCrystalGeo = ownGeo(st, new THREE.CylinderGeometry(0.015, 0.14, 0.78, 6));
+    var plinthGeo = ownGeo(st, new THREE.CylinderGeometry(0.42, 0.56, 0.28, 8));
+    var plinthMat = ownMat(st, new THREE.MeshStandardMaterial({ color: 0x3b4f66, roughness: 0.86 }));
+    function caveSpotClear(px, pz){
+      if(Array.isArray(view.spaces)){
+        for(var ti = 0; ti < view.spaces.length; ti++){
+          var ts = view.spaces[ti];
+          if(ts && Math.hypot(px - ts.x, pz - ts.z) < 2.55) return false;
+        }
+      }
+      if(Array.isArray(view._sceneryObstacles)){
+        for(var oi = 0; oi < view._sceneryObstacles.length; oi++){
+          var o = view._sceneryObstacles[oi];
+          if(o && Math.hypot(px - o.x, pz - o.z) < (o.r || 1.0) + 1.85) return false;
+        }
+      }
+      return true;
+    }
     for(var i = 0; i < 6; i++){
       var ang = (i / 6) * Math.PI * 2 + 0.3;
-      var x = Math.cos(ang) * 4.5;
-      var z = Math.sin(ang) * 4.5;
+      var rad = 4.6, x = Math.cos(ang) * rad, z = Math.sin(ang) * rad, ok = false;
+      for(var tries = 0; tries < 6; tries++){
+        if(caveSpotClear(x, z)){ ok = true; break; }
+        rad += (tries % 2 === 0 ? 1.1 : -0.65);
+        ang += 0.22;
+        x = Math.cos(ang) * rad;
+        z = Math.sin(ang) * rad;
+      }
+      if(!ok) continue;
       var gy = groundYAt(view, x, z);
       var mat = ownMat(st, new THREE.MeshStandardMaterial({
-        color: 0x72efdd,
-        emissive: 0x48bfe3,
+        color: i % 2 ? 0x72efdd : 0x9b8df2,
+        emissive: i % 2 ? 0x3ab2d6 : 0x6b5cd4,
         emissiveIntensity: 0.25,
-        roughness: 0.2
+        roughness: 0.22
       }));
-      var m = new THREE.Mesh(crystalGeo, mat);
-      m.scale.set(0.8, 2.2, 0.8);
-      m.position.set(x, gy + 0.65, z);
-      st.group.add(m);
-      st.echoPillars.push({ mesh: m, mat: mat });
+      var grp = new THREE.Group();
+      grp.position.set(x, gy, z);
+      var plinth = new THREE.Mesh(plinthGeo, plinthMat);
+      plinth.position.y = 0.12;
+      grp.add(plinth);
+      var mainSpire = new THREE.Mesh(crystalGeo, mat);
+      mainSpire.position.y = 0.82;
+      grp.add(mainSpire);
+      var sideL = new THREE.Mesh(subCrystalGeo, mat);
+      sideL.position.set(-0.22, 0.50, 0.12);
+      sideL.rotation.z = 0.28;
+      grp.add(sideL);
+      var sideR = new THREE.Mesh(subCrystalGeo, mat);
+      sideR.position.set(0.20, 0.46, -0.14);
+      sideR.rotation.z = -0.24;
+      grp.add(sideR);
+      st.group.add(grp);
+      st.echoPillars.push({ mesh: grp, mat: mat });
     }
   }
 
@@ -1065,16 +1208,42 @@ var JamboreeRegions = (function(){
     var THREE = T();
     if(!THREE || !st.group) return;
 
-    // Evolving 3D World Signage
-    var sx = -2.8, sz = -3.4;
+    function townSpotClear(px, pz, minD){
+      if(Array.isArray(view.spaces)){
+        for(var ti = 0; ti < view.spaces.length; ti++){
+          var ts = view.spaces[ti];
+          if(ts && Math.hypot(px - ts.x, pz - ts.z) < (minD || 2.55)) return false;
+        }
+      }
+      if(view._shopPos && Math.hypot(px - view._shopPos.x, pz - view._shopPos.z) < 3.0) return false;
+      return true;
+    }
+
+    // Evolving 3D World Signage — placed cleanly on the sunny outer-right sidewalk clear of Bok, Cafe Seahorse & all tiles!
+    var signCands = [[5.2, -4.4], [6.0, -3.6], [4.4, -5.8], [6.4, -5.0], [3.6, -6.2]];
+    var sx = 5.2, sz = -4.4;
+    for(var sci = 0; sci < signCands.length; sci++){
+      if(townSpotClear(signCands[sci][0], signCands[sci][1], 2.85)){
+        sx = signCands[sci][0]; sz = signCands[sci][1]; break;
+      }
+    }
     var sgy = groundYAt(view, sx, sz);
     var signGrp = new THREE.Group();
     signGrp.position.set(sx, sgy, sz);
+    signGrp.rotation.y = -0.35;
 
+    var stoneMat = ownMat(st, new THREE.MeshStandardMaterial({ color: 0xc8bba4, roughness: 0.82 }));
     var postMat = ownMat(st, new THREE.MeshStandardMaterial({ color: 0x6b4226, roughness: 0.8 }));
-    var post = new THREE.Mesh(ownGeo(st, new THREE.CylinderGeometry(0.08, 0.09, 1.5, 8)), postMat);
-    post.position.y = 0.75;
+    var capMat = ownMat(st, new THREE.MeshStandardMaterial({ color: 0xc45746, roughness: 0.72 }));
+    var plinth = new THREE.Mesh(ownGeo(st, new THREE.CylinderGeometry(0.28, 0.34, 0.22, 10)), stoneMat);
+    plinth.position.y = 0.11;
+    signGrp.add(plinth);
+    var post = new THREE.Mesh(ownGeo(st, new THREE.CylinderGeometry(0.08, 0.09, 1.5, 10)), postMat);
+    post.position.y = 0.84;
     signGrp.add(post);
+    var roofCap = new THREE.Mesh(ownGeo(st, new THREE.BoxGeometry(1.48, 0.10, 0.26)), capMat);
+    roofCap.position.y = 1.78;
+    signGrp.add(roofCap);
 
     var cv = document.createElement('canvas');
     cv.width = 256; cv.height = 128;
@@ -1087,11 +1256,11 @@ var JamboreeRegions = (function(){
       ownGeo(st, new THREE.BoxGeometry(1.3, 0.65, 0.08)),
       ownMat(st, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.7 }))
     );
-    board.position.y = 1.35;
+    board.position.y = 1.38;
     signGrp.add(board);
     st.group.add(signGrp);
 
-    // Night Market Carts
+    // Night Market Carts — tile-clear with wooden wheels & canopies
     var items = [];
     try {
       if(window.CulturePacks && typeof CulturePacks.getNightMarketItems === 'function'){
@@ -1107,26 +1276,45 @@ var JamboreeRegions = (function(){
     }
 
     var nightOn = isNight(view);
+    var wheelGeo = ownGeo(st, new THREE.CylinderGeometry(0.16, 0.16, 0.06, 12));
+    var wheelMat = ownMat(st, new THREE.MeshStandardMaterial({ color: 0x4f3018, roughness: 0.78 }));
+    var poleGeo = ownGeo(st, new THREE.CylinderGeometry(0.028, 0.028, 0.64, 6));
+    var cartSpots = [[2.2, -5.2], [4.0, -5.2], [5.8, -5.0]];
     for(var i = 0; i < items.length; i++){
-      var cx = 1.6 + i * 1.45, cz = -3.6;
+      var cx = cartSpots[i] ? cartSpots[i][0] : (1.6 + i * 1.65);
+      var cz = cartSpots[i] ? cartSpots[i][1] : -5.2;
+      if(!townSpotClear(cx, cz, 2.35)){ cz -= 1.2; }
       var cgy = groundYAt(view, cx, cz);
       var cart = new THREE.Group();
       cart.position.set(cx, cgy, cz);
 
       var body = new THREE.Mesh(
-        ownGeo(st, new THREE.BoxGeometry(0.86, 0.56, 0.56)),
+        ownGeo(st, new THREE.BoxGeometry(0.86, 0.50, 0.56)),
         ownMat(st, new THREE.MeshStandardMaterial({ color: 0x7f4f24, roughness: 0.8 }))
       );
-      body.position.y = 0.28;
+      body.position.y = 0.36;
       cart.add(body);
+
+      [-0.36, 0.36].forEach(function(wx){
+        var wh = new THREE.Mesh(wheelGeo, wheelMat);
+        wh.rotation.x = Math.PI / 2;
+        wh.position.set(wx, 0.16, 0.30);
+        cart.add(wh);
+        var pl = new THREE.Mesh(poleGeo, wheelMat);
+        pl.position.set(wx, 0.84, 0.24);
+        cart.add(pl);
+        var pl2 = new THREE.Mesh(poleGeo, wheelMat);
+        pl2.position.set(wx, 0.84, -0.24);
+        cart.add(pl2);
+      });
 
       var awningMat = ownMat(st, new THREE.MeshStandardMaterial({
         color: items[i].col || 0xff9f1c,
         emissive: items[i].col || 0xff9f1c,
         emissiveIntensity: nightOn ? 0.65 : 0.05
       }));
-      var awning = new THREE.Mesh(ownGeo(st, new THREE.BoxGeometry(0.96, 0.14, 0.68)), awningMat);
-      awning.position.y = 0.96;
+      var awning = new THREE.Mesh(ownGeo(st, new THREE.BoxGeometry(0.98, 0.14, 0.68)), awningMat);
+      awning.position.y = 1.14;
       cart.add(awning);
 
       st.group.add(cart);

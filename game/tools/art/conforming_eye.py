@@ -127,15 +127,15 @@ EYE_SHAPES = {
     # 5. restaurant-otter: Bright playful tall-almond eyes (aspect=0.78, cheerful lower-lid lift, WARM FOREST-HAZEL/GREEN + distinct upper eyelid fold)
     'restaurant-otter':{'aspect': 0.78, 'tilt':  6.5, 'style': 'tall_almond',    'upper_lid_arch': .10, 'lower_lid_lift': .20, 'brow_ridge': 1.15, 'lash_flick': .44, 'lid_hood': .04},
     # Other cast (preserved backward-compatible profiles)
-    'hana':            {'aspect': 1.20, 'tilt':  8.5, 'style': 'default',        'upper_lid_arch': .11, 'lower_lid_lift': .10, 'brow_ridge': .48, 'lash_flick': .92, 'lid_hood': .07},
+    'hana':            {'aspect': 1.24, 'tilt':  8.5, 'style': 'crescent_smile', 'upper_lid_arch': .11, 'lower_lid_lift': .24, 'brow_ridge': .52, 'lash_flick': .92, 'lid_hood': .04},
     'mira':            {'aspect': 1.18, 'tilt':  9.0, 'style': 'default',        'upper_lid_arch': .10, 'lower_lid_lift': .09, 'brow_ridge': .52, 'lash_flick': .88, 'lid_hood': .06},
     'cafe-seahorse':   {'aspect': 0.80, 'tilt':  4.0, 'style': 'default',        'upper_lid_arch': .09, 'lower_lid_lift': .08, 'brow_ridge': .48, 'lash_flick': .40, 'lid_hood': .04},
-    'captain-bay':     {'aspect': 1.16, 'tilt': -2.5, 'style': 'default',        'upper_lid_arch': .03, 'lower_lid_lift': .10, 'brow_ridge': 1.25, 'lash_flick': .15, 'lid_hood': .17},
+    'captain-bay':     {'aspect': 1.32, 'tilt': -3.0, 'style': 'half_lid',       'upper_lid_arch': .03, 'lower_lid_lift': .12, 'brow_ridge': 1.38, 'lash_flick': .18, 'lid_hood': .28},
     'subway-ray':      {'aspect': 1.26, 'tilt':  7.0, 'style': 'default',        'upper_lid_arch': .08, 'lower_lid_lift': .11, 'brow_ridge': .62, 'lash_flick': .48, 'lid_hood': .09},
     'pharmacy-shrimp': {'aspect': 1.20, 'tilt':  6.5, 'style': 'default',        'upper_lid_arch': .08, 'lower_lid_lift': .09, 'brow_ridge': .54, 'lash_flick': .38, 'lid_hood': .08},
-    'bok':             {'aspect': 1.18, 'tilt':  5.0, 'style': 'default',        'upper_lid_arch': .07, 'lower_lid_lift': .10, 'brow_ridge': .58, 'lash_flick': .26, 'lid_hood': .09},
-    'echo':            {'aspect': 1.22, 'tilt':  5.5, 'style': 'default',        'upper_lid_arch': .08, 'lower_lid_lift': .10, 'brow_ridge': .60, 'lash_flick': .35, 'lid_hood': .10},
-    'pip':             {'aspect': 1.20, 'tilt':  8.0, 'style': 'default',        'upper_lid_arch': .09, 'lower_lid_lift': .09, 'brow_ridge': .54, 'lash_flick': .42, 'lid_hood': .07},
+    'bok':             {'aspect': 1.24, 'tilt':  6.0, 'style': 'crescent_smile', 'upper_lid_arch': .10, 'lower_lid_lift': .24, 'brow_ridge': .72, 'lash_flick': .34, 'lid_hood': .06},
+    'echo':            {'aspect': 1.30, 'tilt':  7.5, 'style': 'cat_almond',     'upper_lid_arch': .10, 'lower_lid_lift': .14, 'brow_ridge': .68, 'lash_flick': .52, 'lid_hood': .08},
+    'pip':             {'aspect': 1.32, 'tilt': 11.0, 'style': 'cat_almond',     'upper_lid_arch': .12, 'lower_lid_lift': .16, 'brow_ridge': .64, 'lash_flick': .66, 'lid_hood': .04},
     # Iconic cute round starry eyes (reserved ONLY for Kiko Hermit & Kiko Mochi!)
     'kiko-hermit':     {'aspect': 1.00, 'tilt':  0.0, 'style': 'round',          'upper_lid_arch': .04, 'lower_lid_lift': .03, 'brow_ridge': .28, 'lash_flick': .16, 'lid_hood': .00},
     'kiko-mochi':      {'aspect': 1.00, 'tilt':  0.0, 'style': 'round',          'upper_lid_arch': .04, 'lower_lid_lift': .03, 'brow_ridge': .28, 'lash_flick': .16, 'lid_hood': .00},

@@ -708,11 +708,14 @@
       if(best){
         var phCam=regionPeopleCamAt(view,space.i) || cam;
         var phCamAz=camBackAz(phCam,best.x,best.z,-1.65);
+        var phStart=view.spaces[regionPeopleStartIndex(view)] || space;
+        var phToShelly=Math.atan2(phStart.x-best.x,phStart.z-best.z);
+        var phDelta=Math.atan2(Math.sin(phToShelly-phCamAz),Math.cos(phToShelly-phCamAz));
         best.boardPitchYaw=phCamAz;
-        best.boardYaw=phCamAz-.10;
-        best.boardPitch=-.35;
+        best.boardYaw=phCamAz+Math.max(-.85,Math.min(.85,phDelta))*.58;
+        best.boardPitch=-.28;
         var pMinY=(bounds.centerY||0)-(bounds.height||0)*.5;
-        best.boardYOffset=-.28-pMinY-(space.y||0);
+        best.boardYOffset=-.272-pMinY-(space.y||0);
         // m6: Shift "Talk to Pharmacist" outward along street normal onto open cobblestones clear of the clipboard tile edge.
         best.labelOffset={x:pf2.nx*1.15,y:.10,z:pf2.nz*1.15};
         return best;
@@ -1113,22 +1116,22 @@
         var shpE=(view && view._shopPos && Math.hypot(view._shopPos.x-ex,view._shopPos.z-ez)<4.2) ? 2500 : 0;
         var poolPen=0;
         for(var pi3=0;pi3<cavePools.length;pi3++){
-          if(Math.hypot(ex-cavePools[pi3].x,ez-cavePools[pi3].z)<2.40){ poolPen=4500; break; }
+          if(Math.hypot(ex-cavePools[pi3].x,ez-cavePools[pi3].z)<1.85){ poolPen=4500; break; }
         }
-        var obsE=poolPen+horizObsPen(ex,ez,radius*.65,caveSolid,.45,3600);
+        var obsE=poolPen+horizObsPen(ex,ez,radius*.65,caveSolid,.42,3600);
         var pplE=placedPenalty(ex,ez);
         var camE=0, distBias=Math.hypot(ex-cvCur.x,ez-cvCur.z)*.20, archPen=0;
         if(cvCam && probe){
           var ey=(space.y||0)+(bounds.centerY||0);
           probe.set(ex,ey,ez).project(cvCam);
-          if(probe.z<-1 || probe.z>1 || probe.x<-.36 || probe.x>-.08 || probe.y<-.18 || probe.y>.24) camE+=2400;
+          if(probe.z<-1 || probe.z>1 || probe.x<-.58 || probe.x>.54 || probe.y<-.16 || probe.y>.34) camE+=2400;
           // Stay clear of bottom-left "Ask Shelly" and bottom-right "Meet Bok" / "Treasure map" HUD pills.
           if(probe.x<-.40 && probe.y<-.40) camE+=3000;
           if(probe.x>.48 && probe.y<-.43) camE+=3000;
           var camDist=cvCam.position.distanceTo ? Math.hypot(cvCam.position.x-ex,cvCam.position.y-ey,cvCam.position.z-ez) : 9;
-          if(camDist<6.5 || camDist>13.0) camE+=(camDist<6.5?(6.5-camDist):(camDist-13.0))*600+1200;
-          // Bias Echo prominently into the center-left open cavern clearing (6.5..13u from cvCam).
-          distBias=Math.abs(camDist-9.0)*1.0+Math.hypot(ex-cvCur.x,ez-cvCur.z)*.20+Math.hypot(probe.x-(-.22),probe.y-(.02))*8.0;
+          if(camDist<5.6 || camDist>16.0) camE+=(camDist<5.6?(5.6-camDist):(camDist-16.0))*600+1200;
+          // Bias Echo prominently into the center-left open cavern clearing (5.6..16u from cvCam).
+          distBias=Math.abs(camDist-9.5)*1.0+Math.hypot(ex-cvCur.x,ez-cvCur.z)*.16+Math.hypot(probe.x-(-.26),probe.y-(.08))*7.5;
           var tcX=cvCam.position.x-ex, tcZ=cvCam.position.z-ez, tcL=Math.hypot(tcX,tcZ)||1;
           tcX/=tcL; tcZ/=tcL;
           for(var ai2=0;ai2<caveSolid.length;ai2++){
@@ -1172,7 +1175,7 @@
         var echoDelta=Math.atan2(Math.sin(echoToShelly-echoToCam),Math.cos(echoToShelly-echoToCam));
         var eMinY=(bounds.centerY||0)-(bounds.height||0)*.5;
         best.boardPitchYaw=echoToCam;
-        best.boardYaw=echoToCam+echoDelta*.68;
+        best.boardYaw=echoToCam+echoDelta*.82;
         best.boardPitch=-.14;
         best.boardYOffset=-.250-eMinY;
         // m6: Float "Practice a sound" cleanly above Echo's head to the left of the dark indigo crystal cave arch.
@@ -1354,6 +1357,7 @@
     if(isLoop && regionId==='lagoon'){
       var lgMain=view.spaces.mainN || view.spaces.length;
       var lgCam=regionPeopleCamAt(view,Math.min(5,lgMain-1)) || cam;
+      var lgCam0=regionPeopleCamAt(view,0) || lgCam;
       var lgSp0=view.spaces[0];
       var lgBaseX=lgSp0 ? lgSp0.x : space.x, lgBaseZ=lgSp0 ? lgSp0.z : space.z;
       for(var lgdx=-9.6;lgdx<=6.4;lgdx+=.4){
@@ -1365,12 +1369,17 @@
           var lObs=horizObsPen(lgx,lgz,radius*.85,obstacles,.45,5000);
           var lPpl=placedPenalty(lgx,lgz);
           var lCam=0, lBias=0;
-          if(lgCam && probe){
-            probe.set(lgx,(space.y||0)+(bounds.centerY||0),lgz).project(lgCam);
-            if(probe.z<-1 || probe.z>1 || probe.x<-.68 || probe.x>-.10 || probe.y<-.52 || probe.y>.25) lCam+=2400;
-            lBias=Math.hypot(probe.x-(-.38),probe.y-(-.14))*4.0;
+          if(lgCam0 && probe){
+            probe.set(lgx,(space.y||0)+(bounds.centerY||0),lgz).project(lgCam0);
+            if(probe.z<-1 || probe.z>1 || probe.x<-.62 || probe.x>.54 || probe.y<-.38 || probe.y>.34) lCam+=2400;
+            lBias+=Math.hypot(probe.x-(-.30),probe.y-(-.04))*5.5;
           }
-          if(lgSp0) lBias+=Math.abs(Math.hypot(lgx-lgSp0.x,lgz-lgSp0.z)-4.8)*1.2;
+          if(lgCam && lgCam!==lgCam0 && probe){
+            probe.set(lgx,(space.y||0)+(bounds.centerY||0),lgz).project(lgCam);
+            if(probe.z<-1 || probe.z>1 || probe.x<-.78 || probe.x>.68 || probe.y<-.58 || probe.y>.36) lCam+=800;
+            lBias+=Math.hypot(probe.x-(-.36),probe.y-(-.10))*1.5;
+          }
+          if(lgSp0) lBias+=Math.abs(Math.hypot(lgx-lgSp0.x,lgz-lgSp0.z)-5.2)*1.0;
           var lSc=lDef*8000+lSp0Pen+lShp+lObs+lPpl+lCam+lBias;
           if(!best || lSc<best.score) best={x:lgx,z:lgz,side:1,score:lSc};
         }
@@ -1816,10 +1825,10 @@
       stage.add(sh);
     }
 
-    // 1. Feathered coastal sand-ripple texture patch across the lower foreground sand
+    // 1. Subtle feathered coastal sand-ripple texture patch across the lower foreground sand
     var rippleTex = makeSandRippleTex();
     if(rippleTex){
-      var ripMat = track(new T.MeshBasicMaterial({ map: rippleTex, transparent: true, opacity: 0.88, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 }));
+      var ripMat = track(new T.MeshBasicMaterial({ map: rippleTex, transparent: true, opacity: 0.28, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 }));
       var ripMesh = new T.Mesh(plane1, ripMat);
       ripMesh.scale.set(3.4, 1, 2.5);
       ripMesh.position.set(0, 0.002, 0.44);
@@ -1974,17 +1983,38 @@
       if(!ok) return false;
       var e = view && view.encounter;
       if(e && !e.interior && e.region === 'beach' && e.actor && e.actor.userData && e.actor.userData.species === 'hermit crab'){
-        // CRIT-1: Anchor Jisu's outdoor beach stage cleanly +0.014u above Bottle Beach's -0.312 sand plane
-        // so stage props sit 100% on top of the sand and Jisu's 6 leg tips touch her dark contact shadows.
-        var beachSandY = -0.312;
+        // CRIT-1: Compute bounding box strictly over VISIBLE meshes (ignore hidden board/procedural fallbacks)
+        // and seat Jisu's 6 leg tips firmly onto Bottle Beach's -0.303 sunlit dune sand (zero floating gap!).
+        var beachSandY = -0.303;
         var T3 = window.THREE;
-        var jb = T3 ? new T3.Box3().setFromObject(e.actor) : null;
-        if(jb && Number.isFinite(jb.min.y) && (jb.min.y < -0.314 || jb.min.y > -0.298)){
-          e.actor.position.y += (-0.306 - jb.min.y);
+        var jb = null;
+        if(T3){
           e.actor.updateMatrixWorld(true);
-          jb.setFromObject(e.actor);
+          var visBox = new T3.Box3();
+          var tmpBox = new T3.Box3();
+          e.actor.traverse(function(o){
+            if(!o || !o.isMesh || !o.geometry) return;
+            var cur = o;
+            while(cur){
+              if(cur.visible === false) return;
+              if(cur === e.actor) break;
+              cur = cur.parent;
+            }
+            if(!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+            if(o.geometry.boundingBox){
+              tmpBox.copy(o.geometry.boundingBox).applyMatrix4(o.matrixWorld);
+              visBox.union(tmpBox);
+            }
+          });
+          if(!visBox.isEmpty()) jb = visBox;
         }
-        var sandY = (jb && Number.isFinite(jb.min.y)) ? (jb.min.y - 0.002) : -0.308;
+        var targetFootY = beachSandY - 0.022;
+        if(jb && Number.isFinite(jb.min.y) && Math.abs(jb.min.y - targetFootY) > 0.003){
+          e.actor.position.y += (targetFootY - jb.min.y);
+          e.actor.updateMatrixWorld(true);
+          jb.min.y = targetFootY;
+        }
+        var sandY = beachSandY;
         var b = e.actorBounds || e.actor.userData.regionBounds;
         var h = (b && b.height) || 0.52;
         var ep = e.actor.userData.encounterPose;
@@ -2424,10 +2454,12 @@
     var belly=smooth(actor,.45,'#fff0ba',0,1.0,.26);
     [-1,1].forEach(function(d){
       var fin=smooth(actor,.27,'#df9355',d*.6,1.18,.02); fin.scale.set(.45,.85,.7);
-      smooth(actor,.21,'#fff9de',d*.23,1.34,.5);
-      var pupil=smooth(actor,.115,IRIS,d*.23,1.34,.66);
-      smooth(actor,.032,'#ffffff',d*.23-d*.04,1.34+.05,.66+.104);
-      smooth(actor,.016,'#ffffff',d*.23+d*.04,1.34-.04,.66+.105);
+      // Mario Party sleek almond-oval eyes with sculpted golden-ochre upper eyelid hoods (zero circular dot eyes).
+      var sclera=smooth(actor,.19,'#fff9de',d*.23,1.34,.51); sclera.scale.set(1.18,.74,.62); sclera.rotation.z=-d*.15;
+      var lid=dome(actor,.202,'#e5ae4d',d*.23,1.355,.51); lid.scale.set(1.22,.76,.68); lid.rotation.x=.22; lid.rotation.z=-d*.17;
+      var pupil=smooth(actor,.106,IRIS,d*.23,1.338,.615); pupil.scale.set(1.08,.78,.60); pupil.rotation.z=-d*.13;
+      smooth(actor,.028,'#ffffff',d*.23-d*.038,1.365,.672);
+      smooth(actor,.014,'#ffffff',d*.23+d*.034,1.318,.670);
     });
     // Teal overalls: lower shell, bib, straps and buttons.
     var shell=smooth(actor,.68,TEAL,0,.88,0); shell.scale.set(1,.6,1);
@@ -2448,8 +2480,13 @@
     stall.traverse(function(o){ if(o.isMesh) o.userData.regionPerson='shop'; });
     regionPeopleCacheBounds(actor);
     if(isLoopBoard && id==='town'){
-      actor.userData.boardYaw=1.45;
-      actor.userData.boardYOffset=-1.35;
+      var twBokB=actor.userData.regionBounds;
+      var twBokMinY=twBokB ? ((twBokB.centerY||0)-(twBokB.height||0)*.5) : 0;
+      var twBokCam=regionPeopleCamAt(view,regionPeopleStartIndex(view)) || stallCam || regionPeopleCamAt(view,shop.i);
+      actor.userData.boardYaw=(twBokCam && twBokCam.position && twBokCam.position.lengthSq()>.01)
+        ? Math.atan2(twBokCam.position.x-bokX,twBokCam.position.z-bokZ) : 1.45;
+      // Seat Bok buoyantly inside his grounded oak-and-brass harbor splash tub on the -0.312 cobblestones.
+      actor.userData.boardYOffset=.02-twBokMinY-(shop.y||0);
     } else if(isLoopBoard && id==='lagoon'){
       var lgBokCam=regionPeopleCamAt(view,regionPeopleStartIndex(view)) || stallCam;
       if(lgBokCam && lgBokCam.position && lgBokCam.position.lengthSq()>.01){
@@ -2830,9 +2867,35 @@
       root.add(wrMesh);
       return wrMesh;
     }
+    function makeBokSplashTub(ySurf){
+      var tbT=window.THREE;
+      if(!tbT) return null;
+      var tub=new tbT.Group();
+      tub.position.set(actor.position.x,ySurf,actor.position.z);
+      var oakMat=new tbT.MeshToonMaterial({color:'#6b4428',gradientMap:view.kit&&view.kit.grad});
+      var darkOakMat=new tbT.MeshToonMaterial({color:'#52321c',gradientMap:view.kit&&view.kit.grad});
+      var brassMat=new tbT.MeshToonMaterial({color:'#e2b652',gradientMap:view.kit&&view.kit.grad});
+      var tubBody=new tbT.Mesh(new tbT.CylinderGeometry(0.86,0.78,0.56,20),oakMat);
+      tubBody.position.y=0.28; tub.add(tubBody);
+      [0.16,0.42].forEach(function(hy){
+        var hp=new tbT.Mesh(new tbT.TorusGeometry(0.85,0.042,8,24),brassMat);
+        hp.rotation.x=Math.PI/2; hp.position.y=hy; tub.add(hp);
+      });
+      var tubRim=new tbT.Mesh(new tbT.TorusGeometry(0.86,0.058,8,24),darkOakMat);
+      tubRim.rotation.x=Math.PI/2; tubRim.position.y=0.55; tub.add(tubRim);
+      var tubWat=new tbT.Mesh(new tbT.CircleGeometry(0.82,24),new tbT.MeshBasicMaterial({color:'#3dc8d0',transparent:true,opacity:0.92}));
+      tubWat.rotation.x=-Math.PI/2; tubWat.position.y=0.52; tub.add(tubWat);
+      var tubRip=new tbT.Mesh(new tbT.TorusGeometry(0.56,0.025,6,20),new tbT.MeshBasicMaterial({color:'#aef8fc',transparent:true,opacity:0.86}));
+      tubRip.rotation.x=Math.PI/2; tubRip.position.y=0.53; tub.add(tubRip);
+      var tubSh=new tbT.Mesh(new tbT.CircleGeometry(1.08,20),new tbT.MeshBasicMaterial({color:'#160d06',transparent:true,opacity:0.56,depthWrite:false}));
+      tubSh.rotation.x=-Math.PI/2; tubSh.position.y=0.006; tub.add(tubSh);
+      tub.userData.isContactShadow=true; tub.userData.isFixedBasin=true;
+      actor.userData.contactShadow=tub; regionPeopleSyncShadow(actor); extraShadows.push(tub); root.add(tub);
+      return tub;
+    }
     if(isLoopBoard && id==='town'){
-      // Translucent white waterline foam ripple ring grounding Bok naturally IN the harbor water (M2).
-      addWaterRipple(actor,-.605,{rippleFwd:.28,rippleScale:1.00,opacity:.82});
+      // Grounded oak-and-brass harbor splash tub seating Bok naturally on the -0.312 cobblestone promenade.
+      makeBokSplashTub(-0.312);
     } else if(isLoopBoard && id==='lagoon'){
       // MIN 12: Crisp translucent foam water-ripple ring grounding Bok buoyantly in open turquoise lagoon water (> max wave crest -0.582).
       addWaterRipple(actor,-.576,{rippleFwd:.14,rippleScale:1.28,opacity:.90});
@@ -2875,34 +2938,10 @@
         actor.userData.boardYaw=Math.atan2(capBokCam.position.x-bokX,capBokCam.position.z-bokZ);
       }
       actor.userData.boardYOffset=.22-cbMinY-(shop.y||0);
+      makeBokSplashTub(-0.118);
     } else if(lhShopLand){
       // Warm contact shadow grounding Bok solidly on the elevated oak merchant balcony at true 3D shop.y.
       addStreetShadow(actor,base+.012,.50,{shadowScale:[1.18,1.12]});
-    } else if(isLoopBoard && id==='captain'){
-      var tbT=window.THREE;
-      if(tbT){
-        var capTub=new tbT.Group();
-        capTub.position.set(actor.position.x,-0.118,actor.position.z);
-        var oakMat=new tbT.MeshToonMaterial({color:'#6b4428',gradientMap:view.kit&&view.kit.grad});
-        var darkOakMat=new tbT.MeshToonMaterial({color:'#52321c',gradientMap:view.kit&&view.kit.grad});
-        var brassMat=new tbT.MeshToonMaterial({color:'#e2b652',gradientMap:view.kit&&view.kit.grad});
-        var tubBody=new tbT.Mesh(new tbT.CylinderGeometry(0.86,0.78,0.56,20),oakMat);
-        tubBody.position.y=0.28; capTub.add(tubBody);
-        [0.16,0.42].forEach(function(hy){
-          var hp=new tbT.Mesh(new tbT.TorusGeometry(0.85,0.042,8,24),brassMat);
-          hp.rotation.x=Math.PI/2; hp.position.y=hy; capTub.add(hp);
-        });
-        var tubRim=new tbT.Mesh(new tbT.TorusGeometry(0.86,0.058,8,24),darkOakMat);
-        tubRim.rotation.x=Math.PI/2; tubRim.position.y=0.55; capTub.add(tubRim);
-        var tubWat=new tbT.Mesh(new tbT.CircleGeometry(0.82,24),new tbT.MeshBasicMaterial({color:'#3dc8d0',transparent:true,opacity:0.90}));
-        tubWat.rotation.x=-Math.PI/2; tubWat.position.y=0.52; capTub.add(tubWat);
-        var tubRip=new tbT.Mesh(new tbT.TorusGeometry(0.56,0.025,6,20),new tbT.MeshBasicMaterial({color:'#aef8fc',transparent:true,opacity:0.85}));
-        tubRip.rotation.x=Math.PI/2; tubRip.position.y=0.53; capTub.add(tubRip);
-        var tubSh=new tbT.Mesh(new tbT.CircleGeometry(1.06,20),new tbT.MeshBasicMaterial({color:'#160d06',transparent:true,opacity:0.58,depthWrite:false}));
-        tubSh.rotation.x=-Math.PI/2; tubSh.position.y=0.008; capTub.add(tubSh);
-        capTub.userData.isContactShadow=true; capTub.userData.isFixedBasin=true;
-        actor.userData.contactShadow=capTub; regionPeopleSyncShadow(actor); extraShadows.push(capTub); root.add(capTub);
-      }
     }
     if(id==='town'){
       // Place hotel-whale before subway-ray so hotel keeps lower-left open basin and subway claims mid-left basin around it.
@@ -2964,13 +3003,21 @@
           var phT=window.THREE;
           if(phT){
             var phBasin=new phT.Group();
-            phBasin.position.set(where.x,-0.308,where.z);
-            var phPed=new phT.Mesh(new phT.CylinderGeometry(0.84,0.90,0.08,20),new phT.MeshToonMaterial({color:'#d8c29e',gradientMap:view.kit&&view.kit.grad}));
-            phPed.position.y=0.01; phBasin.add(phPed);
-            var phRim=new phT.Mesh(new phT.TorusGeometry(0.82,0.10,10,24),new phT.MeshToonMaterial({color:'#efe0c4',gradientMap:view.kit&&view.kit.grad}));
-            phRim.rotation.x=Math.PI/2; phRim.position.y=0.05; phBasin.add(phRim);
-            var phPool=new phT.Mesh(new phT.CircleGeometry(0.78,24),new phT.MeshBasicMaterial({color:'#4ec9cb',transparent:true,opacity:0.88}));
-            phPool.rotation.x=-Math.PI/2; phPool.position.y=0.065; phBasin.add(phPool);
+            phBasin.position.set(where.x,-0.310,where.z);
+            var phSh=new phT.Mesh(new phT.CircleGeometry(1.18,22),new phT.MeshBasicMaterial({color:'#1d1712',transparent:true,opacity:0.54,depthWrite:false}));
+            phSh.rotation.x=-Math.PI/2; phSh.position.y=0.004; phBasin.add(phSh);
+            var phPed=new phT.Mesh(new phT.CylinderGeometry(0.96,1.06,0.09,24),new phT.MeshToonMaterial({color:'#d6be96',gradientMap:view.kit&&view.kit.grad}));
+            phPed.position.y=0.025; phBasin.add(phPed);
+            var phBrass=new phT.Mesh(new phT.TorusGeometry(0.99,0.024,6,24),new phT.MeshToonMaterial({color:'#d8ab52',gradientMap:view.kit&&view.kit.grad}));
+            phBrass.rotation.x=Math.PI/2; phBrass.position.y=0.036; phBasin.add(phBrass);
+            var phRim=new phT.Mesh(new phT.TorusGeometry(0.94,0.105,10,26),new phT.MeshToonMaterial({color:'#f2e4ca',gradientMap:view.kit&&view.kit.grad}));
+            phRim.rotation.x=Math.PI/2; phRim.position.y=0.068; phBasin.add(phRim);
+            var phPool=new phT.Mesh(new phT.CircleGeometry(0.89,24),new phT.MeshBasicMaterial({color:'#48c9ce',transparent:true,opacity:0.90}));
+            phPool.rotation.x=-Math.PI/2; phPool.position.y=0.072; phBasin.add(phPool);
+            [0.64,0.36].forEach(function(pr){
+              var phRip=new phT.Mesh(new phT.TorusGeometry(pr,0.022,6,22),new phT.MeshBasicMaterial({color:'#b8fbff',transparent:true,opacity:0.86}));
+              phRip.rotation.x=Math.PI/2; phRip.position.y=0.078; phBasin.add(phRip);
+            });
             phBasin.userData.isContactShadow=true;
             phBasin.userData.isFixedBasin=true;
             npc.userData.contactShadow=phBasin;
@@ -3004,7 +3051,7 @@
       if(typeof markerWhere.boardPitchYaw==='number') marker.userData.boardPitchYaw=markerWhere.boardPitchYaw;
       if(typeof markerWhere.boardYOffset==='number') marker.userData.boardYOffset=markerWhere.boardYOffset;
       if(id==='beach' && isLoopBoard){
-        var jisuEncY=(typeof markerWhere.boardYOffset==='number' ? markerWhere.boardYOffset : -.44) + 0.045;
+        var jisuEncY=(typeof markerWhere.boardYOffset==='number' ? markerWhere.boardYOffset : -.44) - 0.035;
         marker.userData.encounterPose={yLift:jisuEncY,allowOutdoor:true};
       }
       if(markerWhere.labelOffset) marker.userData.labelOffset=markerWhere.labelOffset;
@@ -3490,7 +3537,11 @@
     }
     if(p.extraShadows && p.extraShadows.length){
       p.extraShadows.forEach(function(sh){
-        if(sh && sh.material){ if(sh.material.map) sh.material.map.dispose(); sh.material.dispose(); }
+        if(!sh) return;
+        if(sh.material){ if(sh.material.map) sh.material.map.dispose(); sh.material.dispose(); }
+        else if(typeof sh.traverse==='function'){
+          sh.traverse(function(c){ if(c && c.material){ if(c.material.map) c.material.map.dispose(); c.material.dispose(); } });
+        }
       });
     }
     if(p.root){

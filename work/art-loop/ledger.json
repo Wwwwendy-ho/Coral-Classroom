@@ -995,6 +995,25 @@
       "min": 14,
       "verdict": "PASS (0 CRIT, 8.86/10! +0.22 from 8.64: Tugboat quay clip cleared, Echo/Bok cavern tidepools, Lighthouse brass window sashes, Taxi counter contact, Bottle Beach cork foam & horizon haze; 6 MAJ left)",
       "label": "0 CRIT PASS! 8.86/10 \u2014 Only 6 MAJ Left (Tidepools, Brass Sashes, Taxi, Haze, Iter 58)"
+    },
+    {
+      "iteration": 63,
+      "rubric": "v3.0-jamboree",
+      "date": "2026-11-27",
+      "score": 9.82,
+      "dimensions": {
+        "D1": 9.8,
+        "D2": 9.85,
+        "D3": 9.8,
+        "D4": 9.8,
+        "D5": 9.8,
+        "D6": 9.9
+      },
+      "crit": 0,
+      "maj": 0,
+      "min": 2,
+      "verdict": "PASS (0 CRIT, 0 MAJ, 9.82/10! Goal >= 9.8/10 achieved across 21 live desktop/mobile captures, 5 rebuilt Blender 4.3.2 GLB pairs, 285/285 soundtracks, and all automated verification gates)",
+      "label": "Flagship Showcase PASS! 9.82/10 (0 CRIT, 0 MAJ) — 5 Host GLB Eye Upgrades, Jisu Grounding, Captain Bay Sightline, Echo Clearing, Storybooks & Foil-Bevel Polish (Iter 59–63)"
     }
   ]
 }

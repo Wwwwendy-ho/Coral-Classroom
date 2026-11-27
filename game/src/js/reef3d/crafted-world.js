@@ -188,26 +188,34 @@ var ReefCraftedWorld = (function(){
     var deep = new T.Color('#106b96'), channel = new T.Color('#198fb8'), bank = new T.Color('#3cc7cd');
     var light = new T.Color('#8be6d5'), sandbar = new T.Color('#e6dfb8'), color = new T.Color();
     var fog = new T.Color(FOG), halfW = geometry.parameters.width/2, halfL = geometry.parameters.height/2;
-    var fadeWidth = Math.min(halfW, halfL)*.13;
+    var fadeWidth = Math.min(halfW, halfL)*.28;
     for(var i = 0; i < p.count; i++){
       var localX = p.getX(i), localY = p.getY(i), x = localX + floorX, z = floorZ - localY;
       var shore = 1 - distance(x,z);
       var wash = .5 + .5 * Math.sin(x*.37 + z*.24 + .7*Math.sin(z*.36 - x*.14));
       var caustic = Math.pow(wash,5) * (.55 + .45 * Math.cos(z*.39 - x*.23));
       var pool = .5 + .5 * Math.cos(x*.13 - z*.18 + Math.sin(x*.17)*.76);
+      // Current-sculpted seabed sand-ripple crests + shallow reef-limestone strata contours (01-coral-cove terrain detail).
+      var ripPhase = x * .92 + z * .68 + Math.sin(x * .22 - z * .28) * 1.35;
+      var sandRipple = Math.pow(.5 + .5 * Math.sin(ripPhase), 1.8) - .42;
+      var strataContour = Math.sin(Math.hypot(x * .42, z * .42) * 3.1 + Math.sin(x * .16 + z * .19) * 1.1);
+      var strataBand = Math.max(0, strataContour) * .55;
       // Warm shallow turquoise sandbar rings in the mid-ground & deeper outer-channel contrast.
       var radial = Math.hypot(localX / Math.max(1, halfW), localY / Math.max(1, halfL));
       var ringWave = Math.sin(radial * 11.5 + Math.sin(x * .09 - z * .08) * 1.4);
       var sandRing = Math.max(0, ringWave) * Math.max(0, 1 - Math.abs(radial - .56) * 2.8) * (1 - shore);
       var outerDeep = Math.max(0, Math.min(1, (radial - .42) / .48)) * (1 - shore);
       color.copy(channel).lerp(deep, .58 * outerDeep * (1 - .45 * pool));
-      color.lerp(bank, .22 + .42 * shore + .28 * pool * (1 - .35 * outerDeep));
-      color.lerp(sandbar, .34 * sandRing + .12 * shore * pool);
-      color.lerp(light, .22 * caustic + .07 * wash);
-      // Blend the outermost rim smoothly into the horizon water fog.
+      color.lerp(bank, .22 + .42 * shore + .28 * pool * (1 - .35 * outerDeep) + .06 * strataBand * (1 - outerDeep * .5));
+      color.lerp(sandbar, .34 * sandRing + .14 * shore * pool + Math.max(0, sandRipple) * (.13 * shore + .09 * sandRing));
+      color.lerp(light, .22 * caustic + .08 * wash + Math.max(0, sandRipple) * .055);
+      if(sandRipple < 0) color.lerp(deep, -sandRipple * (.14 * shore + .08));
+      // Blend both the outer rectangle rim and far radial horizon smoothly into the sunlit horizon haze (zero tilted sea corner!).
       var edge = Math.min(halfW-Math.abs(localX),halfL-Math.abs(localY));
       var k = Math.max(0,Math.min(1,edge/fadeWidth));
-      color.lerp(fog,1-k*k*(3-2*k));
+      var radFade = Math.max(0,Math.min(1,(radial-.68)/.28));
+      var fogMix = Math.max(1-k*k*(3-2*k), radFade*radFade*(3-2*radFade));
+      color.lerp(fog,fogMix);
       var b = i * 3; rgb[b] = color.r; rgb[b+1] = color.g; rgb[b+2] = color.b;
     }
     geometry.setAttribute('color',new T.BufferAttribute(rgb,3));
@@ -790,13 +798,13 @@ var ReefCraftedWorld = (function(){
           sfCol.copy(sfBase).lerp(sfTip, v * .58 * arm);
           return [Math.cos(a) * rad, yy, Math.sin(a) * rad, sfCol];
         }, cluster, true);
-        sf.position.set(-.10 * size, .09, .62 * size);
+        sf.position.set(-.24 * size, .095, .66 * size);
         sf.rotation.y = seed * 1.3;
         tagSurface(sf, 'coral', .65, seed + 17);
         for(var pb=0;pb<2;pb++){
           var pg = new T.SphereGeometry(1, 10, 7);
-          pg.scale(size*(.14 - pb*.03), size*(.07 - pb*.012), size*(.12 - pb*.02));
-          var pm = mesh(sculpt(pg, pb ? '#e8cfa6' : '#8fd2d8', true), painted, (.48 + pb*.18)*size, .09, (.52 - pb*.12)*size, cluster);
+          pg.scale(size*(.13 - pb*.025), size*(.068 - pb*.012), size*(.11 - pb*.02));
+          var pm = mesh(sculpt(pg, pb ? '#e8cfa6' : '#8fd2d8', true), painted, (.44 + pb*.24)*size, .088, (.58 - pb*.14)*size, cluster);
           pm.rotation.y = seed + pb * 1.4;
           tagSurface(pm, 'stone', .8, seed + pb + 21);
         }

@@ -835,18 +835,22 @@
         add(cyl(.11,.18,1.45,10),'#6f503a',0,.72,0,0,0,0,'timber');
         limb(0,1.05,0,.7,.8,0,.55,.08,.05,'#6f503a','timber');
         limb(0,1.15,0,-Math.cos(.6)*.65,.85,-Math.sin(.6)*.65,.52,.075,.045,'#6f503a','timber');
-        var lowerRing=[[0,.48,0,1.42,.64,.72,cDeep],[2.1,.44,1,1.52,.60,.74,cMid],[4.2,.46,2,1.46,.62,.72,cDeep],[1.05,.38,3,1.68,.56,.78,cMid]];
+        var lowerRing=[[0,.52,1.40,.64,.72,cDeep],[2.1,.48,1.50,.60,.74,cMid],[4.2,.50,1.44,.62,.72,cDeep],[1.05,.42,1.66,.56,.78,cMid],[3.15,.44,1.60,.52,.76,cDeep],[5.25,.42,1.58,.50,.76,cMid]];
         lowerRing.forEach(function(b){
-          var sp=smoothOrb(b[4],b[6],Math.cos(b[0])*b[1],b[3],Math.sin(b[0])*b[1],false);
-          sp.scale.set(1.12,b[5],1.08);
+          var sp=smoothOrb(b[3],b[5],Math.cos(b[0])*b[1],b[2],Math.sin(b[0])*b[1],false);
+          sp.scale.set(1.14,b[4],1.08);
         });
-        var midRing=[[0.5,.36,2.08,.62,cLush],[2.65,.34,2.14,.58,cMid],[4.7,.32,2.02,.56,cLush]];
+        var midRing=[[0.5,.38,2.06,.60,cLush],[2.65,.36,2.14,.56,cMid],[4.7,.34,2.02,.55,cLush],[1.6,.34,2.24,.46,cSun],[3.7,.32,2.18,.44,cLush]];
         midRing.forEach(function(b){
           var sp=smoothOrb(b[3],b[4],Math.cos(b[0])*b[1],b[2],Math.sin(b[0])*b[1],false);
-          sp.scale.set(1.08,.86,1.06);
+          sp.scale.set(1.10,.84,1.06);
         });
         var top1=smoothOrb(.52,cSun,Math.cos(.9)*.18,2.56,Math.sin(.9)*.18,false); top1.scale.set(1.12,.82,1.08);
         var top2=smoothOrb(.40,cCrown,-Math.cos(.4)*.16,2.86,-Math.sin(.4)*.16,false); top2.scale.set(1.10,.78,1.06);
+        var top3=smoothOrb(.28,cCrown,Math.cos(2.3)*.22,2.74,Math.sin(2.3)*.22,false); top3.scale.set(1.08,.76,1.06);
+        [[.46,1.76,.34,'#ffd87a'],[-.42,2.18,.28,'#ff94a2'],[.16,2.62,-.32,'#fff3c4']].forEach(function(bl){
+          smoothOrb(.095,bl[3],bl[0],bl[1],bl[2],false);
+        });
       });
     }
     function palmFrondGeo(){
@@ -1782,6 +1786,69 @@
       tex.wrapS=T.RepeatWrapping; tex.wrapT=T.RepeatWrapping; tex.anisotropy=4;
       return tex;
     }
+    function makeCaveStrataTex(){
+      var S=512, p=makeProcCanvas(S); if(!p) return null;
+      var ctx=p.ctx;
+      // Luminous slate-blue subterranean limestone base (matches Echo Caves palette, zero dark mud)
+      ctx.fillStyle='#84a0b4'; ctx.fillRect(0,0,S,S);
+      // 1. Soft mineral pool & slate-indigo mottling
+      var patches=[
+        ['rgba(154,190,210,0.28)','rgba(154,190,210,0.0)'],
+        ['rgba(78,112,138,0.26)','rgba(78,112,138,0.0)'],
+        ['rgba(104,178,194,0.22)','rgba(104,178,194,0.0)'],
+        ['rgba(136,142,188,0.20)','rgba(136,142,188,0.0)']
+      ];
+      for(var i=0;i<24;i++){
+        var px=procHash(i,111)*S, py=procHash(i,112)*S, pr=46+procHash(i,113)*76, pc=patches[i%patches.length];
+        wrapTileDraw(S,px,py,pr+4,function(wx,wy){
+          var g=ctx.createRadialGradient(wx,wy,pr*.08,wx,wy,pr);
+          g.addColorStop(0,pc[0]); g.addColorStop(1,pc[1]);
+          ctx.fillStyle=g; ctx.beginPath(); ctx.arc(wx,wy,pr,0,Math.PI*2); ctx.fill();
+        });
+      }
+      // 2. Layered sedimentary limestone mineral strata contours & tidepool ripple bands
+      ctx.lineCap='round';
+      for(var row=0;row<14;row++){
+        var baseY=(row+.5)*(S/14);
+        for(var pass=0;pass<2;pass++){
+          ctx.strokeStyle=pass===0?'rgba(56,82,106,0.28)':'rgba(176,220,232,0.30)';
+          ctx.lineWidth=pass===0?9.5:5.5;
+          var yOff=pass===0?3.8:0;
+          ctx.beginPath();
+          for(var x=0;x<=S;x+=16){
+            var ang=x*Math.PI*2/S;
+            var y=baseY+yOff+Math.sin(ang*2+row*1.25)*10+Math.cos(ang*3-row*.85)*4.5;
+            if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+          }
+          ctx.stroke();
+        }
+      }
+      // 3. Delicate turquoise-amethyst bioluminescent mineral hairline veins
+      for(var vi=0;vi<10;vi++){
+        var vy=procHash(vi,121)*S;
+        ctx.strokeStyle=vi%2?'rgba(126,244,238,0.22)':'rgba(196,174,250,0.20)';
+        ctx.lineWidth=2.4;
+        ctx.beginPath();
+        for(var vx=0;vx<=S;vx+=16){
+          var va=vx*Math.PI*2/S;
+          var yy=vy+Math.sin(va*2+vi*1.7)*14+Math.cos(va-vi)*6;
+          if(vx===0) ctx.moveTo(vx,yy); else ctx.lineTo(vx,yy);
+        }
+        ctx.stroke();
+      }
+      // 4. Speckled cavern quartz grit & smooth flat mineral pebble flecks
+      var grit=['rgba(210,238,244,0.48)','rgba(186,178,228,0.42)','rgba(64,88,112,0.46)','rgba(130,224,228,0.44)'];
+      for(var gi=0;gi<360;gi++){
+        var gx=procHash(gi,131)*S, gy=procHash(gi,132)*S, gr=1.3+procHash(gi,133)*2.6;
+        ctx.fillStyle=grit[gi%grit.length];
+        wrapTileDraw(S,gx,gy,gr+2,function(wx,wy){
+          ctx.beginPath(); ctx.arc(wx,wy,gr,0,Math.PI*2); ctx.fill();
+        });
+      }
+      var tex=new T.CanvasTexture(p.cv);
+      tex.wrapS=T.RepeatWrapping; tex.wrapT=T.RepeatWrapping; tex.anisotropy=4;
+      return tex;
+    }
     function makeHarborCurbTex(){
       var S=256, p=makeProcCanvas(S); if(!p) return null;
       var ctx=p.ctx;
@@ -2227,7 +2294,7 @@
         return;
       }
       var geo=own(new T.BufferGeometry());geo.setAttribute('position',new T.Float32BufferAttribute(pos,3));geo.setAttribute('color',new T.Float32BufferAttribute(colors,3));geo.setIndex(idx);geo.computeVertexNormals();
-      var patFloorTex=id==='patterns' ? makeSeabedGroundTex() : null, patFloorMat=null, patScale=6.4;
+      var patFloorTex=id==='patterns' ? makeSeabedGroundTex() : id==='caves' ? makeCaveStrataTex() : null, patFloorMat=null, patScale=id==='caves'?7.2:6.4;
       if(patFloorTex){
         var gUvs=[];
         for(var gi2=0;gi2<pos.length;gi2+=3) gUvs.push(pos[gi2]/patScale,pos[gi2+2]/patScale);
@@ -2263,7 +2330,25 @@
       }
       // Curved water-level surf foam collars for beach, caves & patterns (replaces straight rigid shoreline bar blocks!)
       if(id==='beach'){
-        var smBeachOut=catmullLoop(outer,3), smBeachIn=catmullLoop(inner,3);
+        var smBeachOut=catmullLoop(outer,4), smBeachIn=catmullLoop(inner,4);
+        // Soft, ultra-low-contrast sunlit coastal sand dune warmth along the smooth beach promenade (zero zig-zag stripes, pureAtlas opaque!)
+        var duneCrown=[], shoreWarm=[], bn=smBeachOut.length;
+        for(var bi2=0;bi2<bn;bi2++){
+          var bni=(bi2+1)%bn;
+          var in0=smBeachIn[bi2], in1=smBeachIn[bni], out0=smBeachOut[bi2], out1=smBeachOut[bni];
+          function bLerp(a,b,t){ return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t]; }
+          // Gentle sunlit inner dune warmth (t = 0.24..0.68) with soft organic vertex shading
+          var p0=bLerp(in0,out0,.24), p1=bLerp(in1,out1,.24);
+          var q0=bLerp(in0,out0,.68), q1=bLerp(in1,out1,.68);
+          var sh0=.985+.018*Math.sin(bi2*.28), sh1=.985+.018*Math.sin(bni*.28);
+          duneCrown.push([[p0[0],p0[1],sh0],[q0[0],q0[1],sh0*.985],[q1[0],q1[1],sh1*.985],[p1[0],p1[1],sh1]]);
+          // Soft warm damp-sand shore collar blending naturally toward the surf foam
+          var stA0=bLerp(in0,out0,.87), stA1=bLerp(in1,out1,.87);
+          var stB0=bLerp(in0,out0,.96), stB1=bLerp(in1,out1,.96);
+          shoreWarm.push([[stA0[0],stA0[1],.98],[stB0[0],stB0[1],.93],[stB1[0],stB1[1],.93],[stA1[0],stA1[1],.98]]);
+        }
+        painted(duneCrown,deckY+.008,'#f3dfb1','beach-sand-ripples');
+        painted(shoreWarm,deckY+.010,'#e7cd98','beach-sand-strata');
         curvedSurfFoam(smBeachOut,true,waterY+.062,.74,1.32,'#eefcfd','#aceef2','beach-shore-foam');
         curvedSurfFoam(smBeachOut,true,waterY+.055,1.44,1.76,'#c2f4f7',null,'beach-shore-foam');
         curvedSurfFoam(smBeachIn,false,waterY+.062,.64,1.14,'#eefcfd','#aceef2','beach-shore-foam');
@@ -3239,6 +3324,41 @@
           });
         });
       }
+      // Soft curved sunlit ripple rings across the Harbor Town basin (pureAtlas opaque, zero hard straight bars!)
+      (function addHarborBasinRipples(){
+        var ripTris = [], glintTris = [];
+        var spots = [
+          [cx - 1.4, cz + 1.8, 1.55, 1.05], [cx + 2.8, cz - 2.2, 1.35, .92],
+          [cx - 4.2, cz - 1.6, 1.25, .86], [cx + 0.6, cz + 4.4, 1.40, .96],
+          [cx - 2.4, cz - 4.6, 1.30, .88], [cx + 4.4, cz + 1.4, 1.20, .82]
+        ];
+        spots.forEach(function(sp3, si){
+          if(!inBasin(sp3[0], sp3[1], 5.0)) return;
+          var segs = 16, rIn = sp3[2] - .09, rOut = sp3[2], zSc = sp3[3] / sp3[2];
+          for(var k = 0; k < segs; k++){
+            var a0 = k * Math.PI * 2 / segs, a1 = (k + 1) * Math.PI * 2 / segs;
+            var p0 = [sp3[0] + Math.cos(a0) * rIn,  sp3[1] + Math.sin(a0) * rIn * zSc, .98];
+            var p1 = [sp3[0] + Math.cos(a0) * rOut, sp3[1] + Math.sin(a0) * rOut * zSc, 1.0];
+            var p2 = [sp3[0] + Math.cos(a1) * rOut, sp3[1] + Math.sin(a1) * rOut * zSc, 1.0];
+            var p3 = [sp3[0] + Math.cos(a1) * rIn,  sp3[1] + Math.sin(a1) * rIn * zSc, .98];
+            ripTris.push([p0, p1, p2, p3]);
+          }
+          if(si % 2 === 0){
+            var gIn = sp3[2] * .52, gOut = gIn + .06;
+            for(var k2 = 0; k2 < 12; k2++){
+              var b0 = k2 * Math.PI * 2 / 12, b1 = (k2 + 1) * Math.PI * 2 / 12;
+              glintTris.push([
+                [sp3[0] + Math.cos(b0) * gIn,  sp3[1] + Math.sin(b0) * gIn * zSc, 1],
+                [sp3[0] + Math.cos(b0) * gOut, sp3[1] + Math.sin(b0) * gOut * zSc, 1],
+                [sp3[0] + Math.cos(b1) * gOut, sp3[1] + Math.sin(b1) * gOut * zSc, 1],
+                [sp3[0] + Math.cos(b1) * gIn,  sp3[1] + Math.sin(b1) * gIn * zSc, 1]
+              ]);
+            }
+          }
+        });
+        if(ripTris.length) painted(ripTris, waterY + .040, '#6ad7e4', 'harbor-water-ripple');
+        if(glintTris.length) painted(glintTris, waterY + .045, '#9cecf4', 'harbor-water-glint');
+      })();
       // Camera-space fallback ring around the ferry so all 3 boats land cleanly in open basin water
       if(mooredCount<3){
         var camF=camFw, scan=[];
@@ -3800,18 +3920,20 @@
       function lagoonLotusBush(bx,by,bz,petalCol,seed){
         var ang0=(seed||0)*1.37, pc=petalCol||'#f393b6';
         emitCached('lagLotusBush:' + pc, bx, by, bz, ang0, 1, function(){
-          var b1=smoothOrb(.38,'#3a8c5d',0,.10,0,false); b1.scale.set(1.16,.62,1.10);
-          var b2=smoothOrb(.28,'#4fa56b',.24,.14,0,false); b2.scale.set(1.10,.64,1.06);
-          var b3=smoothOrb(.24,'#63bb76',-.20,.16,-.12,false); b3.scale.set(1.08,.60,1.08);
+          var b0=smoothOrb(.36,'#2a764c',-.16,.07,.16,false); b0.scale.set(1.18,.58,1.12);
+          var b1=smoothOrb(.38,'#3a8c5d',0,.11,0,false); b1.scale.set(1.16,.64,1.10);
+          var b2=smoothOrb(.30,'#4fa56b',.25,.15,-.04,false); b2.scale.set(1.12,.66,1.06);
+          var b3=smoothOrb(.26,'#63bb76',-.20,.18,-.14,false); b3.scale.set(1.10,.62,1.08);
+          var b4=smoothOrb(.21,'#84d672',.06,.24,.10,false); b4.scale.set(1.12,.60,1.08);
           var bPetGeo=lotusPetalGeo();
-          for(var lf=0;lf<5;lf++){
-            var la=lf*Math.PI*2/5;
-            var leaf=add(bPetGeo,lf%2?'#368558':'#54ad6d',Math.cos(la)*.20,.08,Math.sin(la)*.20,0,0,0,false);
+          for(var lf=0;lf<6;lf++){
+            var la=lf*Math.PI*2/6;
+            var leaf=add(bPetGeo,lf%2?'#368558':'#54ad6d',Math.cos(la)*.22,.09,Math.sin(la)*.22,0,0,0,false);
             leaf.rotation.order='YXZ'; leaf.rotation.y=Math.PI*0.5-la; leaf.rotation.x=0.98;
             leaf.scale.set(0.46,0.52,0.52);
           }
-          [[0,.30,0,.64],[.25,.26,0,.50]].forEach(function(sp2,bi){
-            sculptedLotusBlossom(sp2[0],sp2[1],sp2[2],sp2[3],pc,'#fff0d6',bi);
+          [[0,.32,0,.66],[.26,.27,-.02,.52],[-.18,.28,-.14,.46]].forEach(function(sp2,bi){
+            sculptedLotusBlossom(sp2[0],sp2[1],sp2[2],sp2[3],bi===2?'#ffe684':pc,'#fff0d6',bi);
           });
         });
       }
@@ -4055,7 +4177,33 @@
           addObstacle(best.c.x,best.c.z,1.85);
           booksPlaced++;
         });
-        // Additional storybooks around cam@0 and the rest of the lagoon loop
+        // Dedicated cam@0 opening-view hero storybooks so initial Story Lagoon entry showcases open floating books!
+        var lagCam0Rig=realCamSetupAt(0);
+        var cands0=[];
+        for(var wx0=bounds.minX-12;wx0<=bounds.maxX+14;wx0+=1.05) for(var wz0=bounds.minZ-14;wz0<=bounds.maxZ+14;wz0+=1.05){
+          if(!outerClear(wx0,wz0,3.6) || nearLagoonDock(wx0,wz0,2.0) || !clearOfLagoonCast(wx0,wz0,true) || !clearOfLagoonHeroCast(wx0,wz0,3.2)) continue;
+          if(lagHills.some(function(h){ return Math.hypot(h[0]-wx0,h[1]-wz0)<3.6; })) continue;
+          var nd0=realCamNDCAt(0,wx0,waterY+0.42,wz0);
+          if(nd0.z>1 || nd0.x<-.78 || nd0.x>.78 || nd0.y<-.52 || nd0.y>.52) continue;
+          cands0.push({x:wx0,z:wz0,nd:nd0});
+        }
+        [[-.36,.12,1.42],[.46,-.14,1.36]].forEach(function(tg0,bi0){
+          var best0=null;
+          cands0.forEach(function(c){
+            if(bookSpots.some(function(q){ return Math.hypot(q[0]-c.x,q[1]-c.z)<4.2; })) return;
+            var sc0=Math.hypot(c.nd.x-tg0[0],c.nd.y-tg0[1]);
+            if(!best0 || sc0<best0.sc) best0={c:c,sc:sc0};
+          });
+          if(!best0) return;
+          bookSpots.push([best0.c.x,best0.c.z]);
+          lagBookPositions.push([best0.c.x,best0.c.z]);
+          lagClaims.push([best0.c.x,best0.c.z]);
+          var faceCam0=Math.atan2(lagCam0Rig.cam.position.x-best0.c.x, lagCam0Rig.cam.position.z-best0.c.z)+((bi0%2)?0.24:-0.24);
+          giantFloatingStorybook(best0.c.x,best0.c.z,faceCam0,tg0[2],bookCols[(booksPlaced+bi0)%bookCols.length],booksPlaced);
+          addObstacle(best0.c.x,best0.c.z,1.85);
+          booksPlaced++;
+        });
+        // Additional storybooks around the rest of the lagoon loop
         for(var si=0;si<main.length && booksPlaced<8;si+=6){
           var bs=main[si], bf=frame(bs);
           placed(bs,si%2?1:-1,7.4,0,function(bx,by,bz){
@@ -4557,7 +4705,7 @@
       }
       view._echoPool = { x: echoPoolX, z: echoPoolZ };
       function nearEcho(x,z,dist){
-        if(Math.hypot(x-echoPoolX,z-echoPoolZ)<3.45) return true;
+        if(Math.hypot(x-echoPoolX,z-echoPoolZ)<4.55) return true;
         if(Math.hypot(x-(-1.0),z-(-1.5))<2.85) return true;
         return !!(echoDeck && Math.hypot(x-echoDeck.x,z-echoDeck.z)<(dist||5.6));
       }
@@ -4786,6 +4934,9 @@
         addObstacle(x,z,.8);
       }
       function mushrooms(x,y,z,i){
+        // Keep Echo's opening cam@0 center-left hero clearing mushroom-free so Echo's tail & basin read cleanly!
+        var ndE0 = main.length ? camNDCAt(0, x, y, z) : null;
+        if(ndE0 && ndE0.z <= 1 && ndE0.x >= -0.74 && ndE0.x <= -0.16 && ndE0.y >= -0.26 && ndE0.y <= 0.24) return;
         var v=Math.abs(i|0)%4;
         emitCached('caveMush:' + v, x, y, z, (i||0)*.6, 1, function(){
           var caps=['#6ef7dc','#cfaaff','#ffa8d8','#8ee4ff'];
@@ -5397,7 +5548,7 @@
       }
       // Outer rim clusters: cut generic smooth dark boulders by 50%, replacing with stepped mineral spires & crystalline clusters!
       for(var i=2;i<main.length;i+=4) placed(main[i],1,7.8,0,function(x,y,z){
-        if(!caveClaim(x,z,3.2,4.4)) return;
+        if(!caveClaim(x,z,3.2,4.4) || nearEcho(x,z,4.8) || nearEchoHeadBackdrop(x,z)) return;
         if(i%8===2){
           mineralSpire(x,y,z,1.18,i%16===2?'#7ef8f0':'#c8abff');
         }else{
@@ -5406,13 +5557,13 @@
       });
       main.forEach(function(s,i){ if(i%2!==1) return; var sd=pathSide(s,i);
         placed(s,sd,4.6,0,function(x,y,z){
-          if(!caveClaim(x,z,2.4,3.9) || nearEcho(x,z,4.2)) return;
+          if(!caveClaim(x,z,2.4,3.9) || nearEcho(x,z,4.8) || nearEchoHeadBackdrop(x,z)) return;
           var cCol=i%3===0?'#6ef6cc':i%2?'#7ef0f5':'#c4abff';
           crystal(x,y,z,1.2,cCol); crystal(x+.82,y,z+.52,.68,'#d6fcff');
           addObstacle(x,z,.95);
         });
         placed(s,-sd,5.2,-1,function(x,y,z){
-          if(!caveClaim(x,z,2.4,4.0) || nearEcho(x,z,4.8)) return;
+          if(!caveClaim(x,z,2.4,4.0) || nearEcho(x,z,4.8) || nearEchoHeadBackdrop(x,z)) return;
           if(nearCavesBok(x,z,1.95)) return;
           if(i%6===1){
             // M5: Replace flat dark grey disc with a layered faceted slate-indigo amethyst/aqua crystal outcrop + pastel mushroom accent
@@ -5443,7 +5594,7 @@
       for(var ci=0;ci<main.length;ci++){
         var cs=main[ci], cf=frame(cs), csd=ci%2?1:-1, ck=ci%3;
         placed(cs,csd,9.2+(ci%2)*.9,0,function(wx,wy,wz){
-          if(!caveClaim(wx,wz,4.6,4.8)) return;
+          if(!caveClaim(wx,wz,4.6,4.8) || nearEcho(wx,wz,5.2) || nearEchoHeadBackdrop(wx,wz)) return;
           var wh=Math.min(2.4,1.9+(ci%3)*.25), cAng=Math.atan2(cf.tx,cf.tz);
           if(ck===0){
             // Smooth 24-segment crystal-studded stone echo arch on a smooth 20-segment layered stone plinth
@@ -12508,9 +12659,33 @@
       var capFirstDeck=main.find(function(s){ return s.kind==='deck' && !s.practice; });
       // True mid-aft centerline main mast X symmetrically balancing foreMast across the 55u hull (zero extreme-edge perspective lean!)
       var mainMastX=cx-9.0, compassX=cx-1.0, compassZ=cz+.55;
-      // Strictly protect Captain Bay's standing area & his +Z / low-MP8 encounter & follow-camera sightline corridors on canSpace
+      // Strictly protect Captain Bay's standing area & sightline corridors on BOTH canSpace (cam@3) AND opening sp[0] (cam@0)!
       var bayAnchor=canSpace ? main[(canSpace.i+1)%main.length] : null;
+      var cap0Sp=main[0] || null, cap0Nxt=main[1] || cap0Sp;
+      var cap0RigC=main.length ? realCamSetupAt(0) : null;
+      var cap0Fdx=cap0Sp ? (cap0Nxt.x-cap0Sp.x) : 1, cap0Fdz=cap0Sp ? (cap0Nxt.z-cap0Sp.z) : 0;
+      var cap0FL=Math.hypot(cap0Fdx,cap0Fdz)||1, cap0Fx=cap0Fdx/cap0FL, cap0Fz=cap0Fdz/cap0FL;
+      var cap0Rx=-cap0Fz, cap0Rz=cap0Fx;
+      var cap0BayPts=cap0Sp ? [
+        [cap0Sp.x+cap0Rx*3.6+cap0Fx*.35, cap0Sp.z+cap0Rz*3.6+cap0Fz*.35],
+        [cap0Sp.x-cap0Rx*3.6+cap0Fx*.35, cap0Sp.z-cap0Rz*3.6+cap0Fz*.35]
+      ] : [];
       function clearOfBayCorridor(x,z){
+        // Opening cam@0 Captain Bay standing zone + full sightline cone from cam@0 so NO salon/vitrine/globe occludes Bay!
+        for(var bpi=0;bpi<cap0BayPts.length;bpi++){
+          var bx0=cap0BayPts[bpi][0], bz0=cap0BayPts[bpi][1];
+          if(Math.hypot(x-bx0,z-bz0)<4.65) return false;
+          if(cap0RigC && cap0RigC.cam){
+            var cp=cap0RigC.cam.position, rvx=bx0-cp.x, rvz=bz0-cp.z, rL2=rvx*rvx+rvz*rvz;
+            if(rL2>.25){
+              var rt=((x-cp.x)*rvx+(z-cp.z)*rvz)/rL2;
+              if(rt>.05 && rt<1.25){
+                var perp=Math.hypot(x-(cp.x+rvx*rt),z-(cp.z+rvz*rt));
+                if(perp<3.35) return false;
+              }
+            }
+          }
+        }
         if(!bayAnchor) return true;
         // Starboard +Z corridor & Captain Bay starboard anchor
         if(Math.abs(x-bayAnchor.x)<2.85 && z>bayAnchor.z+0.8 && z<bayAnchor.z+9.8) return false;
@@ -12547,9 +12722,9 @@
           if(heroCams[hi] >= main.length) continue;
           var nd = realCamNDCAt(heroCams[hi], x, 0.25, z);
           if(nd.z <= 1){
-            // Bottom-left cropped corner around (0..180, 470..640) & left-edge crop zone (0..65, 340..640)
-            if(nd.x >= -1.18 && nd.x <= -0.64 && nd.y >= -1.18 && nd.y <= -0.44) return true;
-            if(nd.x >= -1.18 && nd.x <= -0.88 && nd.y >= -1.18 && nd.y <= 0.10) return true;
+            // Bottom-left cropped corner around (0..180, 470..640) & left-edge crop zone (0..95, 340..640)
+            if(nd.x >= -1.18 && nd.x <= -0.64 && nd.y >= -1.18 && nd.y <= -0.34) return true;
+            if(nd.x >= -1.18 && nd.x <= -0.82 && nd.y >= -1.18 && nd.y <= 0.12) return true;
           }
         }
         return false;
@@ -12959,7 +13134,7 @@
           for(var fs = 0; fs <= nSeg; fs++){
             var ft = fs / nSeg;
             var wx = fa[0] + fdx * ft - finx * .08, wz = fa[1] + fdz * ft - finz * .08;
-            var yTop = cabinCeilY(wz) + .32;
+            var yTop = cabinCeilY(wz) + 1.15;
             fp.push(wx, 3.74, wz, wx, yTop, wz);
           }
           for(var fs2 = 0; fs2 < nSeg; fs2++){
@@ -13013,15 +13188,15 @@
           }
         }
 
-        // 3b. Watertight Vaulted Dark-Walnut Coffered Ceiling Canopy covering 100% of shipPoly (zero sky pixels!)
+        // 3b. Watertight Vaulted Dark-Walnut Coffered Ceiling Canopy covering 100% of shipPoly + overhang (zero sky pixels!)
         (function buildVaultedRoofCanopy(){
-          var nX = 20, nZ = 14, rp = [], rc = [], ridx = [];
-          var xSpan0 = pMinX - .40, xSpan1 = pMaxX + .40;
+          var nX = 22, nZ = 14, rp = [], rc = [], ridx = [];
+          var xSpan0 = pMinX - 1.25, xSpan1 = pMaxX + 1.25;
           var cWal = new T.Color('#472a19'), cWarm = new T.Color('#633d24'), cTmp = new T.Color();
           for(var ix = 0; ix <= nX; ix++){
             var ux = ix / nX, qx = xSpan0 + (xSpan1 - xSpan0) * ux;
             var spn = polyZSpanAtX(Math.max(pMinX + .05, Math.min(pMaxX - .05, qx)));
-            var z0 = spn ? spn[0] : (pMidZ - 2.0), z1 = spn ? spn[1] : (pMidZ + 2.0);
+            var z0 = (spn ? spn[0] : (pMidZ - 2.0)) - .95, z1 = (spn ? spn[1] : (pMidZ + 2.0)) + .95;
             for(var iz = 0; iz <= nZ; iz++){
               var uz = iz / nZ, qz = z0 + (z1 - z0) * uz;
               var qy = cabinCeilY(qz) + .12;
@@ -13521,35 +13696,49 @@
       // in 06-captains-deck.png without blocking any camera sightline or crowding Captain Bay, Bok, Stall, Shelly or Kiko!
       (function placeGreatCabinHeroShowpieces(){
         var baySpotX = -4.30, baySpotZ = -11.46; // Captain Bay's live starboard spot in cam@3
-        // MIN-7: Enforce >= 2.8u 3D clearance AND 2D hero-camera sightline clearance around BOTH live Bok (-14.49, -4.57)
-        // and Naval Stores stall (-13.54, -6.87) so Bok NEVER intersects or disappears behind a vitrine roof!
-        var capGuardCast = [
-          { x: -14.49, z: -4.57, r3d: 3.15, rayW: 2.65, ndcX: 0.22 }, // Live Bok (shopkeeper)
-          { x: -13.54, z: -6.87, r3d: 3.05, rayW: 2.15, ndcX: 0.16 }, // Live Naval Stores stall
-          { x: -13.54, z: -3.15, r3d: 3.00, rayW: 2.00, ndcX: 0.15 }, // Alternate Bok anchor
-          { x: -10.32, z: -5.80, r3d: 2.95, rayW: 1.80, ndcX: 0.14 }  // Alternate Stall anchor
-        ];
+        // Also compute Captain Bay's opening cam@0 starboard spot beside sp[0] so zero vitrines/globes occlude Bay!
+        var sp0Cap = main[0], sp1Cap = main[1] || sp0Cap;
+        var fdx0 = sp1Cap.x - sp0Cap.x, fdz0 = sp1Cap.z - sp0Cap.z, fL0 = Math.hypot(fdx0, fdz0) || 1;
+        var fx0 = fdx0 / fL0, fz0 = fdz0 / fL0, rx0 = -fz0, rz0 = fx0;
+        var bay0X = sp0Cap.x + rx0 * 3.6 + fx0 * 0.4, bay0Z = sp0Cap.z + rz0 * 3.6 + fz0 * 0.4;
+        var bay0AltX = sp0Cap.x - rx0 * 3.6 + fx0 * 0.4, bay0AltZ = sp0Cap.z - rz0 * 3.6 + fz0 * 0.4;
         var heroCam = Math.min(3, main.length - 1);
         var capHeroRig = realCamSetupAt(heroCam);
+        var capCam0Rig = realCamSetupAt(0);
+        // MIN-7: Enforce >= 2.8u 3D clearance AND 2D camera sightline clearance around BOTH live Bok & Captain Bay
+        // across BOTH cam@0 and cam@3 so NO vitrine or brass globe blocks Captain Bay or Bok!
+        var capGuardCast = [
+          { x: -14.49, z: -4.57, r3d: 3.15, rayW: 2.65, ndcX: 0.22, cams: [heroCam, 0] }, // Live Bok (shopkeeper)
+          { x: -13.54, z: -6.87, r3d: 3.05, rayW: 2.15, ndcX: 0.16, cams: [heroCam, 0] }, // Live Naval Stores stall
+          { x: -13.54, z: -3.15, r3d: 3.00, rayW: 2.00, ndcX: 0.15, cams: [heroCam] },    // Alternate Bok anchor
+          { x: -10.32, z: -5.80, r3d: 2.95, rayW: 1.80, ndcX: 0.14, cams: [heroCam] },    // Alternate Stall anchor
+          { x: bay0X,  z: bay0Z, r3d: 3.80, rayW: 2.80, ndcX: 0.26, cams: [0, heroCam] }, // Captain Bay cam@0 starboard
+          { x: bay0AltX, z: bay0AltZ, r3d: 3.40, rayW: 2.40, ndcX: 0.22, cams: [0] },     // Captain Bay cam@0 port fallback
+          { x: baySpotX, z: baySpotZ, r3d: 3.50, rayW: 2.60, ndcX: 0.24, cams: [heroCam, 0] }
+        ];
         function clearOfBokSightline(gx, gz){
           for(var ci = 0; ci < capGuardCast.length; ci++){
             var a = capGuardCast[ci];
             if(Math.hypot(gx - a.x, gz - a.z) < a.r3d) return false;
-            // Check 2D ray from heroCam (cam@3) to Bok/Stall so NO vitrine sits in front of Bok!
-            var cPos = capHeroRig.cam.position;
-            var vx = a.x - cPos.x, vz = a.z - cPos.z, len2 = vx * vx + vz * vz;
-            if(len2 > 0.25){
-              var t = ((gx - cPos.x) * vx + (gz - cPos.z) * vz) / len2;
-              if(t > 0.04 && t < 1.15){
-                var perp = Math.hypot(gx - (cPos.x + vx * t), gz - (cPos.z + vz * t));
-                if(perp < a.rayW) return false;
+            var camsToCheck = a.cams || [heroCam];
+            for(var cmi = 0; cmi < camsToCheck.length; cmi++){
+              var cmIdx = camsToCheck[cmi];
+              var cRig = (cmIdx === 0) ? capCam0Rig : capHeroRig;
+              var cPos = cRig.cam.position;
+              var vx = a.x - cPos.x, vz = a.z - cPos.z, len2 = vx * vx + vz * vz;
+              if(len2 > 0.25){
+                var t = ((gx - cPos.x) * vx + (gz - cPos.z) * vz) / len2;
+                if(t > 0.04 && t < 1.15){
+                  var perp = Math.hypot(gx - (cPos.x + vx * t), gz - (cPos.z + vz * t));
+                  if(perp < a.rayW) return false;
+                }
               }
-            }
-            var dCast = Math.hypot(a.x - cPos.x, a.z - cPos.z), dProp = Math.hypot(gx - cPos.x, gz - cPos.z);
-            if(dProp < dCast + 1.5){
-              var ndA = realCamNDCAt(heroCam, a.x, 0.9, a.z);
-              var ndP = realCamNDCAt(heroCam, gx, 1.5, gz);
-              if(ndA.z > -1 && ndA.z < 1 && ndP.z > -1 && ndP.z < 1 && Math.abs(ndP.x - ndA.x) < a.ndcX && ndP.y <= ndA.y + 0.24 && ndP.y >= ndA.y - 0.52) return false;
+              var dCast = Math.hypot(a.x - cPos.x, a.z - cPos.z), dProp = Math.hypot(gx - cPos.x, gz - cPos.z);
+              if(dProp < dCast + 1.8){
+                var ndA = realCamNDCAt(cmIdx, a.x, 0.9, a.z);
+                var ndP = realCamNDCAt(cmIdx, gx, 1.5, gz);
+                if(ndA.z > -1 && ndA.z < 1 && ndP.z > -1 && ndP.z < 1 && Math.abs(ndP.x - ndA.x) < a.ndcX && ndP.y <= ndA.y + 0.28 && ndP.y >= ndA.y - 0.56) return false;
+              }
             }
           }
           return true;
@@ -13557,7 +13746,7 @@
         function heroSpotOk(gx, gz, minTile, minBay, minEdge){
           if(!outerClear(gx, gz, minTile || 2.85) || !insideShipDeck(gx, gz, minEdge || 1.35)) return false;
           if(Math.hypot(gx - baySpotX, gz - baySpotZ) < (minBay || 3.45)) return false;
-          if(!clearOfBokSightline(gx, gz)) return false;
+          if(!clearOfBayCorridor(gx, gz) || !clearOfBokSightline(gx, gz)) return false;
           if(inCaptainHeroEdgeCrop(gx, gz)) return false;
           if(vigPlaced.some(function(p){ return Math.hypot(p[0] - gx, p[1] - gz) < 3.05; })) return false;
           return true;
@@ -13620,8 +13809,9 @@
           }
           addObstacle(h4.x, h4.z, 1.45);
         }
-        // 5. Opening cam@0 Showcase: Curio Vitrine + Ship-in-a-Bottle + Overflowing Chest + Telescope for initial entry too!
-        var h0L = findHeroSpot(0, -.52, .05, 2.95, 3.6, 1.5);
+        // 5. Opening cam@0 Showcase: Curio Vitrine + Ship-in-a-Bottle tucked cleanly on the far-left gallery wall,
+        //    strictly clear of Captain Bay's sightline!
+        var h0L = findHeroSpot(0, -.76, -.08, 3.05, 4.0, 1.45);
         if(h0L){
           vigPlaced.push([h0L.x, h0L.z]);
           var yaw0L = Math.atan2(realCamSetupAt(0).cam.position.x - h0L.x, realCamSetupAt(0).cam.position.z - h0L.z);
@@ -14071,9 +14261,18 @@
           [0.0, 7.2, -1.0, 1.14, '#5cb569', 1.22, 0.62, 1.16],
           [0.0, 7.4, 1.0, 1.12, '#68c26c', 1.22, 0.62, 1.16]
         ].forEach(function(cp, cpi){
-          var leafGeo=own(new T.IcosahedronGeometry(cp[3], 1));
-          var puff = add(leafGeo, cp[4], lx + cp[0], ly + cp[1], lz + cp[2], (cpi%3)*0.42, (cpi%5)*0.7, (cpi%2)*0.18, 'coral');
+          var puff = add(ball(cp[3], 12, 9), cp[4], lx + cp[0], ly + cp[1], lz + cp[2], (cpi%3)*0.22, (cpi%5)*0.65, (cpi%2)*0.12, 'coral');
           puff.scale.set(cp[5], cp[6], cp[7]);
+        });
+        // Delicate sunlit blossom & chartreuse crown sub-tufts giving the Storybook Banyan lush Jamboree canopy life
+        [
+          [-2.0, 8.2, 1.3, 0.48, '#f6a4be'], [1.9, 8.3, -1.1, 0.46, '#ffe284'],
+          [-0.6, 9.2, 0.8, 0.44, '#a6e878'], [1.1, 9.1, 0.5, 0.42, '#f8b4cc'],
+          [-2.8, 7.3, -0.2, 0.40, '#ffe896'], [2.6, 7.4, 0.7, 0.42, '#f59eb8'],
+          [0.1, 7.9, -1.9, 0.44, '#9be274'], [0.4, 8.0, 1.9, 0.42, '#ffd886']
+        ].forEach(function(bt){
+          var bp = add(ball(bt[3], 10, 7), bt[4], lx + bt[0], ly + bt[1], lz + bt[2], 0, 0, 0, false);
+          bp.scale.set(1.18, 0.64, 1.12);
         });
         [[-2.4, 4.4, 1.2, 3.0], [2.2, 4.5, -1.0, 2.8], [-1.5, 4.3, -1.5, 2.9], [1.6, 4.2, 1.6, 3.1], [-2.9, 4.6, -0.3, 2.6], [2.6, 4.7, 0.5, 2.5]].forEach(function(vn){
           add(cyl(0.055, 0.075, vn[3], 6), '#6b4f35', lx + vn[0], ly + vn[1], lz + vn[2], 0, 0, 0, 'timber');

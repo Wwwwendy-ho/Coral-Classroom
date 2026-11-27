@@ -1950,30 +1950,35 @@
   function regionInteriorAddPlant(kit, group, x, y, z, scale){
     var T = window.THREE;
     var s = scale || 1;
-    // Sculpted terracotta pot with rim & dark soil
-    regionInteriorAddCyl(kit, group, 0.24 * s, 0.17 * s, 0.34 * s, 12, 0xc76d47, x, y + 0.17 * s, z);
-    regionInteriorAddCyl(kit, group, 0.27 * s, 0.25 * s, 0.07 * s, 12, 0xd87f57, x, y + 0.34 * s, z);
-    regionInteriorAddCyl(kit, group, 0.21 * s, 0.21 * s, 0.03 * s, 10, 0x4c3628, x, y + 0.36 * s, z);
-    // Multi-leaf rounded foliage clusters in three lush tiers
-    regionInteriorAddCyl(kit, group, 0.025 * s, 0.035 * s, 0.24 * s, 6, 0x3b7a4f, x, y + 0.46 * s, z);
-    for(var i = 0; i < 7; i++){
-      var ang = (i / 7) * Math.PI * 2 + 0.25;
-      var lx = x + Math.cos(ang) * 0.18 * s;
-      var lz = z + Math.sin(ang) * 0.18 * s;
-      var leaf = regionInteriorAdd(group, new T.SphereGeometry(0.15 * s, 10, 8), kit.M(i % 2 ? 0x3f8f59 : 0x4ea56a), lx, y + 0.52 * s, lz, Math.sin(ang) * 0.22, -ang, -Math.cos(ang) * 0.22);
-      leaf.scale.set(1.08, 0.82, 0.96);
+    // Sculpted Mediterranean terracotta pot with banded lip & rich dark soil
+    regionInteriorAddCyl(kit, group, 0.24 * s, 0.17 * s, 0.34 * s, 14, 0xc76d47, x, y + 0.17 * s, z);
+    regionInteriorAddCyl(kit, group, 0.27 * s, 0.25 * s, 0.07 * s, 14, 0xd87f57, x, y + 0.34 * s, z);
+    regionInteriorAdd(group, new T.TorusGeometry(0.22 * s, 0.014 * s, 6, 16), kit.M(0xb35d3b), x, y + 0.27 * s, z, Math.PI / 2);
+    regionInteriorAddCyl(kit, group, 0.21 * s, 0.21 * s, 0.03 * s, 12, 0x4c3628, x, y + 0.36 * s, z);
+    // Graceful radiating arched coastal leaves (eliminates stacked-sphere snowman shrub silhouette!)
+    var outerLeaf = regionInteriorCoastalLeafGeo(0.32 * s, 0.072 * s, 0.19 * s, 0.08 * s);
+    var innerLeaf = regionInteriorCoastalLeafGeo(0.24 * s, 0.056 * s, 0.22 * s, 0.06 * s);
+    for(var i = 0; i < 8; i++){
+      var ang = (i / 8) * Math.PI * 2 + 0.18;
+      regionInteriorAdd(group, outerLeaf, kit.M(i % 2 ? 0x2f7d4d : 0x3f965d), x + Math.sin(ang) * 0.04 * s, y + 0.37 * s, z + Math.cos(ang) * 0.04 * s, 0.12 + (i % 2) * 0.08, ang, 0);
     }
-    for(var j = 0; j < 5; j++){
-      var ang2 = (j / 5) * Math.PI * 2 + 0.65;
-      var leaf2 = regionInteriorAdd(group, new T.SphereGeometry(0.14 * s, 10, 8), kit.M(j % 2 ? 0x5eb87a : 0x4ea56a), x + Math.cos(ang2) * 0.12 * s, y + 0.68 * s, z + Math.sin(ang2) * 0.12 * s, Math.sin(ang2) * 0.16, -ang2, -Math.cos(ang2) * 0.16);
-      leaf2.scale.set(1.02, 0.88, 0.95);
+    for(var j = 0; j < 6; j++){
+      var ang2 = (j / 6) * Math.PI * 2 + 0.52;
+      regionInteriorAdd(group, innerLeaf, kit.M(j % 2 ? 0x52b26e : 0x67c67f), x + Math.sin(ang2) * 0.025 * s, y + 0.43 * s, z + Math.cos(ang2) * 0.025 * s, -0.06, ang2, 0);
     }
-    for(var k = 0; k < 3; k++){
-      var ang3 = (k / 3) * Math.PI * 2 + 0.4;
-      var leaf3 = regionInteriorAdd(group, new T.SphereGeometry(0.12 * s, 10, 8), kit.M(0x6fc98b), x + Math.cos(ang3) * 0.06 * s, y + 0.80 * s, z + Math.sin(ang3) * 0.06 * s);
-      leaf3.scale.set(0.98, 0.92, 0.98);
+    // Soft organic inner foliage crown + delicate coastal blossoms
+    var crownCols = [0x3b8e58, 0x52b06c, 0x6ec982];
+    for(var k = 0; k < 5; k++){
+      var ang3 = (k / 5) * Math.PI * 2 + 0.3;
+      var puff = regionInteriorAdd(group, new T.SphereGeometry((0.105 + (k % 2) * 0.018) * s, 10, 8), kit.M(crownCols[k % 3]), x + Math.cos(ang3) * 0.095 * s, y + (0.50 + (k % 2) * 0.045) * s, z + Math.sin(ang3) * 0.095 * s);
+      puff.scale.set(1.18, 0.72, 1.04);
     }
-    regionInteriorAdd(group, new T.SphereGeometry(0.11 * s, 10, 8), kit.M(0x78d194), x, y + 0.86 * s, z);
+    var blossomCols = [0xff8aa8, 0xffe074, 0xfff7e4, 0xffa488];
+    for(var b = 0; b < 5; b++){
+      var bang = (b / 5) * Math.PI * 2 + 0.85;
+      var br = (0.14 + (b % 2) * 0.05) * s;
+      regionInteriorAdd(group, new T.SphereGeometry(0.036 * s, 8, 6), kit.M(blossomCols[b % blossomCols.length]), x + Math.cos(bang) * br, y + (0.55 + (b % 2) * 0.06) * s, z + Math.sin(bang) * br);
+    }
   }
 
   var REGION_INTERIOR_ALIASES = {
@@ -3220,13 +3225,24 @@
     regionInteriorAddCyl(kit, group, 0.175, 0.125, 0.25, 14, sagePot, x, y + 0.225, z);
     regionInteriorAddCyl(kit, group, 0.19, 0.18, 0.045, 14, 0xf5f9f6, x, y + 0.35, z);
     regionInteriorAddCyl(kit, group, 0.155, 0.155, 0.02, 12, 0x4c3628, x, y + 0.365, z);
-    // Lush rosemary & mint foliage clusters
-    for(var j = 0; j < 6; j++){
-      var ang = (j / 6) * Math.PI * 2 + 0.3;
-      var lf = regionInteriorAdd(group, new T.SphereGeometry(0.088, 10, 8), kit.M(j % 2 ? 0x3e9669 : 0x58ba87), x + Math.cos(ang) * 0.095, y + 0.43, z + Math.sin(ang) * 0.095);
-      lf.scale.set(1.08, 0.85, 0.95);
+    // Lush multi-cluster rosemary & mint foliage billows (shaded base -> vibrant mid -> sunlit crown + arched sprigs)
+    var herbLeaf = regionInteriorCoastalLeafGeo(0.165, 0.032, 0.115, 0.048);
+    for(var hli = 0; hli < 6; hli++){
+      var hla = (hli / 6) * Math.PI * 2 + 0.12;
+      regionInteriorAdd(group, herbLeaf, kit.M(hli % 2 ? 0x2f7d56 : 0x3f966a), x + Math.sin(hla) * 0.04, y + 0.37, z + Math.cos(hla) * 0.04, 0.12, hla, 0);
     }
-    regionInteriorAdd(group, new T.SphereGeometry(0.092, 10, 8), kit.M(0x69c796), x, y + 0.49, z);
+    for(var j = 0; j < 7; j++){
+      var ang = (j / 7) * Math.PI * 2 + 0.3;
+      var lf = regionInteriorAdd(group, new T.SphereGeometry(0.072 + (j % 2) * 0.012, 10, 8), kit.M(j % 2 ? 0x35885e : 0x4eab78), x + Math.cos(ang) * 0.105, y + 0.42 + (j % 2) * 0.018, z + Math.sin(ang) * 0.105);
+      lf.scale.set(1.12, 0.80, 1.02);
+    }
+    for(var j2 = 0; j2 < 4; j2++){
+      var ang2 = (j2 / 4) * Math.PI * 2 + 0.65;
+      var lf2 = regionInteriorAdd(group, new T.SphereGeometry(0.068, 10, 8), kit.M(j2 % 2 ? 0x62c48a : 0x7ad496), x + Math.cos(ang2) * 0.056, y + 0.485 + (j2 % 2) * 0.015, z + Math.sin(ang2) * 0.056);
+      lf2.scale.set(1.08, 0.78, 1.04);
+    }
+    var hTop = regionInteriorAdd(group, new T.SphereGeometry(0.064, 10, 8), kit.M(0x94e29a), x, y + 0.525, z);
+    hTop.scale.set(1.12, 0.76, 1.08);
     // Fragrant purple lavender spikes + golden chamomile buds
     [[-0.06, -0.04], [0.07, -0.03], [-0.02, 0.06], [0.05, 0.05]].forEach(function(lv, li){
       regionInteriorAddCyl(kit, group, 0.007, 0.008, 0.18, 6, 0x3a8255, x + lv[0], y + 0.51, z + lv[1]);

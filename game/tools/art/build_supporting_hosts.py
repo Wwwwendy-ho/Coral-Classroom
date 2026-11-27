@@ -134,10 +134,14 @@ def paint_tile(char,name,u,v):
   snout_t=np.clip((v-.02)/.14,0,1);snout_fade=snout_t*snout_t*(3.0-2.0*snout_t)
   n_per=(.45*np.sin(4*a+29*v)+.3*np.sin(8*a-43*v)+.25*np.sin(14*a+67*v))*snout_fade
   # Warm luminous pearl-cream crown & melon blending smoothly into luminous seafoam-mint dorsal & upper flanks
-  rgb=mix((168,228,210),(250,245,228),.42+.44*(1.0-dorsal*snout_fade)+.10*np.sin(math.pi*v)+.018*n_per)
-  # Soft glowing seafoam-mint dorsal saddle starting cleanly behind the smooth melon forehead
-  saddle=(dorsal**2.2)*np.clip((v-.32)*3.2,0,1)
-  rgb=paint(rgb,(126,210,192),saddle*.56)
+  rgb=mix((168,228,210),(250,245,228),.42+.44*(1.0-dorsal*snout_fade)+.10*np.sin(math.pi*v)+.028*n_per)
+  # Soft glowing seafoam-mint dorsal saddle + organic Shelly-grade pearlescent dappling along upper flanks
+  saddle=(dorsal**2.2)*np.clip((v-.30)*3.2,0,1)
+  rgb=paint(rgb,(122,208,190),saddle*.58)
+  dapple=((.5+.5*np.sin(7*a+19*v)*np.cos(5*a-15*v))**2.6)*np.clip((v-.24)*3.6,0,1)*np.clip((dorsal-.22)*2.6,0,1)
+  rgb=paint(rgb,(196,242,232),dapple*.28)
+  flank_ao=np.exp(-(((dorsal-.46)/.14)**2))*np.clip((v-.28)*3.2,0,1)*np.clip((.92-v)*4.0,0,1)
+  rgb=paint(rgb,(118,186,178),flank_ao*.18)
   # Warm luminous pearl-ivory belly & smooth uniform pearl-cream rostrum
   belly=np.clip((.42-dorsal)*4.2,0,1)*np.clip((.92-v)*5.0,0,1)*snout_fade
   rostrum_u=(1.0-snout_fade)*.92
@@ -1828,10 +1832,10 @@ def pip_mesh(close,mat,rig):
  def body_w(p,u,v):
   head=1.0-smooth_w(.28,.46,v);tail=smooth_w(.64,.88,v)
   return {'Head':head,'Body':max(0.0,1.0-head-tail),'Tail':tail}
- b.grid(pip_surface,q(34,54),q(30,46),'skin',body_w,True,False)
+ b.grid(pip_surface,q(30,54),q(26,46),'skin',body_w,True,False)
  # Large wide-open cheerful 77%-iris golden-amber conforming eyes + graceful swept fluted pectoral & sculpted leaf pelvic fins.
  for s,suf in ((-1,'L'),(1,'R')):
-  eye(b,s,q(18,28),q(12,18),pip_eye,.232,pip_surface,'pip',res=(q(34,54),q(30,46)),depth=.105,swell=.042,lid_scale=.85)
+  eye(b,s,q(16,28),q(11,18),pip_eye,.232,pip_surface,'pip',res=(q(30,54),q(26,46)),depth=.105,swell=.042,lid_scale=.85)
   # v28 Minor #5: Smooth high-resolution curved organic tropical reef-fish pectoral fan fins (ZERO jagged sawtooth teeth!).
   def pec(u,v,s=s):
    a=-.94+1.88*u
@@ -1846,7 +1850,7 @@ def pip_mesh(close,mat,rig):
     edge_r=math.sqrt(max(0.0,1.0-(v**10.0)))
     th=(.019*(1.0-.42*v)+.004*math.sin(math.pi*v))*(math.sin(math.pi*u)**.55)*edge_r
     return pec(u,v,s)+Vector((0,0,layer*th))
-   b.grid(pec_l,q(26,44),q(6,9),'fin',_limb_w('Body','Pectoral.'+suf,.02,.28),reverse=(s*layer<0),uvfn=lambda u,v:(u,.25+.72*v))
+   b.grid(pec_l,q(20,44),q(5,9),'fin',_limb_w('Body','Pectoral.'+suf,.02,.28),reverse=(s*layer<0),uvfn=lambda u,v:(u,.25+.72*v))
   # Smooth curved tropical ventral pelvic leaf-fins tucked smoothly backward along the lower belly (ZERO sawtooth!).
   def pelvic(u,v,s=s):
    fan=(u-.5)*2.0
@@ -1884,7 +1888,7 @@ def pip_mesh(close,mat,rig):
    z=1.725-.295*(u**1.30)+.04*math.sin(math.pi*u)
    h=(.15+.50*(math.sin(math.pi*u)**.60))*(1.0-.11*u)
    return Vector((wave+layer*th,y+qq*.16,z+qq*h))
-  b.grid(dorsal,q(32,56),q(7,11),'fin',dorsal_w,reverse=layer<0)
+  b.grid(dorsal,q(24,56),q(6,11),'fin',dorsal_w,reverse=layer<0)
   def anal(u,v,layer=layer):
    qq=v
    edge_round=math.sqrt(max(0.0,1.0-(v**10.0)))
@@ -1892,7 +1896,7 @@ def pip_mesh(close,mat,rig):
    wave=-.028*(v**1.25)*math.sin(u*math.pi*1.4)
    y=-.06+.94*u;z=.98+.20*u
    return Vector((wave+layer*th,y+qq*.16,z-qq*(.07+.29*(math.sin(math.pi*u)**.72))))
-  b.grid(anal,q(22,36),q(5,8),'fin',anal_w,reverse=layer>0)
+  b.grid(anal,q(18,36),q(4,8),'fin',anal_w,reverse=layer>0)
   def tail_fin(u,v,layer=layer):
    # Smoothly curved rounded-lobe tropical reef-fish fan/lyre tail (ZERO jagged teeth, ZERO spiky corners!)
    a=-1.06+2.12*u
@@ -1903,7 +1907,7 @@ def pip_mesh(close,mat,rig):
    th=(.020*(1.0-.40*v)+.005)*(math.sin(math.pi*u)**.55)*edge_round
    wave=.046*(v**1.30)*math.sin((2.0*u-1.0)*math.pi*.75)
    return Vector((wave+layer*th,.92+qq*(.68*math.cos(a)*lyre+.10),1.34+qq*.68*math.sin(a)*lyre))
-  b.grid(tail_fin,q(32,56),q(6,10),'fin','Tail',reverse=layer<0,uvfn=lambda u,v:(u,.58+.40*v))
+  b.grid(tail_fin,q(24,56),q(5,10),'fin','Tail',reverse=layer<0,uvfn=lambda u,v:(u,.58+.40*v))
  # v26 Minor #5: Deepened, slightly thickened (+26%) joyful upturned U-arc happy smile clearly readable even at ~80-95px in 10-patterns!
  def pip_smile_pt(t):
   s=2.0*t-1.0

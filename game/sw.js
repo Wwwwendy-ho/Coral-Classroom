@@ -1,6 +1,6 @@
 /* Coral Cove offline support: keeps a copy of the app's files so it still opens without Wi-Fi.
    Network first, so a new upload to GitHub shows up the next time the iPad is online. */
-var CACHE = 'coral-classroom-20261126-60fps-v1';
+var CACHE = 'coral-classroom-20261127-iter63-v1';
 var FILES = ['./', 'index.html', 'assets/models/crafted-shelly.glb?v=organic-mp-2', 'assets/world/shellstone-color.jpg', 'assets/world/world-surfaces.jpg', 'seed-data.js?v=20261026', 'audio-clips.js?v=20261026', 'storage.js?v=20261026',
              'library.js', 'words.js', 'words-data.js', 'three.min.js', 'reef-models.js', 'win.mp3', 'lobby-song.mp3', 'day-song.mp3', 'night-song.mp3', 'deck-song.mp3', 'game-song.mp3', 'timer-song.mp3', 'region-town-song.mp3', 'region-town-night-song.mp3', 'region-lagoon-song.mp3', 'region-lagoon-night-song.mp3', 'region-caves-song.mp3', 'region-caves-night-song.mp3', 'region-patterns-song.mp3', 'region-patterns-night-song.mp3', 'region-beach-song.mp3', 'region-beach-night-song.mp3', 'region-light-song.mp3', 'region-light-night-song.mp3', 'region-captain-song.mp3', 'region-captain-night-song.mp3', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 
