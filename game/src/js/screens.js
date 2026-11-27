@@ -384,9 +384,8 @@
     if(p) p.addEventListener('click', exitToPicker);
     var e = app.querySelector('[data-act="end-session"]');
     if(e) e.addEventListener('click', function(){
-      // In Adult Mode there's no child "session" to lock/end -- a grown-up playing a deck to try it
-      // out just heads back to Manage Decks, no PIN needed (they were never asked for one to get here).
       if(S.managingDecks){ goHome(); return; }
+      if(reefNoPin()){ endSessionNow(); return; }
       S.pinPromptFor='end'; render();
     });
   }
@@ -518,10 +517,15 @@
   // Adult Mode and a not-yet-started Child Mode profile have nothing to protect, so those go straight
   // through goToPicker().
   function exitToPicker(){
-    if(S.sessionActive){
+    if(S.sessionActive && !reefNoPin()){
       S.pinPromptFor = 'switch';
       render();
       return;
+    }
+    if(S.sessionActive){
+      var endSettings = Object.assign({}, S.settings, { sessionActive:false });
+      S.settings = endSettings;
+      S.store.setSettings(endSettings).catch(function(){});
     }
     goToPicker();
   }
@@ -554,8 +558,7 @@
         var p = S.profiles.find(function(x){ return x.id === b.dataset.profile; });
         if(!p) return;
         Sound.unlock();
-        /* iPad copy: grown-up profiles need the PIN to open; child profiles open freely. */
-        if(p.mode === 'adult'){
+        if(p.mode === 'adult' && !reefNoPin()){
           S.pendingEnterProfile = p;
           S.pinPromptFor = 'enterAdult';
           render();
@@ -566,6 +569,11 @@
     });
     app.querySelector('[data-act="manage-profiles"]').addEventListener('click', function(){
       Sound.unlock();
+      if(reefNoPin()){
+        S.managingProfiles = true;
+        render();
+        return;
+      }
       S.pinPromptFor = 'manageProfiles';
       render();
     });
@@ -722,7 +730,7 @@
       var name = d.name.trim();
       if(!name || (d.mode==='child' && !d.consent)) return;
       var goal = (d.learnGoal || '').trim();   // a learning goal switches Coral Classroom on for this profile
-      S.store.addProfile({ name: name, mode: d.mode, initialMode: d.mode, photoId: d.photoId||'', photoUrl: safePhotoUrl(d.photoUrl||''), order: S.profiles.length, learnGoal: goal, courseOn: !!goal }).then(function(){
+      S.store.addProfile({ name: name, mode: d.mode, initialMode: d.mode, photoId: d.photoId||'', photoUrl: safePhotoUrl(d.photoUrl||''), order: S.profiles.length, learnGoal: goal, courseOn: true }).then(function(){
         S.newProfileDraft = null;
         S.creatingProfile = false;
         render();
@@ -784,7 +792,7 @@
   }
 
   function requestEditMode(){
-    if(S.managingDecks){ S.editMode = true; render(); return; }
+    if(S.managingDecks || reefNoPin()){ S.editMode = true; render(); return; }
     S.pendingEdit = null;
     S.pinPromptFor = 'edit';
     render();

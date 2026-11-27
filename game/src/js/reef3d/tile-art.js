@@ -94,18 +94,66 @@
       g.beginPath(); g.arc(64, 64, insetR - 2, Math.PI * 1.08, Math.PI * 1.9);
       g.strokeStyle = 'rgba(255,255,241,.55)'; g.stroke();
     }
+    var drawCenteredFace = function(boxW, boxH, drawFn){
+      try {
+        if(typeof document === 'undefined' || !document.createElement) return false;
+        if(!paintFace._scratch){
+          paintFace._scratch = document.createElement('canvas');
+          paintFace._scratch.width = paintFace._scratch.height = 192;
+        }
+        var sg = paintFace._scratch.getContext && paintFace._scratch.getContext('2d', { willReadFrequently: true });
+        if(!sg || typeof sg.getImageData !== 'function') return false;
+        sg.clearRect(0, 0, 192, 192);
+        sg.save();
+        drawFn(sg, 96, 96);
+        sg.restore();
+        var img = sg.getImageData(0, 0, 192, 192), data = img && img.data;
+        if(!data || data.length < 192 * 192 * 4) return false;
+        var minX = 192, minY = 192, maxX = -1, maxY = -1;
+        for(var py = 0; py < 192; py++){
+          var row = py * 192 * 4;
+          for(var px = 0; px < 192; px++){
+            if(data[row + px * 4 + 3] > 16){
+              if(px < minX) minX = px;
+              if(px > maxX) maxX = px;
+              if(py < minY) minY = py;
+              if(py > maxY) maxY = py;
+            }
+          }
+        }
+        if(maxX < minX || maxY < minY) return false;
+        var sw = maxX - minX + 1, sh = maxY - minY + 1;
+        var sc = Math.min(1, boxW / sw, boxH / sh);
+        var dw = sw * sc, dh = sh * sc;
+        g.drawImage(paintFace._scratch, minX, minY, sw, sh, 64 - dw * .5, 64 - dh * .5, dw, dh);
+        return true;
+      } catch(e){
+        return false;
+      }
+    };
     g.textAlign = 'center'; g.textBaseline = 'middle';
     if(icon === '?' || icon === '!'){
-      g.fillStyle = night ? '#ffe29a' : '#fffdf3'; g.font = '900 71px system-ui, sans-serif'; g.fillText(icon, 64, 68);
+      var drawBang = function(ctx, ox, oy){
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = night ? '#ffe29a' : '#fffdf3'; ctx.font = '900 71px system-ui, sans-serif'; ctx.fillText(icon, ox, oy);
+      };
+      if(!drawCenteredFace(70, 70, drawBang)) drawBang(g, 64, 64);
     } else if(icon){
-      g.fillStyle = night ? '#694a20' : '#155664';
-      g.font = /[가-힣]/.test(icon) ? '700 54px system-ui, sans-serif' : (style === 'shell' ? '52px' : '62px') + ' "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
-      g.fillText(icon, 64, 67);
+      var iconFont = /[가-힣]/.test(icon) ? '700 54px system-ui, sans-serif' : (style === 'shell' ? '52px' : '62px') + ' "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+      var iconMax = style === 'shell' ? 50 : (kind.indexOf('deck') === 0 ? 58 : 66);
+      var drawIcon = function(ctx, ox, oy){
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = night ? '#694a20' : '#155664'; ctx.font = iconFont; ctx.fillText(icon, ox, oy);
+      };
+      if(!drawCenteredFace(iconMax, iconMax, drawIcon)) drawIcon(g, 64, 64);
     } else {
       // A little etched shell instead of a blank dot.
-      g.strokeStyle = night ? '#7a887c' : '#c7ac83'; g.lineWidth = 2; g.lineCap = 'round';
-      for(var k = -2; k <= 2; k++){ g.beginPath(); g.moveTo(64, 77); g.quadraticCurveTo(64 + k * 6, 66, 64 + k * 8, 53); g.stroke(); }
-      g.beginPath(); g.arc(64, 62, 17, Math.PI * 1.05, Math.PI * 1.95); g.stroke();
+      var drawEtched = function(ctx, ox, oy){
+        ctx.strokeStyle = night ? '#7a887c' : '#c7ac83'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+        for(var k = -2; k <= 2; k++){ ctx.beginPath(); ctx.moveTo(ox, oy + 13); ctx.quadraticCurveTo(ox + k * 6, oy + 2, ox + k * 8, oy - 11); ctx.stroke(); }
+        ctx.beginPath(); ctx.arc(ox, oy - 2, 17, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
+      };
+      if(!drawCenteredFace(42, 42, drawEtched)) drawEtched(g, 64, 64);
     }
     if(kind === 'deck-done'){
       g.font = '900 30px system-ui, sans-serif'; g.lineWidth = 3; g.strokeStyle = '#8a5a12'; g.fillStyle = '#ffcf3f'; g.strokeText('★', 100, 30); g.fillText('★', 100, 30);

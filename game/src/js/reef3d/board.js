@@ -641,7 +641,7 @@
     try {
       if(typeof document === 'undefined' || !document.createElement){ drawDirect(g, cx, cy); return; }
       if(!R3glyphScratch){ R3glyphScratch = document.createElement('canvas'); R3glyphScratch.width = R3glyphScratch.height = 256; }
-      var sg = R3glyphScratch.getContext && R3glyphScratch.getContext('2d');
+      var sg = R3glyphScratch.getContext && R3glyphScratch.getContext('2d', { willReadFrequently: true });
       if(!sg || typeof sg.getImageData !== 'function'){ drawDirect(g, cx, cy); return; }
       sg.clearRect(0, 0, 256, 256);
       sg.save(); drawDirect(sg, 128, 128); sg.restore();
@@ -3205,9 +3205,15 @@
     var obs = view._coveObstacles || [];
     for(var i = 0; i < obs.length; i++){
       var ob = obs[i];
-      if(!ob || ob.maxY < 2.2) continue;
+      if(!ob || ob.maxY < 1.15) continue;
       if(Math.hypot(ob.x - p.x, ob.z - p.z) < 2.6) continue;
-      blockers.push({ x: ob.x, z: ob.z, r: Math.max(2.3, Math.min(4.8, (ob.r || 2.0) + 1.0 + portraitC * .35)), topY: ob.maxY + 1.0 });
+      var tall = ob.maxY >= 2.2;
+      blockers.push({
+        x: ob.x, z: ob.z,
+        r: tall ? Math.max(2.3, Math.min(4.8, (ob.r || 2.0) + 1.0 + portraitC * .35))
+          : Math.max(1.35, Math.min(2.5, (ob.r || 1.1) + .65 + portraitC * .25)),
+        topY: ob.maxY + (tall ? 1.0 : .75)
+      });
     }
     var tx = g.x, ty = g.y + .9, tz = g.z;
     function occlusion(cx, cy, cz){

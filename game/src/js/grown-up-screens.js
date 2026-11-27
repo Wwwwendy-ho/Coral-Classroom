@@ -578,7 +578,7 @@
       b.addEventListener('click', function(){
         var id = b.dataset.modeSwitch;
         if(!S.profile || id === S.profile.mode) return;
-        if(S.profile.initialMode === 'child'){
+        if(S.profile.initialMode === 'child' && !reefNoPin()){
           S.pendingModeSwitch = id;
           S.pinPromptFor = 'modeSwitch';
           render();
@@ -600,9 +600,7 @@
 
   /* ---------- EDITOR ---------- */
   function openEditor(deckId, focusName){
-    // Adult Mode never asks for the PIN. Child Mode already cleared the PIN once to reach Edit Mode
-    // in the first place, so opening one specific deck from inside it needs no second PIN prompt.
-    if(S.managingDecks || S.editMode){ openEditorUnlocked(deckId, focusName); return; }
+    if(S.managingDecks || S.editMode || reefNoPin()){ openEditorUnlocked(deckId, focusName); return; }
     // Defensive fallback in case this is ever reached outside Edit Mode.
     S.pendingEdit = { deckId: deckId, focusName: focusName };
     S.pinPromptFor = 'edit';

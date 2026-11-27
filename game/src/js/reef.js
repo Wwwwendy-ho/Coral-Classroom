@@ -550,10 +550,8 @@
   }
   afterRender('board menu', reefBoardMenuSync);
 
-  /* ---------- No grown-up check in the Claude version (Wendy's choice). The GitHub/iPad copy loads its seed data
-     file, which defines CORAL_COVE_SEED, and asks for the grown-up password (reefGrownUpGate) wherever a PIN
-     used to be asked. ---------- */
-  function reefNoPin(){ return !window.CORAL_COVE_SEED; }
+  /* ---------- No parent/grown-up password gate: profiles, settings, and edit mode open directly. ---------- */
+  function reefNoPin(){ return true; }
   /* Inside a grown-up profile nothing asks again: the password was entered on the way in.
      Opening the profile and Manage Profiles (on the profile screen, outside any profile) still ask. */
   function reefInsideAdult(kind){

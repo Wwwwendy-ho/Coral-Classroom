@@ -51,7 +51,7 @@ var ReefCraftedWorld = (function(){
         markScratch = document.createElement('canvas');
         markScratch.width = markScratch.height = 192;
       }
-      var sg = markScratch.getContext && markScratch.getContext('2d');
+      var sg = markScratch.getContext && markScratch.getContext('2d', { willReadFrequently: true });
       if(!sg || typeof sg.getImageData !== 'function') return false;
       sg.clearRect(0, 0, 192, 192);
       sg.save();
