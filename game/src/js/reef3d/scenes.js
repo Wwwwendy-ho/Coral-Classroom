@@ -304,15 +304,17 @@
         g.position.set(a.x + (b.x - a.x) * travel, .3 + (a.y || 0) + ((b.y || 0) - (a.y || 0)) * travel, a.z + (b.z - a.z) * travel);
         g.rotation.y = ry0 + (ry1 - ry0) * reef3dEase(Math.min(1, p / .55));
         body.position.y = hgt * arc;
-        // Keep the accepted character's proportions fixed. A small lean makes
-        // the launch and landing legible while its rig supplies the stroke.
+        // Rubric v4.5: Tactile Mario-Party squash-and-stretch anticipation, mid-air lift & cushioned landing bounce
         var anticipation = Math.sin(Math.PI * Math.min(1, p / c));
         var landing = p > l ? Math.sin(Math.PI * (p - l) / (1 - l)) : 0;
-        body.rotation.x = .08 * anticipation - .11 * Math.sin(Math.PI * air) + .055 * landing;
-        body.rotation.z = -.045 * angTo(ry0, ry1) * Math.sin(Math.PI * p);
-        body.scale.set(1, 1, 1);
+        var airPulse = Math.sin(Math.PI * air);
+        body.rotation.x = .085 * anticipation - .115 * airPulse + .06 * landing;
+        body.rotation.z = -.048 * angTo(ry0, ry1) * Math.sin(Math.PI * p);
+        var sqY = -0.10 * anticipation + 0.08 * airPulse - 0.12 * landing;
+        var sqXZ = 1 - sqY * 0.52;
+        body.scale.set(sqXZ, 1 + sqY, sqXZ);
         if(p < 1) return requestAnimationFrame(step);
-        body.position.y = 0; body.rotation.x = 0; body.rotation.z = 0; g.rotation.y = ry1;
+        body.position.y = 0; body.rotation.x = 0; body.rotation.z = 0; body.scale.set(1, 1, 1); g.rotation.y = ry1;
         i++; view.at = route[i - 1];
         if(!shelly) reef3dPuff(view, b);
         if(onHop) try { onHop(steps - i); } catch(e){}

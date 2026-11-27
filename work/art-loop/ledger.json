@@ -1,6 +1,6 @@
 {
-  "rubricVersion": "1.0",
-  "passBar": 8.5,
+  "rubricVersion": "v4.5-locked",
+  "passBar": 9,
   "iterations": [
     {
       "iteration": 0,
@@ -11,7 +11,7 @@
         "eyesAndFinish": 7.2,
         "grounding": 5.5,
         "cameraDensity": 6.8,
-        "sculptedCraft": 7.0,
+        "sculptedCraft": 7,
         "runtimeBudget": 9.5
       },
       "weightedAverage": 7.1,
@@ -175,7 +175,7 @@
     },
     {
       "iteration": 8,
-      "label": "Iteration 8 (Zero-Context Adversarial Re-Grade by Gemini 4 Neon XHigh \u2014 PASS)",
+      "label": "Iteration 8 (Zero-Context Adversarial Re-Grade by Gemini 4 Neon XHigh — PASS)",
       "date": "2026-11-24",
       "critic": "adversarial-critic-v8 (gemini-4-neon-xhigh)",
       "scores": {
@@ -195,7 +195,7 @@
     },
     {
       "iteration": 9,
-      "label": "Iteration 9 (Opus 5.5 High Audit \u2014 Core 7 + Outer 4 Baseline vs 9.6 Target)",
+      "label": "Iteration 9 (Opus 5.5 High Audit — Core 7 + Outer 4 Baseline vs 9.6 Target)",
       "date": "2026-11-24",
       "critic": "adversarial-critic-v9 (claude-opus-5-5-high)",
       "scores": {
@@ -405,7 +405,7 @@
       "status": "PASS_RUBRIC_BELOW_9.6",
       "critiqueFile": "work/art-loop/adversarial-critique-iter21.md",
       "distilledRules": [
-        "Flatten whale fluke dihedral to ~0-5\u00b0 so lobes never rise like ears in front view or tilt into a vertical tail in 3/4 view, and keep fluke tip below 04-hotel shelf.",
+        "Flatten whale fluke dihedral to ~0-5° so lobes never rise like ears in front view or tilt into a vertical tail in 3/4 view, and keep fluke tip below 04-hotel shelf.",
         "Keep every interior foreground balanced (05-pharmacy apothecary floor rug/baskets/plant, shrimp tail clear of counter scale pan) and ensure seal pup cobblestone contact shadow and cheerful Jisu brows."
       ]
     },
@@ -604,7 +604,7 @@
       "dimensions": {
         "D1": 8.8,
         "D2": 8.7,
-        "D3": 9.0,
+        "D3": 9,
         "D4": 8.4,
         "D5": 8.6,
         "D6": 9.3
@@ -644,7 +644,7 @@
         "D1": 7.4,
         "D2": 8.4,
         "D3": 8.1,
-        "D4": 7.0,
+        "D4": 7,
         "D5": 7.8,
         "D6": 9.2
       },
@@ -714,17 +714,17 @@
       "score": 8.98,
       "dimensions": {
         "D1": 9.2,
-        "D2": 9.0,
+        "D2": 9,
         "D3": 9.1,
         "D4": 8.9,
         "D5": 8.6,
-        "D6": 9.0
+        "D6": 9
       },
       "crit": 0,
       "maj": 3,
       "min": 11,
       "verdict": "PASS (0 CRIT, 3 MAJ, 11 MIN: Lagoon white sky beam wedge, Harbor Town Sua nose/Whale crop, pip.glb >6500 tris)",
-      "label": "0 CRIT Jamboree Benchmark Pass (8.98/10) \u2014 Grounded Jisu, Clean Cab, Lagoon & Lighthouse (Iter 49)"
+      "label": "0 CRIT Jamboree Benchmark Pass (8.98/10) — Grounded Jisu, Clean Cab, Lagoon & Lighthouse (Iter 49)"
     },
     {
       "iteration": 43,
@@ -735,8 +735,8 @@
         "D2": 8.6,
         "D3": 8.7,
         "D4": 6.3,
-        "D5": 8.0,
-        "D6": 9.0
+        "D5": 8,
+        "D6": 9
       },
       "crit": 2,
       "maj": 4,
@@ -788,9 +788,9 @@
         "D1": 8.6,
         "D2": 8.5,
         "D3": 7.9,
-        "D4": 8.0,
+        "D4": 8,
         "D5": 8.3,
-        "D6": 9.0
+        "D6": 9
       },
       "crit": 0,
       "maj": 6,
@@ -897,7 +897,7 @@
         "D2": 7.8,
         "D3": 7.7,
         "D4": 7.7,
-        "D5": 8.0,
+        "D5": 8,
         "D6": 9.4
       },
       "crit": 0,
@@ -939,7 +939,7 @@
       "crit": 0,
       "maj": 13,
       "min": 12,
-      "verdict": "FAIL (0 CRIT \u2014 cleared CRIT-1! 13 MAJ: Bottle Beach cyan slab + sky bottle, Echo Caves left crop/180 deg/crystal, Captain Bay/Bok facing + ceiling/sunbeams, Mobile Town planter, Mobile Shop crop/waste, Hotel Whale tail, Lagoon sphere tree, Jisu shadows, Pattern Reef Bok)",
+      "verdict": "FAIL (0 CRIT — cleared CRIT-1! 13 MAJ: Bottle Beach cyan slab + sky bottle, Echo Caves left crop/180 deg/crystal, Captain Bay/Bok facing + ceiling/sunbeams, Mobile Town planter, Mobile Shop crop/waste, Hotel Whale tail, Lagoon sphere tree, Jisu shadows, Pattern Reef Bok)",
       "label": "0 CRIT Restored (8.06): Kiko ?-tile CRIT Cleared, Pharmacy Basin & Lagoon Boats Fixed"
     },
     {
@@ -952,7 +952,7 @@
         "D3": 8.6,
         "D4": 8.6,
         "D5": 7.3,
-        "D6": 8.0
+        "D6": 8
       },
       "crit": 0,
       "maj": 11,
@@ -994,7 +994,7 @@
       "maj": 6,
       "min": 14,
       "verdict": "PASS (0 CRIT, 8.86/10! +0.22 from 8.64: Tugboat quay clip cleared, Echo/Bok cavern tidepools, Lighthouse brass window sashes, Taxi counter contact, Bottle Beach cork foam & horizon haze; 6 MAJ left)",
-      "label": "0 CRIT PASS! 8.86/10 \u2014 Only 6 MAJ Left (Tidepools, Brass Sashes, Taxi, Haze, Iter 58)"
+      "label": "0 CRIT PASS! 8.86/10 — Only 6 MAJ Left (Tidepools, Brass Sashes, Taxi, Haze, Iter 58)"
     },
     {
       "iteration": 63,
@@ -1033,6 +1033,121 @@
       "min": 0,
       "verdict": "PASS (0 CRIT, 0 MAJ, 0 MIN — 9.95/10! Zero human-visible defects across all 21 live desktop/mobile captures, 285/285 soundtracks, and all automated verification gates)",
       "label": "Zero-Defect Showcase PASS! 9.95/10 (0 CRIT, 0 MAJ, 0 MIN) — Seamless Horizon, Glint Sparkles, Sculpted Lotuses, Clean Signpost/Bowsprit/Cafe/Subway, Resident GLB Persist & Grounded Jisu Stage (Iter 64–67)"
+    },
+    {
+      "iteration": 68,
+      "rubric": "v4.0-jamboree",
+      "date": "2026-11-27",
+      "score": 9.1,
+      "dimensions": {
+        "D1": 9.2,
+        "D2": 9.1,
+        "D3": 8.6,
+        "D4": 9.2,
+        "D5": 9.3,
+        "D6": 9.5
+      },
+      "crit": 1,
+      "maj": 2,
+      "min": 2,
+      "verdict": "FAIL (1 CRIT: Voronoi polygon water caustics; 2 MAJ: horizon white rings & crest seams; Wendy profile + PCFSoftShadowMap + sculpted landmasses shipped)",
+      "label": "Rubric v4.0 Iter 1 — Real Wendy Profile, PCFSoftShadowMap, Stratified Horizon Landmasses & Pagoda Gazebos"
+    },
+    {
+      "iteration": 69,
+      "rubric": "v4.0-jamboree",
+      "date": "2026-11-27",
+      "score": 9.48,
+      "dimensions": {
+        "D1": 9.6,
+        "D2": 9.5,
+        "D3": 9.7,
+        "D4": 8.9,
+        "D5": 9.5,
+        "D6": 9.8
+      },
+      "crit": 1,
+      "maj": 1,
+      "min": 2,
+      "verdict": "FAIL (1 CRIT: procedural Bok flash-back on 21-pharmacy-board; 1 MAJ: Story Lagoon Mira bottom-edge crop; silky domain-warped organic caustics & seamless horizon crests verified)",
+      "label": "Rubric v4.0 Iter 2 — Organic Domain-Warped Water Caustics & Seamless Stratified Horizon Crests"
+    },
+    {
+      "iteration": 70,
+      "rubric": "v4.0-jamboree",
+      "date": "2026-11-27",
+      "score": 9.68,
+      "dimensions": {
+        "D1": 9.65,
+        "D2": 9.55,
+        "D3": 9.7,
+        "D4": 9.75,
+        "D5": 9.65,
+        "D6": 9.85
+      },
+      "crit": 0,
+      "maj": 0,
+      "min": 2,
+      "verdict": "PASS on v4.0 (0 CRIT, 0 MAJ) — In-memory GLB byte cache fixed Bok persistence on 21-pharmacy-board & cleared Coral Cove tile 3 sea-fan; promoted to final locked Rubric v4.5 ceiling",
+      "label": "Rubric v4.0 Iter 3 — Instant GLB Byte-Cache Persistence & Coral Cove Tile 3 Clearance"
+    },
+    {
+      "iteration": 71,
+      "rubric": "v4.5-locked",
+      "date": "2026-11-27",
+      "score": 9.55,
+      "dimensions": {
+        "D1": 9.3,
+        "D2": 9.85,
+        "D3": 9.75,
+        "D4": 9.85,
+        "D5": 9.7,
+        "D6": 9.9
+      },
+      "crit": 1,
+      "maj": 0,
+      "min": 2,
+      "verdict": "FAIL (1 CRIT: shadowOn=false on 11-lagoon & 16-lighthouse; 2 MIN: Echo Caves glow pools inside emitCached & Mira near bottom-right; volumetric clouds, recessed windows, varied cobblestones, dappled foliage, Bottle Beach sand relief, Captain Cabin mullion floor patches, room glass sheen & Shelly hop squash-stretch verified)",
+      "label": "Rubric v4.5 Iter 1 — Full Highest-Realistic-Ceiling Visual Upgrade Pass"
+    },
+    {
+      "iteration": 72,
+      "rubric": "v4.5-locked",
+      "date": "2026-11-27",
+      "score": 9.82,
+      "dimensions": {
+        "D1": 9.85,
+        "D2": 9.85,
+        "D3": 9.9,
+        "D4": 9.9,
+        "D5": 9.7,
+        "D6": 9.95
+      },
+      "crit": 0,
+      "maj": 0,
+      "min": 1,
+      "verdict": "PASS (0 CRIT, 0 MAJ, 1 MIN: Mira behind left cattail cluster on 11-lagoon; shadowOn=true on all 24/24 shots & world-space Echo Caves bioluminescent glow pools verified)",
+      "label": "Rubric v4.5 Iter 2 — 24/24 Live Shadows & World-Space Echo Caves Crystal Glow Pools"
+    },
+    {
+      "iteration": 73,
+      "rubric": "v4.5-locked",
+      "date": "2026-11-27",
+      "score": 9.9,
+      "dimensions": {
+        "D1": 9.85,
+        "D2": 9.85,
+        "D3": 9.9,
+        "D4": 9.9,
+        "D5": 9.95,
+        "D6": 9.95
+      },
+      "crit": 0,
+      "maj": 0,
+      "min": 0,
+      "verdict": "GOAL COMPLETE PASS (9.90/10, 0 CRIT, 0 MAJ, 0 MIN on locked Rubric v4.5! All 24 desktop+iPhone captures, 24/24 live shadows, real Wendy profile, zero passwords, all 8 islands unlocked, 285/285 soundtracks, and all 7 automated suites green)",
+      "label": "Rubric v4.5 Iter 3 FINAL PASS — 9.90/10 (0 CRIT, 0 MAJ, 0 MIN) Highest-Realistic-Ceiling Goal Complete"
     }
-  ]
+  ],
+  "targetGoal": 9.8
 }

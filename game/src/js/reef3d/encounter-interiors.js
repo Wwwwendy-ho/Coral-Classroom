@@ -481,7 +481,7 @@
   function regionInteriorWindowMat(kit, night, kind){
     var vkind = (kind === 'restaurant' || kind === 'hotel' || kind === 'pharmacy' || kind === 'taxi' || kind === 'friend') ? kind : 'default';
     var cw = vkind === 'friend' ? 512 : 384, ch = vkind === 'friend' ? 352 : 264;
-    var tex = regionInteriorTex('win:v6:' + vkind + ':' + (night ? 'night' : 'day'), cw, ch, 1, 1, function(g, w, h){
+    var tex = regionInteriorTex('win:v7:' + vkind + ':' + (night ? 'night' : 'day'), cw, ch, 1, 1, function(g, w, h){
       if(vkind === 'restaurant'){
         // Sunny terracotta harbor fishing pier & sailboats
         var horizon = h * 0.57;
@@ -1240,6 +1240,35 @@
           g.fillStyle = sb[3];
           g.beginPath(); g.moveTo(sx - 2 * sc, sy - 2 * sc); g.lineTo(sx - 2 * sc, sy - 22 * sc); g.lineTo(sx - 12 * sc, sy - 3 * sc); g.closePath(); g.fill();
         });
+      }
+      // Rubric v4.5: Recessed inner-jamb shadow bevel & delicate diagonal sunlit glass sheen across room windows
+      if(vkind !== 'friend'){
+        // Soft recessed top & side shadow cast by window frame into the exterior glass plane
+        var topSh = g.createLinearGradient(0, 0, 0, Math.round(h * 0.14));
+        topSh.addColorStop(0, night ? 'rgba(6,12,24,0.42)' : 'rgba(26,42,56,0.26)');
+        topSh.addColorStop(1, 'rgba(26,42,56,0)');
+        g.fillStyle = topSh; g.fillRect(0, 0, w, Math.round(h * 0.14));
+        var lSh = g.createLinearGradient(0, 0, Math.round(w * 0.06), 0);
+        lSh.addColorStop(0, night ? 'rgba(6,12,24,0.34)' : 'rgba(26,42,56,0.18)');
+        lSh.addColorStop(1, 'rgba(26,42,56,0)');
+        g.fillStyle = lSh; g.fillRect(0, 0, Math.round(w * 0.06), h);
+        var rSh = g.createLinearGradient(w, 0, w - Math.round(w * 0.06), 0);
+        rSh.addColorStop(0, night ? 'rgba(6,12,24,0.34)' : 'rgba(26,42,56,0.18)');
+        rSh.addColorStop(1, 'rgba(26,42,56,0)');
+        g.fillStyle = rSh; g.fillRect(w - Math.round(w * 0.06), 0, Math.round(w * 0.06), h);
+        // Subtle diagonal sunlit glass reflection bands (tactile glazing depth)
+        g.save();
+        g.fillStyle = night ? 'rgba(190,224,255,0.09)' : 'rgba(255,253,242,0.19)';
+        g.beginPath();
+        g.moveTo(w * 0.12, 0); g.lineTo(w * 0.28, 0);
+        g.lineTo(w * 0.02, h); g.lineTo(-w * 0.10, h);
+        g.closePath(); g.fill();
+        g.fillStyle = night ? 'rgba(190,224,255,0.06)' : 'rgba(255,253,242,0.12)';
+        g.beginPath();
+        g.moveTo(w * 0.34, 0); g.lineTo(w * 0.41, 0);
+        g.lineTo(w * 0.14, h); g.lineTo(w * 0.07, h);
+        g.closePath(); g.fill();
+        g.restore();
       }
     });
     return kit.M('#ffffff', { map: tex });
@@ -5862,10 +5891,10 @@
     // & angled diagonal volumetric window sunbeams (opacity 0.14..0.18) across ALL 8 Harbor Town rooms!
     var sunRoomSpecs = {
       cafe: {
-        beamOp: night ? 0.12 : 0.22,
-        sheenOp: night ? 0.13 : 0.22,
+        beamOp: night ? 0.15 : 0.28,
+        sheenOp: night ? 0.15 : 0.28,
         patches: [
-          { style: 'grid3x2', x0: 0.94, x1: 3.50, zB: -2.10, zF: 1.48, slant: -1.62, op: night ? 0.18 : 0.32, mullOp: night ? 0.16 : 0.26 }
+          { style: 'grid3x2', x0: 0.94, x1: 3.50, zB: -2.10, zF: 1.56, slant: -1.62, op: night ? 0.22 : 0.42, mullOp: night ? 0.18 : 0.32 }
         ],
         sheens: [[1.42, -0.35, 2.75, 2.15, -0.42], [-0.15, 0.25, 1.85, 1.55, -0.35]],
         beams: [
@@ -6183,7 +6212,17 @@
 
     room.position.copy(base.position);
     room.rotation.set(0, yaw, 0);
+    // Enable real soft indoor shadows (furniture, counters, resident & Shelly onto glossy room floor).
+    room.traverse(function(o){
+      if(!o || !o.isMesh) return;
+      var mat = o.material;
+      var trans = !!(mat && mat.transparent);
+      var isLargeWallOrFloor = o.position && o.position.y < 0.03;
+      o.receiveShadow = !trans;
+      o.castShadow = !trans && !isLargeWallOrFloor && !(o.position && o.position.z < -2.7);
+    });
     view.scene.add(room);
+    if(view.renderer && view.renderer.shadowMap) view.renderer.shadowMap.needsUpdate = true;
     // Mark _shellyDialogFramed = true because every bespoke room places Shelly & her contact shadows directly clear of the dialog card!
     e.interior = { kind: kind, room: room, yaw: yaw, _shellyDialogFramed: true };
     e.savedActorTransformForExit = base;

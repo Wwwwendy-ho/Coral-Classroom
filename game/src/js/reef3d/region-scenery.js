@@ -5,7 +5,7 @@
   var _cabinSunbeamTexCache = null;
   function getCabinSunbeamTex(T){
     if(_cabinSunbeamTexCache) return _cabinSunbeamTexCache;
-    var beamTex=null, sheenTex=null;
+    var beamTex=null, sheenTex=null, paneTex=null, glowTex=null;
     if(T && typeof document!=='undefined' && typeof document.createElement==='function'){
       var bc=document.createElement('canvas'); bc.width=64; bc.height=128;
       var bg=bc.getContext && bc.getContext('2d');
@@ -29,8 +29,46 @@
         sg.fillStyle=gr; sg.fillRect(0,0,64,64);
         sheenTex=new T.CanvasTexture(sc);
       }
+      // Rubric v4.5: Crisp sunlit window-pane projection with subtle mullion cross-shadows (04-galleria-indoor parity)
+      var pc=document.createElement('canvas'); pc.width=128; pc.height=128;
+      var pg=pc.getContext && pc.getContext('2d');
+      if(pg){
+        var pGrad=pg.createLinearGradient(0,0,0,128);
+        pGrad.addColorStop(0,'rgba(255,246,204,0)');
+        pGrad.addColorStop(0.14,'rgba(255,246,204,0.92)');
+        pGrad.addColorStop(0.74,'rgba(255,238,182,0.72)');
+        pGrad.addColorStop(1,'rgba(255,234,170,0)');
+        pg.fillStyle=pGrad;
+        // 3x2 sunlit window pane grid with clean recessed mullion gaps
+        var colsP=[[14,32],[50,28],[82,32]], rowsP=[[14,44],[66,44]];
+        for(var ciP=0;ciP<colsP.length;ciP++){
+          for(var riP=0;riP<rowsP.length;riP++){
+            pg.fillRect(colsP[ciP][0], rowsP[riP][0], colsP[ciP][1], rowsP[riP][1]);
+          }
+        }
+        // Soft outer feather vignette so edges melt smoothly onto oak planks
+        pg.globalCompositeOperation='destination-in';
+        var pv=pg.createRadialGradient(64,64,26,64,64,64);
+        pv.addColorStop(0,'rgba(255,255,255,1)');
+        pv.addColorStop(0.75,'rgba(255,255,255,0.85)');
+        pv.addColorStop(1,'rgba(255,255,255,0)');
+        pg.fillStyle=pv; pg.fillRect(0,0,128,128);
+        paneTex=new T.CanvasTexture(pc);
+      }
+      // Rubric v4.5: Soft radial bioluminescent floor glow pool for Echo Caves crystal clusters
+      var gc=document.createElement('canvas'); gc.width=64; gc.height=64;
+      var gg=gc.getContext && gc.getContext('2d');
+      if(gg){
+        var ggr=gg.createRadialGradient(32,32,2,32,32,32);
+        ggr.addColorStop(0,'rgba(255,255,255,0.95)');
+        ggr.addColorStop(0.36,'rgba(255,255,255,0.48)');
+        ggr.addColorStop(0.72,'rgba(255,255,255,0.14)');
+        ggr.addColorStop(1,'rgba(255,255,255,0)');
+        gg.fillStyle=ggr; gg.fillRect(0,0,64,64);
+        glowTex=new T.CanvasTexture(gc);
+      }
     }
-    _cabinSunbeamTexCache = { beamTex: beamTex, sheenTex: sheenTex };
+    _cabinSunbeamTexCache = { beamTex: beamTex, sheenTex: sheenTex, paneTex: paneTex, glowTex: glowTex };
     return _cabinSunbeamTexCache;
   }
   if(typeof window!=='undefined' && window.THREE && typeof document!=='undefined' && typeof document.createElement==='function'){
@@ -408,6 +446,34 @@
         orb(.24,col,0,2.16,0,false); add(cone(.48,.24,6),'#4c5367',0,2.55,0,0,0,0,'roof');
       });
     }
+    var _caveGlowGeo = null, _caveGlowMats = null;
+    function caveCrystalGlowPool(x, y, z, scale, col){
+      if(id !== 'caves' || curRoot !== root || (scale || 1) < 0.65 || y > 0.85 || y < -0.75) return;
+      var sbt = getCabinSunbeamTex(T);
+      if(!sbt || !sbt.glowTex) return;
+      if(!_caveGlowGeo){
+        _caveGlowGeo = new T.PlaneGeometry(1, 1);
+        _caveGlowGeo.rotateX(-Math.PI / 2);
+      }
+      if(!_caveGlowMats) _caveGlowMats = {};
+      var key = col || '#7ef8f0';
+      var mat = _caveGlowMats[key];
+      if(!mat){
+        mat = new T.MeshBasicMaterial({
+          color: key, map: sbt.glowTex,
+          transparent: true, opacity: view.night ? 0.60 : 0.46,
+          blending: T.AdditiveBlending, depthWrite: false, fog: true
+        });
+        _caveGlowMats[key] = mat;
+      }
+      var gp = new T.Mesh(_caveGlowGeo, mat);
+      var rad = 2.95 * Math.min(1.50, Math.max(0.78, scale || 1));
+      gp.scale.set(rad, 1, rad);
+      gp.position.set(x, Math.max(-0.215, y + 0.035), z);
+      gp.userData.noFootprint = true;
+      gp.renderOrder = 2;
+      extras.add(gp);
+    }
     function crystal(x,y,z,scale,col){
       // I10-4: 3-5 beveled hex-prism shards with pointed hex-pyramid caps around a bright glowing inner core (cached composite!).
       var seed=Math.abs(Math.floor(x*3.1+z*1.7)), variant=seed%3, yaw=(seed*.7)%(Math.PI*2);
@@ -424,6 +490,7 @@
         orb(.22,'#f6ffff',0,.3,0,false);
         orb(.12,'#ffffff',.04,.62,0,false);
       });
+      caveCrystalGlowPool(x, y, z, scale, col);
     }
     // A tapered limb from a start point along a direction: cylinder re-oriented with a quaternion. Returns the end point.
     var limbUp=new T.Vector3(0,1,0), limbDir=new T.Vector3();
@@ -827,20 +894,21 @@
       }
     }
     function pineTree(x,y,z,scale,col){
-      // m11: Plush multi-cluster sculpted coastal cypress/pine — cached composite (1-2 meshes instead of 13!).
-      var k=scale||1, ang0=(Math.abs(x*.73+z*1.19)*2.3)%(Math.PI*2), cDeep=col||'#3b7c58';
+      // Rubric v4.5: Dappled Switch Jamboree coastal foliage — deep shaded teal-emerald under-clusters,
+      // vibrant sunlit lime-emerald crowns & pastel blossom clusters (05-blossom-park parity, zero extra geometry!).
+      var k=scale||1, ang0=(Math.abs(x*.73+z*1.19)*2.3)%(Math.PI*2), cDeep=col||'#26684a';
       emitCached('pineTree:' + cDeep, x, y, z, ang0, k, function(){
-        var cMid='#4d9664', cLush='#68b66f', cSun='#8ed679', cCrown='#a8e386';
+        var cShade='#215942', cMid='#388d55', cLush='#58bc61', cSun='#8fe265', cCrown='#bcf27a';
         var moss=smoothOrb(.42,'#67a85c',0,.05,0,false); moss.scale.set(1.15,.28,1.12);
         add(cyl(.11,.18,1.45,10),'#6f503a',0,.72,0,0,0,0,'timber');
         limb(0,1.05,0,.7,.8,0,.55,.08,.05,'#6f503a','timber');
         limb(0,1.15,0,-Math.cos(.6)*.65,.85,-Math.sin(.6)*.65,.52,.075,.045,'#6f503a','timber');
-        var lowerRing=[[0,.52,1.40,.64,.72,cDeep],[2.1,.48,1.50,.60,.74,cMid],[4.2,.50,1.44,.62,.72,cDeep],[1.05,.42,1.66,.56,.78,cMid],[3.15,.44,1.60,.52,.76,cDeep],[5.25,.42,1.58,.50,.76,cMid]];
+        var lowerRing=[[0,.52,1.40,.64,.72,cShade],[2.1,.48,1.50,.60,.74,cMid],[4.2,.50,1.44,.62,.72,cDeep],[1.05,.42,1.66,.56,.78,cMid],[3.15,.44,1.60,.52,.76,cShade],[5.25,.42,1.58,.50,.76,cLush]];
         lowerRing.forEach(function(b){
           var sp=smoothOrb(b[3],b[5],Math.cos(b[0])*b[1],b[2],Math.sin(b[0])*b[1],false);
           sp.scale.set(1.14,b[4],1.08);
         });
-        var midRing=[[0.5,.38,2.06,.60,cLush],[2.65,.36,2.14,.56,cMid],[4.7,.34,2.02,.55,cLush],[1.6,.34,2.24,.46,cSun],[3.7,.32,2.18,.44,cLush]];
+        var midRing=[[0.5,.38,2.06,.60,cLush],[2.65,.36,2.14,.56,cMid],[4.7,.34,2.02,.55,cSun],[1.6,.34,2.24,.46,cSun],[3.7,.32,2.18,.44,cLush]];
         midRing.forEach(function(b){
           var sp=smoothOrb(b[3],b[4],Math.cos(b[0])*b[1],b[2],Math.sin(b[0])*b[1],false);
           sp.scale.set(1.10,.84,1.06);
@@ -848,8 +916,8 @@
         var top1=smoothOrb(.52,cSun,Math.cos(.9)*.18,2.56,Math.sin(.9)*.18,false); top1.scale.set(1.12,.82,1.08);
         var top2=smoothOrb(.40,cCrown,-Math.cos(.4)*.16,2.86,-Math.sin(.4)*.16,false); top2.scale.set(1.10,.78,1.06);
         var top3=smoothOrb(.28,cCrown,Math.cos(2.3)*.22,2.74,Math.sin(2.3)*.22,false); top3.scale.set(1.08,.76,1.06);
-        [[.46,1.76,.34,'#ffd87a'],[-.42,2.18,.28,'#ff94a2'],[.16,2.62,-.32,'#fff3c4']].forEach(function(bl){
-          smoothOrb(.095,bl[3],bl[0],bl[1],bl[2],false);
+        [[.48,1.76,.36,'#ffdc7a'],[-.44,2.16,.30,'#ff8ca0'],[.18,2.60,-.34,'#fff4cc'],[-.16,1.88,-.42,'#ffa2b4']].forEach(function(bl){
+          smoothOrb(.10,bl[3],bl[0],bl[1],bl[2],false);
         });
       });
     }
@@ -1534,31 +1602,49 @@
         waterW=Math.max(bounds.maxX-bounds.minX+180,240), waterD=Math.max(bounds.maxZ-bounds.minZ+180,240),
         waterY=id==='captain'?-1.1:-.64,
         oceanPal={
-          town:{shallow:'#74e2eb',deep:'#164a70',crest:'#d8fdff'},
-          lagoon:{shallow:'#58d4c7',deep:'#2a7d8a',crest:'#8be8d8'},
-          caves:{shallow:'#5694b6',deep:'#2e5976',crest:'#88c9e4'},
-          patterns:{shallow:'#67b7dc',deep:'#35689e',crest:'#8fd3ee'},
-          beach:{shallow:'#74dce0',deep:'#3388a8',crest:'#a6efe8'},
-          light:{shallow:'#66bdca',deep:'#29607a',crest:'#96e2eb'},
-          captain:{shallow:'#56a9cc',deep:'#245782',crest:'#8ad0ec'}
+          town:{foam:'#bafcf8',shallow:'#4be0e6',mid:'#249ec8',deep:'#134f82',crest:'#e4ffff'},
+          lagoon:{foam:'#b8faf0',shallow:'#4adcc8',mid:'#289ea4',deep:'#1a647a',crest:'#c4fff4'},
+          caves:{foam:'#96e8f6',shallow:'#429cc4',mid:'#25648a',deep:'#163a5c',crest:'#a8ebff'},
+          patterns:{foam:'#bceeff',shallow:'#52c0e8',mid:'#2c84bd',deep:'#1c4e8a',crest:'#cef6ff'},
+          beach:{foam:'#c6fff8',shallow:'#4be2e2',mid:'#259ec4',deep:'#14588a',crest:'#e0fffc'},
+          light:{foam:'#b6f6fa',shallow:'#4ac4d6',mid:'#257fa0',deep:'#15486e',crest:'#cbf6ff'},
+          captain:{foam:'#a8e8f8',shallow:'#48b4dc',mid:'#2378a6',deep:'#144470',crest:'#c2f0ff'}
         }[id],
-        cShallow=new T.Color(oceanPal.shallow), cDeep=new T.Color(oceanPal.deep),
+        cFoam=new T.Color(oceanPal.foam), cShallow=new T.Color(oceanPal.shallow),
+        cMid=new T.Color(oceanPal.mid), cDeep=new T.Color(oceanPal.deep),
         cCrest=new T.Color(oceanPal.crest), cTmp=new T.Color(),
-        waterSegs=id==='town'?48:32,
+        waterSegs=id==='town'?56:40,
         waterGeo=own(new T.PlaneGeometry(waterW,waterD,waterSegs,waterSegs));
     waterGeo.rotateX(-Math.PI/2);
     var wPos=waterGeo.attributes.position, wCol=new Float32Array(wPos.count*3);
+    var halfW=waterW*0.5, halfD=waterD*0.5;
     for(var wi=0;wi<wPos.count;wi++){
-      var lx=wPos.getX(wi), lz=wPos.getZ(wi), wx=midX+lx, wz=midZ+lz, minD=999;
+      // Non-linear radial vertex packing: 3.5x finer water resolution across the visible harbor/lagoon/beach
+      // while still stretching 240u seamlessly to the horizon at zero extra triangle cost!
+      var ux=wPos.getX(wi)/halfW, uz=wPos.getZ(wi)/halfD;
+      var lx=Math.sign(ux)*(0.26*Math.abs(ux)+0.74*ux*ux)*halfW;
+      var lz=Math.sign(uz)*(0.26*Math.abs(uz)+0.74*uz*uz)*halfD;
+      wPos.setX(wi,lx); wPos.setZ(wi,lz);
+      var wx=midX+lx, wz=midZ+lz, minD=999;
       for(var si=0;si<sp.length;si++){
         var dSp=Math.hypot(wx-sp[si].x,wz-sp[si].z);
         if(dSp<minD) minD=dSp;
       }
-      var wt=Math.min(1,Math.max(0,id==='town'?(minD-1.5)/16:(minD-4.5)/20)); wt=wt*wt*(3-2*wt);
-      var wave=.036*Math.sin(wx*.18+wz*.14)+.022*Math.cos(wx*.30-wz*.24);
+      var wave=.042*Math.sin(wx*.24+wz*.18)+.028*Math.cos(wx*.38-wz*.31)+.016*Math.sin((wx-wz)*.55);
       wPos.setY(wi,wPos.getY(wi)+wave);
-      cTmp.copy(cShallow).lerp(cDeep,wt);
-      if(wave>0) cTmp.lerp(cCrest,Math.min(id==='town'?.62:.56,wave*(id==='town'?8.5:6.2)));
+      // 4-band Switch-era coastal ocean depth gradient: bright shoreline crystal-foam -> turquoise shoal ->
+      // jewel aquamarine mid-water -> deep sapphire channel + crisp sunlit wave-crest ribbons.
+      var dNorm = id==='town' ? (minD-2.4)/12.5 : (minD-3.6)/18.0;
+      var wt=Math.min(1,Math.max(0,dNorm)); wt=wt*wt*(3-2*wt);
+      if(wt<0.48){
+        cTmp.copy(cShallow).lerp(cMid, wt/0.48);
+      } else {
+        cTmp.copy(cMid).lerp(cDeep, (wt-0.48)/0.52);
+      }
+      var shoreFoam = Math.max(0, 1 - Math.max(0, minD - (id==='town'?2.4:3.2)) / (id==='town'?2.4:3.0));
+      if(shoreFoam>0.01) cTmp.lerp(cFoam, shoreFoam*shoreFoam*(id==='town'?0.46:0.38));
+      var crestBand = Math.max(0, Math.sin(wx*.44+wz*.28+Math.sin(wz*.18)*1.4));
+      if(wave>0) cTmp.lerp(cCrest, Math.min(0.45, wave*5.4 + Math.pow(crestBand, 4)*0.16));
       wCol[wi*3]=cTmp.r; wCol[wi*3+1]=cTmp.g; wCol[wi*3+2]=cTmp.b;
     }
     waterGeo.setAttribute('color',new T.BufferAttribute(wCol,3));
@@ -1602,8 +1688,14 @@
             var x=col*w+shift,z=row*h,q=clipped(poly,0,x+gap,true);
             q=clipped(q,0,x+w-gap,false);q=clipped(q,1,z+gap,true);q=clipped(q,1,z+h-gap,false);
             if(q.length<3)continue;
-            var tone=(wood?.94:.91)+.05*Math.sin(row*13+col*7), minZ=z+gap;
-            out.push(q.map(function(v){return [v[0],v[1],tone+.045*(v[1]-minZ)/h+.025*(v[0]-cx)/(bounds.maxX-bounds.minX+1)];}));
+            // Rubric v4.5: Weathered per-stone limestone / oak tonal variety with crisp front-edge sunlit bevel
+            var hStone=Math.sin(row*17.3+col*31.7)*43758.5453; hStone=hStone-Math.floor(hStone);
+            var tone=wood ? (.92+.08*hStone+.03*Math.sin(row*9+col*5)) : (.85+.17*hStone+.04*Math.cos(row*3.1-col*2.7));
+            var minZ=z+gap, minX=x+gap;
+            out.push(q.map(function(v){
+              var edgeLit=.055*(v[1]-minZ)/h + (wood ? 0 : .028*(v[0]-minX)/w);
+              return [v[0],v[1],tone+edgeLit+.025*(v[0]-cx)/(bounds.maxX-bounds.minX+1)];
+            }));
           }
         }
       });
@@ -2090,15 +2182,25 @@
       g.setAttribute('color',new T.Float32BufferAttribute(c,3));
       g.computeVertexNormals(); geos[k]=g; return g;
     }
-    // m10: Soft warm AO contact patch (vertex-shaded, opaque, zero private canvas texture).
+    // Switch-era grounded contact-AO + sun-projected directional cast shadow (opaque vertex-shaded, zero private canvas).
     function contact(x,z,rx,rz,y){
-      var tr=rx*.76, tz=rz*.76;
-      var ring=[],n=16;
+      var tr=rx*.82, tz=rz*.82;
+      // Offset shadow core slightly away from sun (rig.dir = +6, +18, +10) for crisp directional grounding!
+      var sxOff = -Math.min(.65, tr * .24), szOff = -Math.min(.85, tz * .34);
+      var ring=[],n=14;
       for(var i=0;i<n;i++){
         var a=i*Math.PI*2/n,b=(i+1)*Math.PI*2/n;
-        ring.push([[x,z,.93],[x+Math.cos(a)*tr,z+Math.sin(a)*tz,1],[x+Math.cos(b)*tr,z+Math.sin(b)*tz,1]]);
+        var ca=Math.cos(a), sa=Math.sin(a), cb=Math.cos(b), sb=Math.sin(b);
+        var eA = (ca*sxOff + sa*szOff > 0) ? 1.28 : .94;
+        var eB = (cb*sxOff + sb*szOff > 0) ? 1.28 : .94;
+        ring.push([
+          [x+sxOff*.45, z+szOff*.45, .79],
+          [x+sxOff*.25+ca*tr*eA, z+szOff*.25+sa*tz*eA, .98],
+          [x+sxOff*.25+cb*tr*eB, z+szOff*.25+sb*tz*eB, .98]
+        ]);
       }
-      return painted(ring,y,id==='captain'?'#b58b63':'#cec4b0','contact-patch');
+      var col = id==='captain' ? '#9c734e' : (id==='beach' ? '#ccb58a' : (id==='caves' ? '#626782' : '#aba496'));
+      return painted(ring,y,col,'contact-patch');
     }
     function strip(left,right,top,edge,depth){
       var pos=[],colors=[],idx=[],deckY=-.32,
@@ -2331,24 +2433,43 @@
       // Curved water-level surf foam collars for beach, caves & patterns (replaces straight rigid shoreline bar blocks!)
       if(id==='beach'){
         var smBeachOut=catmullLoop(outer,4), smBeachIn=catmullLoop(inner,4);
-        // Soft, ultra-low-contrast sunlit coastal sand dune warmth along the smooth beach promenade (zero zig-zag stripes, pureAtlas opaque!)
-        var duneCrown=[], shoreWarm=[], bn=smBeachOut.length;
+        // Rubric v4.5: Rich 4-band sunlit coastal sand relief (bleached dry crest, sunlit mid-dune,
+        // organic wave-carved ripple troughs & warm honey damp-shore collar — pureAtlas opaque!)
+        var dryCrest=[], duneCrown=[], midRipple=[], shoreWarm=[], bn=smBeachOut.length;
         for(var bi2=0;bi2<bn;bi2++){
           var bni=(bi2+1)%bn;
           var in0=smBeachIn[bi2], in1=smBeachIn[bni], out0=smBeachOut[bi2], out1=smBeachOut[bni];
           function bLerp(a,b,t){ return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t]; }
-          // Gentle sunlit inner dune warmth (t = 0.24..0.68) with soft organic vertex shading
-          var p0=bLerp(in0,out0,.24), p1=bLerp(in1,out1,.24);
-          var q0=bLerp(in0,out0,.68), q1=bLerp(in1,out1,.68);
-          var sh0=.985+.018*Math.sin(bi2*.28), sh1=.985+.018*Math.sin(bni*.28);
-          duneCrown.push([[p0[0],p0[1],sh0],[q0[0],q0[1],sh0*.985],[q1[0],q1[1],sh1*.985],[p1[0],p1[1],sh1]]);
-          // Soft warm damp-sand shore collar blending naturally toward the surf foam
-          var stA0=bLerp(in0,out0,.87), stA1=bLerp(in1,out1,.87);
-          var stB0=bLerp(in0,out0,.96), stB1=bLerp(in1,out1,.96);
-          shoreWarm.push([[stA0[0],stA0[1],.98],[stB0[0],stB0[1],.93],[stB1[0],stB1[1],.93],[stA1[0],stA1[1],.98]]);
+          var w0=.035*Math.sin(bi2*.45), w1=.035*Math.sin(bni*.45);
+          // 1. Soft bleached sunlit inner dry-sand crest
+          var dA0=bLerp(in0,out0,.16+w0), dA1=bLerp(in1,out1,.16+w1);
+          var dB0=bLerp(in0,out0,.44+w0), dB1=bLerp(in1,out1,.44+w1);
+          var sd0=1.00+.024*Math.sin(bi2*.52), sd1=1.00+.024*Math.sin(bni*.52);
+          dryCrest.push([[dA0[0],dA0[1],sd0*.97],[dB0[0],dB0[1],sd0],[dB1[0],dB1[1],sd1],[dA1[0],dA1[1],sd1*.97]]);
+          // 2. Warm golden mid-beach promenade with soft sunlit contour modulation
+          var p0=bLerp(in0,out0,.42+w0), p1=bLerp(in1,out1,.42+w1);
+          var q0=bLerp(in0,out0,.74-w0*.5), q1=bLerp(in1,out1,.74-w1*.5);
+          var sh0=.975+.032*Math.cos(bi2*.62), sh1=.975+.032*Math.cos(bni*.62);
+          duneCrown.push([[p0[0],p0[1],sh0],[q0[0],q0[1],sh0*.97],[q1[0],q1[1],sh1*.97],[p1[0],p1[1],sh1]]);
+          // 3. Delicate wind-swept sunlit sand ripple scallops along the outer walk
+          var r0=bLerp(in0,out0,.70+w0), r1=bLerp(in1,out1,.70+w1);
+          var r2=bLerp(in0,out0,.87), r3=bLerp(in1,out1,.87);
+          var rs0=.95+.042*Math.sin(bi2*1.45), rs1=.95+.042*Math.sin(bni*1.45);
+          midRipple.push([[r0[0],r0[1],rs0],[r2[0],r2[1],rs0*.96],[r3[0],r3[1],rs1*.96],[r1[0],r1[1],rs1]]);
+          // 4. Warm damp-sand shore wash blending cleanly into the turquoise surf foam
+          var stA0=bLerp(in0,out0,.86), stA1=bLerp(in1,out1,.86);
+          var stB0=bLerp(in0,out0,.97), stB1=bLerp(in1,out1,.97);
+          shoreWarm.push([[stA0[0],stA0[1],.98],[stB0[0],stB0[1],.90],[stB1[0],stB1[1],.90],[stA1[0],stA1[1],.98]]);
+          // Scattered tiny sunlit shell & pebble flecks along the outer tideline (every 3rd segment)
+          if(bi2%3===0){
+            var flk=bLerp(in0,out0,.80+(bi2%5)*.025);
+            pebble(flk[0],deckY+.005,flk[1],.095+(bi2%2)*.035,bi2%6===0?'#fff2db':bi2%9===0?'#f6b8a8':'#e8d0a2');
+          }
         }
-        painted(duneCrown,deckY+.008,'#f3dfb1','beach-sand-ripples');
-        painted(shoreWarm,deckY+.010,'#e7cd98','beach-sand-strata');
+        painted(dryCrest,deckY+.007,'#f8e7be','beach-sand-crest');
+        painted(duneCrown,deckY+.009,'#f2daa3','beach-sand-ripples');
+        painted(midRipple,deckY+.011,'#ebd098','beach-sand-mid');
+        painted(shoreWarm,deckY+.013,'#dfbe86','beach-sand-strata');
         curvedSurfFoam(smBeachOut,true,waterY+.062,.74,1.32,'#eefcfd','#aceef2','beach-shore-foam');
         curvedSurfFoam(smBeachOut,true,waterY+.055,1.44,1.76,'#c2f4f7',null,'beach-shore-foam');
         curvedSurfFoam(smBeachIn,false,waterY+.062,.64,1.14,'#eefcfd','#aceef2','beach-shore-foam');
@@ -2627,14 +2748,14 @@
           add(cyl(.44,.44,.14,12),'#6d4534',0,1.34,2.12,Math.PI/2,0,0,'timber');
           add(cyl(.28,.28,.16,10),'#fae08e',0,1.34,2.13,Math.PI/2,0,0,false); // arched transom fanlight
           block(.16,.07,.16,'#eacb80',.26,.82,2.20,0,false);
-          // Ground-floor display windows with painted wooden shutters & flower boxes
+          // Ground-floor display windows with recessed sky/warm glazing, crisp lintel & painted wooden shutters
           [-1,1].forEach(function(sd){
-            var glCol=(parity+sd)%2?'#f4d584':'#355365';
-            block(.72,.80,.13,glCol,sd*1.22,1.66,2.08);
-            block(.82,.09,.20,'#f6f0e2',sd*1.22,2.10,2.14);
-            block(.08,.80,.18,'#f6f0e2',sd*1.22,1.66,2.14);
-            block(.76,.08,.18,'#f6f0e2',sd*1.22,1.66,2.14);
-            [-1,1].forEach(function(sh){ block(.18,.80,.08,shutCol,sd*1.22+sh*.45,1.66,2.12,0,'timber'); });
+            var glCol=(parity+sd)%2?'#e7c578':'#45788e';
+            block(.72,.80,.10,glCol,sd*1.22,1.66,2.05);
+            block(.84,.10,.22,'#f6f0e2',sd*1.22,2.10,2.14);
+            block(.08,.80,.20,'#f6f0e2',sd*1.22,1.66,2.13);
+            block(.76,.08,.20,'#f6f0e2',sd*1.22,1.66,2.13);
+            [-1,1].forEach(function(sh){ block(.18,.80,.10,shutCol,sd*1.22+sh*.45,1.66,2.13,0,'timber'); });
             terracottaWindowBox(sd*1.22,1.14,2.22,.82,0,vIdx+sd+1);
           });
           // Hanging wrought-iron shop sign jutting gracefully from the right-front corner
@@ -2645,14 +2766,14 @@
           block(.56,.44,.07,parity?'#345c72':'#b84e62',sgX+signSide*.44,2.16,2.22,0,'timber');
           block(.48,.36,.09,'#fbf0d4',sgX+signSide*.44,2.16,2.22,0,false);
           orb(.11,parity?'#e6a844':'#4aa49e',sgX+signSide*.44,2.16,2.25,false);
-          // Second-story warm lit coastal windows + painted shutters + flower boxes
+          // Second-story recessed sky-catching / warm-parlor coastal windows + painted shutters + flower boxes
           [-1,1].forEach(function(sd){
-            var litU=((vIdx+sd)%2===0)?'#fae08e':'#f2cc74';
-            block(.74,.92,.14,litU,sd*1.08,3.62,2.08);
-            block(.08,.92,.18,'#f6f0e2',sd*1.08,3.62,2.13);
-            block(.76,.08,.18,'#f6f0e2',sd*1.08,3.62,2.13);
-            block(.86,.10,.20,roof,sd*1.08,4.12,2.14);
-            [-1,1].forEach(function(sh){ block(.22,.92,.09,shutCol,sd*1.08+sh*.48,3.62,2.12,0,'timber'); });
+            var litU=((vIdx+sd)%2===0)?'#538ea6':'#e8c67c';
+            block(.74,.92,.10,litU,sd*1.08,3.62,2.05);
+            block(.08,.92,.20,'#f6f0e2',sd*1.08,3.62,2.13);
+            block(.76,.08,.20,'#f6f0e2',sd*1.08,3.62,2.13);
+            block(.88,.11,.24,roof,sd*1.08,4.12,2.15);
+            [-1,1].forEach(function(sh){ block(.22,.92,.10,shutCol,sd*1.08+sh*.48,3.62,2.13,0,'timber'); });
             terracottaWindowBox(sd*1.08,3.08,2.22,.80,0,vIdx*2+sd+3);
           });
           // Carved corbeled upper timber & wrought-iron Juliet balcony with decorative scrollwork rings!
@@ -2818,12 +2939,12 @@
           for(var fl=0;fl<stories;fl++){
             var wy=1.16+fl*storyH;
             [-1.24,0,1.24].forEach(function(wx,wi){
-              var warmLit=((bIdx+fl+wi)%3!==0)?'#f7d984':'#3a5b6e';
-              block(.66,.80,.14,warmLit,wx,wy,1.96,0,false);
-              block(.07,.80,.17,'#f6f0e2',wx,wy,1.99,0,false);
-              block(.66,.07,.17,'#f6f0e2',wx,wy,1.99,0,false);
-              block(.78,.10,.20,roof,wx,wy+.45,2.00,0,false);
-              if(wi!==1){ [-1,1].forEach(function(sh){ block(.18,.80,.08,shutCol,wx+sh*.42,wy,1.98,0,'timber'); }); }
+              var warmLit=((bIdx+fl+wi)%3===0)?'#e9c87a':((bIdx+fl+wi)%3===1?'#4d859c':'#3b677c');
+              block(.66,.80,.10,warmLit,wx,wy,1.94,0,false);
+              block(.07,.80,.19,'#f6f0e2',wx,wy,1.99,0,false);
+              block(.66,.07,.19,'#f6f0e2',wx,wy,1.99,0,false);
+              block(.80,.11,.22,roof,wx,wy+.45,2.01,0,false);
+              if(wi!==1){ [-1,1].forEach(function(sh){ block(.18,.80,.10,shutCol,wx+sh*.42,wy,1.99,0,'timber'); }); }
               if(fl>=1 && (wi!==1 || fl!==1)){
                 terracottaWindowBox(wx,wy-.46,2.12,.72,0,bIdx*3+fl*5+wi);
               }
@@ -3884,15 +4005,28 @@
           addObstacle(x,z,1.65);
         });
       }
-      // Scalloped fabric canopy (8 petal panels + a scalloped hem) replaces the old plain cone.
+      // Sculpted tiered curved-eave storybook gazebo canopy with scalloped frieze trim and golden lotus finial.
       function scallopCanopy(x,y,z,r,hgt,c1,c2){
-        for(var w=0;w<8;w++){
-          var wa=w*Math.PI/4, wedge=add(cyl(.08,r*.95,hgt*.78,4),w%2?c2:c1,x,y+hgt*.45,z,0,wa+Math.PI/4,0,'fabric');
-          wedge.scale.set(.74,1,.74);
-          var hem=orb(r*.3,w%2?c2:c1,x+Math.cos(wa+Math.PI/8)*r*.82,y+hgt*.1,z+Math.sin(wa+Math.PI/8)*r*.82,'fabric'); hem.scale.set(1.15,.5,1.15);
+        var nSeg=12;
+        for(var w=0;w<nSeg;w++){
+          var wa=w*Math.PI*2/nSeg;
+          // Lower upturned pagoda eave skirt
+          var low=add(cyl(r*.48,r*1.04,hgt*.42,4),w%2?c2:c1,x,y+hgt*.24,z,0,wa+Math.PI/nSeg,0,'fabric');
+          low.scale.set(.74,1,.74);
+          // Upper gently pitched turret cap
+          var hi=add(cyl(.08,r*.56,hgt*.48,4),w%2?c1:c2,x,y+hgt*.66,z,0,wa+Math.PI/nSeg,0,'fabric');
+          hi.scale.set(.76,1,.76);
+          // Upturned carved timber corner eaves & scalloped trim bobbles
+          if(w%2===0){
+            var tipX=x+Math.cos(wa)*r*.92, tipZ=z+Math.sin(wa)*r*.92;
+            var eave=orb(r*.14,'#f7e2b6',tipX,y+hgt*.12,tipZ,'timber'); eave.scale.set(1.2,.65,1.2);
+          }
         }
-        orb(.16,'#f7d97e',x,y+hgt*.88,z,false);
-        add(cyl(.04,.05,.3,6),'#a77e56',x,y+hgt*.98,z,0,0,0,'timber');
+        add(smoothTorus(r*.52,.06,6,14),'#8d6648',x,y+hgt*.44,z,Math.PI/2,0,0,'timber');
+        add(smoothTorus(r*.94,.055,6,16),'#a47856',x,y+hgt*.06,z,Math.PI/2,0,0,'timber');
+        orb(.18,'#f7d97e',x,y+hgt*.92,z,false);
+        add(cyl(.045,.07,.38,6),'#b88846',x,y+hgt*1.06,z,0,0,0,'timber');
+        orb(.09,'#fff0b2',x,y+hgt*1.26,z,false);
       }
       function openBook(x,y,z,rot){
         block(.5,.06,.36,'#c46a5a',x,y,z,rot,'timber');
@@ -3901,13 +4035,29 @@
       }
       function readingPavilion(x,y,z){
         var g0=curRoot.children.length;
-        add(cyl(2.1,2.45,.27,10),'#dfd5ae',x,y,z);
-        [[-1.35,-.7],[1.35,-.7],[-1.35,.7],[1.35,.7]].forEach(function(o){ post(.14,2.5,'#987456',x+o[0],y,z+o[1]); orb(.12,'#f7e0a0',x+o[0],y+2.55,z+o[1],false); });
-        scallopCanopy(x,y+2.6,z,2.25,1.3,'#d58a72','#f6e3c4');
-        add(cyl(.36,.44,.5,8),'#b9aa86',x,y+.25,z,0,0,0,'stone');
-        openBook(x,y+.55,z,.3);
-        hangLantern(x+1.35,y+2.48,z);
-        hangLantern(x-1.35,y+2.48,z);
+        // Two-stepped carved stone terrace deck with subtle timber rim & reading bench
+        add(cyl(2.25,2.55,.22,12),'#cfc5a0',x,y-.02,z,0,0,0,'stone');
+        add(cyl(1.96,2.14,.18,12),'#e9dfb8',x,y+.14,z,0,0,0,'stone');
+        add(smoothTorus(2.04,.07,6,14),'#9a7452',x,y+.24,z,Math.PI/2,0,0,'timber');
+        [[-1.32,-.72],[1.32,-.72],[-1.32,.72],[1.32,.72]].forEach(function(o){
+          var px=x+o[0], pz=z+o[1];
+          // Stone column plinth + tapered timber post + decorative diagonal knee-braces
+          add(cyl(.22,.26,.24,8),'#b9aa86',px,y+.32,pz,0,0,0,'stone');
+          post(.13,2.45,'#8e684c',px,y+.22,pz);
+          var br=block(.10,.55,.10,'#9e7654',px-Math.sign(o[0])*.24,y+2.36,pz,0,'timber');
+          br.rotation.z=Math.sign(o[0])*.72;
+          orb(.12,'#f7e0a0',px,y+2.64,pz,false);
+        });
+        // Warm timber architrave beams tying all 4 posts together
+        block(2.74,.16,.16,'#8c6648',x,y+2.56,z-.72,0,'timber');
+        block(2.74,.16,.16,'#8c6648',x,y+2.56,z+.72,0,'timber');
+        block(.16,.16,1.56,'#8c6648',x-1.32,y+2.56,z,0,'timber');
+        block(.16,.16,1.56,'#8c6648',x+1.32,y+2.56,z,0,'timber');
+        scallopCanopy(x,y+2.64,z,2.38,1.55,'#d97c62','#faf0d7');
+        add(cyl(.36,.44,.52,8),'#b9aa86',x,y+.42,z,0,0,0,'stone');
+        openBook(x,y+.72,z,.3);
+        hangLantern(x+1.32,y+2.48,z);
+        hangLantern(x-1.32,y+2.48,z);
         compactRootRange(g0, x, y, z, 0);
       }
       var pavSpot=null;
@@ -4932,6 +5082,7 @@
           }
           orb(.14,'#fff4be',0,.60,0,false);
         });
+        caveCrystalGlowPool(x, Math.max(-0.215, y), z, 0.92, '#ffdf88');
         addObstacle(x,z,.8);
       }
       function mushrooms(x,y,z,i){
@@ -4956,15 +5107,16 @@
       // Faceted crystalline mineral cluster on a stepped hex quartz base (cached composite!)
       function mineralCluster(x,y,z,scale,palIdx){
         var k=scale||1, pi=Math.abs(palIdx||0)%4;
+        var pals=[['#7af6ee','#c4a8ff','#d6fcff'],['#c7a8ff','#7af6ee','#f0e2ff'],['#6ef2cf','#ffd87e','#d8fff4'],['#ffb2dc','#8ee6ff','#fff0f8']];
+        var pal=pals[pi];
         emitCached('caveMinCluster:' + pi, x, y, z, (palIdx||0)*.5, k, function(){
-          var pals=[['#7af6ee','#c4a8ff','#d6fcff'],['#c7a8ff','#7af6ee','#f0e2ff'],['#6ef2cf','#ffd87e','#d8fff4'],['#ffb2dc','#8ee6ff','#fff0f8']];
-          var pal=pals[pi];
           add(cyl(.78,.96,.28,6),'#6b889c',0,.14,0,0,0,0,'stone');
           add(cyl(.54,.72,.24,6),'#88a7ba',.08,.34,-.06,0,.4,0,'stone');
           crystal(0,.36,0,1.05,pal[0]);
           crystal(.52,.18,.34,.68,pal[1]);
           crystal(-.48,.16,-.28,.56,pal[2]);
         });
+        caveCrystalGlowPool(x, Math.max(-0.215, y), z, k * 1.10, pal[0]);
         addObstacle(x,z,.98*k);
       }
       // Stepped terraced mineral spire crowned with glowing crystals (cached composite!)
@@ -4977,6 +5129,7 @@
           crystal(0,1.82,0,.82,cc);
           crystal(.58,.55,.32,.52,'#c8abff');
         });
+        caveCrystalGlowPool(x, Math.max(-0.215, y), z, k * 1.18, cc);
         addObstacle(x,z,1.1*k);
       }
       function geode(x,y,z,i){
@@ -14146,21 +14299,21 @@
           drawHorizonPalmCoralIslet(hi[0],hi[1],hi[2],hi[3]);
         }
       });
-      // Jamboree 04-galleria-indoor parity: soft feathered diagonal golden window sunbeams + warm oak floor sheen inside Captain's Great Cabin
+      // Jamboree 04-galleria-indoor parity: soft feathered diagonal golden window sunbeams + crisp mullion-patterned sunlit oak floor patches inside Captain's Great Cabin
       (function addCabinSunbeams(){
-        var sbt=getCabinSunbeamTex(T), beamTex=sbt.beamTex, sheenTex=sbt.sheenTex;
+        var sbt=getCabinSunbeamTex(T), beamTex=sbt.beamTex, sheenTex=sbt.paneTex || sbt.sheenTex;
         var beamMat=new T.MeshBasicMaterial({
           color:view.night?'#a4d6f8':'#ffea9e', map:beamTex,
-          transparent:true, opacity:view.night?0.12:0.28,
+          transparent:true, opacity:view.night?0.13:0.32,
           blending:T.AdditiveBlending, depthWrite:false, side:T.DoubleSide, fog:false
         });
         var sheenMat=new T.MeshBasicMaterial({
-          color:view.night?'#84c2ee':'#fff4cc', map:sheenTex,
-          transparent:true, opacity:view.night?0.18:0.44,
+          color:view.night?'#8cc6f2':'#fff4c6', map:sheenTex,
+          transparent:true, opacity:view.night?0.22:0.56,
           blending:T.AdditiveBlending, depthWrite:false, side:T.DoubleSide, fog:false
         });
-        var beamGeo=new T.PlaneGeometry(3.4, 8.8);
-        var sheenGeo=new T.PlaneGeometry(4.4, 6.4); sheenGeo.rotateX(-Math.PI/2);
+        var beamGeo=new T.PlaneGeometry(3.6, 9.0);
+        var sheenGeo=new T.PlaneGeometry(4.8, 6.8); sheenGeo.rotateX(-Math.PI/2);
         [[2.4, -2.0], [1.4, -5.6], [-0.2, -9.0], [-4.8, -11.4], [-10.8, -11.4], [-16.6, -11.0]].forEach(function(bp){
           var bx=bp[0], bz=bp[1];
           var bm=new T.Mesh(beamGeo, beamMat);
@@ -14169,7 +14322,7 @@
           bm.userData.hideOnZoom=true; bm.userData.noFootprint=true;
           extras.add(bm);
           var sh=new T.Mesh(sheenGeo, sheenMat);
-          sh.position.set(bx - 2.6, -0.112, bz + 0.4);
+          sh.position.set(bx - 2.6, -0.108, bz + 0.45);
           sh.rotation.y=-0.32;
           sh.userData.hideOnZoom=true; sh.userData.noFootprint=true;
           extras.add(sh);
@@ -14327,70 +14480,113 @@
       var baseSpan = (id==='light' && sp.lighthouse) ? (sp.lighthouse.rWallBase + 20) : (Math.max(bnds.maxX - bnds.minX, bnds.maxZ - bnds.minZ) * 0.5 + 16);
       var rMid = baseSpan + 30, rFar = baseSpan + 64;
       var pal = {
-        town:     { mid:'#9ec6b4', roof:'#d9785e', far:'#bfd8d2' },
-        lagoon:   { mid:'#7ebda2', roof:'#569e94', far:'#b4d8ca' },
-        caves:    { mid:'#4f6084', roof:'#66d0e0', far:'#6f85aa' },
-        patterns: { mid:'#96c4be', roof:'#e6b85a', far:'#c2ddd8' },
-        beach:    { mid:'#d2b98e', roof:'#64a87e', far:'#b8d8d6' },
-        light:    { mid:'#8ebea8', roof:'#d88068', far:'#bfd8d4' }
-      }[id] || { mid:'#98c4b4', roof:'#d88068', far:'#bfd8d4' };
-      var midMat = new T.MeshLambertMaterial({ color: pal.mid });
-      var roofMat = new T.MeshLambertMaterial({ color: pal.roof });
-      var farMat = new T.MeshLambertMaterial({ color: pal.far });
-      var domeGeo = new T.SphereGeometry(1, 18, 10, 0, Math.PI * 2, 0, Math.PI * 0.56);
+        town:     { shore:'#ead9b2', cliff:'#b6a88e', grass:'#5ea86e', peak:'#7ec47e', roof:'#d96c52', wall:'#fbf2df', farBase:'#98b8be', farTop:'#c4ded8' },
+        lagoon:   { shore:'#dfd6a6', cliff:'#6a9b82', grass:'#4da36c', peak:'#7ac97e', roof:'#d97c62', wall:'#f7ebd2', farBase:'#82b6aa', farTop:'#b6dfd0' },
+        caves:    { shore:'#3a4e6e', cliff:'#465a7e', grass:'#5c759e', peak:'#68d6e6', roof:'#9a7ae0', wall:'#64d4e6', farBase:'#3e5274', farTop:'#647ea6' },
+        patterns: { shore:'#e8dab8', cliff:'#8fb0a8', grass:'#5ea88a', peak:'#92d2b0', roof:'#e6b652', wall:'#f8f0dc', farBase:'#94bebc', farTop:'#c4e2de' },
+        beach:    { shore:'#f2dfae', cliff:'#c8a472', grass:'#58aa68', peak:'#7ec872', roof:'#d87458', wall:'#faf0d6', farBase:'#9ec2be', farTop:'#c8e0da' },
+        light:    { shore:'#e2d2aa', cliff:'#96a294', grass:'#569e6a', peak:'#84c482', roof:'#d66c56', wall:'#f8efe0', farBase:'#8eb4b4', farTop:'#c0dcd8' }
+      }[id] || { shore:'#e8dab8', cliff:'#9ea89a', grass:'#5ea86e', peak:'#86c884', roof:'#d87458', wall:'#f8efe0', farBase:'#96b8ba', farTop:'#c2deda' };
+      var cShore = new T.Color(pal.shore), cCliff = new T.Color(pal.cliff), cGrass = new T.Color(pal.grass), cPeak = new T.Color(pal.peak);
+      var cFarB = new T.Color(pal.farBase), cFarT = new T.Color(pal.farTop), cSunW = new T.Color('#fff4d4'), cShadC = new T.Color('#6a98b8'), cTmpV = new T.Color();
+      var sunV = new T.Vector3(0.45, 0.72, 0.52).normalize();
+      var vMat = new T.MeshBasicMaterial({ vertexColors: true });
+      var vRoofMat = new T.MeshLambertMaterial({ color: pal.roof });
+      var vWallMat = new T.MeshLambertMaterial({ color: pal.wall });
+      var vPalmMat = new T.MeshLambertMaterial({ color: '#4ea862' });
+      var vTrunkMat = new T.MeshLambertMaterial({ color: '#9a7248' });
+      var vFoamMat = new T.MeshBasicMaterial({ color: '#dffcf9', side: T.DoubleSide });
+      function makeSculptedLandmass(w, h, d, seed, isFar){
+        var segR = isFar ? 18 : 22, segH = isFar ? 7 : 9;
+        var pos = [], cols = [], idx = [];
+        var s1 = seed * 1.73 + 0.4, s2 = seed * 3.11 + 1.9, s3 = seed * 5.07 + 0.8;
+        var p1x = Math.cos(s1) * 0.24, p1z = Math.sin(s1) * 0.20;
+        var p2x = Math.cos(s2) * 0.42, p2z = Math.sin(s2) * 0.36;
+        for(var ri = 0; ri <= segH; ri++){
+          var v = ri / segH;
+          var baseRad = (v >= 0.999) ? 0.0001 : Math.pow(Math.max(0.001, 1 - Math.pow(v, 1.65)), 0.58);
+          var terrace = 1 + (isFar ? 0.035 : 0.065) * Math.sin(v * Math.PI * 6.0);
+          for(var ai = 0; ai <= segR; ai++){
+            var ang = (ai / segR) * Math.PI * 2;
+            var ca = Math.cos(ang), sa = Math.sin(ang);
+            var lobeAmp = 1.0 - v * v; var lobe = 1.0 + lobeAmp * (0.20 * Math.sin(ang * 2 + s1) + 0.12 * Math.cos(ang * 3 + s2) + 0.06 * Math.sin(ang * 5 + s3));
+            var rr = baseRad * lobe * terrace;
+            var px = ca * rr + p1x * v * 0.65 + p2x * Math.sin(v * Math.PI) * 0.35;
+            var pz = sa * rr + p1z * v * 0.65 + p2z * Math.sin(v * Math.PI) * 0.35;
+            var apexSmooth = Math.sin(v * Math.PI); var ridge = Math.pow(v, 0.84) * (1.0 + 0.14 * Math.cos(ang * 2 - s2) * apexSmooth + 0.07 * Math.sin(ang * 3 + s3) * apexSmooth);
+            pos.push(px * w, ridge * h, pz * d);
+            var nx = ca * (1 - v * 0.6), ny = 0.38 + v * 0.72, nz = sa * (1 - v * 0.6);
+            var nl = Math.hypot(nx, ny, nz) || 1;
+            var ndotl = (nx * sunV.x + ny * sunV.y + nz * sunV.z) / nl;
+            if(isFar){
+              cTmpV.copy(cFarB).lerp(cFarT, Math.min(1, v * 1.15));
+              cTmpV.offsetHSL(0, 0, 0.04 * Math.sin(v * 22 + ang * 2));
+            } else {
+              var strataBand = 0.5 + 0.5 * Math.sin(v * 26 + Math.sin(ang * 3 + s1) * 0.9);
+              if(v < 0.16){ cTmpV.copy(cShore).lerp(cCliff, v / 0.16); }
+              else if(v < 0.56){ cTmpV.copy(cCliff).lerp(cShore, strataBand * 0.18); if(v > 0.44) cTmpV.lerp(cGrass, (v - 0.44) / 0.12); }
+              else { cTmpV.copy(cGrass).lerp(cPeak, (v - 0.56) / 0.44); }
+            }
+            if(ndotl > 0.15) cTmpV.lerp(cSunW, Math.min(0.24, (ndotl - 0.15) * 0.28));
+            else cTmpV.lerp(cShadC, Math.min(0.28, (0.15 - ndotl) * 0.36));
+            cols.push(cTmpV.r, cTmpV.g, cTmpV.b);
+          }
+        }
+        var stride = segR + 1;
+        for(var r2 = 0; r2 < segH; r2++){
+          for(var a2 = 0; a2 < segR; a2++){
+            var i0 = r2 * stride + a2, i1 = i0 + 1, i2 = i0 + stride, i3 = i2 + 1;
+            idx.push(i0, i1, i3, i0, i3, i2);
+          }
+        }
+        var g = new T.BufferGeometry();
+        g.setAttribute('position', new T.Float32BufferAttribute(pos, 3));
+        g.setAttribute('color', new T.Float32BufferAttribute(cols, 3));
+        g.setIndex(idx); g.computeVertexNormals();
+        return g;
+      }
+      var houseBoxGeo = new T.BoxGeometry(1, 1, 1), roofPyrGeo = new T.ConeGeometry(0.82, 0.72, 4);
+      var palmCrownGeo = new T.ConeGeometry(1.1, 0.65, 7), trunkGeo = new T.CylinderGeometry(0.10, 0.16, 1.8, 6);
       for(var i=0; i<16; i++){
         var ang = i * Math.PI * 2 / 16 + 0.15;
         var dist = rMid + (i % 3) * 8;
         var vx = vcx + Math.cos(ang) * dist, vz = vcz + Math.sin(ang) * dist;
-        var w = 10 + (i % 4) * 4, h = 5.5 + (i % 3) * 3.5;
-        var isl = new T.Mesh(domeGeo, midMat);
-        isl.scale.set(w * 0.92, h * 0.62, w * 0.84);
-        isl.position.set(vx, -1.6, vz);
-        isl.rotation.y = ang + 0.4;
-        vGrp.add(isl);
-        var kOff = w * 0.48 * (i % 2 ? 1 : -1);
-        var knoll = new T.Mesh(domeGeo, midMat);
-        knoll.scale.set(w * 0.54, h * 0.40, w * 0.50);
-        knoll.position.set(vx - Math.sin(ang) * kOff, -1.6, vz + Math.cos(ang) * kOff);
-        knoll.rotation.y = ang - 0.3;
-        vGrp.add(knoll);
-        if(id==='town' || id==='lagoon' || id==='light' || id==='patterns' || id==='beach'){
-          var cap = new T.Mesh(domeGeo, roofMat);
-          if(id==='beach'){
-            cap.scale.set(w * 0.72, h * 0.34, w * 0.66);
-            cap.position.set(vx + Math.cos(ang + 1.2) * (w * 0.10), -1.6 + h * 0.30, vz + Math.sin(ang + 1.2) * (w * 0.10));
-            vGrp.add(cap);
-            var bluff = new T.Mesh(domeGeo, new T.MeshLambertMaterial({ color: '#b89b6e' }));
-            bluff.scale.set(w * 0.44, h * 0.46, w * 0.40);
-            bluff.position.set(vx + Math.cos(ang - 0.8) * (w * 0.32), -1.6, vz + Math.sin(ang - 0.8) * (w * 0.32));
-            vGrp.add(bluff);
-            var vFoam = new T.Mesh(new T.RingGeometry(w * 0.82, w * 1.04, 24), new T.MeshBasicMaterial({ color: '#e6fcfc', side: T.DoubleSide }));
-            vFoam.rotation.x = -Math.PI * 0.5;
-            vFoam.position.set(vx, -0.58, vz);
-            vGrp.add(vFoam);
-          } else {
-            cap.scale.set(w * 0.38, h * 0.28, w * 0.35);
-            cap.position.set(vx + Math.cos(ang + 1.2) * (w * 0.14), -1.6 + h * 0.36, vz + Math.sin(ang + 1.2) * (w * 0.14));
-            vGrp.add(cap);
+        var w = 10.5 + (i % 4) * 3.8, h = 6.2 + (i % 3) * 3.8;
+        var isl = new T.Mesh(makeSculptedLandmass(w * 0.96, h * 0.78, w * 0.84, i + 1, false), vMat);
+        isl.position.set(vx, -1.35, vz); isl.rotation.y = ang + 0.4; vGrp.add(isl);
+        var kOff = w * 0.56 * (i % 2 ? 1 : -1);
+        var knoll = new T.Mesh(makeSculptedLandmass(w * 0.52, h * 0.50, w * 0.48, i + 21, false), vMat);
+        knoll.position.set(vx - Math.sin(ang) * kOff, -1.35, vz + Math.cos(ang) * kOff); knoll.rotation.y = ang - 0.5; vGrp.add(knoll);
+        /* Soft natural shoreline collar baked in landmass vertices; no harsh white ring */
+        var topY = -1.35 + h * 0.72;
+        if((id === 'town' || id === 'light') && i % 2 === 0){
+          for(var hi = 0; hi < 2; hi++){
+            var hx = vx + (hi ? 1.8 : -1.5), hz = vz + (hi ? -1.1 : 0.9), hh = 1.6 + hi * 0.5;
+            var hb = new T.Mesh(houseBoxGeo, vWallMat); hb.scale.set(1.7, hh, 1.5); hb.position.set(hx, topY + hh * 0.42, hz); hb.rotation.y = ang + hi; vGrp.add(hb);
+            var hr = new T.Mesh(roofPyrGeo, vRoofMat); hr.scale.set(1.75, 1.4, 1.55); hr.position.set(hx, topY + hh * 0.92 + 0.35, hz); hr.rotation.y = ang + hi + Math.PI * 0.25; vGrp.add(hr);
           }
+        } else if(id === 'beach' && i % 2 === 0){
+          for(var pi = 0; pi < 2; pi++){
+            var px2 = vx + (pi ? 1.6 : -1.4), pz2 = vz + (pi ? 0.8 : -0.9);
+            var tr = new T.Mesh(trunkGeo, vTrunkMat); tr.position.set(px2, topY + 0.8, pz2); tr.rotation.z = pi ? -0.18 : 0.16; vGrp.add(tr);
+            var cr = new T.Mesh(palmCrownGeo, vPalmMat); cr.position.set(px2 + (pi ? 0.25 : -0.22), topY + 1.85, pz2); vGrp.add(cr);
+          }
+        } else if(id === 'lagoon' && i % 3 === 0){
+          var pb = new T.Mesh(houseBoxGeo, vWallMat); pb.scale.set(1.8, 1.5, 1.8); pb.position.set(vx, topY + 0.65, vz); pb.rotation.y = ang; vGrp.add(pb);
+          var pr1 = new T.Mesh(roofPyrGeo, vRoofMat); pr1.scale.set(2.4, 1.1, 2.4); pr1.position.set(vx, topY + 1.55, vz); pr1.rotation.y = ang + Math.PI * 0.25; vGrp.add(pr1);
+          var pr2 = new T.Mesh(roofPyrGeo, vRoofMat); pr2.scale.set(1.6, 1.1, 1.6); pr2.position.set(vx, topY + 2.35, vz); pr2.rotation.y = ang + Math.PI * 0.25; vGrp.add(pr2);
         }
       }
       for(var j=0; j<14; j++){
         var fang = j * Math.PI * 2 / 14 + 0.35;
         var fdist = rFar + (j % 2) * 14;
         var fx = vcx + Math.cos(fang) * fdist, fz = vcz + Math.sin(fang) * fdist;
-        var fw = 22 + (j % 3) * 8, fh = 12 + (j % 4) * 5;
-        var mt = new T.Mesh(domeGeo, farMat);
-        mt.scale.set(fw * 1.05, fh * 0.58, fw * 0.88);
-        mt.position.set(fx, -2.2, fz);
-        mt.rotation.y = fang + 0.25;
-        vGrp.add(mt);
-        var fOff = fw * 0.55 * (j % 2 ? -1 : 1);
-        var ridge = new T.Mesh(domeGeo, farMat);
-        ridge.scale.set(fw * 0.62, fh * 0.38, fw * 0.58);
-        ridge.position.set(fx - Math.sin(fang) * fOff, -2.2, fz + Math.cos(fang) * fOff);
-        ridge.rotation.y = fang - 0.35;
-        vGrp.add(ridge);
+        var fw = 24 + (j % 3) * 8, fh = 14 + (j % 4) * 5.5;
+        var mt = new T.Mesh(makeSculptedLandmass(fw * 1.08, fh * 0.72, fw * 0.88, j + 50, true), vMat);
+        mt.position.set(fx, -2.0, fz); mt.rotation.y = fang + 0.25; vGrp.add(mt);
+        var fOff = fw * 0.58 * (j % 2 ? 1 : -1);
+        var ridge = new T.Mesh(makeSculptedLandmass(fw * 0.64, fh * 0.46, fw * 0.56, j + 80, true), vMat);
+        ridge.position.set(fx - Math.sin(fang) * fOff, -2.0, fz + Math.cos(fang) * fOff); ridge.rotation.y = fang - 0.35; vGrp.add(ridge);
       }
       vGrp.traverse(function(o){ o.userData.noFootprint = true; o.castShadow = false; o.receiveShadow = false; });
       compactGroupInPlace(vGrp, true, null);
@@ -14445,9 +14641,10 @@
     // clouds via 2 InstancedMeshes (near + far) -> 2 draw calls instead of 256 per outdoor board!
     var baseSphere = new T.SphereGeometry(1, 10, 7);
     var bPos = baseSphere.attributes.position, bIdx = baseSphere.index;
-    var cTop = new T.Color(night ? '#c8daf0' : '#fffef9'),
-        cMid = new T.Color(night ? '#9ab4d4' : '#f7fafe'),
-        cBot = new T.Color(night ? '#5d7aa0' : '#a0c5e4'),
+    var cSun = new T.Color(night ? '#d6e4f8' : '#fffcf0'),
+        cTop = new T.Color(night ? '#c2d6ee' : '#fffdf6'),
+        cMid = new T.Color(night ? '#8ea8cb' : '#f4f8fe'),
+        cBot = new T.Color(night ? '#4e6990' : '#8cb2dc'),
         cTmp = new T.Color();
     var lobes = [
       [ 0.00,  0.58,  0.00,  2.55, 1.85, 1.95],
@@ -14462,11 +14659,19 @@
     var mPos = [], mCol = [], mIdx = [];
     for(var li = 0; li < lobes.length; li++){
       var lb = lobes[li], vBase = mPos.length / 3;
+      var crownBias = Math.max(0, Math.min(1, (lb[1] + 0.35) / 1.45));
       for(var vi = 0; vi < bPos.count; vi++){
         var sx = bPos.getX(vi), sy = bPos.getY(vi), sz = bPos.getZ(vi);
         mPos.push(lb[0] + sx * lb[3], lb[1] + sy * lb[4], lb[2] + sz * lb[5]);
-        if(sy >= 0) cTmp.copy(cMid).lerp(cTop, Math.pow(sy, 0.72));
-        else cTmp.copy(cMid).lerp(cBot, Math.pow(-sy, 0.78));
+        // Rubric v4.5: Volumetric sunlit cream crown + cool sky-lavender shaded underside with directional sun-side warmth
+        var sunDir = Math.max(0, sy * 0.82 + sx * 0.38 + 0.14);
+        if(sy >= -0.08){
+          cTmp.copy(cMid).lerp(cTop, Math.pow(Math.max(0, (sy + 0.08) / 1.08), 0.72));
+          cTmp.lerp(cSun, Math.min(1, sunDir * (0.45 + 0.55 * crownBias)) * 0.55);
+        } else {
+          var shF = Math.pow(Math.min(1, (-sy - 0.08) / 0.92), 0.75);
+          cTmp.copy(cMid).lerp(cBot, shF * (1.0 - crownBias * 0.22));
+        }
         mCol.push(cTmp.r, cTmp.g, cTmp.b);
       }
       if(bIdx){

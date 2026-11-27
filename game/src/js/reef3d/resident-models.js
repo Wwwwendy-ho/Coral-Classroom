@@ -38,8 +38,9 @@
   // geometry, texture, performance and cast review. Drafts stay dormant.
   var REGION_RESIDENT_VALIDATED_IDS = ['cafe-seahorse','jisu','shop-octopus','mira','echo','pip','hana','captain-bay','bok','restaurant-otter','hotel-whale','pharmacy-shrimp','subway-ray','friend-seal'];
   REGION_RESIDENT_VALIDATED_IDS.forEach(regionResidentEnable);
-  var regionResidentInFlightCount=0, REGION_RESIDENT_MAX_INFLIGHT=1;
+  var regionResidentInFlightCount=0, REGION_RESIDENT_MAX_INFLIGHT=2;
   var regionResidentInFlight=false;
+  var REGION_RESIDENT_BYTES=Object.create(null);
 
   // Cached per-renderer procedural sunlit sky/ocean PMREM environment map for
   // living Pixar corneal sparkle, warm coastal rim bounce & satin oceanic sheen.
@@ -228,10 +229,15 @@
     if(!T || !T.GLTFLoader){ finish(); return; }
     function network(){
       if(finished || !regionResidentAlive(view,state)){ finish(); return; }
+      var cached=REGION_RESIDENT_BYTES[state.entry.url];
+      if(cached){ runParse(cached.slice(0),false); return; }
       fetch(state.entry.url,state.controller ? {signal:state.controller.signal} : {}).then(function(response){
         if(!response.ok) throw new Error('Resident model HTTP '+response.status);
         return response.arrayBuffer();
-      }).then(function(bytes){parse(bytes,false);}).catch(function(){finish();});
+      }).then(function(bytes){
+        if(bytes && bytes.byteLength) REGION_RESIDENT_BYTES[state.entry.url]=bytes.slice(0);
+        parse(bytes,false);
+      }).catch(function(){finish();});
     }
     function runParse(bytes,fromInline){
       if(finished || !regionResidentAlive(view,state)){finish(); return;}
@@ -737,8 +743,8 @@
         if(gp){ var dx=actor.position.x-gp.x, dz=actor.position.z-gp.z; d2=dx*dx+dz*dz; }
       }
       var t=state.entry.target, id=state.entry.id;
-      var heroFg=(t==='host' || id==='hotel-whale' || id==='friend-seal' || id==='pharmacy-shrimp');
-      return {vis:vis,d2:d2,pri:heroFg?0:(t==='shopkeeper'?2:1)};
+      var heroFg=(t==='host' || id==='bok' || id==='cafe-seahorse' || id==='hotel-whale' || id==='friend-seal' || id==='pharmacy-shrimp');
+      return {vis:vis,d2:d2,pri:heroFg?0:1};
     }
     var ranks=new Map();
     states.forEach(function(state){ranks.set(state,rank(state));});
@@ -748,10 +754,11 @@
     });
     var deferMode=regionResidentCanDefer(view);
     var frameN=view && typeof view.frameN==='number' ? view.frameN : 0;
+    var hasCachedBytes=states.some(function(st){ return !st.root && !st.requested && st.entry && REGION_RESIDENT_BYTES[st.entry.url]; });
     var tickBudget={
-      defer:deferMode,
-      attachesLeft:deferMode ? 1 : Infinity,
-      canRequestBoard:!deferMode || (frameN>=1 &&
+      defer:deferMode && !hasCachedBytes,
+      attachesLeft:(deferMode && !hasCachedBytes) ? 1 : 4,
+      canRequestBoard:(!deferMode || hasCachedBytes) || (frameN>=1 &&
         (view._residentNextReqFrame==null || frameN>=view._residentNextReqFrame) &&
         (view._residentNextReqAt==null || now>=view._residentNextReqAt))
     };

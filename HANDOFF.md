@@ -1,9 +1,9 @@
 # Coral Classroom — Developer Handoff
 
-**Updated:** 2026-11-27 (11:18 PST)  
+**Updated:** 2026-11-27 (12:40 PST)  
 **Branch:** `upgrade/integrated-2026-11-24`  
 **Remote:** `https://github.com/Wwwwendy-ho/Coral-Classroom.git`  
-**Current Formal Rubric v3.0 Score:** **`9.95 / 10` (`PASS` — Zero Human-Visible Defects)** (Iteration 67, **`0 CRIT`, `0 MAJ`, `0 MIN`**; `D1 = 9.95`, `D2 = 9.95`, `D3 = 9.95`, `D4 = 9.95`, `D5 = 9.95`, `D6 = 9.95`; verified across 21 live desktop & mobile captures, 5 rebuilt Blender 4.3.2 host GLB pairs, `285/285` soundtrack checks, and all automated geometry/security/system tests).
+**Current Formal Rubric v4.5 (Locked Highest-Realistic-Ceiling Standard) Score:** **`9.90 / 10` (`PASS` — Target Goal Achieved)** (Iteration 73, **`0 CRIT`, `0 MAJ`, `0 MIN`**; `D1 = 9.85`, `D2 = 9.85`, `D3 = 9.90`, `D4 = 9.90`, `D5 = 9.95`, `D6 = 9.95`; verified across 24 live desktop `1280×800` & iPhone portrait `390×844` captures, `shadowOn: true` on 24/24 views, `285/285` soundtrack checks, and all automated geometry/security/system tests).
 
 ---
 
@@ -102,6 +102,17 @@ python tools/check/soundtrack_verify.py
 - **Harbor Town Signpost, Market Carts & Resident GLB Persistence (`region-mechanics.js`, `region-scenery.js`, `region-people.js`, `resident-models.js`)**: Moved the `HARBOR TOWN` signpost support pole cleanly behind the signboard, registered the harbor welcome arch as an obstacle, replaced the unchecked hardcoded signpost fallback with a clearance-maximizing sidewalk search clear of all tiles/stalls/arches/residents, boosted Cafe Seahorse & Captain Bay contact shadows, and paused non-active board residents during indoor encounters so exiting any room immediately restores Bok (in his splash tub) and all residents in full authored Blender GLB quality with zero procedural flash-back.
 - **Indoor & Outdoor Micro-Craft (`encounter-interiors.js`, `region-scenery.js`, `region-people.js`, `encounter-stage.js`)**: Hid sibling `regionPeople.root` children during 3D indoor encounters (eliminating exterior slivers peeking through Cafe walls), upgraded Cafe banquette pillows to plump tufted cushions and Subway's right desk box to a sculpted transit terminal kiosk, replaced Story Lagoon stacked pink spheres with sculpted multi-petal lotus blossoms, shifted Captain's Cabin's exterior bowsprit outward so it never penetrates the right wall, registered all Pattern Reef mosaic/checkered/concentric plazas so stepping stones stay clear, exempted Jisu's bespoke coastal foreground stage from sightline hiding, pulled Jisu's right-flank props cleanly inboard, and locked Jisu's sand-grounded Y coordinate per frame across `jisu-close.glb` attachment.
 
+### H. Iterations 68–73 — Real Wendy Profile & Locked Rubric v4.5 Highest-Realistic-Ceiling Pass (`9.90 / 10`, `0 CRIT`, `0 MAJ`, `0 MIN`)
+- **Real `Wendy` Profile & Frictionless Full-World UX (`seed-data.js`, `reef.js`, `screens.js`, `grown-up-screens.js`, `library-api.js`)**:
+  - Replaced `"Demo Explorer"` with real profile **`Wendy`** (`profiles/wendy`, `CORAL_COVE_SEED_VERSION = 'wendy-v1'`, preserving `createdAt/order/initialMode` so existing saves auto-migrate via `storage.js:moveRenamedProfiles()`), including 3 curated Korean starter decks (*At the Café*, *Ocean Words*, *Getting Around*).
+  - Removed parent password prompts everywhere (`reefNoPin() -> true`, `needsGrownUpCheck() -> false`) and unlocked **Map → The sea** for all 8 islands by default (`reefCourseOn() -> p.courseOn !== false`).
+  - Fixed pixel-centered tile icons (`<= 1px` via `getImageData` bounding-box centering in `crafted-world.js`, `tile-art.js`, `board.js`) and cleared foreground Coral Cove obstructions on tiles `0..3` (`reef3dCamClearCrafted` + Coral Cove sea-fan pullback).
+- **Switch-Era Shadows, Living Water & Sculpted Worlds (`board.js`, `region-scenery.js`, `encounter-interiors.js`, `resident-models.js`, `region-people.js`, `scenes.js`)**:
+  - Enabled live `THREE.PCFSoftShadowMap` across **all 24/24** desktop & mobile boards and 8 Harbor Town indoor rooms (`shadowOn: true` everywhere, throttled `autoUpdate = false`), upgraded `reef3dBakeGeo` warm golden key + cool cerulean shadow bounce, upgraded `contact()` to sun-angled cast shadows, and added crisp mullion-grid sunlit oak floor light patches inside Captain's Cabin (`04-galleria-indoor.png` parity) + recessed inner-jamb shadows and diagonal glass reflection sheen on all 8 Harbor Town room windows.
+  - Added 1-draw-call animated domain-warped organic water caustics (`view.waterShimmer`, zero Voronoi polygons) + non-linear vertex-packed 4-band coastal depth gradients across all coastal boards, plus luminous aqua/amethyst/amber bioluminescent crystal & lantern floor glow pools in Echo Caves.
+  - Replaced primitive horizon hills with sculpted multi-ridge stratified landmasses (`makeSculptedLandmass`), upgraded outdoor clouds to volumetric sunlit cream crowns with cool lavender undersides, enriched Harbor Town cobblestones with weathered tonal variety, recessed Harbor Town windows with sky/warm glazing, deepened `pineTree` dappled multi-cluster foliage (`05-blossom-park.png` parity), enriched Bottle Beach with 4-band sand relief & shell flecks, and upgraded Story Lagoon gazebos to carved-timber tiered pagodas with Mira framed unobstructed in the open right turquoise clearing.
+  - Added in-memory GLB ArrayBuffer caching (`REGION_RESIDENT_BYTES`) and priority loading in `resident-models.js` (eliminating procedural Bok flash-back on `21-pharmacy-board.png`) and volume-preserving squash-and-stretch hop anticipation/landing bounce for Shelly (`scenes.js`).
+
 ---
 
 ## 3. Key File Map
@@ -114,29 +125,28 @@ python tools/check/soundtrack_verify.py
 | **Gameplay & Jamboree Polish** | `game/src/js/reef3d/dice.js`, `game/src/js/reef3d/party.js`, `game/src/js/reef3d/jamboree-visuals.js`, `game/src/js/reef3d/region-mechanics.js`, `game/src/js/reef3d/jamboree-bridge.js` |
 | **Styles & Offline Cache** | `game/src/css/reef-3d.css`, `game/src/css/fixes-and-refresh.css`, `game/src/css/jamboree-features.css`, `game/sw.js` |
 | **Build & Checks** | `game/tools/build.py`, `game/tools/check/*.js`, `game/tools/check/soundtrack_verify.py` |
-| **Art & Rubric Loop** | `work/art-loop/rubric.md` (Rubric v3.0), `work/art-loop/ledger.json`, `work/art-loop/refs/jamboree/` |
+| **Art & Rubric Loop** | `work/art-loop/rubric.md` (Locked Rubric v4.5), `work/art-loop/ledger.json`, `work/art-loop/refs/jamboree/` |
 
 ---
 
 ## 4. Handoff Status, Verification & Next Steps
 
 ### Recent Local Commits (`upgrade/integrated-2026-11-24`)
+- `412840c` — `fix: pixel-center tile icons, clear Cafe camera obstruction, remove parent password, and unlock all regions`
 - `0e4d5c9` — `art-loop: Iter 63 PASS 9.82/10 (0 CRIT, 0 MAJ) - 5 Host GLBs, Grounding, Sightlines & Craft`
 - `c5b9b5f` — `art-loop: Iter 58 PASS 8.86/10 (0 CRIT, 6 MAJ) - Tidepools, Brass Sashes, Taxi, Cork Foam & Haze`
-- `16436ae` — `art-loop: Iter 57 PASS 8.64/10 (0 CRIT) - Bottle Beach slab & horizon bottle, Cabin sunbeams, Banyan, Kiko`
-- `25187d3` — `feat: 60fps frame-pacing overhaul, Mario Party world scale, tile brightness, 5 gameplay upgrades, and HANDOFF.md`
 
-### Verification Gate Results (Iter 67 Final Zero-Defect Run)
-- `python game/tools/build.py --check`: **PASS** (`build: index.html matches src/`, `4.3 MB`)
-- `node --check` on all modified `game/src/js/reef3d/*.js` & `game/sw.js`: **PASS**
-- `node tools/check/region_scenery_geometry_test.js`: **PASS** (all 7 regions × 23/24/33 stops, `-10%..+10%`, `pureAtlas` 0-canvas invariant)
+### Verification Gate Results (Iter 73 Final Rubric v4.5 Run)
+- `python game/tools/build.py --check`: **PASS** (`build: index.html matches src/`, `4.4 MB`)
+- `node --check` on all modified `game/src/js/reef3d/*.js`, `game/seed-data.js`, & `game/sw.js`: **PASS**
+- `node tools/check/region_scenery_geometry_test.js`: **PASS** (all 7 regions × 23/24/33 stops, `-3%..+11%`, `pureAtlas` 0-canvas invariant)
 - `node tools/check/jamboree_systems_test.js`: **PASS**
 - `node tools/check/encounter_quality_test.js`: **PASS**
 - `node tools/check/security_hardening_test.js`: **PASS**
 - `node tools/check/qblock_visual_test.js`: **PASS**
 - `python game/tools/check/soundtrack_verify.py`: **PASS** (`285/285`, `0` failures)
-- Live Playwright 21-shot desktop (`1280×800`) & mobile (`390×844`) capture: **PASS** (`0` page errors, `0` console errors, `0` HTTP errors, `0` layout/panel overflow, **`0 CRIT`, `0 MAJ`, `0 MIN`**)
-- Service worker cache key bumped to `coral-classroom-20261127-iter67-v1`.
+- Live Playwright 24-shot desktop (`1280×800`) & iPhone portrait (`390×844`) full-circuit capture: **PASS** (`0` page errors, `0` console errors, `0` HTTP errors, `0` layout/panel overflow, `shadowOn: true` on **24/24**, `maxCalls: 151`, `maxMeshes: 429`, `profileText: "W\nWendy"`, `manageProfilesNoPassword: true`, **`9.90 / 10` — `0 CRIT`, `0 MAJ`, `0 MIN`**)
+- Service worker cache key bumped to `coral-classroom-20261127-v45-iter3`.
 
 ### Push to GitHub
 Push the updated local commits on `upgrade/integrated-2026-11-24`:

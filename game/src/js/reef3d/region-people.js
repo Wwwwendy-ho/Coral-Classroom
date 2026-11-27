@@ -1360,26 +1360,22 @@
       var lgCam0=regionPeopleCamAt(view,0) || lgCam;
       var lgSp0=view.spaces[0];
       var lgBaseX=lgSp0 ? lgSp0.x : space.x, lgBaseZ=lgSp0 ? lgSp0.z : space.z;
-      for(var lgdx=-9.6;lgdx<=6.4;lgdx+=.4){
-        for(var lgdz=-8.0;lgdz<=8.0;lgdz+=.4){
+      for(var lgdx=-11.2;lgdx<=11.2;lgdx+=.4){
+        for(var lgdz=-11.2;lgdz<=11.2;lgdz+=.4){
           var lgx=lgBaseX+lgdx, lgz=lgBaseZ+lgdz;
-          var lMinT=minTileDist(lgx,lgz), lDef=Math.max(0,radius+1.85-lMinT);
-          var lSp0Pen=(lgSp0 && Math.hypot(lgx-lgSp0.x,lgz-lgSp0.z)<3.4) ? 8000 : 0;
-          var lShp=(view && view._shopPos && Math.hypot(view._shopPos.x-lgx,view._shopPos.z-lgz)<4.5) ? 2000 : 0;
-          var lObs=horizObsPen(lgx,lgz,radius*.85,obstacles,.45,5000);
+          var lMinT=minTileDist(lgx,lgz), lDef=Math.max(0,radius+1.25-lMinT);
+          var lSp0Pen=(lgSp0 && Math.hypot(lgx-lgSp0.x,lgz-lgSp0.z)<3.1) ? 8000 : 0;
+          var lShp=(view && view._shopPos && Math.hypot(view._shopPos.x-lgx,view._shopPos.z-lgz)<4.2) ? 2000 : 0;
+          var lObs=horizObsPen(lgx,lgz,radius+0.68,obstacles,.85,6500);
           var lPpl=placedPenalty(lgx,lgz);
           var lCam=0, lBias=0;
           if(lgCam0 && probe){
             probe.set(lgx,(space.y||0)+(bounds.centerY||0),lgz).project(lgCam0);
-            if(probe.z<-1 || probe.z>1 || probe.x<-.62 || probe.x>.54 || probe.y<-.38 || probe.y>.34) lCam+=2400;
-            lBias+=Math.hypot(probe.x-(-.30),probe.y-(-.04))*5.5;
+            // Keep Mira in the wide-open crystal-clear turquoise lagoon right of Shelly (zero left-side reeds/dock!)
+            if(probe.z<-1 || probe.z>1 || probe.x<.12 || probe.x>.54 || probe.y<-.26 || probe.y>.20) lCam+=16000;
+            lBias+=Math.hypot(probe.x-(.32),probe.y-(-.08))*12.0;
           }
-          if(lgCam && lgCam!==lgCam0 && probe){
-            probe.set(lgx,(space.y||0)+(bounds.centerY||0),lgz).project(lgCam);
-            if(probe.z<-1 || probe.z>1 || probe.x<-.78 || probe.x>.68 || probe.y<-.58 || probe.y>.36) lCam+=800;
-            lBias+=Math.hypot(probe.x-(-.36),probe.y-(-.10))*1.5;
-          }
-          if(lgSp0) lBias+=Math.abs(Math.hypot(lgx-lgSp0.x,lgz-lgSp0.z)-5.2)*1.0;
+          if(lgSp0) lBias+=Math.abs(Math.hypot(lgx-lgSp0.x,lgz-lgSp0.z)-5.2)*0.8;
           var lSc=lDef*8000+lSp0Pen+lShp+lObs+lPpl+lCam+lBias;
           if(!best || lSc<best.score) best={x:lgx,z:lgz,side:1,score:lSc};
         }

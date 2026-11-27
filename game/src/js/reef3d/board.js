@@ -74,6 +74,14 @@
   }
   function reef3dQEncounter(view, active){
     view.renderer.setPixelRatio(reef3dQRatio(R3.q,active,!!(view.encounter && view.encounter.pixelPressure)));
+    if(view.renderer && view.renderer.shadowMap){
+      var shE = !!(view.shadowCatcher || (active && view.encounter && view.encounter.interior));
+      if(view.renderer.shadowMap.enabled !== shE){
+        view.renderer.shadowMap.enabled = shE;
+        view.scene.traverse(function(o){ if(o.material) [].concat(o.material).forEach(function(m){ m.needsUpdate = true; }); });
+      }
+      view.renderer.shadowMap.needsUpdate = true;
+    }
     view.w=0; view.qs=null;
   }
   function reef3dQApply(view){
@@ -84,7 +92,7 @@
       if(debug && /swiftshader|llvmpipe|software/i.test(gl.getParameter(debug.UNMASKED_RENDERER_WEBGL))){ R3.qMin = R3.q = q = 3; }
     }
     r.setPixelRatio(reef3dQRatio(q,!!view.encounter,!!(view.encounter && view.encounter.pixelPressure)));
-    var sh = q < 2 && !view.baked;
+    var sh = !!(view.shadowCatcher || (view.encounter && view.encounter.interior)) || (q < 2 && !view.baked);
     if(r.shadowMap.enabled !== sh){
       r.shadowMap.enabled = sh; r.shadowMap.needsUpdate = true;
       view.scene.traverse(function(o){ if(o.material) [].concat(o.material).forEach(function(m){ m.needsUpdate = true; }); });
@@ -629,6 +637,43 @@
   function reef3dShade(hex, amt){
     var c = new window.THREE.Color(hex), hsl = {}; c.getHSL(hsl); c.setHSL(hsl.h, hsl.s, Math.max(0, Math.min(1, hsl.l + amt))); return '#' + c.getHexString();
   }
+  // Tileable organic domain-warped sunlit water-caustics ripple texture (zero polygonal Voronoi edges, 1 draw call).
+  var R3waterCausTex = {};
+  function reef3dWaterCausticsTex(THREE, night, rid){
+    var key = 'v2:' + (night ? 'n:' : 'd:') + (rid === 'caves' ? 'caves' : 'sea');
+    if(R3waterCausTex[key]) return R3waterCausTex[key];
+    if(typeof document === 'undefined' || !document.createElement) return null;
+    var S = 256, TAU = Math.PI * 2, c = document.createElement('canvas'); c.width = c.height = S;
+    var g = c.getContext('2d'); if(!g) return null;
+    var img = g.createImageData(S, S), d = img.data;
+    for(var y = 0; y < S; y++){
+      var v0 = y / S * TAU;
+      for(var x = 0; x < S; x++){
+        var u0 = x / S * TAU;
+        // Smooth organic periodic domain warp so caustic ribbons curve like real sunlit coastal ripples!
+        var wu = u0 + .68 * Math.sin(v0 * 2.0 + .4) + .36 * Math.cos(u0 * 3.0 - v0 * 2.0);
+        var wv = v0 + .68 * Math.cos(u0 * 2.0 - .7) + .36 * Math.sin(v0 * 3.0 + u0 * 2.0);
+        var f1 = Math.abs(Math.sin(wu * 2.0 + wv * 1.0) + Math.cos(wu * 1.0 - wv * 2.0));
+        var f2 = Math.abs(Math.sin(wu * 3.0 - wv * 2.0 + 1.2) + Math.cos(wu * 2.0 + wv * 3.0 - .5));
+        var c1 = Math.pow(Math.max(0, 1 - f1 * .78), 3.2);
+        var c2 = Math.pow(Math.max(0, 1 - f2 * .74), 3.6);
+        var shimmer = Math.pow(.5 + .5 * Math.sin(wu * 2.0 - wv * 1.0), 4.0) * .22;
+        var val = Math.min(1, c1 * .72 + c2 * .52 + shimmer);
+        var idx = (y * S + x) * 4;
+        d[idx]     = Math.round((rid === 'caves' ? 168 : 220) * val);
+        d[idx + 1] = Math.round(252 * val);
+        d[idx + 2] = Math.round(255 * val);
+        d[idx + 3] = Math.round(255 * Math.min(1, val * 1.1));
+      }
+    }
+    g.putImageData(img, 0, 0);
+    var tex = new THREE.CanvasTexture(c);
+    tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(34, 34);
+    tex.needsUpdate = true;
+    return (R3waterCausTex[key] = tex);
+  }
+
   // The painted top of a space: the deck's emoji, a "?" for surprises, a shell for plain spaces.
   var R3tex = {};
   var R3glyphScratch = null;
@@ -1086,13 +1131,18 @@
     for(var i = 0; i < n; i++){
       if(unlit){ c.copy(alb); if(old){ c.r *= old.getX(i); c.g *= old.getY(i); c.b *= old.getZ(i); } out[i * 3] = c.r; out[i * 3 + 1] = c.g; out[i * 3 + 2] = c.b; continue; }
       v.fromBufferAttribute(nor, i); var len = v.length(); if(len) v.multiplyScalar(1 / len);
-      var up = v.y * .5 + .5, band = reef3dBand(v.dot(rig.dir));
+      var ndotl = v.dot(rig.dir), up = v.y * .5 + .5, band = reef3dBand(ndotl);
       c.r = rig.ground.r + (rig.sky.r - rig.ground.r) * up + rig.sun.r * band;
       c.g = rig.ground.g + (rig.sky.g - rig.ground.g) * up + rig.sun.g * band;
       c.b = rig.ground.b + (rig.sky.b - rig.ground.b) * up + rig.sun.b * band;
-      // fake ambient occlusion: shapes darken toward the sea floor, the way crevices and undersides would
-      // (tops that face the open water stay bright; sides and undersides near the sand get the shade)
-      if(ao){ var y = pos.getY(i), t = Math.min(1, Math.max(0, (y + .1) / 1.5)), sh = .78 + .22 * t * t * (3 - 2 * t), open = Math.max(0, v.y); c.multiplyScalar(sh + (1 - sh) * open * open); }
+      // Switch-era daylight contrast: warm golden key lift on sunlit faces, cool sky-cerulean bounce in shadows.
+      var sunLit = Math.max(0, Math.min(1, (ndotl - .08) / .72));
+      var skyShade = Math.max(0, Math.min(1, (-ndotl + .12) / .78));
+      c.r *= (1 + sunLit * .06 - skyShade * .07);
+      c.g *= (1 + sunLit * .03 - skyShade * .02);
+      c.b *= (1 - sunLit * .04 + skyShade * .08);
+      // Contact ambient occlusion near the floor: crisper grounding crevices while open tops stay sunlit.
+      if(ao){ var y = pos.getY(i), t = Math.min(1, Math.max(0, (y + .15) / 1.65)), sh = .72 + .28 * t * t * (3 - 2 * t), open = Math.max(0, v.y); c.multiplyScalar(sh + (1 - sh) * open * open); }
       // Compress bright illumination before applying pigment. Per-channel
       // framebuffer clipping otherwise turns pale roofs and coral chalk white.
       var peak=Math.max(c.r,c.g,c.b);
@@ -1150,7 +1200,7 @@
     Object.keys(buckets).forEach(function(k){
       var b = buckets[k], merged = null;
       try { merged = U.mergeBufferGeometries(b.geos, false); } catch(e){}
-      if(merged){ var mm = new THREE.Mesh(merged, b.mat); mm.matrixAutoUpdate = false; mm.renderOrder = b.mat.transparent ? 1 : 0; if(b.ground) mm.userData.reefGround = true; out.add(mm); }
+      if(merged){ var mm = new THREE.Mesh(merged, b.mat); mm.matrixAutoUpdate = false; mm.castShadow = false; mm.receiveShadow = false; mm.renderOrder = b.mat.transparent ? 1 : 0; if(b.ground) mm.userData.reefGround = true; out.add(mm); }
       b.geos.forEach(function(g){ g.dispose(); });
     });
     return out;
@@ -1756,10 +1806,42 @@
     scene.add(new THREE.HemisphereLight(night ? '#86c9c0' : '#f8fff7', night ? '#24434b' : '#73b8bd', night ? .78 : .56));
     var sun = new THREE.DirectionalLight(night ? '#b5f0e6' : '#fff8ee', night ? .78 : .70);
     sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024);
-    var sc = sun.shadow.camera; sc.left = -14; sc.right = 14; sc.top = 14; sc.bottom = -14; sc.near = 1; sc.far = 60; sun.shadow.bias = -.0022; sun.shadow.normalBias = .06;
+    var sc = sun.shadow.camera; sc.left = -16; sc.right = 16; sc.top = 16; sc.bottom = -16; sc.near = 2; sc.far = 52; sun.shadow.bias = -.0018; sun.shadow.normalBias = .05;
     scene.add(sun, sun.target);
-    var rig = reef3dRig(scene), bake = {};   // lighting is baked into the scenery (see reef3dBakeGeo), so no shadow maps
-    renderer.shadowMap.enabled = false; sun.castShadow = false;
+    var rig = reef3dRig(scene), bake = {};
+    // Enable crisp PCFSoftShadowMap for dynamic hero cast shadows (Shelly, Kiko, residents, ?-cubes) onto
+    // a lightweight tinted ShadowMaterial floor catcher (updated throttled in reef3dFrame for 60 FPS!).
+    renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.shadowMap.autoUpdate = false;
+    sun.castShadow = true;
+    var shSize = spaces.lighthouse ? 9 : (region && region.id === 'lagoon' ? 14 : 34);
+    var shMat = new THREE.ShadowMaterial({ color: night ? '#0a2038' : '#183a60', opacity: night ? .16 : (region && region.id === 'lagoon' ? .20 : .22), transparent: true, depthWrite: false });
+    var shadowCatcher = new THREE.Mesh(new THREE.PlaneGeometry(shSize, shSize), shMat);
+    shadowCatcher.rotation.x = -Math.PI / 2;
+    shadowCatcher.position.set(0, region ? (region.id === 'captain' ? -.29 : region.id === 'lagoon' ? -.175 : region.id === 'light' ? -.255 : -.295) : .02, 0);
+    shadowCatcher.receiveShadow = true;
+    shadowCatcher.castShadow = false;
+    shadowCatcher.renderOrder = 2;
+    shadowCatcher.userData.reefGround = true;
+    scene.add(shadowCatcher);
+    // Lightweight single-draw animated sunlit water caustics shimmer layer across coastal regions!
+    var waterShimmer = null;
+    if(region){
+      var ridW = region.id;
+      var cTex = reef3dWaterCausticsTex(THREE, night, ridW);
+      if(cTex){
+        var shY = ridW === 'captain' ? -1.06 : -.605;
+        var shCol = ridW === 'caves' ? (night ? '#58c8e8' : '#7ce6f8') : (night ? '#68c8dc' : '#e8fffc');
+        var shOp = ridW === 'caves' ? (night ? .16 : .20) : ridW === 'town' ? (night ? .12 : .24) : (night ? .11 : .21);
+        var wMat = new THREE.MeshBasicMaterial({ map: cTex, color: shCol, transparent: true, opacity: shOp, blending: THREE.AdditiveBlending, depthWrite: false, fog: true });
+        waterShimmer = new THREE.Mesh(new THREE.PlaneGeometry(220, 220), wMat);
+        waterShimmer.rotation.x = -Math.PI / 2;
+        waterShimmer.position.set(spaces.bounds ? (spaces.bounds.minX + spaces.bounds.maxX) * .5 : 0, shY, spaces.bounds ? (spaces.bounds.minZ + spaces.bounds.maxZ) * .5 : 0);
+        waterShimmer.renderOrder = 1;
+        waterShimmer.userData.reefGround = true;
+        waterShimmer.userData.causticTex = cTex;
+        scene.add(waterShimmer);
+      }
+    }
 
     // Sea floor with soft dunes — extend wide past fogFar on Coral Cove so the left/right ocean horizon is 100% seamless.
     var bounds = spaces.bounds;
@@ -1939,7 +2021,8 @@
             o.position.set(s.x + lox / lol * 1.32 - loz / lol * sd * .92, treadY, s.z + loz / lol * 1.32 + lox / lol * sd * .92);
           } else if(spaces.loop){
             var ox = nxt.x - s.x, oz = nxt.z - s.z, ol = Math.hypot(ox, oz) || 1;
-            o.position.set(s.x - oz / ol * sd * 2.3, s.y || 0, s.z + ox / ol * sd * 2.3);
+            var propOut = (!region && crafted) ? 2.85 : 2.3;
+            o.position.set(s.x - oz / ol * sd * propOut, s.y || 0, s.z + ox / ol * sd * propOut);
           } else {
             o.position.set(s.x + sd * 2.1, s.y || 0, s.z - .2);
           }
@@ -1958,7 +2041,8 @@
           }
         }
         if(!skipProp){
-          o.scale.setScalar(spaces.lighthouse ? (kind === 'story' ? .75 : .78) : (kind === 'clam' ? .46 : kind === 'story' ? 1.0 : 1.25));
+          var deckPropSc = spaces.lighthouse ? (kind === 'story' ? .75 : .78) : (kind === 'clam' ? .46 : kind === 'story' ? 1.0 : (!region && crafted && kind === 'fan') ? .76 : 1.25);
+          o.scale.setScalar(deckPropSc);
           o.traverse(function(c){ c.userData.space = s.i; });
           o.userData.space = s.i; s.obj = o; s.side = side;
           scene.add(o); deckObjs.push(o); hitables.push(o);
@@ -2384,7 +2468,8 @@
       fishMixers: fishMixers, bigOne: bigOne, models: models, baked: true, blobG: blobG, blobC: blobC, glowG: glowG, groundY: groundY,
       crab: crab, crabFit: crabFit, crabGap: reefCrabExtent(guide) / 2 + crabFit / 2 + .2, leaving: null, spareCrab: null, chestMixer: chestMixer, chestActs: chestActs, nextStar: nextStar, spinners: spinners, lastT: performance.now(),
       plume: plume, lamp: lamp, wreck: wreckFx, reefFx: reefFx, shipDeck: shipDeck, rig: rig, bake: bake, floor: floor, craftedPavilion: craftedPavilion, _coveObstacles: coveObstacles,
-      skyDome: skyDome, motes: reef3dAmbientMotes(scene, region, night), _tileEnvRT: tileEnvRT
+      skyDome: skyDome, motes: reef3dAmbientMotes(scene, region, night), _tileEnvRT: tileEnvRT,
+      shadowCatcher: shadowCatcher, waterShimmer: waterShimmer
     };
     view.post = null; // Direct MSAA render avoids 5 offscreen RenderTargets + 9 shader passes per frame.
     if(view.crab){
@@ -3211,8 +3296,8 @@
       blockers.push({
         x: ob.x, z: ob.z,
         r: tall ? Math.max(2.3, Math.min(4.8, (ob.r || 2.0) + 1.0 + portraitC * .35))
-          : Math.max(1.35, Math.min(2.5, (ob.r || 1.1) + .65 + portraitC * .25)),
-        topY: ob.maxY + (tall ? 1.0 : .75)
+          : Math.max(1.85, Math.min(2.8, (ob.r || 1.1) + .95 + portraitC * .25)),
+        topY: ob.maxY + (tall ? 1.2 : 2.2)
       });
     }
     var tx = g.x, ty = g.y + .9, tz = g.z;
@@ -3433,7 +3518,35 @@
       }
     }
     var g = view.guide.position;
-    view.sun.position.set(g.x + 6, g.y + 18, g.z + 8); view.sun.target.position.set(g.x, g.y - .3, g.z - 2);
+    if(view.encounter && view.encounter.interior && view.encounter.interior.room){
+      var rm = view.encounter.interior.room, rYaw = view.encounter.interior.yaw || 0;
+      var sxL = 4.5, syL = 8.5, szL = -4.2;
+      var cY = Math.cos(rYaw), sY = Math.sin(rYaw);
+      view.sun.position.set(rm.position.x + sxL * cY + szL * sY, rm.position.y + syL, rm.position.z - sxL * sY + szL * cY);
+      view.sun.target.position.set(rm.position.x, rm.position.y + .4, rm.position.z + .5);
+    } else {
+      view.sun.position.set(g.x + 6, g.y + 18, g.z + 8); view.sun.target.position.set(g.x, g.y - .3, g.z - 2);
+    }
+    if(view.shadowCatcher){
+      var inInt = !!(view.encounter && view.encounter.interior);
+      view.shadowCatcher.visible = !inInt;
+      if(!inInt){
+        var baseShY = view.region
+          ? (view.region.id === 'captain' ? -.29
+            : view.region.id === 'lagoon' ? -.175
+            : view.region.id === 'light' ? ((view.spaces[view.at] && view.spaces[view.at].y || 0) - .255)
+            : (view.spaces[view.at] && view.spaces[view.at].y || 0) - .295)
+          : .02;
+        view.shadowCatcher.position.set(g.x, baseShY, g.z);
+      }
+    }
+    if(view.waterShimmer){
+      var showSh = !(view.encounter && view.encounter.interior);
+      view.waterShimmer.visible = showSh;
+      if(showSh && !calm && view.waterShimmer.userData.causticTex){
+        view.waterShimmer.userData.causticTex.offset.set((t * .018) % 1, (t * .011) % 1);
+      }
+    }
     if(view.motes){
       view.motes.visible = !calm && !view.encounter;
       if(view.motes.visible && (((view.frameN || 0) % 3) === 0 || view.moving)){
